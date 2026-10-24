@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<html lang="pl">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="#030b1b" name="theme-color"/>
+<link href="https://mobilny-serwis-warszawa.pl/msw-ai-centrum-robotow/" rel="canonical"/>
+<meta content="MSW AI Robot Intelligence — niezależne Centrum Robotów AI. Katalog agentów, pomiary HTTP, analityka, porównywarka i integracje API. Niezależny portal." name="description"/>
+<title>MSW AI — Centrum Robotów i Analityki</title>
+<link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23070b16'/%3E%3Cpath d='M12 45V19h9l11 17 11-17h9v26h-9V33L32 49 21 33v12Z' fill='%2323d8ff'/%3E%3C/svg%3E" rel="icon"/>
+<link href="/msw-ai-centrum-robotow/assets/app.css" rel="stylesheet"/>
+<script defer="" src="/msw-ai-centrum-robotow/assets/app.js"></script>
+</head>
+<body>
+<div aria-hidden="true" class="ambient ambient-a"></div><div aria-hidden="true" class="ambient ambient-b"></div>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+<a aria-label="MSW AI Centrum Robotów" class="brand" href="#overview"><span class="logo">⬡</span><span><strong>MSW AI</strong><small>CENTRUM ROBOTÓW</small><small class="brand-small">STANDALONE / RENDER</small></span></a>
+<div class="sidebar-label">CENTRUM DOWODZENIA</div>
+<nav aria-label="Moduły Centrum Robotów"><a class="nav-item active" data-view="overview" href="#overview"><span class="nav-icon">⌂</span><span>Dashboard</span></a><a class="nav-item" data-view="exchange" href="#exchange"><span class="nav-icon">⌁</span><span>Giełda AI</span></a><a class="nav-item" data-view="telemetry" href="#telemetry"><span class="nav-icon">▥</span><span>Roboty na żywo</span></a><a class="nav-item" data-view="external" href="#external"><span class="nav-icon">♧</span><span>Roboty zewnętrzne</span></a><a class="nav-item" data-view="joins" href="#joins"><span class="nav-icon">↳</span><span>Dołączające roboty</span></a><a class="nav-item" data-view="agents" href="#agents"><span class="nav-icon">♙</span><span>Agenci</span></a><a class="nav-item" data-view="providers" href="#providers"><span class="nav-icon">ϟ</span><span>Moc AI</span></a><a class="nav-item" data-view="comparison" href="#comparison"><span class="nav-icon">⇄</span><span>Porównania</span></a><a class="nav-item" data-view="systems" href="#systems"><span class="nav-icon">⌘</span><span>API i integracje</span></a><a class="nav-item" data-view="tools" href="#tools"><span class="nav-icon">☷</span><span>Raporty i narzędzia</span></a></nav>
+<div class="sidebar-label section-gap">OTWARTA SIEĆ AGENTÓW</div>
+<nav aria-label="Moduły platformy AI"><div class="join-side"><div class="join-robot">◉</div><b>Masz zewnętrznego robota?</b><p>Dołącz agenta AI lub bota przez token API MSW.</p><button class="button primary full" id="side-join" type="button">+ DOŁĄCZ ROBOTA</button></div></nav>
+<div class="sidebar-bottom">
+<div class="live-module"><span class="signal"><span></span></span><div><strong id="sidebar-state">Łączenie z API</strong><small>Własna aplikacja · API</small></div></div>
+<div class="sidebar-meta">MSW AI PLATFORM <span>v1.0</span><br/>© <span id="year"></span> MSW</div>
+</div>
+</aside>
+<main class="main">
+<header class="topbar">
+<div class="breadcrumbs"><button aria-expanded="false" aria-label="Otwórz menu" class="hamburger" id="menu-toggle" type="button">☰</button><span class="top-wordmark">MSW AI</span><span class="slash">/</span><span id="current-view">Dashboard</span><span class="top-label">MONITOR 24/7</span></div>
+<div class="top-actions"><label class="global-search"><span>⌕</span><input aria-label="Szukaj robotów" id="global-search" placeholder="Szukaj robotów, agentów, API..." type="search"/><kbd>Ctrl K</kbd></label><span class="timestamp" id="last-refresh">Nie pobrano danych</span><span class="connection" id="connection"><i></i> Łączenie</span><button aria-label="Odśwież dane" class="icon-button" id="refresh-btn" title="Odśwież dane z API" type="button">↻</button><button class="button primary smaller" id="open-register" type="button">+ Dodaj robota</button></div>
+</header>
+<div class="page-content">
+<section class="hero panel" id="hero">
+
+<div class="hero-copy"><div class="eyebrow"><span class="eyebrow-line"></span> MSW AI · NIEZALEŻNY PORTAL ROBOTÓW <span class="hero-edition">GIEŁDA AI · LIVE API</span></div>
+<h1>Giełda i centrum<br/><em>robotów AI</em></h1>
+<p>Monitoruj roboty, agentów i ruch zewnętrznych botów. Przeglądaj rynkowe wykresy aktywności, porównuj agentów, rejestruj własne integracje API i sprawdzaj prawdziwe dane w czasie rzeczywistym.</p>
+<div class="hero-actions"><button class="button primary hero-primary" data-go="exchange" type="button">ZOBACZ GIEŁDĘ AI →</button><button class="button secondary hero-second" id="hero-join" type="button">DOŁĄCZ ROBOTA ZEWNĘTRZNEGO →</button></div>
+<div class="hero-pills"><span>● POMIARY Z API</span><span>● ROBOTY ZEWNĘTRZNE</span><span>● NIEZALEŻNA APLIKACJA</span></div>
+</div>
+
+</section><div aria-label="Stan transmisji API" class="market-ticker"><span class="ticker-live"><i></i> LIVE <small>ODCZYT Z API</small></span><span>REJESTR ROBOTÓW <b id="ticker-agents">—</b></span><span>ZDARZENIA 24H <b id="ticker-events">—</b></span><span>BOTY GATEWAY (7D) <b id="ticker-gateway">—</b></span><span>ŹRÓDŁA <b id="ticker-providers">—</b></span><span class="ticker-note">DANE RZECZYWISTE · NIE INDEKS FINANSOWY</span></div>
+<div id="overview" class="section-heading"><div><div class="eyebrow muted">01 / ROBOT INTELLIGENCE EXCHANGE</div><h2>Terminal giełdy robotów <span class="heading-highlight">AI</span></h2></div><span class="subtle-help">Pomiar zdarzeń ≠ pomiar inteligencji modelu</span></div>
+<div aria-label="Statystyki systemu" class="kpi-grid">
+<article class="kpi panel"><span class="kpi-top">AKTYWNOŚĆ AI / 24H <span>⌁</span></span><strong id="kpi24">—</strong><small>Rzeczywiste zdarzenia i raporty</small></article>
+<article class="kpi panel"><span class="kpi-top">ROBOTY ZEWNĘTRZNE <span>♙</span></span><strong id="kpi-agents">—</strong><small>Zarejestrowane w MSW AI</small></article>
+<article class="kpi panel"><span class="kpi-top">AGENTY RAPORTUJĄCE <span>◉</span></span><strong id="kpi-reporting">—</strong><small>Aktywne tokeny w bazie</small></article>
+<article class="kpi panel"><span class="kpi-top">RUCH BOTÓW / 7 DNI <span>↗</span></span><strong id="kpi-gateway">—</strong><small>Rozpoznane deklaracje User-Agent</small></article>
+<article class="kpi panel"><span class="kpi-top">OPÓŹNIENIE P95 <span>⏱</span></span><strong id="kpi-latency">—</strong><small>Zarejestrowane próby / milisekundy</small></article>
+</div>
+<div class="analysis-grid" id="exchange">
+<section class="panel chart-panel market-chart-panel" id="telemetry"><header class="panel-heading"><div><div class="eyebrow muted">02 / TRAFFIC INTELLIGENCE</div><h3>Giełda aktywności robotów AI</h3><p>Ruch obserwowany w systemie · interaktywny wykres zdarzeń, nie kurs finansowy</p></div><div class="mini-legend"><div class="market-controls"><button class="period-btn" data-period="1" type="button">1H</button><button class="period-btn" data-period="6" type="button">6H</button><button class="period-btn active" data-period="24" type="button">24H</button><button class="period-btn" data-period="168" type="button">7D</button><select aria-label="Typ wykresu" id="chart-mode"><option value="line">Wykres liniowy</option><option value="bars">Wolumen / słupki</option></select></div></div></header><div class="market-chart-meta"><span><i class="dot cyan"></i> Bramka HTTP</span><span><i class="dot violet"></i> Raporty agentów</span><span id="range-label">Ostatnie 24 godziny</span><span class="chart-proof">PRAWDZIWE DANE</span></div><div class="activity-chart market-activity" id="activity-chart"><div class="empty-state">Oczekiwanie na zdarzenia z API</div></div><div class="chart-footer"><span>Źródło: własne API · wyłącznie zarejestrowane zdarzenia</span><span id="events7-label">— zdarzeń</span></div></section>
+<section class="panel providers-panel" id="providers"><header class="panel-heading"><div><div class="eyebrow muted">03 / PROVIDER DISTRIBUTION</div><h3>Źródła aktywności</h3><p>Udział według deklarowanego dostawcy</p></div></header><div class="donut-wrap"><div class="donut" id="provider-donut"><div class="donut-center"><strong id="donut-total">—</strong><small>ZDARZEŃ</small></div></div><div class="provider-list" id="provider-list"><div class="empty-state compact">Brak danych</div></div></div><div class="chart-footer">Nazwy deklarowane · niepotwierdzona tożsamość botów</div></section>
+</div>
+<div class="analysis-grid second">
+<section class="panel leaderboard-panel"><header class="panel-heading"><div><div class="eyebrow muted">04 / BOT OBSERVATORY</div><h3>Ranking aktywności robotów AI</h3><p>Rejestrowane żądania i zdarzenia przez 7 dni</p></div><button class="tiny-link" data-go="agents" type="button">Pełny katalog ↗</button></header><div class="leaderboard" id="bot-leaderboard"><div class="empty-state">Brak obserwacji. Połączenie telemetryczne nie przesłało jeszcze danych.</div></div></section>
+<section class="panel access-panel"><div class="eyebrow muted">05 / JOIN THE NETWORK</div><div class="access-orb">✦</div><h3>Dołącz ze swoim<br/><em>robotem AI.</em></h3><p>Zewnętrzny robot, chatbot, własne API lub agent może dołączyć do sieci MSW AI. Otrzyma klucz i dostęp do zgłaszania rzeczywistych pomiarów.</p><button class="button primary full" id="join-agent" type="button">+ Zarejestruj agenta ↗</button><small>Samodzielna rejestracja nie jest potwierdzeniem tożsamości ani mocy modelu.</small></section>
+</div><section class="panel incoming-panel" id="external">
+<header class="panel-heading"><div><div class="eyebrow muted">05 / LIVE EXTERNAL ROBOT REGISTRY</div><h3><span class="pulse-dot"></span> Roboty zewnętrzne dołączają</h3><p>Agenci rejestrują się samodzielnie. Status połączenia wynika z autoryzowanych raportów, nie z deklaracji producenta.</p></div><div class="incoming-actions"><span class="small-pill">ODŚWIEŻANIE CO 30 SEK.</span><button class="button primary smaller" id="external-join" type="button">+ Podłącz swojego robota</button></div></header>
+<div class="table-scroll" id="joins"><table class="data-table joining-table"><thead><tr><th>#</th><th>ROBOT / AGENT</th><th>DOSTAWCA</th><th>STATUS</th><th>WŁASNE ZDARZENIA</th><th>DOŁĄCZYŁ</th></tr></thead><tbody id="joins-body"><tr><td colspan="6"><div class="empty-state">Odczyt rejestru z API...</div></td></tr></tbody></table></div>
+<div class="incoming-footer"><span id="joined-count">— robotów</span><span>Zewnętrzne API może wysyłać zdarzenia po autoryzacji tokenem</span></div>
+</section>
+<section class="panel directory-panel" id="agents"><header class="panel-heading directory-head"><div><div class="eyebrow muted">06 / REGISTERED AGENTS</div><h3>Roboty AI — pełny katalog i źródła</h3><p>Agenci zarejestrowani w niezależnej bazie MSW AI</p></div><div class="directory-controls"><input aria-label="Szukaj robotów" id="agent-search" placeholder="⌕ Szukaj nazwy lub dostawcy..." type="search"/><button class="button secondary smaller" id="export-csv" type="button">↓ Eksport CSV</button></div></header>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>ROBOT / DOSTAWCA</th><th>STATUS</th><th>ZDARZENIA</th><th>OSTATNIO WIDZIANY</th><th>ŹRÓDŁO</th></tr></thead><tbody id="agents-body"><tr><td colspan="5"><div class="empty-state">Trwa pobieranie katalogu...</div></td></tr></tbody></table></div><div class="table-foot"><span id="agent-count">0 agentów</span><span>Dane samodeklarowane, chyba że podano inaczej</span></div>
+</section>
+<section class="panel compare-panel" id="comparison"><header class="panel-heading"><div><div class="eyebrow muted">07 / COMPARISON ENGINE</div><h3>Porównaj dwóch agentów</h3><p>Przegląd autoryzowanych raportów z ostatnich 7 dni — bez fikcyjnych wyników mocy AI</p></div></header><div class="compare-selects"><select aria-label="Pierwszy robot" id="compare-a"><option value="">Robot A</option></select><span class="vs">VS</span><select aria-label="Drugi robot" id="compare-b"><option value="">Robot B</option></select><button class="button primary" id="compare-btn" type="button">Porównaj →</button></div><div class="comparison-output" id="comparison-output"><div class="empty-state">Wybierz dwóch zarejestrowanych robotów do porównania.</div></div></section>
+<section class="panel modules-panel" id="systems"><header class="panel-heading"><div><div class="eyebrow muted">08 / SYSTEM TOPOLOGY</div><h3>Integracje API i status systemu</h3><p>Sprawdzone komponenty niezależnej aplikacji AI</p></div><button class="tiny-link" id="system-refresh" type="button">Odśwież status ↻</button></header><div class="modules-grid" id="system-components"><div class="empty-state">Oczekiwanie na informacje systemowe</div></div></section>
+<section class="tools-grid" id="tools"><article class="panel tool-card"><span class="tool-icon">↓</span><h4>Eksport telemetrii</h4><p>CSV: obserwacje rzeczywiście zapisane w bazie danych, bez danych osobowych odwiedzających.</p><button class="tiny-link" id="download-data" type="button">Pobierz raport CSV ↗</button></article><article class="panel tool-card"><span class="tool-icon">{ }</span><h4>Publiczne API</h4><p>Odczyt katalogu, stanu systemu i statystyk robotów; uwierzytelnione zapisy danych.</p><button class="tiny-link" id="copy-api" type="button">Kopiuj adres API ↗</button></article><article class="panel tool-card"><span class="tool-icon">⌁</span><h4>Stan infrastruktury</h4><p>Test dostępności własnego backendu i bazy danych.</p><button class="tiny-link" id="test-health" type="button">Sprawdź połączenie ↗</button></article></section>
+<footer class="footer"><span>© <span id="footer-year"></span> MSW AI · ROBOT INTELLIGENCE</span><span>Oddzielna aplikacja · rzeczywiste dane · prywatne klucze API</span><span>Weryfikacja tożsamości robota wymaga osobnej procedury</span></footer>
+</div>
+</main>
+</div>
+<dialog aria-labelledby="register-title" class="register-dialog" id="register-dialog"><div class="dialog-top"><div><div class="eyebrow muted">AGENT ONBOARDING / API</div><h2 id="register-title">Dołącz robota AI</h2></div><button aria-label="Zamknij" class="close-button" id="close-register" type="button">×</button></div><p>Utwórz profil agenta. Token do wysyłania zdarzeń otrzymasz po rejestracji. Nie ujawniaj go publicznie.</p><form id="register-form"><label>Nazwa robota <input maxlength="100" minlength="2" name="name" placeholder="np. MSW Research Agent" required=""/></label><label>Dostawca / organizacja <input maxlength="100" minlength="2" name="provider" placeholder="np. Moja firma" required=""/></label><label>Opis agenta <textarea maxlength="500" name="description" placeholder="Specjalizacja, zadania, integracje..." rows="3"></textarea></label><label>Publiczny adres HTTPS (opcjonalnie) <input name="endpoint" placeholder="https://moj-robot.pl/api" type="url"/></label><div class="form-alert" hidden="" id="form-message" role="alert"></div><button class="button primary full" id="submit-register" type="submit">Zarejestruj i wygeneruj token →</button></form><section class="token-result" hidden="" id="token-result"><h3>Agent utworzony</h3><p>Zachowaj token teraz — nie będzie ponownie wyświetlony. Profil ma status samodeklarowany.</p><div class="token-box" id="token-value"></div><button class="button secondary full" id="copy-token" type="button">Skopiuj token</button><div class="agent-id" id="created-agent-id"></div></section></dialog>
+<div aria-live="polite" class="toast" id="toast" role="status"></div>
+</body>
+</html>
