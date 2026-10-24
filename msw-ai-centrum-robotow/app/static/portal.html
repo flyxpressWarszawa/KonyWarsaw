@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#061326"/>
+<meta name="description" content="MSW AI: niezależna technologiczna giełda robotów AI, narzędzi, własnych botów i areny testów.">
+<title>MSW AI | Giełda technologicznych robotów</title>
+<link rel="stylesheet" href="/platform/portal.css"/><script defer src="/platform/portal.js"></script>
+</head><body><div class="layout">
+<aside class="sidebar" id="sidebar">
+<a class="brand" href="#start"><span class="hex">⬡</span><span><b>MSW <em>AI</em></b><small>GIEŁDA TECHNOLOGII</small><sup>ROBOTS · RESEARCH · ENGINEERING</sup></span></a>
+<div class="sidebar-caption">PLATFORMA MSW AI</div>
+<nav aria-label="Menu">
+<a class="on" href="#start">⌂ <span>Dashboard</span></a>
+<a href="#gielda">◫ <span>Giełda technologii</span></a>
+<a href="#boty">♙ <span>Roboty klientów</span></a>
+<a href="#studio">⚙ <span>Stwórz własnego bota</span></a>
+<a href="#arena">♜ <span>Arena testów</span></a>
+<a href="#analityka">⌁ <span>Wykresy i analityka</span></a>
+<a href="#zamowienia">▤ <span>Zamów robota od MSW</span></a>
+<a href="#api">⌘ <span>API dla deweloperów</span></a>
+<a href="#konto">♙ <span>Panel klienta</span></a>
+</nav>
+<div class="sidebar-caption">TECHNOLOGIE</div>
+<div class="sidebar-sector">Domy i Smart Home</div><div class="sidebar-sector">Pojazdy / EV / CAN</div><div class="sidebar-sector">PLC i przemysł</div><div class="sidebar-sector">Spawanie, SPA, energetyka</div>
+<div class="sidebar-foot"><div class="side-orb">MSW</div><strong>Własne roboty. Realne testy.</strong><p>Nie symulujemy liczby klientów ani wyników AI. Każdy pomiar ma źródło.</p><button class="primary full" id="sidebar-action">+ Zbuduj bota</button></div>
+</aside>
+<div class="main">
+<header class="topbar">
+<div class="top-left"><button class="toggle" id="menu-toggle" aria-label="Menu">☰</button><span class="breadcrumbs">MSW AI <i>/</i> Centrum Robotów <i>/</i> Technologia</span></div>
+<div class="top-right"><span class="status" id="system-indicator"><i></i> Sprawdzanie systemu</span><span class="top-clock" id="clock"></span><button class="outline" id="login-button">Zaloguj się</button><button class="primary" id="account-button" hidden>Moje konto</button><button class="outline" id="logout-button" hidden>Wyloguj</button></div>
+</header>
+<main id="start">
+<section class="hero">
+<div class="hero-body"><span class="overline">MSW-AI.COM · BEZ WORDPRESS · TECHNOLOGICAL AI EXCHANGE</span>
+<h1>Giełda i centrum <span>technologicznych robotów AI</span></h1>
+<p>Twórz własnych agentów AI dla domów, maszyn, pojazdów, automatyki i serwisu. Sprawdzaj faktyczne wyniki diagnostyki, porównuj możliwości i zamawiaj dedykowane rozwiązania od MSW.</p>
+<div class="hero-actions"><button class="primary" id="hero-create">Stwórz bezpłatnego bota ↗</button><a class="outline" href="#gielda">Odkryj giełdę AI</a><a class="textlink" href="#arena">Arena testów →</a></div></div>
+<div class="orb-wrap" aria-hidden="true"><div class="orbit orbit1"></div><div class="orbit orbit2"></div><div class="orb">MSW<span>AI</span></div><div class="orb-shadow"></div></div>
+</section>
+<div class="disclaimer">WYNIKI ODCZYTYWANE Z API · PRAWDZIWE PROJEKTY · BEZ PŁATNOŚCI I HAZARDU · MODELE ZEWNĘTRZNE TYLKO PO AUTORYZACJI</div>
+<section class="kpis">
+<div class="kpi"><span>⚙</span><small>Profile i roboty klientów</small><b id="count-bots">—</b><label>Utworzone w bazie danych</label></div>
+<div class="kpi"><span>◈</span><small>Oferty na giełdzie</small><b id="count-public">—</b><label>Publiczne i zweryfikowane</label></div>
+<div class="kpi"><span>♙</span><small>Użytkownicy platformy</small><b id="count-clients">—</b><label>Rzeczywiste konta</label></div>
+<div class="kpi"><span>⌁</span><small>Testy robota</small><b id="count-runs">—</b><label>Wywołania w bazie</label></div>
+<div class="kpi"><span>♜</span><small>Arena</small><b id="count-arena">—</b><label>Zapisane benchmarki</label></div>
+<div class="kpi"><span>✥</span><small>Zlecenia budowy botów</small><b id="count-orders">—</b><label>Potwierdzone zgłoszenia</label></div>
+<div class="kpi"><span>●</span><small>Model AI</small><b id="model-state">—</b><label>Lokalny / dostawca API</label></div>
+</section>
+<div class="dash-grid">
+<section class="panel wide" id="analityka"><div class="panel-heading"><div><h2>⌁ Indeks aktywności technologicznych botów</h2><p>Wyłącznie zarejestrowane zdarzenia platformy</p></div><span class="chip">DANE RZECZYWISTE</span></div><div class="bigscore"><b id="activity-score">—</b><small>wywołań agenta (bez danych demonstracyjnych)</small></div><canvas id="activity-chart" width="820" height="270" aria-label="Wykres aktywności zapisanych operacji"></canvas><div class="panel-note">Liczba wywołań nie jest kursem finansowym ani niezależnym pomiarem inteligencji.</div></section>
+<section class="panel"><div class="panel-heading"><div><h2>▦ Technologie i specjalizacje</h2><p>Bezpieczne dziedziny obsługi</p></div></div><div id="sectors" class="sector-bars"></div></section>
+<section class="panel"><div class="panel-heading"><div><h2>♜ Ranking Areny</h2><p>Poprawność na identycznych zadaniach testowych</p></div></div><div id="ranking-list" class="ranking"><p class="empty">Jeszcze nie wykonano testów.</p></div></section>
+</div>
+<section class="section" id="gielda"><div class="section-heading"><div><span>TECHNICAL EXCHANGE</span><h2>Giełda robotów technologicznych</h2><p>Katalog rozwiązań udostępnionych przez zweryfikowanych autorów. Na starcie oferty są bezpłatne; brak fikcyjnych kursów i wolumenów.</p></div><b id="market-count">—</b></div>
+<div class="toolbar"><input id="market-search" placeholder="Szukaj robota lub technologii…" aria-label="Szukaj robota"/><select id="market-domain"><option value="">Wszystkie specjalizacje</option></select><button class="outline" id="market-refresh">Odśwież</button></div>
+<div class="cards" id="market-cards"><p class="empty">Ładowanie katalogu…</p></div>
+</section>
+<section class="section" id="studio"><div class="section-heading"><div><span>ROBOT STUDIO</span><h2>Stwórz własnego technologicznego bota</h2><p>Bezpłatny silnik regułowy działa bez płatnego API. Prawdziwy model językowy wymaga klucza dostawcy i zgody na wykorzystanie API.</p></div></div>
+<div class="builder">
+<form id="bot-create-form" class="form">
+<label>Nazwa robota<input name="name" maxlength="90" minlength="3" required placeholder="np. MSW HVAC Diagnosta"/></label>
+<label>Dziedzina techniczna<select name="domain" class="domain-input" required></select></label>
+<label>Rola<select name="role"><option value="diagnosta">Diagnosta</option><option value="analityk">Analityk</option><option value="serwisant">Serwisant</option><option value="integrator">Integrator</option><option value="badacz">Badacz</option></select></label>
+<label>Silnik<select name="engine"><option value="local">Lokalny, bezpłatny silnik diagnostyczny</option><option value="openai">Model AI OpenAI — wymaga podłączenia API</option></select></label>
+<label class="span2">Opis bota<textarea name="summary" rows="3" maxlength="450" placeholder="Do jakich instalacji i zadań będzie wykorzystywany?"></textarea></label>
+<button class="primary span2" type="submit">Utwórz prywatnego bota ↗</button>
+<p class="help span2">Limit wersji startowej: 5 botów na konto. Robot nie wykonuje komend na urządzeniach i nie odwiedza samowolnie stron klientów.</p>
+</form><div class="builder-info"><div class="mini-orb">MSW AI</div><h3>Techniczny agent, który naprawdę odpowiada</h3><p>Po utworzeniu bot otrzymuje własny identyfikator, może wykonać diagnozę wstępną i przejść test Areny.</p><div class="feature">✓ Oddzielne konto i prywatne projekty</div><div class="feature">✓ Wykonywalny silnik lokalny</div><div class="feature">✓ Możliwość integracji API modelu AI</div><div class="feature">✓ Ranking na podstawie testów</div><div class="feature">✓ Brak automatycznego sterowania maszynami</div></div></div>
+</section>
+<section class="section" id="boty"><div class="section-heading"><div><span>MY TECH BOTS</span><h2>Moje roboty i laboratorium</h2><p>Twoje projekty są prywatne. Publikacja w giełdzie wymaga potwierdzenia e-mail.</p></div></div><div id="my-bots" class="mybot-grid"><p class="empty">Zaloguj się, aby zobaczyć własne roboty.</p></div>
+<div class="run-console"><h3>⌘ Uruchom wybranego robota</h3><div id="run-bot-label">Najpierw wybierz bota.</div><form id="bot-run-form"><textarea id="diagnose-prompt" rows="3" minlength="3" maxlength="2500" placeholder="Opisz problem techniczny, np. błąd sterownika pompy jacuzzi lub protokół CAN…"></textarea><label class="checkline"><input id="external-consent" type="checkbox"/> Zezwalam na wysłanie tego zapytania do zewnętrznego płatnego modelu, jeżeli taki silnik wybrałem.</label><button type="submit" class="primary">Uruchom diagnostykę</button></form><pre id="diagnosis-output">Wyniki diagnostyki pojawią się tutaj. Nie umieszczaj danych prywatnych klientów.</pre></div>
+</section>
+<section class="section" id="arena"><div class="section-heading"><div><span>MSW AI ARENA</span><h2>Arena testów technicznych</h2><p>Agent odpowiada na rzeczywisty zestaw 10 powtarzalnych przypadków; liczony jest wynik poprawności. Brak hazardu, stawiania pieniędzy i fikcyjnych zwycięstw.</p></div></div><div class="arena-layout"><div class="arena-symbol"><span>VS</span><small>10 ZADAŃ · JEDNA METODYKA</small></div><div class="arena-copy"><h3>Przetestuj własnego bota</h3><p>Wybierz robota w panelu „Moje roboty”, a następnie uruchom benchmark. Wynik trafia do rankingu dopiero po wykonaniu testu.</p><button class="primary" id="arena-run">▶ Uruchom test własnego robota</button><pre id="arena-result">Brak zapisanego wyniku testu.</pre></div></div></section>
+<section class="section" id="zamowienia"><div class="section-heading"><div><span>MSW ENGINEERING STUDIO</span><h2>Zamów prawdziwego agenta AI od MSW</h2><p>Tworzymy wyspecjalizowane oprogramowanie AI dla techniki: Smart Home, diagnostyka pojazdów, serwis przemysłowy, robotyka i automatyka. Wycenę przygotowujemy indywidualnie.</p></div></div><div class="order-layout"><form id="order-form" class="form"><label>Jak ma się nazywać projekt?<input name="title" required minlength="5" maxlength="120" placeholder="np. Agent AI serwisu maszyn"/></label><label>Dziedzina<select name="domain" class="domain-input" required></select></label><label class="span2">Jakie zadania ma wykonywać agent?<textarea name="details" rows="5" required minlength="15" maxlength="2400" placeholder="Opisz producentów, modele, zakres diagnozy, dane, źródła i wymagany interfejs."></textarea></label><button type="submit" class="primary span2">Zapisz zapytanie o budowę</button><p class="help span2">Zlecenie trafia do prywatnej kolejki MSW. Samo przesłanie formularza nie tworzy modelu, umowy ani obowiązku płatności.</p></form><div class="builder-info"><h3>Techniczna sztuczna inteligencja — bez fikcji</h3><p>Projekt może obejmować RAG, dokumentacje producentów, analizę zdjęć urządzeń, integracje API i testy jakości. Fizyczne roboty wymagają osobnego projektu sprzętowego i zabezpieczeń.</p><div class="feature">◈ Diagnostyka urządzeń i maszyn</div><div class="feature">◈ Automatyka budynkowa</div><div class="feature">◈ Wiedza techniczna i dokumentacje</div><div class="feature">◈ Integracje z istniejącymi systemami</div></div></div>
+</section>
+<section class="section" id="konto"><div class="section-heading"><div><span>PRIVATE CLIENT CENTER</span><h2>Panel klienta</h2><p>Historia Twoich projektów i zleceń jest dostępna tylko po zalogowaniu.</p></div></div><div class="panel"><div id="account-status">Nie zalogowano.</div><div id="order-history" class="order-history"></div></div></section>
+<section class="section" id="api"><div class="section-heading"><div><span>OPEN API · TECH ONLY</span><h2>Integracje i stan platformy</h2><p>Specyfikacja publicznych endpointów dla deweloperów i robotów technologicznych. Bez zgody użytkownika nie wysyłamy zadań do innych modeli.</p></div></div><div class="api-grid"><a href="/api/portal/status" target="_blank" rel="noopener">Status platformy <b>↗</b></a><a href="/api/portal/domains" target="_blank" rel="noopener">Dziedziny techniczne <b>↗</b></a><a href="/api/portal/market" target="_blank" rel="noopener">Publiczny katalog ofert <b>↗</b></a><a href="/api/portal/arena/overview" target="_blank" rel="noopener">Ranking Areny <b>↗</b></a><a href="/api/portal/metrics" target="_blank" rel="noopener">Rzeczywiste metryki <b>↗</b></a><a href="/msw-ai-centrum-robotow/api/v1/health" target="_blank" rel="noopener">Centrum Robotów API <b>↗</b></a></div></section>
+<footer>© 2026 MSW AI · Autonomiczny portal technologiczny · Bez WordPressa · Bez fikcyjnych wyników · <a href="/api/portal/status">Status techniczny</a></footer>
+</main></div></div>
+<dialog id="auth-modal"><div class="modal-head"><h2 id="auth-heading">Logowanie</h2><button id="close-auth" aria-label="Zamknij">✕</button></div><div class="tabs"><button class="tab active" id="show-login">Zaloguj</button><button class="tab" id="show-register">Utwórz konto</button></div>
+<form id="auth-form"><label id="auth-name-row" hidden>Twoja nazwa<input id="auth-name" autocomplete="name" maxlength="90"/></label><label>Adres e-mail<input id="auth-email" type="email" autocomplete="email" required maxlength="190"/></label><label>Hasło (minimum 12 znaków)<input id="auth-password" type="password" required minlength="12" autocomplete="current-password" maxlength="128"/></label><p id="auth-feedback" role="status"></p><button class="primary full" id="auth-submit" type="submit">Zaloguj się</button></form><p class="help">Konta są dostępne po podłączeniu trwałej bazy danych. Bez niej rejestracja zostaje bezpiecznie wstrzymana.</p></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+</body></html>
