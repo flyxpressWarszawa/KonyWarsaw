@@ -41,7 +41,7 @@ async function getMetrics(){try{const m=await api("/metrics");$("count-runs").te
 async function getDomains(){try{const d=await api("/domains");state.domains=d.domains;for(const el of [...document.querySelectorAll(".domain-input"),$("market-domain")]){const current=el.value;const empty=el.id==="market-domain";el.replaceChildren();if(empty){const o=document.createElement("option");o.value="";o.textContent="Wszystkie specjalizacje";el.appendChild(o)}
 for(const cat of d.domains){const opt=document.createElement("option");opt.value=cat.id;opt.textContent=cat.name;el.appendChild(opt)}if(current)el.value=current}
 const all=d.domains;const categories=[["Elektrotechnika i energia","ELEKTRYKA"],["Automatyka i maszyny","MASZYNY"],["Smart Home i CCTV","SMART_HOME"],["Pojazdy i EV","POJAZDY"],["Hydraulika i SPA","HYDRAULIKA"]];
-$("sectors").innerHTML=categories.map(([name,group],i)=>'<div class="sector-row"><div><b>'+escapeHTML(name)+'</b><span>'+escapeHTML(all.find(x=>x.id===group)?.name||"")+'</span></div><div class="sector-line"><i style="width:'+((i+1)*16)+'%"></i></div></div>').join("");
+$("sectors").innerHTML=categories.map(([name,group],i)=>'<div class="sector-row"><div><b>'+escapeHTML(name)+'</b><span>'+escapeHTML(all.find(x=>x.id===group)?.name||"")+'</span></div></div>').join("");
 // Bars above represent category taxonomy positions, not actual usage; avoid implied percentages in UI.
 }catch(err){notify("Dziedziny techniczne: "+err.message)}}
 async function loadMarket(){
