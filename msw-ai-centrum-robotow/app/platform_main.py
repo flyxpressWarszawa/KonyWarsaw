@@ -359,11 +359,34 @@ def order(data:BuildInput,identity=Depends(csrf),db:Session=Depends(db_session))
     prior=db.scalar(select(func.count()).select_from(BuildRequest).where(BuildRequest.owner_id==user.id,BuildRequest.created>now()-timedelta(days=1))) or 0
     if prior>=3:raise HTTPException(429,"Limit trzech zapytań na dobę")
     row=BuildRequest(id=str(uuid.uuid4()),owner_id=user.id,title=data.title.strip(),domain=data.domain,details=data.details.strip(),status="queued_for_quote")
-    db.add(row);db.commit();return {"id":row.id,"status":row.status,"saved":True,"notification_sent":False,"message":"Zapytanie zapisano. Czeka na obsługę MSW."}
+    db.add(row);db.commit()
+    notified=False
+    if os.getenv("MSW_NOTIFY_ORDERS")=="1" and os.getenv("MSW_TG_BOT_TOKEN") and os.getenv("MSW_TG_CHAT_ID"):
+        try:
+            response=httpx.post("https://api.telegram.org/bot"+os.environ["MSW_TG_BOT_TOKEN"]+"/sendMessage",
+                json={"chat_id":os.environ["MSW_TG_CHAT_ID"],
+                      "text":"MSW AI · nowe zamówienie "+row.id+" · "+row.domain+" · "+row.title[:80]},
+                timeout=7.0,follow_redirects=False)
+            notified=response.status_code==200 and bool(response.json().get("ok"))
+        except (httpx.HTTPError,ValueError):
+            notified=False
+    return {"id":row.id,"status":row.status,"saved":True,"notification_sent":notified,
+            "message":"Zapytanie zapisano. Czeka na obsługę MSW."}
 @app.get("/api/portal/my/orders")
 def orders(identity=Depends(current),db:Session=Depends(db_session)):
     user,_=identity;rows=db.scalars(select(BuildRequest).where(BuildRequest.owner_id==user.id).order_by(BuildRequest.created.desc()).limit(50)).all()
     return {"items":[{"id":x.id,"title":x.title,"domain":x.domain,"status":x.status,"created":x.created.isoformat()} for x in rows]}
+@app.get("/api/portal/admin/orders")
+def admin_orders(x_msw_admin:str=Header(default=""),db:Session=Depends(db_session)):
+    secret=os.getenv("MSW_PORTAL_ADMIN_SECRET","")
+    if len(secret)<24:
+        raise HTTPException(503,"Panel właściciela wymaga konfiguracji sekretu")
+    if not hmac.compare_digest(x_msw_admin,secret):
+        raise HTTPException(403,"Brak uprawnień")
+    rows=db.scalars(select(BuildRequest).order_by(BuildRequest.created.desc()).limit(100)).all()
+    return {"items":[{"id":r.id,"title":r.title,"domain":r.domain,"details":r.details,
+                       "status":r.status,"created":r.created.isoformat(),"owner_id":r.owner_id} for r in rows],
+            "visibility":"admin_only"}
 @app.get("/api/portal/metrics")
 def metrics(db:Session=Depends(db_session)):
     count=db.scalar(select(func.count()).select_from(AgentRun)) or 0
