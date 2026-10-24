@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#06101f">
+<meta name="description" content="MSW AI Giełda Technologii — rzeczywisty portal analityczny dla 300 dziedzin wiedzy, 500 operacji obliczeniowo-diagnostycznych i 300 profili agentów.">
+<title>MSW AI — Giełda Technologii i Robotów</title>
+<link rel="stylesheet" href="/market/style.css">
+<script defer src="/market/app.js"></script>
+</head>
+<body>
+<div class="shell">
+<aside class="side" aria-label="Menu portalu">
+<a class="brand" href="#home"><span class="brand-mark">⬡</span><span><b>MSW <em>AI</em></b><small>GIEŁDA TECHNOLOGII</small><sup>CENTRUM ROBOTÓW · TECHNICAL 360</sup></span></a>
+<div class="side-sep">CENTRUM STEROWANIA</div>
+<nav class="nav">
+<a class="active" href="#home"><span>⌂</span> Dashboard</a>
+<a href="#power"><span>⌁</span> Indeks techniczny AI</a>
+<a href="#domains"><span>▦</span> 300 dziedzin wiedzy</a>
+<a href="#operations"><span>⚙</span> 500 narzędzi obliczeniowych</a>
+<a href="#bots"><span>♧</span> 300 profili robotów AI</a>
+<a href="#analytics"><span>◫</span> Analityka i wykresy</a>
+<a href="#memory"><span>◈</span> Pamięć i testy</a>
+<a href="#research"><span>☷</span> Badania i źródła</a>
+<a href="#integrations"><span>⛓</span> API i integracje</a>
+</nav>
+<div class="side-sep">PORTALE MSW</div>
+<nav class="nav secondary">
+<a href="https://mobilny-serwis-warszawa.pl/msw-ai-discovery-360/" target="_blank" rel="noopener">↗ Discovery 360</a>
+<a href="https://mobilny-serwis-warszawa.pl/gielda-ai-robotow/" target="_blank" rel="noopener">↗ Wcześniejsza giełda</a>
+<a href="/msw-technical-university-360/">↗ University 360</a>
+<a href="https://mobilny-serwis-warszawa.pl/" target="_blank" rel="noopener">↗ Serwis MSW</a>
+</nav>
+<div class="side-bottom"><div class="orb"><span>MSW</span></div><b>Własna platforma</b><p>Katalog wiedzy, obliczenia, porównania, testy i prawdziwe dane API.</p><a href="#operations" class="side-button">Uruchom narzędzie ↗</a></div>
+</aside>
+<div class="workspace">
+<header class="top">
+<div class="top-left"><button id="toggle-menu" class="menu-button" aria-label="Pokaż menu">☰</button><span class="top-label">MSW TECHNICAL EXCHANGE <span class="slash">/</span> LIVE ANALYTICS</span></div>
+<div class="top-right"><label class="global-search"><span>⌕</span><input id="global-query" placeholder="Szukaj dziedzin, narzędzi, botów…" aria-label="Szukaj w portalu" maxlength="100"><kbd>Enter</kbd></label><span class="status-dot" title="Stan widoczny po pobraniu statusu API"></span><span id="top-state">Sprawdzanie API</span><time id="clock"></time></div>
+</header>
+<main id="home">
+<section class="hero">
+<div class="hero-copy"><div class="eyebrow"><span class="live-led"></span> MSW AI · POLSKA · TECHNICAL INTELLIGENCE</div>
+<h1>Giełda i centrum <span>technologicznych robotów AI</span></h1>
+<p>Inteligentny portal wiedzy technicznej i monitoringu: diagnozuj, obliczaj, porównuj, testuj i rozwijaj własne rozwiązania.</p>
+<div class="hero-actions"><a href="#operations" class="btn primary">Uruchom diagnostykę <span>↗</span></a><a href="#bots" class="btn outline">Przeglądaj profile botów</a><a href="#domains" class="btn text">300 dziedzin →</a></div></div>
+<div class="hero-art" aria-hidden="true"><div class="city-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="holo-ring ring-a"></div><div class="holo-ring ring-b"></div><div class="holo-core">M<span>SW</span><small>AI</small></div><div class="holo-base"></div></div>
+</section>
+<div class="scope">300 DZIEDZIN · 500 WYWOŁYWALNYCH OPERACJI · 300 PROFILI AGENTÓW · WYNIKI NA PODSTAWIE POMIARÓW · BRAK FIKCYJNEGO LIVE</div>
+<section class="kpis" aria-label="Metryki systemu">
+<article class="kpi"><span class="kpi-icon">▦</span><small>Dziedziny techniczne</small><strong id="k-domains">—</strong><span>Katalog MSW</span></article>
+<article class="kpi"><span class="kpi-icon">⚙</span><small>Operacje diagnostyczne</small><strong id="k-operations">—</strong><span>Wywoływalne API</span></article>
+<article class="kpi"><span class="kpi-icon">◇</span><small>Profile robotów AI</small><strong id="k-bots">—</strong><span>Katalog, nie aktywne procesy</span></article>
+<article class="kpi"><span class="kpi-icon">↗</span><small>Wywołania narzędzi</small><strong id="k-calls">—</strong><span>Od startu procesu</span></article>
+<article class="kpi"><span class="kpi-icon">✓</span><small>Testy poprawne</small><strong id="k-quality">—</strong><span>Rzeczywista zgodność wyników</span></article>
+<article class="kpi"><span class="kpi-icon">◷</span><small>Średni czas obliczenia</small><strong id="k-latency">—</strong><span>Pomiar serwera (ms)</span></article>
+<article class="kpi"><span class="kpi-icon">●</span><small>Aktywne procesy botów</small><strong id="k-online">—</strong><span>Tylko potwierdzone</span></article>
+</section>
+
+<div class="dashboard-grid">
+<section class="panel chart-panel" id="power"><div class="panel-head"><div><h2><span class="head-symbol">⌁</span> Indeks sprawności narzędzi AI</h2><p>Rzeczywiste wyniki obliczeń i testów — nie kurs kryptowaluty ani „moc” bez pomiaru</p></div><span class="chip outline">POMIARY</span></div>
+<div class="chart-value"><strong id="chart-score">Brak pomiaru</strong><small id="chart-desc">Uruchom benchmark lub narzędzie, aby utworzyć historię</small><button id="benchmark" class="mini-button">▶ Benchmark 25 algorytmów</button></div>
+<canvas id="market-chart" height="285" role="img" aria-label="Wykres wyników wykonanych testów"></canvas><div class="chart-foot"><span>OHLC — kolejne serie 10 wywołań</span><span id="chart-series">0 zarejestrowanych próbek</span></div>
+</section>
+<section class="panel rank-panel"><div class="panel-head"><div><h2>✧ Stan rynku technologii</h2><p>Realna liczba profili i operacji</p></div></div><div id="category-ranking" class="rank-list"><p class="empty">Pobieranie danych…</p></div><div class="panel-note">Ranking liczby zdefiniowanych specjalizacji; to nie pomiar mocy modeli.</div></section>
+<section class="panel bot-mini"><div class="panel-head"><div><h2>♧ Status robotów AI</h2><p>Rozróżnienie profilu od uruchomionego agenta</p></div></div><div id="bot-state-list" class="bot-state"><p class="empty">Ładowanie…</p></div><a href="#bots" class="link-line">Zobacz pełny katalog profili →</a></section>
+
+<section class="panel metric-panel" id="analytics"><div class="panel-head"><div><h2>▥ Rozkład dziedzin i operacji</h2><p>Udział pozycji w katalogu MSW</p></div></div><div class="metric-inner"><canvas id="donut-chart" width="210" height="210" role="img" aria-label="Wykres rozkładu dziedzin"></canvas><div id="donut-legend"></div></div></section>
+<section class="panel api-bars"><div class="panel-head"><div><h2>▤ Analiza operacji technicznych</h2><p>Operacje dostępne w 4 działach techniki</p></div></div><div id="operation-bars"></div><div class="panel-note">Wartości wynikają z konfiguracji narzędzi, a nie fikcyjnego ruchu API.</div></section>
+<section class="panel history-panel"><div class="panel-head"><div><h2>⌁ Ostatnie wykonania</h2><p>Wyniki obliczeń i testów tej instancji</p></div><button class="mini-button thin" id="history-refresh">Odśwież</button></div><div id="history-list" class="history-list"></div></section>
+</div>
+
+<section class="full-section" id="domains"><div class="section-head"><div><div class="eyebrow small">KNOWLEDGE ENGINE / 300</div><h2>300 dziedzin wiedzy technicznej</h2><p>Od Smart Home przez spawanie, hydraulikę i pojazdy po PLC, mechatronikę i technologię AI. Każda pozycja ma identyfikator i źródło.</p></div><span class="section-count" id="domain-count">300</span></div>
+<div class="filterbar"><label><span>Szukaj dziedziny</span><input id="domains-query" placeholder="np. CAN, KNX, HVAC, elektronika…" maxlength="100"></label><label><span>Sektor</span><select id="domains-group"><option value="">Wszystkie sektory</option><option value="DOMY">Domy / Smart Home</option><option value="POJAZDY">Pojazdy / EV</option><option value="MASZYNY">Maszyny / Przemysł</option><option value="IT_AI">IT / AI / Elektronika</option></select></label></div>
+<div class="tile-grid" id="domain-grid"></div><div class="paginate"><button class="mini-button" id="domains-prev">← Poprzednie</button><span id="domains-pages">—</span><button class="mini-button" id="domains-next">Następne →</button></div></section>
+
+<section class="full-section" id="operations"><div class="section-head"><div><div class="eyebrow small">DIAGNOSTICS LAB / 500</div><h2>500 rzeczywistych operacji obliczeniowo-diagnostycznych</h2><p>25 walidowalnych algorytmów w 20 kontekstach technicznych. Każdy wariant ma własny identyfikator i endpoint wykonania.</p></div><span class="section-count">500</span></div>
+<div class="filterbar"><label><span>Wyszukaj narzędzie</span><input id="operations-query" placeholder="np. moc, poślizg, przepływ…" maxlength="100"></label><label><span>Sektor</span><select id="operations-group"><option value="">Wszystkie sektory</option><option value="DOMY">Domy / Smart Home</option><option value="POJAZDY">Pojazdy / EV</option><option value="MASZYNY">Maszyny / Przemysł</option><option value="IT_AI">IT / AI</option></select></label></div>
+<div class="ops-layout"><div><div id="operations-list" class="operation-list"></div><div class="paginate"><button class="mini-button" id="operations-prev">← Poprzednie</button><span id="operations-pages">—</span><button class="mini-button" id="operations-next">Następne →</button></div></div>
+<div class="panel execute-panel"><div class="panel-head"><div><h2>◈ Laboratorium obliczeń</h2><p>Uruchamiasz prawdziwe obliczenie na serwerze</p></div></div><form id="execute-form"><div id="operation-selected">Wybierz operację z listy po lewej.</div><div id="formula-fields"></div><button type="submit" class="btn primary" id="execute-button">Oblicz i zweryfikuj →</button></form><div id="execute-result" class="result-box">Wynik zostanie tutaj zapisany. Bez danych klientów i bez sterowania urządzeniem.</div></div></div>
+</section>
+
+<section class="full-section" id="bots"><div class="section-head"><div><div class="eyebrow small">TECHNICAL AGENT REGISTRY / 300</div><h2>300 profili botów technologicznych AI</h2><p>Gotowe role agentów analitycznych, diagnostycznych, walidacyjnych i monitorujących. Profil nie oznacza uruchomionego modelu ani automatycznego publikowania w internecie.</p></div><span class="section-count" id="bots-count">300</span></div>
+<div class="filterbar"><label><span>Szukaj bota</span><input id="bots-query" placeholder="Szukaj technologii lub profilu…" maxlength="100"></label><label><span>Sektor</span><select id="bots-group"><option value="">Wszystkie sektory</option><option value="DOMY">Domy / Smart Home</option><option value="POJAZDY">Pojazdy / EV</option><option value="MASZYNY">Maszyny</option><option value="IT_AI">IT / AI</option></select></label></div>
+<div id="bots-list" class="bots-grid"></div><div class="paginate"><button class="mini-button" id="bots-prev">← Poprzednie</button><span id="bots-pages">—</span><button class="mini-button" id="bots-next">Następne →</button></div>
+</section>
+
+<div class="bottom-grid">
+<section class="panel memory" id="memory"><div class="panel-head"><div><h2>◈ Pamięć techniczna i walidacja</h2><p>Oddzielamy dane zapisane od deklaracji treningu AI</p></div></div><div class="memory-body"><div class="neural"><span>MSW</span><i></i><i></i><i></i><i></i><i></i></div><div class="memory-info"><div><small>Katalog dziedzin</small><b>300</b></div><div><small>Kalkulatory i walidatory</small><b>500</b></div><div><small>Wagi własnego modelu</small><b>Niepotwierdzone</b></div><div><small>Historia prób</small><b id="memory-events">—</b></div></div></div><p class="panel-note">Obecny magazyn pomiarów jest pamięcią procesu — nie trwałym treningiem własnej sieci neuronowej.</p></section>
+<section class="panel research" id="research"><div class="panel-head"><div><h2>☷ Badania techniczne i API źródeł</h2><p>Publiczne metadane projektów i sprawdzalne linki</p></div></div><div id="research-status" class="research-status">Ładowanie stanu…</div><div id="research-list" class="source-list"></div><a class="link-line" href="/api/market/research" target="_blank" rel="noopener">Otwórz wynik JSON →</a></section>
+<section class="panel integrations" id="integrations"><div class="panel-head"><div><h2>⛓ Integracja z ekosystemem MSW</h2><p>Rzeczywiste punkty wejścia zamiast symulowanych połączeń</p></div></div><div class="integration-list"><a href="/api/market/health" target="_blank" rel="noopener"><b>MSW Giełda API</b><span>Sprawdź status ↗</span></a><a href="/api/market/manifest" target="_blank" rel="noopener"><b>Manifest dla botów</b><span>Publiczne narzędzia ↗</span></a><a href="/api/status" target="_blank" rel="noopener"><b>Technical Core API</b><span>1000 specjalizacji ↗</span></a><a href="https://mobilny-serwis-warszawa.pl/wp-json/msw-discovery-analytics/v1/knowledge/status" target="_blank" rel="noopener"><b>Knowledge Harvester 100M</b><span>Status WordPress ↗</span></a><a href="https://mobilny-serwis-warszawa.pl/msw-ai-discovery-360/" target="_blank" rel="noopener"><b>Portal Discovery 360</b><span>Otwórz ↗</span></a></div><p class="panel-note">Zewnętrzne modele wymagają autoryzacji i aktywnego adaptera. Ich nazwy nie oznaczają automatycznej łączności.</p></section>
+</div>
+<footer class="footer"><span>© MSW AI • Technologia, wiedza, praktyka • Dane i testy identyfikowalne</span><div><a href="https://mobilny-serwis-warszawa.pl/" target="_blank" rel="noopener">Mobilny Serwis Warszawa</a><a href="/api/market/manifest" target="_blank" rel="noopener">API dla botów</a><a href="#home">↑ Na górę</a></div></footer>
+</main></div></div>
+<div id="toast" role="status" aria-live="polite"></div>
+</body></html>
