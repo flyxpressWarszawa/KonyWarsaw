@@ -1,0 +1,30 @@
+name: MSW AI independent portal checks
+on:
+  push:
+    paths:
+      - 'msw-ai-centrum-robotow/app/platform_core.py'
+      - 'msw-ai-centrum-robotow/app/platform_main.py'
+      - 'msw-ai-centrum-robotow/app/static/portal.*'
+      - 'msw-ai-centrum-robotow/tests/test_platform_core.py'
+      - '.github/workflows/msw-ai-com-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  app-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Python dependencies
+        run: pip install -r msw-ai-centrum-robotow/requirements.txt httpx
+      - name: Verify Python syntax
+        run: python -m compileall -q msw-ai-centrum-robotow/app
+      - name: Run technical rule and benchmark tests
+        working-directory: msw-ai-centrum-robotow
+        run: python -m unittest discover -s tests -p 'test_platform_core.py' -v
+      - name: Verify JavaScript syntax
+        run: node --check msw-ai-centrum-robotow/app/static/portal.js
