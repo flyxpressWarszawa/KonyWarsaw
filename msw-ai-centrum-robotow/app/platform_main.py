@@ -192,8 +192,20 @@ def as_agent(x:TechAgent):
 @app.middleware("http")
 async def portal_root(request:Request,call_next):
     if PRIMARY and request.url.path=="/":
-        return FileResponse(ROOT/"static"/"portal.html",media_type="text/html",headers={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"})
-    return await call_next(request)
+        response=FileResponse(ROOT/"static"/"portal.html",media_type="text/html")
+    else:
+        response=await call_next(request)
+    if request.url.path.startswith(("/api/portal/","/platform")) or (PRIMARY and request.url.path=="/"):
+        response.headers["X-Content-Type-Options"]="nosniff"
+        response.headers["X-Frame-Options"]="DENY"
+        response.headers["Referrer-Policy"]="strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"]="camera=(), microphone=(), geolocation=()"
+        response.headers["Content-Security-Policy"]="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        if request.url.path.startswith("/api/portal/") or request.url.path=="/":
+            response.headers["Cache-Control"]="no-store"
+        if request.url.scheme=="https":
+            response.headers["Strict-Transport-Security"]="max-age=31536000"
+    return response
 @app.get("/platform/")
 @app.get("/platform")
 def portal_index():return FileResponse(ROOT/"static"/"portal.html",media_type="text/html",headers={"Cache-Control":"no-store"})
