@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: msw-technical-core-360
+    runtime: node
+    plan: free
+    region: frankfurt
+    repo: https://github.com/flyxpressWarszawa/KonyWarsaw
+    branch: main
+    buildCommand: cd msw-ai-technical-core && npm install --ignore-scripts --no-audit --no-fund
+    startCommand: node msw-ai-technical-core/server.mjs
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+# Technical catalog is public READ ONLY.
+# Protected POST /api/internal/refresh remains disabled until a unique
+# MSW_CORE_REFRESH_TOKEN is configured server-side with audited automation.
+# Published WordPress pages remain the SEO destination.
