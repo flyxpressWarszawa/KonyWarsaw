@@ -50,7 +50,7 @@ const noSecrets=()=>!process.env.MSW_CORE_REFRESH_TOKEN;
 const constantTimeEqual=(a,b)=>{if(!a||!b)return false;const x=createHash('sha256').update(a).digest(),y=createHash('sha256').update(b).digest();return timingSafeEqual(x,y)};
 const secureRefresh=req=>!noSecrets()&&constantTimeEqual(req.headers['x-msw-core-key']||'',process.env.MSW_CORE_REFRESH_TOKEN);
 function search(arr,p){let result=arr;const group=(p.get('group')||'').toUpperCase();const q=(p.get('q')||'').toLocaleLowerCase('pl-PL').slice(0,100);if(group)result=result.filter(x=>x.group===group);if(q)result=result.filter(x=>`${x.title||x.name||''} ${x.topic||''} ${x.family||''} ${x.standards||''}`.toLocaleLowerCase('pl-PL').includes(q));const page=Math.max(1,Math.min(100,Number(p.get('page'))||1)),size=Math.max(1,Math.min(50,Number(p.get('per_page'))||20));return {items:result.slice((page-1)*size,page*size),total:result.length,page,per_page:size,pages:Math.ceil(result.length/size)};}
-const json=(res,status,data)=>{const text=JSON.stringify(data);res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','access-control-allow-origin':'*','x-content-type-options':'nosniff'});res.end(text)};
+const json=(res,status,data)=>{const text=JSON.stringify(data);res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','access-control-allow-origin':'*','x-content-type-options':'nosniff','x-robots-tag':'noindex, follow'});res.end(text)};
 const timeout=ms=>AbortSignal.timeout(ms);
 async function scanResearch(){
  if(cache.refreshing)return {...research,busy:true};
@@ -87,7 +87,7 @@ function detail(item){const t=tracks.find(x=>x.slug===item.track);const lab=item
 const bell={simulation:'analytic_Bell_state_H_then_CNOT',qubits:2,probabilities:{'00':0.5,'01':0,'10':0,'11':0.5},remote_qpu_executed:false,hardware:'NONE',method:'unitary statevector analytic educational demonstration'};
 const links={wordpress:'https://mobilny-serwis-warszawa.pl/msw-technical-university/',technical:'https://mobilny-serwis-warszawa.pl/centrum-technicznych-ai/',legacy_render:'https://msw-ai-centrum-robotow.onrender.com/'};
 function page(){return fs.readFileSync(path.join(DIR,'index.html'),'utf8')}
-function serveStatic(res,file,type){res.writeHead(200,{'content-type':type,'cache-control':'public, max-age=300','x-content-type-options':'nosniff'});res.end(fs.readFileSync(path.join(DIR,file)))}
+function serveStatic(res,file,type){res.writeHead(200,{'content-type':type,'cache-control':'public, max-age=300','x-content-type-options':'nosniff','x-robots-tag':'noindex, follow'});res.end(fs.readFileSync(path.join(DIR,file)))}
 const server=http.createServer(async(req,res)=>{
  const url=new URL(req.url||'/', 'http://local');const p=url.pathname;
  if(req.method==='OPTIONS'){res.writeHead(204,{'access-control-allow-origin':'*','access-control-allow-methods':'GET, POST, OPTIONS','access-control-allow-headers':'Content-Type, X-MSW-Core-Key'});return res.end()}
