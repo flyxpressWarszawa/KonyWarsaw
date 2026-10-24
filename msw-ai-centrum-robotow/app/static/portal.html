@@ -14,6 +14,7 @@
 <a href="#gielda">◫ <span>Giełda technologii</span></a>
 <a href="#boty">♙ <span>Roboty klientów</span></a>
 <a href="#studio">⚙ <span>Stwórz własnego bota</span></a>
+<a href="#narzedzia">▦ <span>300 dziedzin / 500 narzędzi</span></a>
 <a href="#arena">♜ <span>Arena testów</span></a>
 <a href="#analityka">⌁ <span>Wykresy i analityka</span></a>
 <a href="#zamowienia">▤ <span>Zamów robota od MSW</span></a>
@@ -55,6 +56,12 @@
 <section class="section" id="gielda"><div class="section-heading"><div><span>TECHNICAL EXCHANGE</span><h2>Giełda robotów technologicznych</h2><p>Katalog rozwiązań udostępnionych przez zweryfikowanych autorów. Na starcie oferty są bezpłatne; brak fikcyjnych kursów i wolumenów.</p></div><b id="market-count">—</b></div>
 <div class="toolbar"><input id="market-search" placeholder="Szukaj robota lub technologii…" aria-label="Szukaj robota"/><select id="market-domain"><option value="">Wszystkie specjalizacje</option></select><button class="outline" id="market-refresh">Odśwież</button></div>
 <div class="cards" id="market-cards"><p class="empty">Ładowanie katalogu…</p></div>
+</section>
+<section class="section" id="narzedzia"><div class="section-heading"><div><span>MSW TECHNICAL TOOL EXCHANGE</span><h2>300 dziedzin · 500 rzeczywistych narzędzi technicznych</h2><p>Przeszukuj katalog dziedzin i uruchamiaj dostępne kalkulatory i walidatory. Źródłem jest osobny serwer MSW Technical Exchange; wyniki nie są symulowanym kursem giełdowym.</p></div><b id="technical-count">—</b></div>
+<div class="toolbar"><input id="technical-query" placeholder="Szukaj operacji: moc, napięcie, przepływ, silnik…" maxlength="100" aria-label="Szukaj narzędzia"/><select id="technical-group"><option value="">Wszystkie dziedziny</option><option value="DOMY">Domy i Smart Home</option><option value="POJAZDY">Pojazdy / EV</option><option value="MASZYNY">Maszyny i PLC</option><option value="IT_AI">Elektronika, IT i AI</option></select><button id="technical-refresh" class="outline">Odśwież</button></div>
+<div id="technical-status" class="panel-note">Łączenie z silnikiem obliczeniowym…</div>
+<div class="tools-layout"><div><div id="technical-list" class="tool-list"><p class="empty">Ładowanie narzędzi…</p></div><div class="paginate"><button id="technical-prev" class="outline">← Poprzednia</button><span id="technical-pages">—</span><button id="technical-next" class="outline">Następna →</button></div></div>
+<div class="run-console"><h3>◈ Uruchom obliczenie</h3><div id="technical-selected">Wybierz narzędzie z katalogu.</div><form id="technical-form"><div id="technical-inputs" class="technical-fields"></div><button class="primary" type="submit">Oblicz na serwerze ↗</button></form><pre id="technical-result">Wynik będzie zawierał wartość, jednostkę i informację o źródle.</pre></div></div>
 </section>
 <section class="section" id="studio"><div class="section-heading"><div><span>ROBOT STUDIO</span><h2>Stwórz własnego technologicznego bota</h2><p>Bezpłatny silnik regułowy działa bez płatnego API. Prawdziwy model językowy wymaga klucza dostawcy i zgody na wykorzystanie API.</p></div></div>
 <div class="builder">
