@@ -358,3 +358,6 @@ def metrics(db:Session=Depends(db_session)):
     tested=db.scalar(select(func.count()).select_from(ArenaRecord)) or 0
     return {"runs":count,"benchmarks":tested,"source":"real_persisted_database_events","bots_active_in_background":0,
             "comparison_kind":"task_accuracy_not_trading_price","model_weights_trained":False}
+
+# Mount the safe, fixed-origin 300-domain / 500-operation technical microservice.
+from . import platform_catalog  # noqa: E402,F401
