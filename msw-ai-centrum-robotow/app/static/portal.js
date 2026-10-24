@@ -145,3 +145,59 @@ function bind(){
 }
 async function init(){clock();setInterval(clock,1000);bind();await Promise.allSettled([getStatus(),getDomains(),getMetrics(),loadHistory(),getArena()]);await Promise.allSettled([getMe(),loadMarket()]);if(state.user)await Promise.allSettled([getMyBots(),getOrders()]);setInterval(()=>{if(document.visibilityState==="visible"){getMetrics();getStatus()}},45000)}
 document.addEventListener("DOMContentLoaded",init);
+
+
+const toolsState={page:1,pages:1,selected:null,items:[]};
+async function loadTechnical(){
+  const params=new URLSearchParams({page:String(toolsState.page),per_page:"12",q:$("technical-query").value.trim(),group:$("technical-group").value});
+  try{
+    const data=await api("/technical/operations?"+params);
+    toolsState.pages=Math.max(1,data.pages||1);toolsState.items=data.items||[];
+    $("technical-pages").textContent=fmt(data.total)+" operacji · strona "+data.page+"/"+toolsState.pages;
+    $("technical-list").innerHTML=toolsState.items.length?toolsState.items.map(item=>'<button class="tool-entry'+(item.id===toolsState.selected?.id?' active':'')+'" data-id="'+escapeHTML(item.id)+'"><span>'+escapeHTML(item.id)+'</span><b>'+escapeHTML(item.base_name||item.name)+'</b><small>'+escapeHTML(item.family||'')+'</small></button>').join(""):'<p class="empty">Nie znaleziono operacji dla tych filtrów.</p>';
+    $("technical-list").querySelectorAll("button[data-id]").forEach(btn=>btn.onclick=()=>{
+      const item=toolsState.items.find(row=>row.id===btn.dataset.id);
+      if(!item)return;
+      toolsState.selected=item;
+      $("technical-selected").textContent=item.id+" · "+item.base_name+" · "+item.family;
+      $("technical-inputs").innerHTML=(item.fields||[]).map((label,i)=>'<label>'+escapeHTML(label)+'<input type="number" step="any" required name="num-'+i+'" value="'+Number(item.defaults?.[i]||0)+'"></label>').join("");
+      $("technical-result").textContent="Wprowadź liczby i uruchom obliczenie. Wynik nie zastępuje pomiaru urządzenia.";
+      $("technical-list").querySelectorAll(".tool-entry").forEach(el=>el.classList.toggle("active",el.dataset.id===item.id));
+    });
+    $("technical-prev").disabled=toolsState.page<=1;$("technical-next").disabled=toolsState.page>=toolsState.pages;
+  }catch(error){
+    $("technical-list").innerHTML='<p class="empty">Silnik operacji niedostępny: '+escapeHTML(error.message)+'. Spróbuj ponownie.</p>';
+  }
+}
+async function techStatus(){
+  try{
+    const response=await api("/technical/status"),stats=response.data?.counts||{};
+    $("technical-count").textContent=fmt(stats.operations||0);
+    $("technical-status").textContent="Połączono z niezależnym MSW Technical Exchange • "+fmt(stats.domains||0)+" dziedzin • "+fmt(stats.operations||0)+" wywoływalnych narzędzi • "+fmt(stats.bot_profiles||0)+" profili (nie procesów LIVE)";
+  }catch(error){
+    $("technical-count").textContent="—";$("technical-status").textContent="Brak potwierdzenia połączenia z modułem 300/500: "+error.message;
+  }
+}
+async function techEvaluate(event){
+  event.preventDefault();
+  const item=toolsState.selected;
+  if(!item){notify("Najpierw wybierz narzędzie");return}
+  const fields=[...$("technical-inputs").querySelectorAll("input")];
+  if(fields.some(el=>!el.value.trim())){notify("Uzupełnij dane wejściowe");return}
+  const numbers=fields.map(el=>Number(el.value));const submit=$("technical-form").querySelector("button[type=submit]");submit.disabled=true;
+  try{
+    const result=await api("/technical/evaluate",json({id:item.id,values:numbers}));const value=result.result;
+    $("technical-result").textContent=value.ok?"WYNIK: "+fmt(value.value)+" "+value.unit+"\n"+(value.notice||""):"Błąd: "+(value.error||"Nie można wykonać obliczenia");
+  }catch(error){$("technical-result").textContent="Błąd połączenia: "+error.message}
+  finally{submit.disabled=false}
+}
+function techInit(){
+  $("technical-refresh").onclick=()=>{techStatus();loadTechnical()};
+  $("technical-prev").onclick=()=>{toolsState.page=Math.max(1,toolsState.page-1);loadTechnical()};
+  $("technical-next").onclick=()=>{toolsState.page=Math.min(toolsState.pages,toolsState.page+1);loadTechnical()};
+  $("technical-group").onchange=()=>{toolsState.page=1;loadTechnical()};
+  $("technical-query").oninput=debounce(()=>{toolsState.page=1;loadTechnical()},320);
+  $("technical-form").onsubmit=techEvaluate;
+  Promise.allSettled([techStatus(),loadTechnical()]);
+}
+document.addEventListener("DOMContentLoaded",techInit);
