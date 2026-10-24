@@ -225,7 +225,7 @@ def portal_status(db:Session=Depends(db_session)):
         orders=db.scalar(select(func.count()).select_from(BuildRequest)) or 0
     except Exception:
         result="unavailable";bots=customers=public=orders=0
-    return {"ok":result=="connected","database":result,"durable":DURABLE,"signup_ready":(DURABLE or ALLOW_DEV) and result=="connected",
+    return {"release":os.getenv("MSW_PORTAL_RELEASE","2026-10-25.1"),"ok":result=="connected","database":result,"durable":DURABLE,"signup_ready":(DURABLE or ALLOW_DEV) and result=="connected",
             "app":"msw-ai.com independent technical AI portal","wordpress":False,
             "bot_instances":bots,"customers":customers,"public_offers":public,"build_requests":orders,
             "ai_provider_connected":bool(os.getenv("OPENAI_API_KEY")) and os.getenv("MSW_ALLOW_PAID_INFERENCE")=="1",
