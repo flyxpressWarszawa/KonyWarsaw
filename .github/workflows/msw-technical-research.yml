@@ -1,0 +1,32 @@
+name: MSW Technical AI — public research collection
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '25 5 * * *'
+permissions:
+  contents: write
+jobs:
+  collect-public-sources:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Get MSW repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Collect public references only
+        run: python msw-technical-ai-core/research_collect.py
+      - name: Commit research queue only if changed
+        shell: bash
+        run: |
+          git config user.name 'msw-research-bot'
+          git config user.email 'msw-research-bot@users.noreply.github.com'
+          git add msw-technical-ai-core/data/research_candidates.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'MSW research: daily bibliographic candidates (unreviewed)'
+            git push
+          fi
