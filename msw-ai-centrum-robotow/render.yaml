@@ -1,0 +1,26 @@
+# Render Blueprint. Requires code to be pushed to a Git repository.
+# The DB is a separate Render Postgres resource, not a WordPress database.
+databases:
+  - name: msw-ai-roboty-db
+    databaseName: mswrobots
+    user: mswrobots
+    ipAllowList: []
+    region: frankfurt
+    plan: 0.1c-256mb
+services:
+  - type: web
+    name: msw-ai-centrum-robotow
+    runtime: docker
+    plan: 0.5c-512mb
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /msw-ai-centrum-robotow/api/v1/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: msw-ai-roboty-db
+          property: connectionString
+      - key: INGEST_SECRET
+        generateValue: true
+      - key: HIDE_API_DOCS
+        value: "1"
