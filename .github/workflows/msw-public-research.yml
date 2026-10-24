@@ -21,11 +21,14 @@ jobs:
         run: python -m unittest discover -s msw-research-engine/tests -v
       - name: Synchronize public OpenAlex, CISA and CIS metadata
         run: python msw-research-engine/sync.py
+      - name: Audit public MSW pages and internal links incrementally
+        continue-on-error: true
+        run: python msw-research-engine/site_audit.py
       - name: Commit public snapshot to separate directory
         run: |
           git config user.name 'msw-public-intelligence[bot]'
           git config user.email 'msw-public-intelligence@users.noreply.github.com'
-          git add msw-research-engine/data/latest.json
+          git add -A msw-research-engine/data
           if git diff --cached --quiet; then
             echo 'No public metadata changes'
             exit 0
