@@ -1,0 +1,14 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+process.env.PORT='18997';
+const m=await import('../server.mjs');
+const base='http://127.0.0.1:18997';
+const read=async p=>{const r=await fetch(base+p);return [r.status,await r.json()]};
+test('catalogue cardinalities and disabled physical controls',()=>{assert.equal(m.families.length,40);assert.equal(m.spec.length,1000);assert.equal(m.agents.length,1000);assert.equal(m.lessons.length,1200);assert.equal(m.labs.length,1600);assert.equal(m.agents.filter(x=>x.online||x.autonomous_device_control).length,0)});
+test('status contract is explicit on lack of QPU and training',async()=>{const [c,s]=await read('/api/status');assert.equal(c,200);assert.equal(s.hardware_qpu_connected,false);assert.equal(s.model_training,false);assert.equal(s.counts.labs,1600)});
+test('pagination bounded and filter',async()=>{const [c,d]=await read('/api/specializations?group=POJAZDY&per_page=500');assert.equal(c,200);assert.equal(d.items.length,50);assert(d.items.every(x=>x.group==='POJAZDY'))});
+test('lesson deep detail',async()=>{const [c,d]=await read('/api/curriculum/item?id=L-smart-home-01-01');assert.equal(c,200);assert(d.item.content.procedura.length===6);assert(d.source.startsWith('https:'))});
+test('Bell exact state and no hardware',async()=>{const [c,d]=await read('/api/quantum/bell');assert.equal(c,200);assert.equal(d.probabilities['00'],0.5);assert.equal(d.remote_qpu_executed,false)});
+test('unconfigured message route refuses to pretend delivery',async()=>{const r=await fetch(base+'/api/peer/message',{method:'POST'});assert.equal(r.status,503)});
+test('refresh route requires server secret',async()=>{const r=await fetch(base+'/api/internal/refresh',{method:'POST'});assert.equal(r.status,403)});
+test('unknown path responds 404',async()=>{const [c]=await read('/api/no-such-path');assert.equal(c,404)});
+test('cleanup',()=>{m.server.close()});
