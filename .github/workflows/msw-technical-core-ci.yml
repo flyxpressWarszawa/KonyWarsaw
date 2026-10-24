@@ -1,0 +1,24 @@
+name: MSW Technical Core - safety tests
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'msw-ai-technical-core/**'
+      - '.github/workflows/msw-technical-core-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test all read-only API and authorization contracts
+        working-directory: msw-ai-technical-core
+        run: npm test
