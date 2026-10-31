@@ -1,0 +1,35 @@
+name: MSW owned LLM live verification
+on:
+  push:
+    branches: [msw/local-llm-20261031]
+    paths: [.github/workflows/msw-llm-live-check.yml]
+permissions:
+  contents: read
+jobs:
+  verify_deployed_inference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Verify actual Render startup generation and deny anonymous generation
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, urllib.error
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self,*a,**kw): raise RuntimeError('redirect_denied')
+          opener=urllib.request.build_opener(NoRedirect())
+          base='https://msw-owned-llm.onrender.com'
+          with opener.open(base+'/v1/status',timeout=90) as r:
+            assert r.status==200 and 'application/json' in r.headers.get('Content-Type','')
+            raw=r.read(20001); assert len(raw)<=20000
+            d=json.loads(raw)
+          assert d['schema']=='msw.owned-llm.status.v1' and d['ready'] is True
+          assert d['weights']['sha256']=='2e8040ceae7815abe0dcb3540b9995eaa1fa0d2ca9e797d0a635ae4433c68c2d'
+          assert d['weights']['bytes']==105454432 and d['self_test']['tokens_generated']>0 and d['self_test']['text']
+          assert d['external_inference_API'] is False and d['weight_training'] is False
+          payload=json.dumps({'request_id':'live-denial-001','prompt':'This unsigned request must not run.'}).encode()
+          try:
+            opener.open(urllib.request.Request(base+'/v1/generate',data=payload,headers={'Content-Type':'application/json'}),timeout=20)
+            raise RuntimeError('unsigned_generation_was_allowed')
+          except urllib.error.HTTPError as e: assert e.code==401
+          print(json.dumps({'schema':'msw.owned-llm.live-check.v1','server':base,'status':d,'anonymous_denied':True,'new_authenticated_task_executed':False,'wordpress_pairing_verified':False},ensure_ascii=False))
+          PY
