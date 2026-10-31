@@ -6,7 +6,7 @@ const keys=(o,list)=>o!==null&&typeof o==='object'&&!Array.isArray(o)&&Object.ke
 export class Denied extends Error{constructor(code,status=400){super(code);this.code=code;this.status=status;}}
 export class Executor{
  constructor(nodeId,secret='',enabled=false){if(!/^[a-z0-9][a-z0-9_-]{2,63}$/.test(nodeId))throw Error('node_id');this.nodeId=nodeId;this.secret=secret;this.enabled=enabled;this.calls=[];}
- manifest(){return {schema:'msw.compute-node.v1',version:'0.1.0',node_id:this.nodeId,central_origin:'https://mobilny-serwis-warszawa.pl',execution_enabled:this.enabled&&this.secret.length>=32,operations:OPS,queue_owner:'existing_wordpress_compute_mesh',native_broker_adapter_verified:false,model_inference:false,durable_receipt:false,max_request_bytes:32768,max_calls_per_minute_per_process:6};}
+ manifest(){return {schema:'msw.compute-node.v1',version:'0.1.1',node_id:this.nodeId,central_origin:'https://mobilny-serwis-warszawa.pl',execution_enabled:this.enabled&&this.secret.length>=32,operations:OPS,queue_owner:'existing_wordpress_compute_mesh',native_broker_adapter_verified:false,model_inference:false,durable_receipt:false,max_request_bytes:32768,max_calls_per_minute_per_process:6};}
  authenticate(auth){if(!this.enabled||this.secret.length<32)throw new Denied('node_not_enabled',503);if(typeof auth!=='string'||auth.length>512||!timingSafeEqual(Buffer.from(sha('Bearer '+this.secret),'hex'),Buffer.from(sha(auth),'hex')))throw new Denied('unauthorized',401);}
  execute(raw,auth){
   this.authenticate(auth);if(!Buffer.isBuffer(raw)||raw.length>32768)throw new Denied('request_too_large',413);
@@ -21,7 +21,7 @@ export class Executor{
    const v=a.values,sum=v.reduce((s,x)=>s+x,0);result={count:v.length,sum,min:Math.min(...v),max:Math.max(...v),mean:sum/v.length};
   }else if(d.operation==='text.metrics'){
    if(!keys(a,['text'])||typeof a.text!=='string')throw new Denied('text_schema');
-   if(!a.text.isWellFormed())throw new Denied('text_utf8');const size=Buffer.byteLength(a.text);
+   if(Buffer.from(a.text,'utf8').toString('utf8')!==a.text)throw new Denied('text_utf8');const size=Buffer.byteLength(a.text);
    if(size>16384)throw new Denied('text_size',413);
    result={utf8_bytes:size,codepoints:[...a.text].length,whitespace_tokens:a.text.trim()?a.text.trim().split(/\s+/u).length:0};
   }else if(d.operation==='node.probe'){
