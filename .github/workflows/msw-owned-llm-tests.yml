@@ -22,8 +22,10 @@ jobs:
           git fetch --depth=1 origin "$EXPECTED_SHA"
           git checkout --detach FETCH_HEAD
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
-      - name: Independent constrained source parser tests
-        run: python3 msw-owned-llm/test_codeforge.py
+      - name: Independent source and advisory regression tests
+        run: |
+          python3 msw-owned-llm/test_codeforge.py
+          python3 msw-owned-llm/test_advisory.py
       - name: Build image; verify runtime and weight digests
         run: docker build --progress=plain -t msw-owned-llm msw-owned-llm
       - name: Real model generation and code candidate under constrained resources
@@ -43,7 +45,7 @@ jobs:
             except (urllib.error.URLError,TimeoutError,ConnectionResetError):pass
             time.sleep(2)
           else:raise RuntimeError('model_or_source_not_ready')
-          assert d['version']=='0.2.0'
+          assert d['version']=='0.2.1' and d['advisory_prompt_normalization'] is True
           assert d['weights']['sha256']=='2e8040ceae7815abe0dcb3540b9995eaa1fa0d2ca9e797d0a635ae4433c68c2d'
           assert d['ready'] and d['self_test']['text'] and d['self_test']['tokens_generated']>0
           proof=d['code_self_test'];assert 'error' not in proof
@@ -59,6 +61,7 @@ jobs:
           except urllib.error.HTTPError as e:assert e.code==401
           print(json.dumps({'schema':'msw.real-weight-code.acceptance.v1','status':d,'independent_code_tests':verdict,'anonymous_denied':True,'resource_limit':'512MiB,0.1CPU,no-swap','environment':'GitHub Actions Docker, not Render or WordPress'},ensure_ascii=False))
           PY
+          docker exec -i msw-owned-test python3 - < msw-owned-llm/test_advisory_live.py
           docker stats --no-stream --format '{{json .}}' msw-owned-test
           docker inspect --format '{{.State.OOMKilled}}' msw-owned-test | grep '^false$'
       - name: Final logs and stop only the test instance
