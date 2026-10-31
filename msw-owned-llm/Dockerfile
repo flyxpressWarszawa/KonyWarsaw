@@ -7,7 +7,7 @@ RUN curl -fL --max-time 180 -o /tmp/llama.tgz https://github.com/ggml-org/llama.
  && mkdir llama && tar -xzf /tmp/llama.tgz --strip-components=1 -C llama && rm /tmp/llama.tgz
 RUN curl -fL --max-time 240 -o model.gguf https://huggingface.co/bartowski/SmolLM2-135M-Instruct-GGUF/resolve/09816acd5d99df7be770d85ea30822623dab342c/SmolLM2-135M-Instruct-Q4_K_M.gguf \
  && echo '2e8040ceae7815abe0dcb3540b9995eaa1fa0d2ca9e797d0a635ae4433c68c2d  model.gguf' | sha256sum -c -
-COPY gateway.py codeforge.py autonomy.py ./
+COPY gateway.py codeforge.py autonomy.py advisory.py ./
 RUN groupadd -g 10001 msw && useradd -u 10001 -g msw -M msw && chmod -R a-w /opt/msw
 USER 10001:10001
 EXPOSE 10000
