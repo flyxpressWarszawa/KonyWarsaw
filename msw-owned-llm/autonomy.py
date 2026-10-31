@@ -1,11 +1,11 @@
-"""Extend the existing signed inference gateway; no new listener or owner key.
-Only exact reserved prompts generate constrained source. WordPress owns any
-admission, persistence, versioning and application of the priority function.
+"""Extend signed inference without changing authentication or business permissions.
+WordPress owns admission, persistence and application of priority candidates.
 """
 import json
 import time
 import gateway
 import codeforge
+import advisory
 
 BaseRuntime = gateway.ModelRuntime
 
@@ -29,6 +29,17 @@ class AutonomousRuntime(BaseRuntime):
         except Exception:
             self.code_proof = {'error':'candidate_generation_failed','synthetic_test':True}
             print(json.dumps({'event':'code_candidate_self_test_failed'}), flush=True)
+
+    def _generate(self, prompt, maximum=64):
+        if not prompt.startswith(advisory.PREFIX):
+            return super()._generate(prompt, maximum)
+        try:
+            result = advisory.generate(self, prompt)
+        except ValueError:
+            raise gateway.Fault('advisory_quality_rejected', 502) from None
+        result.update({'runtime':'llama.cpp-b11979-local-cpu','model':gateway.MODEL,
+            'weight_sha256':gateway.MODEL_SHA,'training_performed':False,'actions_executed':False})
+        return result
 
     def generate(self, prompt):
         if not prompt.startswith(codeforge.PREFIX):
@@ -59,9 +70,11 @@ class AutonomousRuntime(BaseRuntime):
 
     def status(self):
         d = super().status()
-        d.update({'version':'0.2.0','code_candidate_generation':True,
+        d.update({'version':'0.2.1','code_candidate_generation':True,
             'code_domain':'one_constrained_priority_function',
-            'code_self_test':self.code_proof,'server_source_auto_overwrite':False})
+            'code_self_test':self.code_proof,'server_source_auto_overwrite':False,
+            'advisory_prompt_normalization':True,
+            'advisory_quality_gate':'echo_incomplete_and_mutating_advice_rejected; not factual validation'})
         return d
 
 if __name__ == '__main__':
