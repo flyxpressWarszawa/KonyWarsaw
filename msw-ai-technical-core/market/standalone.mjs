@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createMarketHandler} from './server.mjs';
+import {createHandler} from '../../msw-compute-node-adapters/compute-node.mjs';
 
 const HERE=path.dirname(fileURLToPath(import.meta.url));
 const families=JSON.parse(fs.readFileSync(path.join(HERE,'../data/families.json'),'utf8'));
@@ -39,11 +40,12 @@ async function scanPublicReleases(){
  }finally{scanning=false}
 }
 const market=createMarketHandler({families,research,audit});
+const compute=createHandler('msw-ai-gielda-technologii');
 const server=http.createServer(async(req,res)=>{
  const url=new URL(req.url||'/', 'http://127.0.0.1');const p=url.pathname;
  if(req.method==='GET'&&p==='/'){res.writeHead(302,{Location:'/gielda-technologii-ai/','cache-control':'no-store'});res.end();return}
  if(req.method==='GET'&&p==='/health'){res.writeHead(200,{'content-type':'application/json; charset=utf-8'});res.end(JSON.stringify({ok:true,service:'MSW AI Giełda Technologii',version:'1.0.0',research_checked_at:research.checkedAt,external_agent_processes:0,source_sync:'in_memory_allowlisted'}));return}
- try{if(await market(req,res,url))return;res.writeHead(404,{'content-type':'application/json'});res.end(JSON.stringify({error:'not_found'}));}
+ try{if(await compute(req,res,url))return;if(await market(req,res,url))return;res.writeHead(404,{'content-type':'application/json'});res.end(JSON.stringify({error:'not_found'}));}
  catch(e){console.error('Portal server error:',String(e?.message||e).slice(0,120));if(!res.headersSent){res.writeHead(500,{'content-type':'application/json'});res.end('{"error":"server_error"}')}else res.end()}
 });
 const port=Number(process.env.PORT||10000);
