@@ -74,7 +74,10 @@ class AutonomousRuntime(BaseRuntime):
             'code_domain':'one_constrained_priority_function',
             'code_self_test':self.code_proof,'server_source_auto_overwrite':False,
             'advisory_prompt_normalization':True,
-            'advisory_quality_gate':'echo_incomplete_and_mutating_advice_rejected; not factual validation'})
+            'advisory_mode':'model_selects_one_of_four_read_only_checks_not_freeform_business_planning',
+            'advisory_catalog':advisory.CATALOG,
+            'advisory_catalog_origin':'human_authored_not_model_generated',
+            'advisory_quality_gate':'exact_catalog_schema; selection_optimality_not_verified'})
         return d
 
 if __name__ == '__main__':
