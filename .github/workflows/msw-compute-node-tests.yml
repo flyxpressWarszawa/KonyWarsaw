@@ -1,0 +1,48 @@
+name: MSW compute node acceptance
+on:
+  push:
+    branches:
+      - msw/compute-node-adapters-20261031
+    paths:
+      - msw-compute-node-adapters/**
+      - msw-ai-technical-core/market/**
+      - .github/workflows/msw-compute-node-tests.yml
+  workflow_dispatch:
+    inputs:
+      verify_render:
+        description: Run one public readiness check after a deliberate Render deploy
+        type: boolean
+        required: false
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: msw-compute-acceptance-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out the exact public repository commit without stored credentials
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          git init .
+          git remote add origin https://github.com/flyxpressWarszawa/KonyWarsaw.git
+          git fetch --depth=1 origin "$EXPECTED_SHA"
+          git checkout --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Syntax and unit contracts
+        run: |
+          node --version
+          node --check msw-ai-technical-core/market/standalone.mjs
+          node --check msw-compute-node-adapters/compute-node.mjs
+          node --test msw-compute-node-adapters/test-compute-node.mjs
+      - name: Existing application routes and disabled-by-default transport
+        run: node msw-compute-node-adapters/integration-smoke.mjs disabled
+      - name: Synthetic authenticated local task in the actual app
+        run: node msw-compute-node-adapters/integration-smoke.mjs enabled
+      - name: One-shot public Render check, no secrets and no task execution
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.verify_render }}
+        run: node msw-compute-node-adapters/check-render-public.mjs
