@@ -44,5 +44,5 @@ jobs:
       - name: Synthetic authenticated local task in the actual app
         run: node msw-compute-node-adapters/integration-smoke.mjs enabled
       - name: One-shot public Render check, no secrets and no task execution
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.verify_render }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.verify_render) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[verify-render]')) }}
         run: node msw-compute-node-adapters/check-render-public.mjs
