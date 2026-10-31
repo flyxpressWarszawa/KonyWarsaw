@@ -1,0 +1,26 @@
+name: MSW LLM source identity
+on:
+  push:
+    branches: [msw/local-llm-20261031]
+    paths: [.github/workflows/msw-llm-source-check.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Read exact public quantized model identity
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request
+          url='https://huggingface.co/api/models/bartowski/SmolLM2-135M-Instruct-GGUF?blobs=true'
+          with urllib.request.urlopen(url,timeout=45) as r: d=json.load(r)
+          f=next(x for x in d['siblings'] if x['rfilename']=='SmolLM2-135M-Instruct-Q4_K_M.gguf')
+          print(json.dumps({'schema':'msw.model.source.v1','repo':d['id'],'revision':d['sha'],'file':f,'license':d.get('cardData',{}).get('license')},sort_keys=True))
+          PY
+      - name: Verify official CPU executable download and inspect archive
+        run: |
+          curl --fail --location --max-time 90 -o /tmp/llama.tgz https://github.com/ggml-org/llama.cpp/releases/download/b11979/llama-b11979-bin-ubuntu-x64.tar.gz
+          echo '437879071395165dafd08bbd70f9eb9b0353698b5278d09504a2a97b46e81130  /tmp/llama.tgz' | sha256sum -c -
+          tar -tzf /tmp/llama.tgz | head -35
