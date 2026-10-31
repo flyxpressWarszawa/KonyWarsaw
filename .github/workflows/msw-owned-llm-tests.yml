@@ -1,0 +1,58 @@
+name: MSW owned LLM acceptance
+on:
+  push:
+    branches: [msw/local-llm-20261031]
+    paths: [msw-owned-llm/**, .github/workflows/msw-owned-llm-tests.yml]
+permissions:
+  contents: read
+concurrency:
+  group: msw-owned-llm-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  real_inference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Exact public source checkout
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          git init .
+          git remote add origin https://github.com/flyxpressWarszawa/KonyWarsaw.git
+          git fetch --depth=1 origin "$EXPECTED_SHA"
+          git checkout --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Build image; verify runtime and weight digests
+        run: docker build --progress=plain -t msw-owned-llm msw-owned-llm
+      - name: Real model load and generated tokens, constrained resources
+        run: |
+          docker run -d --name msw-owned-test --memory=512m --memory-swap=512m --cpus=0.1 -p 127.0.0.1:18080:10000 msw-owned-llm
+          python3 - <<'PY'
+          import json,time,urllib.request,urllib.error
+          base='http://127.0.0.1:18080'
+          deadline=time.time()+300
+          while time.time()<deadline:
+            try:
+              with urllib.request.urlopen(base+'/v1/status',timeout=3) as r:d=json.load(r)
+              if d.get('failure'):raise RuntimeError(d['failure'])
+              if d.get('ready'):break
+            except (urllib.error.URLError,TimeoutError,ConnectionResetError):pass
+            time.sleep(2)
+          else:raise RuntimeError('model_not_ready')
+          assert d['weights']['sha256']=='2e8040ceae7815abe0dcb3540b9995eaa1fa0d2ca9e797d0a635ae4433c68c2d'
+          assert d['ready'] and d['self_test']['text'] and d['self_test']['tokens_generated']>0
+          assert d['external_inference_API'] is False and d['weight_training'] is False
+          payload=json.dumps({'request_id':'unsigned-test-001','prompt':'Describe a repair report.'}).encode()
+          try:
+            urllib.request.urlopen(urllib.request.Request(base+'/v1/generate',data=payload,headers={'Content-Type':'application/json'}),timeout=5)
+            raise RuntimeError('anonymous_generation_allowed')
+          except urllib.error.HTTPError as e:assert e.code==401
+          print(json.dumps({'schema':'msw.real-weight.acceptance.v1','status':d,'anonymous_denied':True,'resource_limit':'512MiB,0.1CPU,no-swap','environment':'GitHub Actions Docker, not Render or WordPress'},ensure_ascii=False))
+          PY
+          docker stats --no-stream --format '{{json .}}' msw-owned-test
+          docker inspect --format '{{.State.OOMKilled}}' msw-owned-test | grep '^false$'
+      - name: Final logs and stop only the test instance
+        if: always()
+        run: |
+          docker logs msw-owned-test 2>&1 | tail -20 || true
+          docker rm -f msw-owned-test || true
