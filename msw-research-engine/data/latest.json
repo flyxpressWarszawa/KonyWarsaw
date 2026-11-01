@@ -7269,12 +7269,12 @@
     "publishing_unreviewed_articles": false,
     "training_models": false
   },
-  "retrieved_utc": "2026-10-31T10:24:59.179537+00:00",
+  "retrieved_utc": "2026-11-01T11:18:30.375279+00:00",
   "schema": "msw-public-research/v1",
   "source_sha256": {
     "cis_feed_digest": "29bbc41f4c518eb2f63421bb36b3257490d35ac613604b1cfc4e8b295852ebb4",
     "cisa_body_digest": "3aa9cf3c01f116362a29d111702979175453c425e3733bde80fc4f6f8e2294e5",
-    "openalex_pages_digest": "d2e78d6bd51dd0b479a33bee573695a805fc17f7191d5e5edf658c90063b37f2"
+    "openalex_pages_digest": "e2528717a320c0ccc152ca3257ba01782cdf4b51f89115ba6496a126690b5896"
   },
   "topics": [
     {
@@ -7441,16 +7441,16 @@
     {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
-      "id": "T10595",
-      "name": "Medieval Literature and History",
-      "subfield": "Classics"
+      "id": "T14475",
+      "name": "History of Science and Medicine",
+      "subfield": "History and Philosophy of Science"
     },
     {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
-      "id": "T14475",
-      "name": "History of Science and Medicine",
-      "subfield": "History and Philosophy of Science"
+      "id": "T10595",
+      "name": "Medieval Literature and History",
+      "subfield": "Classics"
     },
     {
       "domain": "Social Sciences",
@@ -7509,18 +7509,18 @@
       "subfield": "Literature and Literary Theory"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T10034",
-      "name": "Syntax, Semantics, Linguistic Variation",
-      "subfield": "Language and Linguistics"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10252",
       "name": "Microbial Natural Products and Biosynthesis",
       "subfield": "Pharmacology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T10034",
+      "name": "Syntax, Semantics, Linguistic Variation",
+      "subfield": "Language and Linguistics"
     },
     {
       "domain": "Social Sciences",
@@ -7635,13 +7635,6 @@
       "subfield": "Religious studies"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T10055",
-      "name": "Diverse Aspects of Tourism Research",
-      "subfield": "Sociology and Political Science"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Environmental Science",
       "id": "T10332",
@@ -7651,8 +7644,8 @@
     {
       "domain": "Social Sciences",
       "field": "Social Sciences",
-      "id": "T13376",
-      "name": "Criminal Law and Policy",
+      "id": "T10055",
+      "name": "Diverse Aspects of Tourism Research",
       "subfield": "Sociology and Political Science"
     },
     {
@@ -7661,6 +7654,13 @@
       "id": "T12454",
       "name": "European Political History Analysis",
       "subfield": "History"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T13376",
+      "name": "Criminal Law and Policy",
+      "subfield": "Sociology and Political Science"
     },
     {
       "domain": "Social Sciences",
@@ -7796,18 +7796,18 @@
       "subfield": "Cell Biology"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10038",
-      "name": "Tuberculosis Research and Epidemiology",
-      "subfield": "Infectious Diseases"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Social Sciences",
       "id": "T13296",
       "name": "Physical Education and Sports Studies",
       "subfield": "Sociology and Political Science"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10038",
+      "name": "Tuberculosis Research and Epidemiology",
+      "subfield": "Infectious Diseases"
     },
     {
       "domain": "Physical Sciences",
@@ -7846,17 +7846,17 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Earth and Planetary Sciences",
-      "id": "T10017",
-      "name": "Geology and Paleoclimatology Research",
-      "subfield": "Atmospheric Science"
-    },
-    {
-      "domain": "Physical Sciences",
       "field": "Environmental Science",
       "id": "T11791",
       "name": "Microbial Community Ecology and Physiology",
       "subfield": "Ecology"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Earth and Planetary Sciences",
+      "id": "T10017",
+      "name": "Geology and Paleoclimatology Research",
+      "subfield": "Atmospheric Science"
     },
     {
       "domain": "Social Sciences",
@@ -7864,6 +7864,20 @@
       "id": "T14185",
       "name": "Research, Science, and Academia",
       "subfield": "Information Systems and Management"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Earth and Planetary Sciences",
+      "id": "T10255",
+      "name": "Oceanographic and Atmospheric Processes",
+      "subfield": "Oceanography"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T12678",
+      "name": "Themes in Literature Analysis",
+      "subfield": "Literature and Literary Theory"
     },
     {
       "domain": "Social Sciences",
@@ -7881,38 +7895,10 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Earth and Planetary Sciences",
-      "id": "T10255",
-      "name": "Oceanographic and Atmospheric Processes",
-      "subfield": "Oceanography"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T12678",
-      "name": "Themes in Literature Analysis",
-      "subfield": "Literature and Literary Theory"
-    },
-    {
-      "domain": "Physical Sciences",
       "field": "Mathematics",
       "id": "T12522",
       "name": "Mathematics Education and Pedagogy",
       "subfield": "Applied Mathematics"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T13766",
-      "name": "Media, Journalism, and Communication History",
-      "subfield": "History"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T10130",
-      "name": "Mathematics Education and Teaching Techniques",
-      "subfield": "Education"
     },
     {
       "domain": "Physical Sciences",
@@ -7920,6 +7906,13 @@
       "id": "T13443",
       "name": "Mineralogy and Gemology Studies",
       "subfield": "Geochemistry and Petrology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T13766",
+      "name": "Media, Journalism, and Communication History",
+      "subfield": "History"
     },
     {
       "domain": "Social Sciences",
@@ -7937,10 +7930,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Business, Management and Accounting",
-      "id": "T13355",
-      "name": "Marketing and Advertising Strategies",
-      "subfield": "Marketing"
+      "field": "Social Sciences",
+      "id": "T10130",
+      "name": "Mathematics Education and Teaching Techniques",
+      "subfield": "Education"
     },
     {
       "domain": "Physical Sciences",
@@ -7962,6 +7955,13 @@
       "id": "T10628",
       "name": "China's Socioeconomic Reforms and Governance",
       "subfield": "Political Science and International Relations"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Business, Management and Accounting",
+      "id": "T13355",
+      "name": "Marketing and Advertising Strategies",
+      "subfield": "Marketing"
     },
     {
       "domain": "Social Sciences",
@@ -8069,18 +8069,18 @@
       "subfield": "Economics and Econometrics"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T11657",
-      "name": "Digital and Traditional Archives Management",
-      "subfield": "Conservation"
-    },
-    {
       "domain": "Life Sciences",
       "field": "Biochemistry, Genetics and Molecular Biology",
       "id": "T14049",
       "name": "Plant and Fungal Species Descriptions",
       "subfield": "Molecular Biology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T11657",
+      "name": "Digital and Traditional Archives Management",
+      "subfield": "Conservation"
     },
     {
       "domain": "Social Sciences",
@@ -8104,18 +8104,18 @@
       "subfield": "Accounting"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Business, Management and Accounting",
-      "id": "T10058",
-      "name": "Entrepreneurship Studies and Influences",
-      "subfield": "Management of Technology and Innovation"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Environmental Science",
       "id": "T11004",
       "name": "Crustacean biology and ecology",
       "subfield": "Ecology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Business, Management and Accounting",
+      "id": "T10058",
+      "name": "Entrepreneurship Studies and Influences",
+      "subfield": "Management of Technology and Innovation"
     },
     {
       "domain": "Social Sciences",
@@ -8132,18 +8132,18 @@
       "subfield": "Human Factors and Ergonomics"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Dentistry",
-      "id": "T10113",
-      "name": "Dental materials and restorations",
-      "subfield": "Orthodontics"
-    },
-    {
       "domain": "Life Sciences",
       "field": "Agricultural and Biological Sciences",
       "id": "T12045",
       "name": "Rice Cultivation and Yield Improvement",
       "subfield": "Plant Science"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Dentistry",
+      "id": "T10113",
+      "name": "Dental materials and restorations",
+      "subfield": "Orthodontics"
     },
     {
       "domain": "Social Sciences",
@@ -8160,11 +8160,11 @@
       "subfield": "Physiology"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Business, Management and Accounting",
-      "id": "T10415",
-      "name": "International Business and FDI",
-      "subfield": "Strategy and Management"
+      "domain": "Physical Sciences",
+      "field": "Earth and Planetary Sciences",
+      "id": "T10466",
+      "name": "Meteorological Phenomena and Simulations",
+      "subfield": "Atmospheric Science"
     },
     {
       "domain": "Health Sciences",
@@ -8174,11 +8174,11 @@
       "subfield": "Cardiology and Cardiovascular Medicine"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Earth and Planetary Sciences",
-      "id": "T10466",
-      "name": "Meteorological Phenomena and Simulations",
-      "subfield": "Atmospheric Science"
+      "domain": "Social Sciences",
+      "field": "Business, Management and Accounting",
+      "id": "T10415",
+      "name": "International Business and FDI",
+      "subfield": "Strategy and Management"
     },
     {
       "domain": "Physical Sciences",
@@ -8216,18 +8216,18 @@
       "subfield": "Philosophy"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T13031",
-      "name": "Civil and Structural Engineering Research",
-      "subfield": "Civil and Structural Engineering"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T13068",
       "name": "Ancient Mediterranean Archaeology and History",
       "subfield": "Archeology"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T13031",
+      "name": "Civil and Structural Engineering Research",
+      "subfield": "Civil and Structural Engineering"
     },
     {
       "domain": "Physical Sciences",
@@ -8245,13 +8245,6 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Psychology",
-      "id": "T10103",
-      "name": "Reading and Literacy Development",
-      "subfield": "Developmental and Educational Psychology"
-    },
-    {
-      "domain": "Social Sciences",
       "field": "Social Sciences",
       "id": "T10216",
       "name": "Migration, Refugees, and Integration",
@@ -8263,6 +8256,13 @@
       "id": "T12455",
       "name": "Mediterranean and Iberian flora and fauna",
       "subfield": "Plant Science"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Psychology",
+      "id": "T10103",
+      "name": "Reading and Literacy Development",
+      "subfield": "Developmental and Educational Psychology"
     },
     {
       "domain": "Social Sciences",
@@ -8286,18 +8286,18 @@
       "subfield": "Psychiatry and Mental health"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Health Professions",
-      "id": "T13315",
-      "name": "Occupational Health and Safety in Workplaces",
-      "subfield": "Occupational Therapy"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Environmental Science",
       "id": "T10029",
       "name": "Climate variability and models",
       "subfield": "Global and Planetary Change"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Health Professions",
+      "id": "T13315",
+      "name": "Occupational Health and Safety in Workplaces",
+      "subfield": "Occupational Therapy"
     },
     {
       "domain": "Social Sciences",
@@ -8314,18 +8314,18 @@
       "subfield": "Law"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10082",
-      "name": "HIV/AIDS Research and Interventions",
-      "subfield": "Infectious Diseases"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T14388",
       "name": "Medieval European History and Architecture",
       "subfield": "Archeology"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10082",
+      "name": "HIV/AIDS Research and Interventions",
+      "subfield": "Infectious Diseases"
     },
     {
       "domain": "Social Sciences",
@@ -8399,17 +8399,17 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T11461",
-      "name": "Local Government Finance and Decentralization",
-      "subfield": "Political Science and International Relations"
-    },
-    {
-      "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T13519",
       "name": "Historical Architecture and Urbanism",
       "subfield": "History"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T11461",
+      "name": "Local Government Finance and Decentralization",
+      "subfield": "Political Science and International Relations"
     },
     {
       "domain": "Social Sciences",
@@ -8461,6 +8461,13 @@
       "subfield": "Global and Planetary Change"
     },
     {
+      "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T11937",
+      "name": "Research Data Management Practices",
+      "subfield": "Information Systems"
+    },
+    {
       "domain": "Social Sciences",
       "field": "Economics, Econometrics and Finance",
       "id": "T10632",
@@ -8473,13 +8480,6 @@
       "id": "T10395",
       "name": "Construction Project Management and Performance",
       "subfield": "Management Science and Operations Research"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T11937",
-      "name": "Research Data Management Practices",
-      "subfield": "Information Systems"
     },
     {
       "domain": "Physical Sciences",
@@ -8539,17 +8539,17 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T10698",
-      "name": "Transportation Planning and Optimization",
-      "subfield": "Transportation"
-    },
-    {
-      "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T12076",
       "name": "Renaissance and Early Modern Studies",
       "subfield": "History"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T10698",
+      "name": "Transportation Planning and Optimization",
+      "subfield": "Transportation"
     },
     {
       "domain": "Life Sciences",
@@ -8587,6 +8587,13 @@
       "subfield": "Condensed Matter Physics"
     },
     {
+      "domain": "Physical Sciences",
+      "field": "Physics and Astronomy",
+      "id": "T10159",
+      "name": "Ionosphere and magnetosphere dynamics",
+      "subfield": "Astronomy and Astrophysics"
+    },
+    {
       "domain": "Life Sciences",
       "field": "Agricultural and Biological Sciences",
       "id": "T10135",
@@ -8601,20 +8608,6 @@
       "subfield": "Research and Theory"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Physics and Astronomy",
-      "id": "T10159",
-      "name": "Ionosphere and magnetosphere dynamics",
-      "subfield": "Astronomy and Astrophysics"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10160",
-      "name": "Seismic Performance and Analysis",
-      "subfield": "Civil and Structural Engineering"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Health Professions",
       "id": "T13896",
@@ -8622,11 +8615,11 @@
       "subfield": "General Health Professions"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T13427",
-      "name": "Latin American Literature Analysis",
-      "subfield": "Literature and Literary Theory"
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10160",
+      "name": "Seismic Performance and Analysis",
+      "subfield": "Civil and Structural Engineering"
     },
     {
       "domain": "Health Sciences",
@@ -8643,6 +8636,13 @@
       "subfield": "Immunology"
     },
     {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T11076",
+      "name": "Policing Practices and Perceptions",
+      "subfield": "Political Science and International Relations"
+    },
+    {
       "domain": "Physical Sciences",
       "field": "Engineering",
       "id": "T10360",
@@ -8651,10 +8651,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T11076",
-      "name": "Policing Practices and Perceptions",
-      "subfield": "Political Science and International Relations"
+      "field": "Arts and Humanities",
+      "id": "T13427",
+      "name": "Latin American Literature Analysis",
+      "subfield": "Literature and Literary Theory"
     },
     {
       "domain": "Social Sciences",
@@ -8734,18 +8734,18 @@
       "subfield": "Cellular and Molecular Neuroscience"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10121",
-      "name": "Building Energy and Comfort Optimization",
-      "subfield": "Building and Construction"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T12555",
       "name": "Ancient Egypt and Archaeology",
       "subfield": "Archeology"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10121",
+      "name": "Building Energy and Comfort Optimization",
+      "subfield": "Building and Construction"
     },
     {
       "domain": "Social Sciences",
@@ -8762,18 +8762,11 @@
       "subfield": "Ecology, Evolution, Behavior and Systematics"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T13006",
-      "name": "Spanish History and Politics",
-      "subfield": "History"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T13089",
-      "name": "Medieval and Early Modern Iberia",
-      "subfield": "History"
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10189",
+      "name": "Anesthesia and Pain Management",
+      "subfield": "Surgery"
     },
     {
       "domain": "Physical Sciences",
@@ -8783,18 +8776,18 @@
       "subfield": "Software"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10189",
-      "name": "Anesthesia and Pain Management",
-      "subfield": "Surgery"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Physics and Astronomy",
       "id": "T10523",
       "name": "Atomic and Molecular Physics",
       "subfield": "Atomic and Molecular Physics, and Optics"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T13006",
+      "name": "Spanish History and Politics",
+      "subfield": "History"
     },
     {
       "domain": "Social Sciences",
@@ -8809,6 +8802,13 @@
       "id": "T10012",
       "name": "Genetic diversity and population structure",
       "subfield": "Genetics"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T13089",
+      "name": "Medieval and Early Modern Iberia",
+      "subfield": "History"
     },
     {
       "domain": "Life Sciences",
@@ -8832,6 +8832,13 @@
       "subfield": "Accounting"
     },
     {
+      "domain": "Physical Sciences",
+      "field": "Environmental Science",
+      "id": "T11913",
+      "name": "Animal Ecology and Behavior Studies",
+      "subfield": "Ecology"
+    },
+    {
       "domain": "Life Sciences",
       "field": "Agricultural and Biological Sciences",
       "id": "T12294",
@@ -8844,13 +8851,6 @@
       "id": "T10016",
       "name": "Adsorption and biosorption for pollutant removal",
       "subfield": "Water Science and Technology"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Environmental Science",
-      "id": "T11913",
-      "name": "Animal Ecology and Behavior Studies",
-      "subfield": "Ecology"
     },
     {
       "domain": "Physical Sciences",
@@ -8903,20 +8903,6 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Business, Management and Accounting",
-      "id": "T13151",
-      "name": "Business Strategies and Innovation",
-      "subfield": "Strategy and Management"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T10126",
-      "name": "Logic, programming, and type systems",
-      "subfield": "Artificial Intelligence"
-    },
-    {
-      "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T13260",
       "name": "Linguistics and Language Studies",
@@ -8931,10 +8917,10 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Environmental Science",
-      "id": "T10139",
-      "name": "Heavy metals in environment",
-      "subfield": "Pollution"
+      "field": "Computer Science",
+      "id": "T10126",
+      "name": "Logic, programming, and type systems",
+      "subfield": "Artificial Intelligence"
     },
     {
       "domain": "Social Sciences",
@@ -8944,11 +8930,25 @@
       "subfield": "Religious studies"
     },
     {
+      "domain": "Physical Sciences",
+      "field": "Environmental Science",
+      "id": "T10139",
+      "name": "Heavy metals in environment",
+      "subfield": "Pollution"
+    },
+    {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T13174",
       "name": "American and British Literature Analysis",
       "subfield": "Literature and Literary Theory"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Business, Management and Accounting",
+      "id": "T13151",
+      "name": "Business Strategies and Innovation",
+      "subfield": "Strategy and Management"
     },
     {
       "domain": "Social Sciences",
@@ -8973,20 +8973,6 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Business, Management and Accounting",
-      "id": "T10797",
-      "name": "Accounting and Organizational Management",
-      "subfield": "Management Information Systems"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10453",
-      "name": "Maternal and Perinatal Health Interventions",
-      "subfield": "Obstetrics and Gynecology"
-    },
-    {
-      "domain": "Social Sciences",
       "field": "Psychology",
       "id": "T11132",
       "name": "Psychoanalysis and Psychopathology Research",
@@ -8998,6 +8984,20 @@
       "id": "T13445",
       "name": "American Constitutional Law and Politics",
       "subfield": "Political Science and International Relations"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10453",
+      "name": "Maternal and Perinatal Health Interventions",
+      "subfield": "Obstetrics and Gynecology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Business, Management and Accounting",
+      "id": "T10797",
+      "name": "Accounting and Organizational Management",
+      "subfield": "Management Information Systems"
     },
     {
       "domain": "Social Sciences",
@@ -9014,18 +9014,18 @@
       "subfield": "Language and Linguistics"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10436",
-      "name": "Anesthesia and Sedative Agents",
-      "subfield": "Anesthesiology and Pain Medicine"
-    },
-    {
       "domain": "Life Sciences",
       "field": "Biochemistry, Genetics and Molecular Biology",
       "id": "T10134",
       "name": "Inflammatory Bowel Disease",
       "subfield": "Genetics"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10436",
+      "name": "Anesthesia and Sedative Agents",
+      "subfield": "Anesthesiology and Pain Medicine"
     },
     {
       "domain": "Physical Sciences",
@@ -9042,20 +9042,6 @@
       "subfield": "History"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Dentistry",
-      "id": "T10368",
-      "name": "Dental Health and Care Utilization",
-      "subfield": "Periodontics"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10293",
-      "name": "Thyroid Disorders and Treatments",
-      "subfield": "Endocrinology, Diabetes and Metabolism"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Social Sciences",
       "id": "T14190",
@@ -9070,6 +9056,13 @@
       "subfield": "Electrical and Electronic Engineering"
     },
     {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10293",
+      "name": "Thyroid Disorders and Treatments",
+      "subfield": "Endocrinology, Diabetes and Metabolism"
+    },
+    {
       "domain": "Social Sciences",
       "field": "Social Sciences",
       "id": "T10289",
@@ -9077,11 +9070,11 @@
       "subfield": "Political Science and International Relations"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Decision Sciences",
-      "id": "T10102",
-      "name": "scientometrics and bibliometrics research",
-      "subfield": "Statistics, Probability and Uncertainty"
+      "domain": "Health Sciences",
+      "field": "Dentistry",
+      "id": "T10368",
+      "name": "Dental Health and Care Utilization",
+      "subfield": "Periodontics"
     },
     {
       "domain": "Physical Sciences",
@@ -9089,6 +9082,13 @@
       "id": "T12201",
       "name": "Agricultural Engineering and Mechanization",
       "subfield": "Mechanical Engineering"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Decision Sciences",
+      "id": "T10102",
+      "name": "scientometrics and bibliometrics research",
+      "subfield": "Statistics, Probability and Uncertainty"
     },
     {
       "domain": "Life Sciences",
@@ -9112,6 +9112,13 @@
       "subfield": "Pharmacology"
     },
     {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T14020",
+      "name": "Medical research and treatments",
+      "subfield": "Surgery"
+    },
+    {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T13072",
@@ -9124,13 +9131,6 @@
       "id": "T10356",
       "name": "Orthodontics and Dentofacial Orthopedics",
       "subfield": "Orthodontics"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T14020",
-      "name": "Medical research and treatments",
-      "subfield": "Surgery"
     },
     {
       "domain": "Social Sciences",
@@ -9189,13 +9189,6 @@
       "subfield": "Periodontics"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Physics and Astronomy",
-      "id": "T10095",
-      "name": "Cosmology and Gravitation Theories",
-      "subfield": "Astronomy and Astrophysics"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Social Sciences",
       "id": "T12323",
@@ -9203,11 +9196,18 @@
       "subfield": "Cultural Studies"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T13684",
-      "name": "Political Dynamics in Latin America",
-      "subfield": "Political Science and International Relations"
+      "domain": "Physical Sciences",
+      "field": "Physics and Astronomy",
+      "id": "T10095",
+      "name": "Cosmology and Gravitation Theories",
+      "subfield": "Astronomy and Astrophysics"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10233",
+      "name": "Geotechnical Engineering and Soil Mechanics",
+      "subfield": "Civil and Structural Engineering"
     },
     {
       "domain": "Health Sciences",
@@ -9217,11 +9217,11 @@
       "subfield": "Cardiology and Cardiovascular Medicine"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10233",
-      "name": "Geotechnical Engineering and Soil Mechanics",
-      "subfield": "Civil and Structural Engineering"
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T13684",
+      "name": "Political Dynamics in Latin America",
+      "subfield": "Political Science and International Relations"
     },
     {
       "domain": "Social Sciences",
@@ -9238,6 +9238,13 @@
       "subfield": "Pulmonary and Respiratory Medicine"
     },
     {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10177",
+      "name": "Palliative Care and End-of-Life Issues",
+      "subfield": "Public Health, Environmental and Occupational Health"
+    },
+    {
       "domain": "Social Sciences",
       "field": "Social Sciences",
       "id": "T10162",
@@ -9252,11 +9259,11 @@
       "subfield": "Animal Science and Zoology"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10177",
-      "name": "Palliative Care and End-of-Life Issues",
-      "subfield": "Public Health, Environmental and Occupational Health"
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T13291",
+      "name": "Political Theory and Democracy",
+      "subfield": "Political Science and International Relations"
     },
     {
       "domain": "Health Sciences",
@@ -9264,13 +9271,6 @@
       "id": "T13147",
       "name": "Ethics and bioethics in healthcare",
       "subfield": "Public Health, Environmental and Occupational Health"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T13291",
-      "name": "Political Theory and Democracy",
-      "subfield": "Political Science and International Relations"
     },
     {
       "domain": "Social Sciences",
@@ -9285,13 +9285,6 @@
       "id": "T11168",
       "name": "International Development and Aid",
       "subfield": "Development"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T13460",
-      "name": "Historical Studies in Latin America",
-      "subfield": "Demography"
     },
     {
       "domain": "Social Sciences",
@@ -9313,6 +9306,13 @@
       "id": "T11645",
       "name": "Urban, Neighborhood, and Segregation Studies",
       "subfield": "Sociology and Political Science"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T13460",
+      "name": "Historical Studies in Latin America",
+      "subfield": "Demography"
     },
     {
       "domain": "Physical Sciences",
@@ -9357,13 +9357,6 @@
       "subfield": "Physical Therapy, Sports Therapy and Rehabilitation"
     },
     {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T14127",
-      "name": "Food and Agricultural Sciences",
-      "subfield": "Food Science"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10129",
@@ -9378,18 +9371,18 @@
       "subfield": "Philosophy"
     },
     {
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T14127",
+      "name": "Food and Agricultural Sciences",
+      "subfield": "Food Science"
+    },
+    {
       "domain": "Social Sciences",
       "field": "Business, Management and Accounting",
       "id": "T10115",
       "name": "Corporate Social Responsibility Reporting",
       "subfield": "Strategy and Management"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T10036",
-      "name": "Advanced Neural Network Applications",
-      "subfield": "Computer Vision and Pattern Recognition"
     },
     {
       "domain": "Social Sciences",
@@ -9400,10 +9393,10 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T13263",
-      "name": "Building energy efficiency and sustainability",
-      "subfield": "Building and Construction"
+      "field": "Computer Science",
+      "id": "T10036",
+      "name": "Advanced Neural Network Applications",
+      "subfield": "Computer Vision and Pattern Recognition"
     },
     {
       "domain": "Health Sciences",
@@ -9425,6 +9418,13 @@
       "id": "T13177",
       "name": "Geological and Geophysical Studies",
       "subfield": "Geology"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T13263",
+      "name": "Building energy efficiency and sustainability",
+      "subfield": "Building and Construction"
     },
     {
       "domain": "Physical Sciences",
@@ -9455,18 +9455,18 @@
       "subfield": "Fluid Flow and Transfer Processes"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10202",
-      "name": "Lung Cancer Diagnosis and Treatment",
-      "subfield": "Pulmonary and Respiratory Medicine"
-    },
-    {
       "domain": "Life Sciences",
       "field": "Agricultural and Biological Sciences",
       "id": "T13015",
       "name": "Botany, Ecology, and Taxonomy Studies",
       "subfield": "Plant Science"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10202",
+      "name": "Lung Cancer Diagnosis and Treatment",
+      "subfield": "Pulmonary and Respiratory Medicine"
     },
     {
       "domain": "Social Sciences",
@@ -9490,20 +9490,6 @@
       "subfield": "Cardiology and Cardiovascular Medicine"
     },
     {
-      "domain": "Life Sciences",
-      "field": "Biochemistry, Genetics and Molecular Biology",
-      "id": "T10240",
-      "name": "Plant tissue culture and regeneration",
-      "subfield": "Molecular Biology"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T13745",
-      "name": "Media and Digital Communication",
-      "subfield": "Computer Networks and Communications"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T12648",
@@ -9511,11 +9497,25 @@
       "subfield": "History and Philosophy of Science"
     },
     {
+      "domain": "Life Sciences",
+      "field": "Biochemistry, Genetics and Molecular Biology",
+      "id": "T10240",
+      "name": "Plant tissue culture and regeneration",
+      "subfield": "Molecular Biology"
+    },
+    {
       "domain": "Social Sciences",
       "field": "Economics, Econometrics and Finance",
       "id": "T12394",
       "name": "Insurance and Financial Risk Management",
       "subfield": "Economics and Econometrics"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T13745",
+      "name": "Media and Digital Communication",
+      "subfield": "Computer Networks and Communications"
     },
     {
       "domain": "Health Sciences",
@@ -9532,13 +9532,6 @@
       "subfield": "Information Systems"
     },
     {
-      "domain": "Life Sciences",
-      "field": "Biochemistry, Genetics and Molecular Biology",
-      "id": "T10147",
-      "name": "Antibiotic Resistance in Bacteria",
-      "subfield": "Molecular Medicine"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Psychology",
       "id": "T10258",
@@ -9553,11 +9546,11 @@
       "subfield": "Physiology"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T10446",
-      "name": "Income, Poverty, and Inequality",
-      "subfield": "Sociology and Political Science"
+      "domain": "Life Sciences",
+      "field": "Biochemistry, Genetics and Molecular Biology",
+      "id": "T10147",
+      "name": "Antibiotic Resistance in Bacteria",
+      "subfield": "Molecular Medicine"
     },
     {
       "domain": "Social Sciences",
@@ -9569,9 +9562,9 @@
     {
       "domain": "Social Sciences",
       "field": "Social Sciences",
-      "id": "T10380",
-      "name": "Intimate Partner and Family Violence",
-      "subfield": "Health"
+      "id": "T10446",
+      "name": "Income, Poverty, and Inequality",
+      "subfield": "Sociology and Political Science"
     },
     {
       "domain": "Life Sciences",
@@ -9579,6 +9572,13 @@
       "id": "T10375",
       "name": "Pharmacogenetics and Drug Metabolism",
       "subfield": "Pharmacology"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Energy",
+      "id": "T10030",
+      "name": "Electrocatalysts for Energy Conversion",
+      "subfield": "Renewable Energy, Sustainability and the Environment"
     },
     {
       "domain": "Life Sciences",
@@ -9589,17 +9589,17 @@
     },
     {
       "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T10380",
+      "name": "Intimate Partner and Family Violence",
+      "subfield": "Health"
+    },
+    {
+      "domain": "Social Sciences",
       "field": "Psychology",
       "id": "T10182",
       "name": "Child and Adolescent Psychosocial and Emotional Development",
       "subfield": "Clinical Psychology"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Energy",
-      "id": "T10030",
-      "name": "Electrocatalysts for Energy Conversion",
-      "subfield": "Renewable Energy, Sustainability and the Environment"
     },
     {
       "domain": "Social Sciences",
@@ -9607,6 +9607,13 @@
       "id": "T10994",
       "name": "Terrorism, Counterterrorism, and Political Violence",
       "subfield": "Sociology and Political Science"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10188",
+      "name": "Advanced machining processes and optimization",
+      "subfield": "Mechanical Engineering"
     },
     {
       "domain": "Social Sciences",
@@ -9617,10 +9624,10 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10188",
-      "name": "Advanced machining processes and optimization",
-      "subfield": "Mechanical Engineering"
+      "field": "Computer Science",
+      "id": "T12216",
+      "name": "Network Time Synchronization Technologies",
+      "subfield": "Computer Networks and Communications"
     },
     {
       "domain": "Health Sciences",
@@ -9635,13 +9642,6 @@
       "id": "T11859",
       "name": "Educator Training and Historical Pedagogy",
       "subfield": "Sociology and Political Science"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T12216",
-      "name": "Network Time Synchronization Technologies",
-      "subfield": "Computer Networks and Communications"
     },
     {
       "domain": "Physical Sciences",
@@ -9707,18 +9707,18 @@
       "subfield": "General Arts and Humanities"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10780",
-      "name": "Reliability and Maintenance Optimization",
-      "subfield": "Safety, Risk, Reliability and Quality"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Social Sciences",
       "id": "T11743",
       "name": "Political Economy and Marxism",
       "subfield": "Sociology and Political Science"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10780",
+      "name": "Reliability and Maintenance Optimization",
+      "subfield": "Safety, Risk, Reliability and Quality"
     },
     {
       "domain": "Life Sciences",
@@ -9735,13 +9735,6 @@
       "subfield": "Urology"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10307",
-      "name": "Head and Neck Cancer Studies",
-      "subfield": "Otorhinolaryngology"
-    },
-    {
       "domain": "Life Sciences",
       "field": "Agricultural and Biological Sciences",
       "id": "T10616",
@@ -9749,11 +9742,11 @@
       "subfield": "Plant Science"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T13727",
-      "name": "Linguistic and Sociocultural Studies",
-      "subfield": "Linguistics and Language"
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10307",
+      "name": "Head and Neck Cancer Studies",
+      "subfield": "Otorhinolaryngology"
     },
     {
       "domain": "Physical Sciences",
@@ -9763,11 +9756,11 @@
       "subfield": "Organic Chemistry"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Physics and Astronomy",
-      "id": "T10025",
-      "name": "Black Holes and Theoretical Physics",
-      "subfield": "Nuclear and High Energy Physics"
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T13727",
+      "name": "Linguistic and Sociocultural Studies",
+      "subfield": "Linguistics and Language"
     },
     {
       "domain": "Social Sciences",
@@ -9784,11 +9777,11 @@
       "subfield": "Law"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Business, Management and Accounting",
-      "id": "T14244",
-      "name": "Consumer Behavior and Marketing Influence",
-      "subfield": "Marketing"
+      "domain": "Physical Sciences",
+      "field": "Physics and Astronomy",
+      "id": "T10025",
+      "name": "Black Holes and Theoretical Physics",
+      "subfield": "Nuclear and High Energy Physics"
     },
     {
       "domain": "Social Sciences",
@@ -9796,6 +9789,13 @@
       "id": "T10794",
       "name": "Islamic Studies and History",
       "subfield": "Political Science and International Relations"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Business, Management and Accounting",
+      "id": "T14244",
+      "name": "Consumer Behavior and Marketing Influence",
+      "subfield": "Marketing"
     },
     {
       "domain": "Social Sciences",
@@ -9820,13 +9820,6 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T12931",
-      "name": "Educational Methods and Outcomes",
-      "subfield": "Education"
-    },
-    {
-      "domain": "Social Sciences",
       "field": "Decision Sciences",
       "id": "T10050",
       "name": "Multi-Criteria Decision Making",
@@ -9834,24 +9827,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T12283",
-      "name": "Latin American history and culture",
-      "subfield": "Visual Arts and Performing Arts"
-    },
-    {
-      "domain": "Social Sciences",
       "field": "Social Sciences",
-      "id": "T12148",
-      "name": "Brazilian Legal Issues",
-      "subfield": "Law"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T10443",
-      "name": "Social Policy and Reform Studies",
-      "subfield": "Political Science and International Relations"
+      "id": "T12931",
+      "name": "Educational Methods and Outcomes",
+      "subfield": "Education"
     },
     {
       "domain": "Physical Sciences",
@@ -9859,6 +9838,13 @@
       "id": "T10078",
       "name": "Advanced Photocatalysis Techniques",
       "subfield": "Renewable Energy, Sustainability and the Environment"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T10443",
+      "name": "Social Policy and Reform Studies",
+      "subfield": "Political Science and International Relations"
     },
     {
       "domain": "Social Sciences",
@@ -9870,9 +9856,9 @@
     {
       "domain": "Social Sciences",
       "field": "Social Sciences",
-      "id": "T10457",
-      "name": "Education Pedagogy and Practices",
-      "subfield": "Education"
+      "id": "T12148",
+      "name": "Brazilian Legal Issues",
+      "subfield": "Law"
     },
     {
       "domain": "Physical Sciences",
@@ -9882,11 +9868,18 @@
       "subfield": "Atomic and Molecular Physics, and Optics"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10479",
-      "name": "Structural Behavior of Reinforced Concrete",
-      "subfield": "Building and Construction"
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T12283",
+      "name": "Latin American history and culture",
+      "subfield": "Visual Arts and Performing Arts"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T10457",
+      "name": "Education Pedagogy and Practices",
+      "subfield": "Education"
     },
     {
       "domain": "Social Sciences",
@@ -9894,6 +9887,13 @@
       "id": "T12998",
       "name": "Education and Islamic Studies",
       "subfield": "Education"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10479",
+      "name": "Structural Behavior of Reinforced Concrete",
+      "subfield": "Building and Construction"
     },
     {
       "domain": "Health Sciences",
@@ -9911,13 +9911,6 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T12531",
-      "name": "Values and Moral Education",
-      "subfield": "Education"
-    },
-    {
-      "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T12990",
       "name": "Medical History and Innovations",
@@ -9929,6 +9922,13 @@
       "id": "T10350",
       "name": "Electronic Health Records Systems",
       "subfield": "Health Information Management"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T12531",
+      "name": "Values and Moral Education",
+      "subfield": "Education"
     },
     {
       "domain": "Health Sciences",
@@ -9959,18 +9959,18 @@
       "subfield": "Accounting"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Nursing",
-      "id": "T10140",
-      "name": "Food composition and properties",
-      "subfield": "Nutrition and Dietetics"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T12517",
       "name": "Seventeenth-Century Political and Philosophical Thought",
       "subfield": "Philosophy"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Nursing",
+      "id": "T10140",
+      "name": "Food composition and properties",
+      "subfield": "Nutrition and Dietetics"
     },
     {
       "domain": "Physical Sciences",
@@ -9987,20 +9987,6 @@
       "subfield": "Education"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10146",
-      "name": "Cervical Cancer and HPV Research",
-      "subfield": "Epidemiology"
-    },
-    {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T10225",
-      "name": "Essential Oils and Antimicrobial Activity",
-      "subfield": "Food Science"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Environmental Science",
       "id": "T12837",
@@ -10013,6 +9999,13 @@
       "id": "T10597",
       "name": "Nuclear reactor physics and engineering",
       "subfield": "Aerospace Engineering"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10146",
+      "name": "Cervical Cancer and HPV Research",
+      "subfield": "Epidemiology"
     },
     {
       "domain": "Social Sciences",
@@ -10036,6 +10029,27 @@
       "subfield": "Pathology and Forensic Medicine"
     },
     {
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T10225",
+      "name": "Essential Oils and Antimicrobial Activity",
+      "subfield": "Food Science"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10158",
+      "name": "Cancer Immunotherapy and Biomarkers",
+      "subfield": "Oncology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T11507",
+      "name": "Religion and Society Interactions",
+      "subfield": "Sociology and Political Science"
+    },
+    {
       "domain": "Social Sciences",
       "field": "Economics, Econometrics and Finance",
       "id": "T11043",
@@ -10057,18 +10071,11 @@
       "subfield": "Sociology and Political Science"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10158",
-      "name": "Cancer Immunotherapy and Biomarkers",
-      "subfield": "Oncology"
-    },
-    {
       "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T11507",
-      "name": "Religion and Society Interactions",
-      "subfield": "Sociology and Political Science"
+      "field": "Arts and Humanities",
+      "id": "T13342",
+      "name": "Art History and Market Analysis",
+      "subfield": "Visual Arts and Performing Arts"
     },
     {
       "domain": "Health Sciences",
@@ -10076,13 +10083,6 @@
       "id": "T10167",
       "name": "Influenza Virus Research Studies",
       "subfield": "Epidemiology"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T13342",
-      "name": "Art History and Market Analysis",
-      "subfield": "Visual Arts and Performing Arts"
     },
     {
       "domain": "Social Sciences",
@@ -10100,24 +10100,17 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Mathematics",
-      "id": "T13500",
-      "name": "Probability and Statistical Research",
-      "subfield": "Statistics and Probability"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Decision Sciences",
-      "id": "T10467",
-      "name": "Psychometric Methodologies and Testing",
-      "subfield": "Management Science and Operations Research"
-    },
-    {
-      "domain": "Physical Sciences",
       "field": "Environmental Science",
       "id": "T10347",
       "name": "Atmospheric aerosols and clouds",
       "subfield": "Global and Planetary Change"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Mathematics",
+      "id": "T13500",
+      "name": "Probability and Statistical Research",
+      "subfield": "Statistics and Probability"
     },
     {
       "domain": "Life Sciences",
@@ -10127,25 +10120,18 @@
       "subfield": "Parasitology"
     },
     {
+      "domain": "Social Sciences",
+      "field": "Decision Sciences",
+      "id": "T10467",
+      "name": "Psychometric Methodologies and Testing",
+      "subfield": "Management Science and Operations Research"
+    },
+    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10322",
       "name": "Respiratory Support and Mechanisms",
       "subfield": "Pulmonary and Respiratory Medicine"
-    },
-    {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T11925",
-      "name": "Culinary Culture and Tourism",
-      "subfield": "Food Science"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Psychology",
-      "id": "T10730",
-      "name": "Language Development and Disorders",
-      "subfield": "Developmental and Educational Psychology"
     },
     {
       "domain": "Social Sciences",
@@ -10162,11 +10148,11 @@
       "subfield": "Education"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Decision Sciences",
-      "id": "T10315",
-      "name": "Decision-Making and Behavioral Economics",
-      "subfield": "General Decision Sciences"
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T11925",
+      "name": "Culinary Culture and Tourism",
+      "subfield": "Food Science"
     },
     {
       "domain": "Social Sciences",
@@ -10176,18 +10162,25 @@
       "subfield": "History"
     },
     {
+      "domain": "Social Sciences",
+      "field": "Decision Sciences",
+      "id": "T10315",
+      "name": "Decision-Making and Behavioral Economics",
+      "subfield": "General Decision Sciences"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Psychology",
+      "id": "T10730",
+      "name": "Language Development and Disorders",
+      "subfield": "Developmental and Educational Psychology"
+    },
+    {
       "domain": "Physical Sciences",
       "field": "Computer Science",
       "id": "T10138",
       "name": "Network Traffic and Congestion Control",
       "subfield": "Computer Networks and Communications"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10291",
-      "name": "Dialysis and Renal Disease Management",
-      "subfield": "Nephrology"
     },
     {
       "domain": "Life Sciences",
@@ -10204,11 +10197,11 @@
       "subfield": "Complementary and alternative medicine"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Physics and Astronomy",
-      "id": "T11044",
-      "name": "Particle Detector Development and Performance",
-      "subfield": "Nuclear and High Energy Physics"
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10291",
+      "name": "Dialysis and Renal Disease Management",
+      "subfield": "Nephrology"
     },
     {
       "domain": "Life Sciences",
@@ -10226,17 +10219,10 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T10028",
-      "name": "Topic Modeling",
-      "subfield": "Artificial Intelligence"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Mathematics",
-      "id": "T10061",
-      "name": "Algebraic Geometry and Number Theory",
-      "subfield": "Geometry and Topology"
+      "field": "Physics and Astronomy",
+      "id": "T11044",
+      "name": "Particle Detector Development and Performance",
+      "subfield": "Nuclear and High Energy Physics"
     },
     {
       "domain": "Life Sciences",
@@ -10260,11 +10246,25 @@
       "subfield": "Epidemiology"
     },
     {
+      "domain": "Physical Sciences",
+      "field": "Mathematics",
+      "id": "T10061",
+      "name": "Algebraic Geometry and Number Theory",
+      "subfield": "Geometry and Topology"
+    },
+    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10170",
       "name": "Retinal Diseases and Treatments",
       "subfield": "Ophthalmology"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T10028",
+      "name": "Topic Modeling",
+      "subfield": "Artificial Intelligence"
     },
     {
       "domain": "Life Sciences",
@@ -10295,11 +10295,11 @@
       "subfield": "History"
     },
     {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T10473",
-      "name": "Postharvest Quality and Shelf Life Management",
-      "subfield": "Plant Science"
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T13337",
+      "name": "Korean Peninsula Historical and Political Studies",
+      "subfield": "Sociology and Political Science"
     },
     {
       "domain": "Physical Sciences",
@@ -10309,13 +10309,6 @@
       "subfield": "Nature and Landscape Conservation"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T12952",
-      "name": "School Leadership and Teacher Performance",
-      "subfield": "Education"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Engineering",
       "id": "T10399",
@@ -10323,17 +10316,24 @@
       "subfield": "Mechanics of Materials"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T13337",
-      "name": "Korean Peninsula Historical and Political Studies",
-      "subfield": "Sociology and Political Science"
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T10473",
+      "name": "Postharvest Quality and Shelf Life Management",
+      "subfield": "Plant Science"
     },
     {
       "domain": "Social Sciences",
       "field": "Social Sciences",
       "id": "T11779",
       "name": "Higher Education and Employability",
+      "subfield": "Education"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T12952",
+      "name": "School Leadership and Teacher Performance",
       "subfield": "Education"
     },
     {
@@ -10365,13 +10365,6 @@
       "subfield": "Safety Research"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T13344",
-      "name": "Industrial Automation and Control Systems",
-      "subfield": "Control and Systems Engineering"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T12912",
@@ -10384,6 +10377,13 @@
       "id": "T10484",
       "name": "Wood Treatment and Properties",
       "subfield": "Building and Construction"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T13344",
+      "name": "Industrial Automation and Control Systems",
+      "subfield": "Control and Systems Engineering"
     },
     {
       "domain": "Health Sciences",
@@ -10400,11 +10400,11 @@
       "subfield": "Global and Planetary Change"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T11794",
-      "name": "Early Modern Spanish Literature",
-      "subfield": "Literature and Literary Theory"
+      "domain": "Physical Sciences",
+      "field": "Earth and Planetary Sciences",
+      "id": "T11211",
+      "name": "3D Surveying and Cultural Heritage",
+      "subfield": "Geology"
     },
     {
       "domain": "Social Sciences",
@@ -10414,18 +10414,32 @@
       "subfield": "Education"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Earth and Planetary Sciences",
-      "id": "T11211",
-      "name": "3D Surveying and Cultural Heritage",
-      "subfield": "Geology"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Nursing",
       "id": "T12873",
       "name": "Nutrition, Health and Food Behavior",
       "subfield": "Nutrition and Dietetics"
+    },
+    {
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T12361",
+      "name": "Study of Mite Species",
+      "subfield": "Ecology, Evolution, Behavior and Systematics"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Psychology",
+      "id": "T10156",
+      "name": "LGBTQ Health, Identity, and Policy",
+      "subfield": "Social Psychology"
+    },
+    {
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T12329",
+      "name": "Hemiptera Insect Studies",
+      "subfield": "Ecology, Evolution, Behavior and Systematics"
     },
     {
       "domain": "Life Sciences",
@@ -10443,24 +10457,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Psychology",
-      "id": "T10156",
-      "name": "LGBTQ Health, Identity, and Policy",
-      "subfield": "Social Psychology"
-    },
-    {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T12361",
-      "name": "Study of Mite Species",
-      "subfield": "Ecology, Evolution, Behavior and Systematics"
-    },
-    {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T12329",
-      "name": "Hemiptera Insect Studies",
-      "subfield": "Ecology, Evolution, Behavior and Systematics"
+      "field": "Arts and Humanities",
+      "id": "T11794",
+      "name": "Early Modern Spanish Literature",
+      "subfield": "Literature and Literary Theory"
     },
     {
       "domain": "Health Sciences",
@@ -10470,18 +10470,18 @@
       "subfield": "Physical Therapy, Sports Therapy and Rehabilitation"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Business, Management and Accounting",
-      "id": "T10328",
-      "name": "Supply Chain and Inventory Management",
-      "subfield": "Management Information Systems"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10231",
       "name": "Pancreatic and Hepatic Oncology Research",
       "subfield": "Oncology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Business, Management and Accounting",
+      "id": "T10328",
+      "name": "Supply Chain and Inventory Management",
+      "subfield": "Management Information Systems"
     },
     {
       "domain": "Social Sciences",
@@ -10498,20 +10498,6 @@
       "subfield": "Mechanical Engineering"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10337",
-      "name": "Liver Disease and Transplantation",
-      "subfield": "Hepatology"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Psychology",
-      "id": "T10636",
-      "name": "Innovative Teaching and Learning Methods",
-      "subfield": "Developmental and Educational Psychology"
-    },
-    {
       "domain": "Life Sciences",
       "field": "Agricultural and Biological Sciences",
       "id": "T10174",
@@ -10520,10 +10506,10 @@
     },
     {
       "domain": "Health Sciences",
-      "field": "Health Professions",
-      "id": "T12871",
-      "name": "Healthcare Quality and Management",
-      "subfield": "Health Information Management"
+      "field": "Medicine",
+      "id": "T10337",
+      "name": "Liver Disease and Transplantation",
+      "subfield": "Hepatology"
     },
     {
       "domain": "Life Sciences",
@@ -10540,11 +10526,11 @@
       "subfield": "Economics and Econometrics"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T10574",
-      "name": "Crime Patterns and Interventions",
-      "subfield": "Sociology and Political Science"
+      "domain": "Health Sciences",
+      "field": "Health Professions",
+      "id": "T12871",
+      "name": "Healthcare Quality and Management",
+      "subfield": "Health Information Management"
     },
     {
       "domain": "Physical Sciences",
@@ -10554,11 +10540,25 @@
       "subfield": "Information Systems"
     },
     {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T14423",
+      "name": "Military Technology and Strategies",
+      "subfield": "Aerospace Engineering"
+    },
+    {
       "domain": "Social Sciences",
       "field": "Psychology",
-      "id": "T10263",
-      "name": "Eating Disorders and Behaviors",
-      "subfield": "Clinical Psychology"
+      "id": "T10636",
+      "name": "Innovative Teaching and Learning Methods",
+      "subfield": "Developmental and Educational Psychology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T10574",
+      "name": "Crime Patterns and Interventions",
+      "subfield": "Sociology and Political Science"
     },
     {
       "domain": "Physical Sciences",
@@ -10568,18 +10568,18 @@
       "subfield": "Water Science and Technology"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T14423",
-      "name": "Military Technology and Strategies",
-      "subfield": "Aerospace Engineering"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Health Professions",
       "id": "T11376",
       "name": "Geriatric Care and Nursing Homes",
       "subfield": "General Health Professions"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Psychology",
+      "id": "T10263",
+      "name": "Eating Disorders and Behaviors",
+      "subfield": "Clinical Psychology"
     },
     {
       "domain": "Health Sciences",
@@ -10590,17 +10590,17 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Environmental Science",
-      "id": "T11108",
-      "name": "Municipal Solid Waste Management",
-      "subfield": "Waste Management and Disposal"
-    },
-    {
-      "domain": "Physical Sciences",
       "field": "Engineering",
       "id": "T10278",
       "name": "Electric Motor Design and Analysis",
       "subfield": "Electrical and Electronic Engineering"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Environmental Science",
+      "id": "T11108",
+      "name": "Municipal Solid Waste Management",
+      "subfield": "Waste Management and Disposal"
     },
     {
       "domain": "Social Sciences",
@@ -10638,20 +10638,6 @@
       "subfield": "Computer Networks and Communications"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Business, Management and Accounting",
-      "id": "T13706",
-      "name": "Management and Optimization Techniques",
-      "subfield": "Strategy and Management"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T12289",
-      "name": "Library Science and Administration",
-      "subfield": "Library and Information Sciences"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Chemistry",
       "id": "T10721",
@@ -10664,6 +10650,13 @@
       "id": "T13636",
       "name": "Pentecostalism and Christianity Studies",
       "subfield": "Religious studies"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T12289",
+      "name": "Library Science and Administration",
+      "subfield": "Library and Information Sciences"
     },
     {
       "domain": "Physical Sciences",
@@ -10695,17 +10688,17 @@
     },
     {
       "domain": "Social Sciences",
+      "field": "Business, Management and Accounting",
+      "id": "T13706",
+      "name": "Management and Optimization Techniques",
+      "subfield": "Strategy and Management"
+    },
+    {
+      "domain": "Social Sciences",
       "field": "Social Sciences",
       "id": "T11380",
       "name": "Child Welfare and Adoption",
       "subfield": "Safety Research"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10010",
-      "name": "Obesity, Physical Activity, Diet",
-      "subfield": "Public Health, Environmental and Occupational Health"
     },
     {
       "domain": "Health Sciences",
@@ -10727,6 +10720,13 @@
       "id": "T10292",
       "name": "Acute Myocardial Infarction Research",
       "subfield": "Cardiology and Cardiovascular Medicine"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10010",
+      "name": "Obesity, Physical Activity, Diet",
+      "subfield": "Public Health, Environmental and Occupational Health"
     },
     {
       "domain": "Social Sciences",
@@ -10752,8 +10752,8 @@
     {
       "domain": "Life Sciences",
       "field": "Biochemistry, Genetics and Molecular Biology",
-      "id": "T10261",
-      "name": "Genetic Associations and Epidemiology",
+      "id": "T12447",
+      "name": "Spider Taxonomy and Behavior Studies",
       "subfield": "Genetics"
     },
     {
@@ -10766,16 +10766,9 @@
     {
       "domain": "Life Sciences",
       "field": "Biochemistry, Genetics and Molecular Biology",
-      "id": "T12447",
-      "name": "Spider Taxonomy and Behavior Studies",
+      "id": "T10261",
+      "name": "Genetic Associations and Epidemiology",
       "subfield": "Genetics"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10084",
-      "name": "Musculoskeletal pain and rehabilitation",
-      "subfield": "Pharmacology"
     },
     {
       "domain": "Physical Sciences",
@@ -10783,6 +10776,13 @@
       "id": "T10024",
       "name": "TiO2 Photocatalysis and Solar Cells",
       "subfield": "Renewable Energy, Sustainability and the Environment"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10084",
+      "name": "Musculoskeletal pain and rehabilitation",
+      "subfield": "Pharmacology"
     },
     {
       "domain": "Physical Sciences",
@@ -10827,11 +10827,39 @@
       "subfield": "Rheumatology"
     },
     {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10193",
+      "name": "Coronary Interventions and Diagnostics",
+      "subfield": "Surgery"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Economics, Econometrics and Finance",
+      "id": "T10785",
+      "name": "Economic Theory and Institutions",
+      "subfield": "Economics and Econometrics"
+    },
+    {
       "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T14496",
-      "name": "Educational Technology and E-Learning",
-      "subfield": "Information Systems"
+      "field": "Chemistry",
+      "id": "T12191",
+      "name": "Chemical Reaction Mechanisms",
+      "subfield": "Organic Chemistry"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10345",
+      "name": "Hematopoietic Stem Cell Transplantation",
+      "subfield": "Hematology"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10696",
+      "name": "Gastric Cancer Management and Outcomes",
+      "subfield": "Pulmonary and Respiratory Medicine"
     },
     {
       "domain": "Physical Sciences",
@@ -10841,11 +10869,11 @@
       "subfield": "Astronomy and Astrophysics"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10193",
-      "name": "Coronary Interventions and Diagnostics",
-      "subfield": "Surgery"
+      "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T14496",
+      "name": "Educational Technology and E-Learning",
+      "subfield": "Information Systems"
     },
     {
       "domain": "Social Sciences",
@@ -10856,38 +10884,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Economics, Econometrics and Finance",
-      "id": "T10785",
-      "name": "Economic Theory and Institutions",
-      "subfield": "Economics and Econometrics"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10345",
-      "name": "Hematopoietic Stem Cell Transplantation",
-      "subfield": "Hematology"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Chemistry",
-      "id": "T12191",
-      "name": "Chemical Reaction Mechanisms",
-      "subfield": "Organic Chemistry"
-    },
-    {
-      "domain": "Social Sciences",
       "field": "Business, Management and Accounting",
       "id": "T10003",
       "name": "Innovation and Knowledge Management",
       "subfield": "Strategy and Management"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10696",
-      "name": "Gastric Cancer Management and Outcomes",
-      "subfield": "Pulmonary and Respiratory Medicine"
     },
     {
       "domain": "Physical Sciences",
@@ -10905,17 +10905,17 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Economics, Econometrics and Finance",
-      "id": "T11742",
-      "name": "Economic Theory and Policy",
-      "subfield": "General Economics, Econometrics and Finance"
-    },
-    {
-      "domain": "Social Sciences",
       "field": "Social Sciences",
       "id": "T12966",
       "name": "Russian Literature and Bakhtin Studies",
       "subfield": "Education"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Economics, Econometrics and Finance",
+      "id": "T11742",
+      "name": "Economic Theory and Policy",
+      "subfield": "General Economics, Econometrics and Finance"
     },
     {
       "domain": "Life Sciences",
@@ -10974,25 +10974,11 @@
       "subfield": "Biomedical Engineering"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T13061",
-      "name": "Literacy and Educational Practices",
-      "subfield": "Education"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10394",
       "name": "Lipoproteins and Cardiovascular Health",
       "subfield": "Surgery"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T11209",
-      "name": "Cardiovascular and exercise physiology",
-      "subfield": "Complementary and alternative medicine"
     },
     {
       "domain": "Physical Sciences",
@@ -11002,11 +10988,18 @@
       "subfield": "Materials Chemistry"
     },
     {
-      "domain": "Life Sciences",
-      "field": "Neuroscience",
-      "id": "T10056",
-      "name": "Neurotransmitter Receptor Influence on Behavior",
-      "subfield": "Cellular and Molecular Neuroscience"
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T11209",
+      "name": "Cardiovascular and exercise physiology",
+      "subfield": "Complementary and alternative medicine"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T13061",
+      "name": "Literacy and Educational Practices",
+      "subfield": "Education"
     },
     {
       "domain": "Physical Sciences",
@@ -11016,11 +11009,11 @@
       "subfield": "Mechanical Engineering"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10238",
-      "name": "Spine and Intervertebral Disc Pathology",
-      "subfield": "Pathology and Forensic Medicine"
+      "domain": "Life Sciences",
+      "field": "Neuroscience",
+      "id": "T10056",
+      "name": "Neurotransmitter Receptor Influence on Behavior",
+      "subfield": "Cellular and Molecular Neuroscience"
     },
     {
       "domain": "Social Sciences",
@@ -11030,18 +11023,11 @@
       "subfield": "Sociology and Political Science"
     },
     {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T10450",
-      "name": "Aquaculture Nutrition and Growth",
-      "subfield": "Aquatic Science"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T13823",
-      "name": "Religious and Theological Studies",
-      "subfield": "Sociology and Political Science"
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10238",
+      "name": "Spine and Intervertebral Disc Pathology",
+      "subfield": "Pathology and Forensic Medicine"
     },
     {
       "domain": "Physical Sciences",
@@ -11065,18 +11051,25 @@
       "subfield": "Safety Research"
     },
     {
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T10450",
+      "name": "Aquaculture Nutrition and Growth",
+      "subfield": "Aquatic Science"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T13823",
+      "name": "Religious and Theological Studies",
+      "subfield": "Sociology and Political Science"
+    },
+    {
       "domain": "Physical Sciences",
       "field": "Materials Science",
       "id": "T10389",
       "name": "Polymer crystallization and properties",
       "subfield": "Polymers and Plastics"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T12857",
-      "name": "Medieval Philosophy and Theology",
-      "subfield": "Philosophy"
     },
     {
       "domain": "Physical Sciences",
@@ -11086,18 +11079,18 @@
       "subfield": "Mechanical Engineering"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Environmental Science",
-      "id": "T10111",
-      "name": "Remote Sensing in Agriculture",
-      "subfield": "Ecology"
-    },
-    {
       "domain": "Life Sciences",
       "field": "Biochemistry, Genetics and Molecular Biology",
       "id": "T10521",
       "name": "RNA and protein synthesis mechanisms",
       "subfield": "Molecular Biology"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Environmental Science",
+      "id": "T10111",
+      "name": "Remote Sensing in Agriculture",
+      "subfield": "Ecology"
     },
     {
       "domain": "Social Sciences",
@@ -11108,10 +11101,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Psychology",
-      "id": "T10813",
-      "name": "Sport Psychology and Performance",
-      "subfield": "Developmental and Educational Psychology"
+      "field": "Arts and Humanities",
+      "id": "T12857",
+      "name": "Medieval Philosophy and Theology",
+      "subfield": "Philosophy"
     },
     {
       "domain": "Health Sciences",
@@ -11122,10 +11115,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Business, Management and Accounting",
-      "id": "T12509",
-      "name": "Corporate Insolvency and Governance",
-      "subfield": "Accounting"
+      "field": "Psychology",
+      "id": "T10813",
+      "name": "Sport Psychology and Performance",
+      "subfield": "Developmental and Educational Psychology"
     },
     {
       "domain": "Physical Sciences",
@@ -11135,46 +11128,11 @@
       "subfield": "Mechanics of Materials"
     },
     {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T11957",
-      "name": "Food Safety and Hygiene",
-      "subfield": "Food Science"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10218",
-      "name": "Sepsis Diagnosis and Treatment",
-      "subfield": "Epidemiology"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Environmental Science",
-      "id": "T10197",
-      "name": "Membrane Separation Technologies",
-      "subfield": "Water Science and Technology"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10837",
-      "name": "Dermatology and Skin Diseases",
-      "subfield": "Dermatology"
-    },
-    {
       "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T13763",
-      "name": "Historical Legal Studies and Society",
-      "subfield": "Political Science and International Relations"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Materials Science",
-      "id": "T10107",
-      "name": "Ferroelectric and Piezoelectric Materials",
-      "subfield": "Materials Chemistry"
+      "field": "Business, Management and Accounting",
+      "id": "T12509",
+      "name": "Corporate Insolvency and Governance",
+      "subfield": "Accounting"
     },
     {
       "domain": "Social Sciences",
@@ -11184,25 +11142,53 @@
       "subfield": "Philosophy"
     },
     {
+      "domain": "Physical Sciences",
+      "field": "Environmental Science",
+      "id": "T10197",
+      "name": "Membrane Separation Technologies",
+      "subfield": "Water Science and Technology"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Materials Science",
+      "id": "T10107",
+      "name": "Ferroelectric and Piezoelectric Materials",
+      "subfield": "Materials Chemistry"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10837",
+      "name": "Dermatology and Skin Diseases",
+      "subfield": "Dermatology"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10218",
+      "name": "Sepsis Diagnosis and Treatment",
+      "subfield": "Epidemiology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T13763",
+      "name": "Historical Legal Studies and Society",
+      "subfield": "Political Science and International Relations"
+    },
+    {
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T11957",
+      "name": "Food Safety and Hygiene",
+      "subfield": "Food Science"
+    },
+    {
       "domain": "Social Sciences",
       "field": "Social Sciences",
       "id": "T10509",
       "name": "Religion, Spirituality, and Psychology",
       "subfield": "Health"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10276",
-      "name": "Helicobacter pylori-related gastroenterology studies",
-      "subfield": "Surgery"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T10470",
-      "name": "Usability and User Interface Design",
-      "subfield": "Human-Computer Interaction"
     },
     {
       "domain": "Physical Sciences",
@@ -11212,18 +11198,25 @@
       "subfield": "Electrical and Electronic Engineering"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T12332",
-      "name": "Comparative constitutional jurisprudence studies",
-      "subfield": "Political Science and International Relations"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Earth and Planetary Sciences",
       "id": "T13193",
       "name": "Geological Studies and Exploration",
       "subfield": "Geology"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T10470",
+      "name": "Usability and User Interface Design",
+      "subfield": "Human-Computer Interaction"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10276",
+      "name": "Helicobacter pylori-related gastroenterology studies",
+      "subfield": "Surgery"
     },
     {
       "domain": "Health Sciences",
@@ -11247,18 +11240,18 @@
       "subfield": "Economics and Econometrics"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10309",
-      "name": "Acute Myeloid Leukemia Research",
-      "subfield": "Hematology"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Chemistry",
       "id": "T11831",
       "name": "Chemical Synthesis and Reactions",
       "subfield": "Organic Chemistry"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10309",
+      "name": "Acute Myeloid Leukemia Research",
+      "subfield": "Hematology"
     },
     {
       "domain": "Physical Sciences",
@@ -11282,18 +11275,25 @@
       "subfield": "Biomaterials"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Physics and Astronomy",
-      "id": "T10477",
-      "name": "Astrophysics and Star Formation Studies",
-      "subfield": "Astronomy and Astrophysics"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Psychology",
       "id": "T10316",
       "name": "Sleep and related disorders",
       "subfield": "Experimental and Cognitive Psychology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T12332",
+      "name": "Comparative constitutional jurisprudence studies",
+      "subfield": "Political Science and International Relations"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Physics and Astronomy",
+      "id": "T10477",
+      "name": "Astrophysics and Star Formation Studies",
+      "subfield": "Astronomy and Astrophysics"
     },
     {
       "domain": "Social Sciences",
@@ -11304,17 +11304,17 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T11028",
-      "name": "Social Work Education and Practice",
-      "subfield": "Public Administration"
-    },
-    {
-      "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T14494",
       "name": "American Literature and Culture",
       "subfield": "History"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T11028",
+      "name": "Social Work Education and Practice",
+      "subfield": "Public Administration"
     },
     {
       "domain": "Social Sciences",
@@ -11331,18 +11331,18 @@
       "subfield": "Ecology"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Dentistry",
-      "id": "T10359",
-      "name": "Dental Implant Techniques and Outcomes",
-      "subfield": "Oral Surgery"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Social Sciences",
       "id": "T11640",
       "name": "Linguistic Variation and Morphology",
       "subfield": "Linguistics and Language"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Dentistry",
+      "id": "T10359",
+      "name": "Dental Implant Techniques and Outcomes",
+      "subfield": "Oral Surgery"
     },
     {
       "domain": "Life Sciences",
@@ -11359,11 +11359,11 @@
       "subfield": "History"
     },
     {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T13010",
-      "name": "Agriculture and Agroindustry Studies",
-      "subfield": "General Agricultural and Biological Sciences"
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10364",
+      "name": "Reproductive Biology and Fertility",
+      "subfield": "Public Health, Environmental and Occupational Health"
     },
     {
       "domain": "Social Sciences",
@@ -11373,11 +11373,25 @@
       "subfield": "Management Information Systems"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10364",
-      "name": "Reproductive Biology and Fertility",
-      "subfield": "Public Health, Environmental and Occupational Health"
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T12144",
+      "name": "Colonialism, slavery, and trade",
+      "subfield": "Anthropology"
+    },
+    {
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T13010",
+      "name": "Agriculture and Agroindustry Studies",
+      "subfield": "General Agricultural and Biological Sciences"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Chemistry",
+      "id": "T11809",
+      "name": "Advanced NMR Techniques and Applications",
+      "subfield": "Spectroscopy"
     },
     {
       "domain": "Physical Sciences",
@@ -11389,37 +11403,9 @@
     {
       "domain": "Social Sciences",
       "field": "Social Sciences",
-      "id": "T12144",
-      "name": "Colonialism, slavery, and trade",
-      "subfield": "Anthropology"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Chemistry",
-      "id": "T11809",
-      "name": "Advanced NMR Techniques and Applications",
-      "subfield": "Spectroscopy"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
       "id": "T11197",
       "name": "Digital Games and Media",
       "subfield": "Sociology and Political Science"
-    },
-    {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T11404",
-      "name": "Irrigation Practices and Water Management",
-      "subfield": "Soil Science"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T12799",
-      "name": "Mobile and Web Applications",
-      "subfield": "Information Systems"
     },
     {
       "domain": "Social Sciences",
@@ -11427,6 +11413,13 @@
       "id": "T12507",
       "name": "Utopian, Dystopian, and Speculative Fiction",
       "subfield": "Philosophy"
+    },
+    {
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T11404",
+      "name": "Irrigation Practices and Water Management",
+      "subfield": "Soil Science"
     },
     {
       "domain": "Social Sciences",
@@ -11444,6 +11437,13 @@
     },
     {
       "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T12799",
+      "name": "Mobile and Web Applications",
+      "subfield": "Information Systems"
+    },
+    {
+      "domain": "Physical Sciences",
       "field": "Environmental Science",
       "id": "T10122",
       "name": "Toxic Organic Pollutants Impact",
@@ -11452,8 +11452,8 @@
     {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
-      "id": "T12119",
-      "name": "Linguistics and Discourse Analysis",
+      "id": "T13931",
+      "name": "Philosophy and Historical Thought",
       "subfield": "Philosophy"
     },
     {
@@ -11466,8 +11466,8 @@
     {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
-      "id": "T13931",
-      "name": "Philosophy and Historical Thought",
+      "id": "T12119",
+      "name": "Linguistics and Discourse Analysis",
       "subfield": "Philosophy"
     },
     {
@@ -11499,18 +11499,18 @@
       "subfield": "Artificial Intelligence"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T10355",
-      "name": "Impact of Technology on Adolescents",
-      "subfield": "Sociology and Political Science"
-    },
-    {
       "domain": "Life Sciences",
       "field": "Neuroscience",
       "id": "T10334",
       "name": "Hearing, Cochlea, Tinnitus, Genetics",
       "subfield": "Sensory Systems"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T10355",
+      "name": "Impact of Technology on Adolescents",
+      "subfield": "Sociology and Political Science"
     },
     {
       "domain": "Health Sciences",
@@ -11532,13 +11532,6 @@
       "id": "T10262",
       "name": "Microwave Engineering and Waveguides",
       "subfield": "Electrical and Electronic Engineering"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T10020",
-      "name": "Quantum Information and Cryptography",
-      "subfield": "Artificial Intelligence"
     },
     {
       "domain": "Social Sciences",
@@ -11577,10 +11570,10 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Mathematics",
-      "id": "T10588",
-      "name": "Mathematical Dynamics and Fractals",
-      "subfield": "Mathematical Physics"
+      "field": "Computer Science",
+      "id": "T10020",
+      "name": "Quantum Information and Cryptography",
+      "subfield": "Artificial Intelligence"
     },
     {
       "domain": "Health Sciences",
@@ -11604,6 +11597,13 @@
       "subfield": "Organic Chemistry"
     },
     {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T11159",
+      "name": "Manufacturing Process and Optimization",
+      "subfield": "Industrial and Manufacturing Engineering"
+    },
+    {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T13178",
@@ -11618,18 +11618,18 @@
       "subfield": "Oral Surgery"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T11159",
-      "name": "Manufacturing Process and Optimization",
-      "subfield": "Industrial and Manufacturing Engineering"
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T14149",
+      "name": "Historical and Literary Analyses",
+      "subfield": "Literature and Literary Theory"
     },
     {
       "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10339",
-      "name": "Advanced Numerical Methods in Computational Mathematics",
-      "subfield": "Computational Mechanics"
+      "field": "Mathematics",
+      "id": "T10588",
+      "name": "Mathematical Dynamics and Fractals",
+      "subfield": "Mathematical Physics"
     },
     {
       "domain": "Social Sciences",
@@ -11639,18 +11639,18 @@
       "subfield": "Clinical Psychology"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T14149",
-      "name": "Historical and Literary Analyses",
-      "subfield": "Literature and Literary Theory"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T11029",
       "name": "Renal Diseases and Glomerulopathies",
       "subfield": "Nephrology"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10339",
+      "name": "Advanced Numerical Methods in Computational Mathematics",
+      "subfield": "Computational Mechanics"
     },
     {
       "domain": "Physical Sciences",
@@ -11665,6 +11665,13 @@
       "id": "T11717",
       "name": "Postcolonial and Cultural Literary Studies",
       "subfield": "Literature and Literary Theory"
+    },
+    {
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T14399",
+      "name": "Invertebrate Taxonomy and Ecology",
+      "subfield": "Ecology, Evolution, Behavior and Systematics"
     },
     {
       "domain": "Social Sciences",
@@ -11683,9 +11690,9 @@
     {
       "domain": "Life Sciences",
       "field": "Agricultural and Biological Sciences",
-      "id": "T14399",
-      "name": "Invertebrate Taxonomy and Ecology",
-      "subfield": "Ecology, Evolution, Behavior and Systematics"
+      "id": "T12834",
+      "name": "Flowering Plant Growth and Cultivation",
+      "subfield": "Plant Science"
     },
     {
       "domain": "Physical Sciences",
@@ -11702,11 +11709,11 @@
       "subfield": "Hepatology"
     },
     {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T12834",
-      "name": "Flowering Plant Growth and Cultivation",
-      "subfield": "Plant Science"
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10472",
+      "name": "Semiconductor materials and devices",
+      "subfield": "Electrical and Electronic Engineering"
     },
     {
       "domain": "Social Sciences",
@@ -11730,18 +11737,11 @@
       "subfield": "Marketing"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10472",
-      "name": "Semiconductor materials and devices",
-      "subfield": "Electrical and Electronic Engineering"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T10320",
-      "name": "Neural Networks and Applications",
-      "subfield": "Artificial Intelligence"
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T13778",
+      "name": "Comparative and World Literature",
+      "subfield": "Literature and Literary Theory"
     },
     {
       "domain": "Life Sciences",
@@ -11751,25 +11751,11 @@
       "subfield": "Molecular Biology"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T13778",
-      "name": "Comparative and World Literature",
-      "subfield": "Literature and Literary Theory"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Psychology",
-      "id": "T10485",
-      "name": "Bullying, Victimization, and Aggression",
-      "subfield": "Social Psychology"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T10883",
-      "name": "Ethics and Social Impacts of AI",
-      "subfield": "Safety Research"
+      "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T10320",
+      "name": "Neural Networks and Applications",
+      "subfield": "Artificial Intelligence"
     },
     {
       "domain": "Physical Sciences",
@@ -11781,9 +11767,16 @@
     {
       "domain": "Social Sciences",
       "field": "Social Sciences",
-      "id": "T11514",
-      "name": "Disability Education and Employment",
+      "id": "T10883",
+      "name": "Ethics and Social Impacts of AI",
       "subfield": "Safety Research"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Psychology",
+      "id": "T10485",
+      "name": "Bullying, Victimization, and Aggression",
+      "subfield": "Social Psychology"
     },
     {
       "domain": "Life Sciences",
@@ -11798,6 +11791,20 @@
       "id": "T10672",
       "name": "Design Education and Practice",
       "subfield": "Mechanical Engineering"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T11514",
+      "name": "Disability Education and Employment",
+      "subfield": "Safety Research"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T14414",
+      "name": "Artificial Intelligence in Education",
+      "subfield": "Information Systems"
     },
     {
       "domain": "Social Sciences",
@@ -11821,11 +11828,11 @@
       "subfield": "Electrical and Electronic Engineering"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Physics and Astronomy",
-      "id": "T10099",
-      "name": "GaN-based semiconductor devices and materials",
-      "subfield": "Condensed Matter Physics"
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10510",
+      "name": "Stroke Rehabilitation and Recovery",
+      "subfield": "Rehabilitation"
     },
     {
       "domain": "Social Sciences",
@@ -11835,18 +11842,18 @@
       "subfield": "Finance"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T14414",
-      "name": "Artificial Intelligence in Education",
-      "subfield": "Information Systems"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Medicine",
-      "id": "T10510",
-      "name": "Stroke Rehabilitation and Recovery",
-      "subfield": "Rehabilitation"
+      "id": "T10118",
+      "name": "SARS-CoV-2 and COVID-19 Research",
+      "subfield": "Infectious Diseases"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Physics and Astronomy",
+      "id": "T10099",
+      "name": "GaN-based semiconductor devices and materials",
+      "subfield": "Condensed Matter Physics"
     },
     {
       "domain": "Physical Sciences",
@@ -11854,13 +11861,6 @@
       "id": "T11595",
       "name": "Textile materials and evaluations",
       "subfield": "Polymers and Plastics"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10118",
-      "name": "SARS-CoV-2 and COVID-19 Research",
-      "subfield": "Infectious Diseases"
     },
     {
       "domain": "Physical Sciences",
@@ -11875,13 +11875,6 @@
       "id": "T10088",
       "name": "Thermochemical Biomass Conversion Processes",
       "subfield": "Biomedical Engineering"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Economics, Econometrics and Finance",
-      "id": "T12641",
-      "name": "Historical and socio-economic studies of Spain and related regions",
-      "subfield": "Economics and Econometrics"
     },
     {
       "domain": "Health Sciences",
@@ -11919,32 +11912,11 @@
       "subfield": "Nephrology"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Health Professions",
-      "id": "T10327",
-      "name": "Adolescent Sexual and Reproductive Health",
-      "subfield": "General Health Professions"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T13179",
-      "name": "Literature, Culture, and Criticism",
-      "subfield": "Literature and Literary Theory"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Materials Science",
       "id": "T10544",
       "name": "Glass properties and applications",
       "subfield": "Ceramics and Composites"
-    },
-    {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T10494",
-      "name": "Plant Virus Research Studies",
-      "subfield": "Plant Science"
     },
     {
       "domain": "Social Sciences",
@@ -11954,11 +11926,32 @@
       "subfield": "Education"
     },
     {
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T13179",
+      "name": "Literature, Culture, and Criticism",
+      "subfield": "Literature and Literary Theory"
+    },
+    {
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T10494",
+      "name": "Plant Virus Research Studies",
+      "subfield": "Plant Science"
+    },
+    {
       "domain": "Health Sciences",
       "field": "Nursing",
       "id": "T10858",
       "name": "Clinical Nutrition and Gastroenterology",
       "subfield": "Nutrition and Dietetics"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Health Professions",
+      "id": "T10327",
+      "name": "Adolescent Sexual and Reproductive Health",
+      "subfield": "General Health Professions"
     },
     {
       "domain": "Physical Sciences",
@@ -11982,18 +11975,11 @@
       "subfield": "Cognitive Neuroscience"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Business, Management and Accounting",
-      "id": "T13164",
-      "name": "Quality and Management Systems",
-      "subfield": "Strategy and Management"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Economics, Econometrics and Finance",
-      "id": "T10067",
-      "name": "Stochastic processes and financial applications",
-      "subfield": "Finance"
+      "domain": "Life Sciences",
+      "field": "Biochemistry, Genetics and Molecular Biology",
+      "id": "T10441",
+      "name": "Muscle Physiology and Disorders",
+      "subfield": "Molecular Biology"
     },
     {
       "domain": "Health Sciences",
@@ -12003,18 +11989,18 @@
       "subfield": "Physiology"
     },
     {
-      "domain": "Life Sciences",
-      "field": "Biochemistry, Genetics and Molecular Biology",
-      "id": "T10441",
-      "name": "Muscle Physiology and Disorders",
-      "subfield": "Molecular Biology"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Business, Management and Accounting",
       "id": "T10880",
       "name": "Environmental Sustainability in Business",
       "subfield": "Marketing"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T11813",
+      "name": "Library Collection Development and Digital Resources",
+      "subfield": "Information Systems"
     },
     {
       "domain": "Social Sciences",
@@ -12024,11 +12010,11 @@
       "subfield": "Education"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T11813",
-      "name": "Library Collection Development and Digital Resources",
-      "subfield": "Information Systems"
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T12377",
+      "name": "Digital Humanities and Scholarship",
+      "subfield": "Literature and Literary Theory"
     },
     {
       "domain": "Physical Sciences",
@@ -12039,10 +12025,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T12377",
-      "name": "Digital Humanities and Scholarship",
-      "subfield": "Literature and Literary Theory"
+      "field": "Social Sciences",
+      "id": "T10314",
+      "name": "Social and Intergroup Psychology",
+      "subfield": "Sociology and Political Science"
     },
     {
       "domain": "Health Sciences",
@@ -12053,10 +12039,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T10314",
-      "name": "Social and Intergroup Psychology",
-      "subfield": "Sociology and Political Science"
+      "field": "Economics, Econometrics and Finance",
+      "id": "T10067",
+      "name": "Stochastic processes and financial applications",
+      "subfield": "Finance"
     },
     {
       "domain": "Social Sciences",
@@ -12073,11 +12059,18 @@
       "subfield": "Orthopedics and Sports Medicine"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Physics and Astronomy",
-      "id": "T10591",
-      "name": "Theoretical and Computational Physics",
-      "subfield": "Condensed Matter Physics"
+      "domain": "Social Sciences",
+      "field": "Business, Management and Accounting",
+      "id": "T13164",
+      "name": "Quality and Management Systems",
+      "subfield": "Strategy and Management"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Economics, Econometrics and Finance",
+      "id": "T12641",
+      "name": "Historical and socio-economic studies of Spain and related regions",
+      "subfield": "Economics and Econometrics"
     },
     {
       "domain": "Physical Sciences",
@@ -12085,6 +12078,13 @@
       "id": "T10271",
       "name": "Seismic Imaging and Inversion Techniques",
       "subfield": "Geophysics"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Physics and Astronomy",
+      "id": "T10591",
+      "name": "Theoretical and Computational Physics",
+      "subfield": "Condensed Matter Physics"
     },
     {
       "domain": "Social Sciences",
@@ -12101,11 +12101,11 @@
       "subfield": "Spectroscopy"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Physics and Astronomy",
-      "id": "T10818",
-      "name": "Astrophysics and Cosmic Phenomena",
-      "subfield": "Nuclear and High Energy Physics"
+      "domain": "Social Sciences",
+      "field": "Business, Management and Accounting",
+      "id": "T13025",
+      "name": "American History and Culture",
+      "subfield": "Marketing"
     },
     {
       "domain": "Physical Sciences",
@@ -12115,25 +12115,18 @@
       "subfield": "Electrical and Electronic Engineering"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Business, Management and Accounting",
-      "id": "T13025",
-      "name": "American History and Culture",
-      "subfield": "Marketing"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T12767",
-      "name": "Conflict of Laws and Jurisdiction",
-      "subfield": "Political Science and International Relations"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Materials Science",
       "id": "T10306",
       "name": "Liquid Crystal Research Advancements",
       "subfield": "Electronic, Optical and Magnetic Materials"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Physics and Astronomy",
+      "id": "T10818",
+      "name": "Astrophysics and Cosmic Phenomena",
+      "subfield": "Nuclear and High Energy Physics"
     },
     {
       "domain": "Health Sciences",
@@ -12143,13 +12136,6 @@
       "subfield": "Epidemiology"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T11121",
-      "name": "Public Relations and Crisis Communication",
-      "subfield": "Communication"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Environmental Science",
       "id": "T10226",
@@ -12157,11 +12143,18 @@
       "subfield": "Global and Planetary Change"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10524",
-      "name": "Traffic control and management",
-      "subfield": "Control and Systems Engineering"
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T11121",
+      "name": "Public Relations and Crisis Communication",
+      "subfield": "Communication"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T12767",
+      "name": "Conflict of Laws and Jurisdiction",
+      "subfield": "Political Science and International Relations"
     },
     {
       "domain": "Health Sciences",
@@ -12176,6 +12169,13 @@
       "id": "T10522",
       "name": "Medical Imaging Techniques and Applications",
       "subfield": "Radiology, Nuclear Medicine and Imaging"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10524",
+      "name": "Traffic control and management",
+      "subfield": "Control and Systems Engineering"
     },
     {
       "domain": "Social Sciences",
@@ -12213,6 +12213,27 @@
       "subfield": "Mechanical Engineering"
     },
     {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10571",
+      "name": "Robotic Mechanisms and Dynamics",
+      "subfield": "Control and Systems Engineering"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Psychology",
+      "id": "T10853",
+      "name": "Anxiety, Depression, Psychometrics, Treatment, Cognitive Processes",
+      "subfield": "Experimental and Cognitive Psychology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T12764",
+      "name": "Polish Historical and Cultural Studies",
+      "subfield": "Political Science and International Relations"
+    },
+    {
       "domain": "Social Sciences",
       "field": "Business, Management and Accounting",
       "id": "T12121",
@@ -12229,16 +12250,9 @@
     {
       "domain": "Physical Sciences",
       "field": "Engineering",
-      "id": "T10571",
-      "name": "Robotic Mechanisms and Dynamics",
-      "subfield": "Control and Systems Engineering"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Psychology",
-      "id": "T10853",
-      "name": "Anxiety, Depression, Psychometrics, Treatment, Cognitive Processes",
-      "subfield": "Experimental and Cognitive Psychology"
+      "id": "T10944",
+      "name": "Turbomachinery Performance and Optimization",
+      "subfield": "Aerospace Engineering"
     },
     {
       "domain": "Social Sciences",
@@ -12246,20 +12260,6 @@
       "id": "T13599",
       "name": "Architecture and Cultural Influences",
       "subfield": "Archeology"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10944",
-      "name": "Turbomachinery Performance and Optimization",
-      "subfield": "Aerospace Engineering"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T12764",
-      "name": "Polish Historical and Cultural Studies",
-      "subfield": "Political Science and International Relations"
     },
     {
       "domain": "Health Sciences",
@@ -12284,10 +12284,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T11857",
-      "name": "Archaeological and Historical Studies",
-      "subfield": "Archeology"
+      "field": "Psychology",
+      "id": "T10826",
+      "name": "Behavioral and Psychological Studies",
+      "subfield": "Developmental and Educational Psychology"
     },
     {
       "domain": "Life Sciences",
@@ -12295,13 +12295,6 @@
       "id": "T10506",
       "name": "Aquaculture disease management and microbiota",
       "subfield": "Immunology"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Psychology",
-      "id": "T10826",
-      "name": "Behavioral and Psychological Studies",
-      "subfield": "Developmental and Educational Psychology"
     },
     {
       "domain": "Life Sciences",
@@ -12318,18 +12311,18 @@
       "subfield": "Infectious Diseases"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10760",
-      "name": "Pancreatitis Pathology and Treatment",
-      "subfield": "Surgery"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Chemistry",
       "id": "T11746",
       "name": "Inorganic and Organometallic Chemistry",
       "subfield": "Organic Chemistry"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10760",
+      "name": "Pancreatitis Pathology and Treatment",
+      "subfield": "Surgery"
     },
     {
       "domain": "Life Sciences",
@@ -12360,13 +12353,6 @@
       "subfield": "Physical and Theoretical Chemistry"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Physics and Astronomy",
-      "id": "T10622",
-      "name": "Quantum Mechanics and Applications",
-      "subfield": "Atomic and Molecular Physics, and Optics"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10881",
@@ -12381,11 +12367,11 @@
       "subfield": "Control and Systems Engineering"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Business, Management and Accounting",
-      "id": "T11734",
-      "name": "Decision Support System Applications",
-      "subfield": "Management Information Systems"
+      "domain": "Physical Sciences",
+      "field": "Physics and Astronomy",
+      "id": "T10622",
+      "name": "Quantum Mechanics and Applications",
+      "subfield": "Atomic and Molecular Physics, and Optics"
     },
     {
       "domain": "Physical Sciences",
@@ -12395,11 +12381,11 @@
       "subfield": "Mechanics of Materials"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10452",
-      "name": "Iron Metabolism and Disorders",
-      "subfield": "Hematology"
+      "domain": "Social Sciences",
+      "field": "Business, Management and Accounting",
+      "id": "T11734",
+      "name": "Decision Support System Applications",
+      "subfield": "Management Information Systems"
     },
     {
       "domain": "Physical Sciences",
@@ -12407,6 +12393,13 @@
       "id": "T10894",
       "name": "Groundwater flow and contamination studies",
       "subfield": "Environmental Engineering"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10452",
+      "name": "Iron Metabolism and Disorders",
+      "subfield": "Hematology"
     },
     {
       "domain": "Physical Sciences",
@@ -12437,18 +12430,18 @@
       "subfield": "Endocrinology, Diabetes and Metabolism"
     },
     {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T11789",
-      "name": "Land Rights and Reforms",
-      "subfield": "Soil Science"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Earth and Planetary Sciences",
       "id": "T11740",
       "name": "Geochemistry and Elemental Analysis",
       "subfield": "Geochemistry and Petrology"
+    },
+    {
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T11789",
+      "name": "Land Rights and Reforms",
+      "subfield": "Soil Science"
     },
     {
       "domain": "Physical Sciences",
@@ -12472,6 +12465,13 @@
       "subfield": "Modeling and Simulation"
     },
     {
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T11857",
+      "name": "Archaeological and Historical Studies",
+      "subfield": "Archeology"
+    },
+    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10373",
@@ -12493,25 +12493,11 @@
       "subfield": "Mechanical Engineering"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Environmental Science",
-      "id": "T11880",
-      "name": "Forest ecology and management",
-      "subfield": "Nature and Landscape Conservation"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10035",
-      "name": "Phytochemicals and Antioxidant Activities",
-      "subfield": "Biochemistry"
-    },
-    {
       "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T13831",
-      "name": "Archaeological and Geological Studies",
-      "subfield": "Archeology"
+      "field": "Social Sciences",
+      "id": "T13103",
+      "name": "Middle East Politics and Society",
+      "subfield": "Sociology and Political Science"
     },
     {
       "domain": "Physical Sciences",
@@ -12522,24 +12508,17 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T13103",
-      "name": "Middle East Politics and Society",
-      "subfield": "Sociology and Political Science"
-    },
-    {
-      "domain": "Social Sciences",
       "field": "Psychology",
       "id": "T10677",
       "name": "Attachment and Relationship Dynamics",
       "subfield": "Social Psychology"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T12895",
-      "name": "Environmental law and policy",
-      "subfield": "Law"
+      "domain": "Physical Sciences",
+      "field": "Environmental Science",
+      "id": "T11880",
+      "name": "Forest ecology and management",
+      "subfield": "Nature and Landscape Conservation"
     },
     {
       "domain": "Social Sciences",
@@ -12547,6 +12526,13 @@
       "id": "T12440",
       "name": "Karl Barth and Christian Theology",
       "subfield": "Philosophy"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10035",
+      "name": "Phytochemicals and Antioxidant Activities",
+      "subfield": "Biochemistry"
     },
     {
       "domain": "Social Sciences",
@@ -12563,6 +12549,20 @@
       "subfield": "Conservation"
     },
     {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T12895",
+      "name": "Environmental law and policy",
+      "subfield": "Law"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T13831",
+      "name": "Archaeological and Geological Studies",
+      "subfield": "Archeology"
+    },
+    {
       "domain": "Physical Sciences",
       "field": "Physics and Astronomy",
       "id": "T10527",
@@ -12570,11 +12570,11 @@
       "subfield": "Nuclear and High Energy Physics"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Physics and Astronomy",
-      "id": "T10463",
-      "name": "Pulsars and Gravitational Waves Research",
-      "subfield": "Astronomy and Astrophysics"
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T14134",
+      "name": "Medical and Biological Sciences",
+      "subfield": "Anatomy"
     },
     {
       "domain": "Physical Sciences",
@@ -12582,13 +12582,6 @@
       "id": "T10324",
       "name": "Microbial bioremediation and biosurfactants",
       "subfield": "Pollution"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T14134",
-      "name": "Medical and Biological Sciences",
-      "subfield": "Anatomy"
     },
     {
       "domain": "Life Sciences",
@@ -12605,13 +12598,6 @@
       "subfield": "Molecular Biology"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T13710",
-      "name": "European and International Law Studies",
-      "subfield": "Political Science and International Relations"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10630",
@@ -12619,18 +12605,18 @@
       "subfield": "Surgery"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Economics, Econometrics and Finance",
-      "id": "T11257",
-      "name": "Taxation and Compliance Studies",
-      "subfield": "Economics and Econometrics"
-    },
-    {
       "domain": "Life Sciences",
       "field": "Biochemistry, Genetics and Molecular Biology",
       "id": "T10303",
       "name": "Photosynthetic Processes and Mechanisms",
       "subfield": "Molecular Biology"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Physics and Astronomy",
+      "id": "T10463",
+      "name": "Pulsars and Gravitational Waves Research",
+      "subfield": "Astronomy and Astrophysics"
     },
     {
       "domain": "Life Sciences",
@@ -12642,15 +12628,22 @@
     {
       "domain": "Social Sciences",
       "field": "Social Sciences",
-      "id": "T14493",
-      "name": "Criminal Law and Evidence",
-      "subfield": "Law"
+      "id": "T13710",
+      "name": "European and International Law Studies",
+      "subfield": "Political Science and International Relations"
     },
     {
       "domain": "Social Sciences",
       "field": "Economics, Econometrics and Finance",
       "id": "T11792",
       "name": "Pharmaceutical Economics and Policy",
+      "subfield": "Economics and Econometrics"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Economics, Econometrics and Finance",
+      "id": "T11257",
+      "name": "Taxation and Compliance Studies",
       "subfield": "Economics and Econometrics"
     },
     {
@@ -12666,6 +12659,13 @@
       "id": "T10283",
       "name": "Hearing Loss and Rehabilitation",
       "subfield": "Cognitive Neuroscience"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T14493",
+      "name": "Criminal Law and Evidence",
+      "subfield": "Law"
     },
     {
       "domain": "Life Sciences",
@@ -12690,13 +12690,6 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Business, Management and Accounting",
-      "id": "T12779",
-      "name": "Public Procurement and Policy",
-      "subfield": "Strategy and Management"
-    },
-    {
-      "domain": "Social Sciences",
       "field": "Social Sciences",
       "id": "T10757",
       "name": "Geographic Information Systems Studies",
@@ -12710,6 +12703,13 @@
       "subfield": "Pollution"
     },
     {
+      "domain": "Social Sciences",
+      "field": "Business, Management and Accounting",
+      "id": "T12779",
+      "name": "Public Procurement and Policy",
+      "subfield": "Strategy and Management"
+    },
+    {
       "domain": "Life Sciences",
       "field": "Biochemistry, Genetics and Molecular Biology",
       "id": "T10702",
@@ -12717,18 +12717,18 @@
       "subfield": "Genetics"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Health Professions",
-      "id": "T10809",
-      "name": "Occupational Health and Safety Research",
-      "subfield": "Radiological and Ultrasound Technology"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Engineering",
       "id": "T10573",
       "name": "Power Quality and Harmonics",
       "subfield": "Electrical and Electronic Engineering"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Health Professions",
+      "id": "T10809",
+      "name": "Occupational Health and Safety Research",
+      "subfield": "Radiological and Ultrasound Technology"
     },
     {
       "domain": "Health Sciences",
@@ -12766,13 +12766,6 @@
       "subfield": "Cognitive Neuroscience"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10329",
-      "name": "Thyroid Cancer Diagnosis and Treatment",
-      "subfield": "Endocrinology, Diabetes and Metabolism"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Business, Management and Accounting",
       "id": "T10856",
@@ -12780,11 +12773,32 @@
       "subfield": "Management of Technology and Innovation"
     },
     {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10329",
+      "name": "Thyroid Cancer Diagnosis and Treatment",
+      "subfield": "Endocrinology, Diabetes and Metabolism"
+    },
+    {
       "domain": "Physical Sciences",
       "field": "Environmental Science",
       "id": "T10210",
       "name": "Advanced oxidation water treatment",
       "subfield": "Water Science and Technology"
+    },
+    {
+      "domain": "Life Sciences",
+      "field": "Neuroscience",
+      "id": "T10814",
+      "name": "Neuropeptides and Animal Physiology",
+      "subfield": "Cellular and Molecular Neuroscience"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T13153",
+      "name": "Rousseau and Enlightenment Thought",
+      "subfield": "Philosophy"
     },
     {
       "domain": "Physical Sciences",
@@ -12801,11 +12815,18 @@
       "subfield": "Information Systems"
     },
     {
-      "domain": "Life Sciences",
-      "field": "Neuroscience",
-      "id": "T10814",
-      "name": "Neuropeptides and Animal Physiology",
-      "subfield": "Cellular and Molecular Neuroscience"
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10205",
+      "name": "Advanced Fiber Optic Sensors",
+      "subfield": "Electrical and Electronic Engineering"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Economics, Econometrics and Finance",
+      "id": "T10804",
+      "name": "Health Systems, Economic Evaluations, Quality of Life",
+      "subfield": "Economics and Econometrics"
     },
     {
       "domain": "Health Sciences",
@@ -12816,31 +12837,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T13153",
-      "name": "Rousseau and Enlightenment Thought",
-      "subfield": "Philosophy"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Physics and Astronomy",
-      "id": "T10382",
-      "name": "Quantum and electron transport phenomena",
-      "subfield": "Atomic and Molecular Physics, and Optics"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Economics, Econometrics and Finance",
-      "id": "T10804",
-      "name": "Health Systems, Economic Evaluations, Quality of Life",
-      "subfield": "Economics and Econometrics"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10205",
-      "name": "Advanced Fiber Optic Sensors",
-      "subfield": "Electrical and Electronic Engineering"
+      "field": "Social Sciences",
+      "id": "T10674",
+      "name": "School Choice and Performance",
+      "subfield": "Education"
     },
     {
       "domain": "Social Sciences",
@@ -12857,11 +12857,11 @@
       "subfield": "Health, Toxicology and Mutagenesis"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T10674",
-      "name": "School Choice and Performance",
-      "subfield": "Education"
+      "domain": "Physical Sciences",
+      "field": "Physics and Astronomy",
+      "id": "T10382",
+      "name": "Quantum and electron transport phenomena",
+      "subfield": "Atomic and Molecular Physics, and Optics"
     },
     {
       "domain": "Social Sciences",
@@ -12869,6 +12869,13 @@
       "id": "T10383",
       "name": "Language, Discourse, Communication Strategies",
       "subfield": "Language and Linguistics"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Chemistry",
+      "id": "T10973",
+      "name": "Radioactive element chemistry and processing",
+      "subfield": "Inorganic Chemistry"
     },
     {
       "domain": "Life Sciences",
@@ -12879,31 +12886,10 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Chemistry",
-      "id": "T10973",
-      "name": "Radioactive element chemistry and processing",
-      "subfield": "Inorganic Chemistry"
-    },
-    {
-      "domain": "Physical Sciences",
       "field": "Environmental Science",
       "id": "T10555",
       "name": "Fire effects on ecosystems",
       "subfield": "Global and Planetary Change"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Environmental Science",
-      "id": "T13557",
-      "name": "Environmental and sustainability education",
-      "subfield": "Management, Monitoring, Policy and Law"
-    },
-    {
-      "domain": "Life Sciences",
-      "field": "Immunology and Microbiology",
-      "id": "T10695",
-      "name": "Parasites and Host Interactions",
-      "subfield": "Parasitology"
     },
     {
       "domain": "Health Sciences",
@@ -12913,18 +12899,25 @@
       "subfield": "Surgery"
     },
     {
+      "domain": "Life Sciences",
+      "field": "Immunology and Microbiology",
+      "id": "T10695",
+      "name": "Parasites and Host Interactions",
+      "subfield": "Parasitology"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Environmental Science",
+      "id": "T13557",
+      "name": "Environmental and sustainability education",
+      "subfield": "Management, Monitoring, Policy and Law"
+    },
+    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10746",
       "name": "Platelet Disorders and Treatments",
       "subfield": "Hematology"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T12374",
-      "name": "European and International Contract Law",
-      "subfield": "Law"
     },
     {
       "domain": "Social Sciences",
@@ -12948,18 +12941,18 @@
       "subfield": "Health"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10424",
-      "name": "Electric Power System Optimization",
-      "subfield": "Electrical and Electronic Engineering"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T11395",
       "name": "Radiopharmaceutical Chemistry and Applications",
       "subfield": "Radiology, Nuclear Medicine and Imaging"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Psychology",
+      "id": "T10242",
+      "name": "Posttraumatic Stress Disorder Research",
+      "subfield": "Clinical Psychology"
     },
     {
       "domain": "Health Sciences",
@@ -12970,10 +12963,17 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Psychology",
-      "id": "T10242",
-      "name": "Posttraumatic Stress Disorder Research",
-      "subfield": "Clinical Psychology"
+      "field": "Social Sciences",
+      "id": "T12374",
+      "name": "European and International Contract Law",
+      "subfield": "Law"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10424",
+      "name": "Electric Power System Optimization",
+      "subfield": "Electrical and Electronic Engineering"
     },
     {
       "domain": "Physical Sciences",
@@ -12983,18 +12983,18 @@
       "subfield": "Inorganic Chemistry"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T11137",
-      "name": "Historical Philosophy and Science",
-      "subfield": "History and Philosophy of Science"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Chemistry",
       "id": "T10835",
       "name": "Carbohydrate Chemistry and Synthesis",
       "subfield": "Organic Chemistry"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T11137",
+      "name": "Historical Philosophy and Science",
+      "subfield": "History and Philosophy of Science"
     },
     {
       "domain": "Social Sciences",
@@ -13011,18 +13011,18 @@
       "subfield": "Civil and Structural Engineering"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Economics, Econometrics and Finance",
-      "id": "T11599",
-      "name": "Aviation Industry Analysis and Trends",
-      "subfield": "General Economics, Econometrics and Finance"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Earth and Planetary Sciences",
       "id": "T10955",
       "name": "Paleontology and Evolutionary Biology",
       "subfield": "Paleontology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Economics, Econometrics and Finance",
+      "id": "T11599",
+      "name": "Aviation Industry Analysis and Trends",
+      "subfield": "General Economics, Econometrics and Finance"
     },
     {
       "domain": "Physical Sciences",
@@ -13032,32 +13032,18 @@
       "subfield": "Organic Chemistry"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T11676",
-      "name": "Parental Involvement in Education",
-      "subfield": "Education"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T12687",
-      "name": "Public Administration in Developing Nations",
-      "subfield": "Political Science and International Relations"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Psychology",
-      "id": "T12430",
-      "name": "Academic and Historical Perspectives in Psychology",
-      "subfield": "General Psychology"
-    },
-    {
       "domain": "Physical Sciences",
       "field": "Chemistry",
       "id": "T10519",
       "name": "Advanced Proteomics Techniques and Applications",
       "subfield": "Spectroscopy"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Psychology",
+      "id": "T10699",
+      "name": "Primate Behavior and Ecology",
+      "subfield": "Social Psychology"
     },
     {
       "domain": "Physical Sciences",
@@ -13068,10 +13054,24 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Psychology",
-      "id": "T10699",
-      "name": "Primate Behavior and Ecology",
-      "subfield": "Social Psychology"
+      "field": "Social Sciences",
+      "id": "T12687",
+      "name": "Public Administration in Developing Nations",
+      "subfield": "Political Science and International Relations"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T11676",
+      "name": "Parental Involvement in Education",
+      "subfield": "Education"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10046",
+      "name": "Stability and Control of Uncertain Systems",
+      "subfield": "Control and Systems Engineering"
     },
     {
       "domain": "Health Sciences",
@@ -13081,11 +13081,11 @@
       "subfield": "Epidemiology"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10046",
-      "name": "Stability and Control of Uncertain Systems",
-      "subfield": "Control and Systems Engineering"
+      "domain": "Social Sciences",
+      "field": "Psychology",
+      "id": "T12430",
+      "name": "Academic and Historical Perspectives in Psychology",
+      "subfield": "General Psychology"
     },
     {
       "domain": "Social Sciences",
@@ -13123,25 +13123,11 @@
       "subfield": "Ecology"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10689",
-      "name": "Remote-Sensing Image Classification",
-      "subfield": "Media Technology"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Social Sciences",
       "id": "T11147",
       "name": "Misinformation and Its Impacts",
       "subfield": "Sociology and Political Science"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T10203",
-      "name": "Recommender Systems and Techniques",
-      "subfield": "Information Systems"
     },
     {
       "domain": "Physical Sciences",
@@ -13151,6 +13137,13 @@
       "subfield": "Organic Chemistry"
     },
     {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10689",
+      "name": "Remote-Sensing Image Classification",
+      "subfield": "Media Technology"
+    },
+    {
       "domain": "Health Sciences",
       "field": "Health Professions",
       "id": "T12041",
@@ -13158,18 +13151,25 @@
       "subfield": "General Health Professions"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T13100",
-      "name": "Comparative Animal Anatomy Studies",
-      "subfield": "Urology"
-    },
-    {
       "domain": "Life Sciences",
       "field": "Biochemistry, Genetics and Molecular Biology",
       "id": "T10756",
       "name": "Estrogen and related hormone effects",
       "subfield": "Genetics"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T10203",
+      "name": "Recommender Systems and Techniques",
+      "subfield": "Information Systems"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T13100",
+      "name": "Comparative Animal Anatomy Studies",
+      "subfield": "Urology"
     },
     {
       "domain": "Physical Sciences",
@@ -13200,13 +13200,6 @@
       "subfield": "Equine"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10171",
-      "name": "Biofuel production and bioconversion",
-      "subfield": "Biomedical Engineering"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T11016",
@@ -13214,11 +13207,11 @@
       "subfield": "Radiology, Nuclear Medicine and Imaging"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T13101",
-      "name": "Legal and Social Justice Studies",
-      "subfield": "Law"
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10171",
+      "name": "Biofuel production and bioconversion",
+      "subfield": "Biomedical Engineering"
     },
     {
       "domain": "Health Sciences",
@@ -13229,24 +13222,17 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T10720",
-      "name": "Complexity and Algorithms in Graphs",
-      "subfield": "Computational Theory and Mathematics"
-    },
-    {
-      "domain": "Physical Sciences",
       "field": "Engineering",
       "id": "T10409",
       "name": "Fuel Cells and Related Materials",
       "subfield": "Electrical and Electronic Engineering"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T10237",
-      "name": "Cryptography and Data Security",
-      "subfield": "Artificial Intelligence"
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T13101",
+      "name": "Legal and Social Justice Studies",
+      "subfield": "Law"
     },
     {
       "domain": "Physical Sciences",
@@ -13257,10 +13243,24 @@
     },
     {
       "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T10237",
+      "name": "Cryptography and Data Security",
+      "subfield": "Artificial Intelligence"
+    },
+    {
+      "domain": "Physical Sciences",
       "field": "Environmental Science",
       "id": "T12883",
       "name": "Sustainable Development and Environmental Management",
       "subfield": "Management, Monitoring, Policy and Law"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T10720",
+      "name": "Complexity and Algorithms in Graphs",
+      "subfield": "Computational Theory and Mathematics"
     },
     {
       "domain": "Physical Sciences",
@@ -13293,9 +13293,16 @@
     {
       "domain": "Health Sciences",
       "field": "Medicine",
-      "id": "T10793",
-      "name": "Diabetes Management and Education",
-      "subfield": "Endocrinology, Diabetes and Metabolism"
+      "id": "T10706",
+      "name": "Traumatic Brain Injury and Neurovascular Disturbances",
+      "subfield": "Neurology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T13271",
+      "name": "Ukrainian Legal and Forensic Studies",
+      "subfield": "Political Science and International Relations"
     },
     {
       "domain": "Social Sciences",
@@ -13314,9 +13321,16 @@
     {
       "domain": "Health Sciences",
       "field": "Medicine",
-      "id": "T10706",
-      "name": "Traumatic Brain Injury and Neurovascular Disturbances",
-      "subfield": "Neurology"
+      "id": "T10793",
+      "name": "Diabetes Management and Education",
+      "subfield": "Endocrinology, Diabetes and Metabolism"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T11203",
+      "name": "Jewish and Middle Eastern Studies",
+      "subfield": "Sociology and Political Science"
     },
     {
       "domain": "Life Sciences",
@@ -13327,17 +13341,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T13271",
-      "name": "Ukrainian Legal and Forensic Studies",
-      "subfield": "Political Science and International Relations"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Mathematics",
-      "id": "T10948",
-      "name": "Advanced Combinatorial Mathematics",
-      "subfield": "Discrete Mathematics and Combinatorics"
+      "field": "Psychology",
+      "id": "T11104",
+      "name": "Memory, Trauma, and Commemoration",
+      "subfield": "Social Psychology"
     },
     {
       "domain": "Physical Sciences",
@@ -13347,32 +13354,11 @@
       "subfield": "Computer Vision and Pattern Recognition"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T11203",
-      "name": "Jewish and Middle Eastern Studies",
-      "subfield": "Sociology and Political Science"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Psychology",
-      "id": "T11104",
-      "name": "Memory, Trauma, and Commemoration",
-      "subfield": "Social Psychology"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10693",
       "name": "Blood transfusion and management",
       "subfield": "Biochemistry"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Chemistry",
-      "id": "T10578",
-      "name": "Supramolecular Chemistry and Complexes",
-      "subfield": "Organic Chemistry"
     },
     {
       "domain": "Physical Sciences",
@@ -13389,18 +13375,11 @@
       "subfield": "Pulmonary and Respiratory Medicine"
     },
     {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T10889",
-      "name": "Soil erosion and sediment transport",
-      "subfield": "Soil Science"
-    },
-    {
       "domain": "Physical Sciences",
-      "field": "Physics and Astronomy",
-      "id": "T10064",
-      "name": "Complex Network Analysis Techniques",
-      "subfield": "Statistical and Nonlinear Physics"
+      "field": "Chemistry",
+      "id": "T10578",
+      "name": "Supramolecular Chemistry and Complexes",
+      "subfield": "Organic Chemistry"
     },
     {
       "domain": "Physical Sciences",
@@ -13408,6 +13387,13 @@
       "id": "T10281",
       "name": "Advanced Battery Materials and Technologies",
       "subfield": "Electrical and Electronic Engineering"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Mathematics",
+      "id": "T10948",
+      "name": "Advanced Combinatorial Mathematics",
+      "subfield": "Discrete Mathematics and Combinatorics"
     },
     {
       "domain": "Physical Sciences",
@@ -13425,24 +13411,31 @@
     },
     {
       "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10654",
-      "name": "Pneumonia and Respiratory Infections",
-      "subfield": "Epidemiology"
-    },
-    {
-      "domain": "Health Sciences",
       "field": "Health Professions",
       "id": "T13986",
       "name": "Medical Practices and Rehabilitation",
       "subfield": "Physical Therapy, Sports Therapy and Rehabilitation"
     },
     {
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T10889",
+      "name": "Soil erosion and sediment transport",
+      "subfield": "Soil Science"
+    },
+    {
       "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T10260",
-      "name": "Software Engineering Research",
-      "subfield": "Information Systems"
+      "field": "Physics and Astronomy",
+      "id": "T10064",
+      "name": "Complex Network Analysis Techniques",
+      "subfield": "Statistical and Nonlinear Physics"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10654",
+      "name": "Pneumonia and Respiratory Infections",
+      "subfield": "Epidemiology"
     },
     {
       "domain": "Physical Sciences",
@@ -13466,6 +13459,13 @@
       "subfield": "Education"
     },
     {
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T12437",
+      "name": "Balkans: History, Politics, Society",
+      "subfield": "Cultural Studies"
+    },
+    {
       "domain": "Life Sciences",
       "field": "Biochemistry, Genetics and Molecular Biology",
       "id": "T11178",
@@ -13473,18 +13473,18 @@
       "subfield": "Molecular Biology"
     },
     {
+      "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T10260",
+      "name": "Software Engineering Research",
+      "subfield": "Information Systems"
+    },
+    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10449",
       "name": "Renal cell carcinoma treatment",
       "subfield": "Pulmonary and Respiratory Medicine"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T12437",
-      "name": "Balkans: History, Politics, Society",
-      "subfield": "Cultural Studies"
     },
     {
       "domain": "Life Sciences",
@@ -13501,13 +13501,6 @@
       "subfield": "Analytical Chemistry"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10684",
-      "name": "Acute Kidney Injury Research",
-      "subfield": "Nephrology"
-    },
-    {
       "domain": "Life Sciences",
       "field": "Agricultural and Biological Sciences",
       "id": "T11228",
@@ -13515,18 +13508,18 @@
       "subfield": "Ecology, Evolution, Behavior and Systematics"
     },
     {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10684",
+      "name": "Acute Kidney Injury Research",
+      "subfield": "Nephrology"
+    },
+    {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T12390",
       "name": "Comics and Graphic Narratives",
       "subfield": "Visual Arts and Performing Arts"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Mathematics",
-      "id": "T11166",
-      "name": "Analytic Number Theory Research",
-      "subfield": "Algebra and Number Theory"
     },
     {
       "domain": "Health Sciences",
@@ -13543,25 +13536,18 @@
       "subfield": "Clinical Psychology"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T11212",
-      "name": "Cultural Heritage Materials Analysis",
-      "subfield": "Archeology"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Environmental Science",
-      "id": "T11781",
-      "name": "Wastewater Treatment and Reuse",
-      "subfield": "Waste Management and Disposal"
-    },
-    {
       "domain": "Life Sciences",
       "field": "Biochemistry, Genetics and Molecular Biology",
       "id": "T10943",
       "name": "Escherichia coli research studies",
       "subfield": "Endocrinology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T11212",
+      "name": "Cultural Heritage Materials Analysis",
+      "subfield": "Archeology"
     },
     {
       "domain": "Health Sciences",
@@ -13571,11 +13557,46 @@
       "subfield": "Otorhinolaryngology"
     },
     {
+      "domain": "Physical Sciences",
+      "field": "Environmental Science",
+      "id": "T11781",
+      "name": "Wastewater Treatment and Reuse",
+      "subfield": "Waste Management and Disposal"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Mathematics",
+      "id": "T11166",
+      "name": "Analytic Number Theory Research",
+      "subfield": "Algebra and Number Theory"
+    },
+    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10877",
       "name": "Allergic Rhinitis and Sensitization",
       "subfield": "Immunology and Allergy"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T13470",
+      "name": "Surface Treatment and Coatings",
+      "subfield": "Mechanical Engineering"
+    },
+    {
+      "domain": "Life Sciences",
+      "field": "Biochemistry, Genetics and Molecular Biology",
+      "id": "T10432",
+      "name": "DNA and Nucleic Acid Chemistry",
+      "subfield": "Molecular Biology"
+    },
+    {
+      "domain": "Social Sciences",
+      "field": "Economics, Econometrics and Finance",
+      "id": "T12825",
+      "name": "Defense, Military, and Policy Studies",
+      "subfield": "Economics and Econometrics"
     },
     {
       "domain": "Social Sciences",
@@ -13586,31 +13607,10 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T13470",
-      "name": "Surface Treatment and Coatings",
-      "subfield": "Mechanical Engineering"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Business, Management and Accounting",
-      "id": "T12040",
-      "name": "International Arbitration and Investment Law",
-      "subfield": "Strategy and Management"
-    },
-    {
-      "domain": "Physical Sciences",
       "field": "Environmental Science",
       "id": "T11056",
       "name": "Physiological and biochemical adaptations",
       "subfield": "Ecology"
-    },
-    {
-      "domain": "Life Sciences",
-      "field": "Biochemistry, Genetics and Molecular Biology",
-      "id": "T10432",
-      "name": "DNA and Nucleic Acid Chemistry",
-      "subfield": "Molecular Biology"
     },
     {
       "domain": "Health Sciences",
@@ -13621,10 +13621,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Economics, Econometrics and Finance",
-      "id": "T12825",
-      "name": "Defense, Military, and Policy Studies",
-      "subfield": "Economics and Econometrics"
+      "field": "Social Sciences",
+      "id": "T12011",
+      "name": "Insurance, Mortality, Demography, Risk Management",
+      "subfield": "Demography"
     },
     {
       "domain": "Health Sciences",
@@ -13635,24 +13635,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T12011",
-      "name": "Insurance, Mortality, Demography, Risk Management",
-      "subfield": "Demography"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T14332",
-      "name": "European Linguistics and Anthropology",
-      "subfield": "Anthropology"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T11544",
-      "name": "Gender, Labor, and Family Dynamics",
-      "subfield": "Gender Studies"
+      "field": "Business, Management and Accounting",
+      "id": "T12040",
+      "name": "International Arbitration and Investment Law",
+      "subfield": "Strategy and Management"
     },
     {
       "domain": "Social Sciences",
@@ -13663,10 +13649,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Psychology",
-      "id": "T10426",
-      "name": "Child Abuse and Trauma",
-      "subfield": "Clinical Psychology"
+      "field": "Social Sciences",
+      "id": "T11544",
+      "name": "Gender, Labor, and Family Dynamics",
+      "subfield": "Gender Studies"
     },
     {
       "domain": "Physical Sciences",
@@ -13676,18 +13662,18 @@
       "subfield": "Mechanical Engineering"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10680",
-      "name": "Wind Energy Research and Development",
-      "subfield": "Aerospace Engineering"
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T14332",
+      "name": "European Linguistics and Anthropology",
+      "subfield": "Anthropology"
     },
     {
       "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T11042",
-      "name": "Corruption and Economic Development",
-      "subfield": "Sociology and Political Science"
+      "field": "Psychology",
+      "id": "T10426",
+      "name": "Child Abuse and Trauma",
+      "subfield": "Clinical Psychology"
     },
     {
       "domain": "Health Sciences",
@@ -13699,9 +13685,9 @@
     {
       "domain": "Social Sciences",
       "field": "Social Sciences",
-      "id": "T10907",
-      "name": "International Student and Expatriate Challenges",
-      "subfield": "Communication"
+      "id": "T11042",
+      "name": "Corruption and Economic Development",
+      "subfield": "Sociology and Political Science"
     },
     {
       "domain": "Health Sciences",
@@ -13711,18 +13697,11 @@
       "subfield": "Complementary and alternative medicine"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T11062",
-      "name": "Gear and Bearing Dynamics Analysis",
-      "subfield": "Mechanical Engineering"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10979",
-      "name": "Breastfeeding Practices and Influences",
-      "subfield": "Epidemiology"
+      "domain": "Social Sciences",
+      "field": "Social Sciences",
+      "id": "T10907",
+      "name": "International Student and Expatriate Challenges",
+      "subfield": "Communication"
     },
     {
       "domain": "Social Sciences",
@@ -13734,9 +13713,16 @@
     {
       "domain": "Physical Sciences",
       "field": "Engineering",
-      "id": "T10716",
-      "name": "Soil and Unsaturated Flow",
-      "subfield": "Civil and Structural Engineering"
+      "id": "T11062",
+      "name": "Gear and Bearing Dynamics Analysis",
+      "subfield": "Mechanical Engineering"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10680",
+      "name": "Wind Energy Research and Development",
+      "subfield": "Aerospace Engineering"
     },
     {
       "domain": "Social Sciences",
@@ -13748,23 +13734,30 @@
     {
       "domain": "Health Sciences",
       "field": "Medicine",
+      "id": "T10979",
+      "name": "Breastfeeding Practices and Influences",
+      "subfield": "Epidemiology"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10716",
+      "name": "Soil and Unsaturated Flow",
+      "subfield": "Civil and Structural Engineering"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
       "id": "T10554",
       "name": "Hemoglobinopathies and Related Disorders",
       "subfield": "Genetics"
     },
     {
       "domain": "Health Sciences",
-      "field": "Veterinary",
-      "id": "T11074",
-      "name": "Helminth infection and control",
-      "subfield": "Small Animals"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Materials Science",
-      "id": "T10079",
-      "name": "Nanoparticles: synthesis and applications",
-      "subfield": "Materials Chemistry"
+      "field": "Medicine",
+      "id": "T11636",
+      "name": "Artificial Intelligence in Healthcare and Education",
+      "subfield": "Health Informatics"
     },
     {
       "domain": "Social Sciences",
@@ -13775,24 +13768,24 @@
     },
     {
       "domain": "Physical Sciences",
+      "field": "Materials Science",
+      "id": "T10079",
+      "name": "Nanoparticles: synthesis and applications",
+      "subfield": "Materials Chemistry"
+    },
+    {
+      "domain": "Physical Sciences",
       "field": "Engineering",
       "id": "T13093",
       "name": "Electric Power Systems and Control",
       "subfield": "Electrical and Electronic Engineering"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T12343",
-      "name": "Geography Education and Pedagogy",
-      "subfield": "Geography, Planning and Development"
-    },
-    {
       "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T11636",
-      "name": "Artificial Intelligence in Healthcare and Education",
-      "subfield": "Health Informatics"
+      "field": "Veterinary",
+      "id": "T11074",
+      "name": "Helminth infection and control",
+      "subfield": "Small Animals"
     },
     {
       "domain": "Physical Sciences",
@@ -13803,17 +13796,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T13156",
-      "name": "Historical Linguistics and Language Studies",
-      "subfield": "Language and Linguistics"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10299",
-      "name": "Photonic and Optical Devices",
-      "subfield": "Electrical and Electronic Engineering"
+      "field": "Social Sciences",
+      "id": "T12343",
+      "name": "Geography Education and Pedagogy",
+      "subfield": "Geography, Planning and Development"
     },
     {
       "domain": "Social Sciences",
@@ -13821,13 +13807,6 @@
       "id": "T10758",
       "name": "Cinema and Media Studies",
       "subfield": "Economics and Econometrics"
-    },
-    {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T13102",
-      "name": "Soil and Environmental Studies",
-      "subfield": "Soil Science"
     },
     {
       "domain": "Social Sciences",
@@ -13844,25 +13823,32 @@
       "subfield": "Physical and Theoretical Chemistry"
     },
     {
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T13156",
+      "name": "Historical Linguistics and Language Studies",
+      "subfield": "Language and Linguistics"
+    },
+    {
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T13102",
+      "name": "Soil and Environmental Studies",
+      "subfield": "Soil Science"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T10299",
+      "name": "Photonic and Optical Devices",
+      "subfield": "Electrical and Electronic Engineering"
+    },
+    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10418",
       "name": "Pelvic floor disorders treatments",
       "subfield": "Rheumatology"
-    },
-    {
-      "domain": "Life Sciences",
-      "field": "Immunology and Microbiology",
-      "id": "T10873",
-      "name": "Bacterial Infections and Vaccines",
-      "subfield": "Microbiology"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T11236",
-      "name": "Control Systems and Identification",
-      "subfield": "Control and Systems Engineering"
     },
     {
       "domain": "Physical Sciences",
@@ -13879,6 +13865,13 @@
       "subfield": "Small Animals"
     },
     {
+      "domain": "Life Sciences",
+      "field": "Immunology and Microbiology",
+      "id": "T10873",
+      "name": "Bacterial Infections and Vaccines",
+      "subfield": "Microbiology"
+    },
+    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T11055",
@@ -13893,6 +13886,13 @@
       "subfield": "Clinical Psychology"
     },
     {
+      "domain": "Physical Sciences",
+      "field": "Engineering",
+      "id": "T11236",
+      "name": "Control Systems and Identification",
+      "subfield": "Control and Systems Engineering"
+    },
+    {
       "domain": "Health Sciences",
       "field": "Medicine",
       "id": "T10832",
@@ -13901,10 +13901,10 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Engineering",
-      "id": "T10305",
-      "name": "Power System Optimization and Stability",
-      "subfield": "Electrical and Electronic Engineering"
+      "field": "Chemistry",
+      "id": "T12967",
+      "name": "Molecular Spectroscopy and Structure",
+      "subfield": "Spectroscopy"
     },
     {
       "domain": "Social Sciences",
@@ -13915,10 +13915,10 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Chemistry",
-      "id": "T12967",
-      "name": "Molecular Spectroscopy and Structure",
-      "subfield": "Spectroscopy"
+      "field": "Engineering",
+      "id": "T10305",
+      "name": "Power System Optimization and Stability",
+      "subfield": "Electrical and Electronic Engineering"
     },
     {
       "domain": "Social Sciences",
@@ -13935,18 +13935,18 @@
       "subfield": "Hematology"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Materials Science",
-      "id": "T10083",
-      "name": "Graphene research and applications",
-      "subfield": "Materials Chemistry"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
       "id": "T13433",
       "name": "Short Stories in Global Literature",
       "subfield": "Literature and Literary Theory"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Materials Science",
+      "id": "T10083",
+      "name": "Graphene research and applications",
+      "subfield": "Materials Chemistry"
     },
     {
       "domain": "Social Sciences",
@@ -13970,20 +13970,6 @@
       "subfield": "Physiology"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Mathematics",
-      "id": "T11151",
-      "name": "Advanced Topology and Set Theory",
-      "subfield": "Geometry and Topology"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T12184",
-      "name": "Linguistics and Education Research",
-      "subfield": "Literature and Literary Theory"
-    },
-    {
       "domain": "Social Sciences",
       "field": "Decision Sciences",
       "id": "T11890",
@@ -14000,30 +13986,16 @@
     {
       "domain": "Health Sciences",
       "field": "Medicine",
-      "id": "T10821",
-      "name": "Cardiovascular Function and Risk Factors",
-      "subfield": "Cardiology and Cardiovascular Medicine"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Medicine",
       "id": "T10844",
       "name": "Radiation Dose and Imaging",
       "subfield": "Radiology, Nuclear Medicine and Imaging"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Energy",
-      "id": "T12271",
-      "name": "Renewable energy and sustainable power systems",
-      "subfield": "Renewable Energy, Sustainability and the Environment"
-    },
-    {
       "domain": "Health Sciences",
       "field": "Medicine",
-      "id": "T10512",
-      "name": "Orthopaedic implants and arthroplasty",
-      "subfield": "Surgery"
+      "id": "T10821",
+      "name": "Cardiovascular Function and Risk Factors",
+      "subfield": "Cardiology and Cardiovascular Medicine"
     },
     {
       "domain": "Social Sciences",
@@ -14035,16 +14007,30 @@
     {
       "domain": "Health Sciences",
       "field": "Medicine",
-      "id": "T10537",
-      "name": "Attention Deficit Hyperactivity Disorder",
-      "subfield": "Psychiatry and Mental health"
+      "id": "T10512",
+      "name": "Orthopaedic implants and arthroplasty",
+      "subfield": "Surgery"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Energy",
+      "id": "T12271",
+      "name": "Renewable energy and sustainable power systems",
+      "subfield": "Renewable Energy, Sustainability and the Environment"
     },
     {
       "domain": "Social Sciences",
       "field": "Arts and Humanities",
-      "id": "T12542",
-      "name": "Second Language Learning and Teaching",
+      "id": "T12184",
+      "name": "Linguistics and Education Research",
       "subfield": "Literature and Literary Theory"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Mathematics",
+      "id": "T11151",
+      "name": "Advanced Topology and Set Theory",
+      "subfield": "Geometry and Topology"
     },
     {
       "domain": "Life Sciences",
@@ -14052,6 +14038,20 @@
       "id": "T10918",
       "name": "Memory Processes and Influences",
       "subfield": "Cognitive Neuroscience"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10537",
+      "name": "Attention Deficit Hyperactivity Disorder",
+      "subfield": "Psychiatry and Mental health"
+    },
+    {
+      "domain": "Life Sciences",
+      "field": "Agricultural and Biological Sciences",
+      "id": "T11578",
+      "name": "Plant Pathogenic Bacteria Studies",
+      "subfield": "Plant Science"
     },
     {
       "domain": "Physical Sciences",
@@ -14069,31 +14069,10 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T10904",
-      "name": "Embedded Systems Design Techniques",
-      "subfield": "Hardware and Architecture"
-    },
-    {
-      "domain": "Life Sciences",
-      "field": "Agricultural and Biological Sciences",
-      "id": "T11578",
-      "name": "Plant Pathogenic Bacteria Studies",
-      "subfield": "Plant Science"
-    },
-    {
-      "domain": "Physical Sciences",
       "field": "Chemistry",
       "id": "T11434",
       "name": "Electrochemical Analysis and Applications",
       "subfield": "Electrochemistry"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T10743",
-      "name": "Software Testing and Debugging Techniques",
-      "subfield": "Software"
     },
     {
       "domain": "Social Sciences",
@@ -14103,11 +14082,25 @@
       "subfield": "Literature and Literary Theory"
     },
     {
+      "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T10904",
+      "name": "Embedded Systems Design Techniques",
+      "subfield": "Hardware and Architecture"
+    },
+    {
       "domain": "Social Sciences",
-      "field": "Economics, Econometrics and Finance",
-      "id": "T10987",
-      "name": "Microfinance and Financial Inclusion",
-      "subfield": "Economics and Econometrics"
+      "field": "Arts and Humanities",
+      "id": "T12542",
+      "name": "Second Language Learning and Teaching",
+      "subfield": "Literature and Literary Theory"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Computer Science",
+      "id": "T10743",
+      "name": "Software Testing and Debugging Techniques",
+      "subfield": "Software"
     },
     {
       "domain": "Physical Sciences",
@@ -14118,10 +14111,10 @@
     },
     {
       "domain": "Social Sciences",
-      "field": "Psychology",
-      "id": "T11079",
-      "name": "Creativity in Education and Neuroscience",
-      "subfield": "Experimental and Cognitive Psychology"
+      "field": "Economics, Econometrics and Finance",
+      "id": "T10987",
+      "name": "Microfinance and Financial Inclusion",
+      "subfield": "Economics and Econometrics"
     },
     {
       "domain": "Life Sciences",
@@ -14131,18 +14124,18 @@
       "subfield": "Cognitive Neuroscience"
     },
     {
+      "domain": "Social Sciences",
+      "field": "Psychology",
+      "id": "T11079",
+      "name": "Creativity in Education and Neuroscience",
+      "subfield": "Experimental and Cognitive Psychology"
+    },
+    {
       "domain": "Life Sciences",
       "field": "Agricultural and Biological Sciences",
       "id": "T11495",
       "name": "Animal Virus Infections Studies",
       "subfield": "Animal Science and Zoology"
-    },
-    {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T10992",
-      "name": "Forensic Anthropology and Bioarchaeology Studies",
-      "subfield": "Archeology"
     },
     {
       "domain": "Physical Sciences",
@@ -14159,11 +14152,11 @@
       "subfield": "Materials Chemistry"
     },
     {
-      "domain": "Physical Sciences",
-      "field": "Environmental Science",
-      "id": "T11119",
-      "name": "Urban Stormwater Management Solutions",
-      "subfield": "Environmental Engineering"
+      "domain": "Social Sciences",
+      "field": "Arts and Humanities",
+      "id": "T10992",
+      "name": "Forensic Anthropology and Bioarchaeology Studies",
+      "subfield": "Archeology"
     },
     {
       "domain": "Physical Sciences",
@@ -14174,17 +14167,10 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Energy",
-      "id": "T10905",
-      "name": "Solar Thermal and Photovoltaic Systems",
-      "subfield": "Renewable Energy, Sustainability and the Environment"
-    },
-    {
-      "domain": "Physical Sciences",
-      "field": "Physics and Astronomy",
-      "id": "T11323",
-      "name": "Gamma-ray bursts and supernovae",
-      "subfield": "Astronomy and Astrophysics"
+      "field": "Environmental Science",
+      "id": "T11119",
+      "name": "Urban Stormwater Management Solutions",
+      "subfield": "Environmental Engineering"
     },
     {
       "domain": "Physical Sciences",
@@ -14194,11 +14180,18 @@
       "subfield": "Safety, Risk, Reliability and Quality"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Arts and Humanities",
-      "id": "T12341",
-      "name": "Spanish Linguistics and Language Studies",
-      "subfield": "Language and Linguistics"
+      "domain": "Health Sciences",
+      "field": "Medicine",
+      "id": "T10645",
+      "name": "Cardiac Arrest and Resuscitation",
+      "subfield": "Emergency Medicine"
+    },
+    {
+      "domain": "Physical Sciences",
+      "field": "Energy",
+      "id": "T10905",
+      "name": "Solar Thermal and Photovoltaic Systems",
+      "subfield": "Renewable Energy, Sustainability and the Environment"
     },
     {
       "domain": "Social Sciences",
@@ -14208,11 +14201,11 @@
       "subfield": "Philosophy"
     },
     {
-      "domain": "Health Sciences",
-      "field": "Medicine",
-      "id": "T10645",
-      "name": "Cardiac Arrest and Resuscitation",
-      "subfield": "Emergency Medicine"
+      "domain": "Physical Sciences",
+      "field": "Physics and Astronomy",
+      "id": "T11323",
+      "name": "Gamma-ray bursts and supernovae",
+      "subfield": "Astronomy and Astrophysics"
     },
     {
       "domain": "Health Sciences",
@@ -14223,17 +14216,10 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Computer Science",
-      "id": "T10639",
-      "name": "Advanced Software Engineering Methodologies",
-      "subfield": "Artificial Intelligence"
-    },
-    {
-      "domain": "Health Sciences",
-      "field": "Health Professions",
-      "id": "T12339",
-      "name": "Medical Malpractice and Liability Issues",
-      "subfield": "Pharmacy"
+      "field": "Materials Science",
+      "id": "T10204",
+      "name": "Microstructure and mechanical properties",
+      "subfield": "Materials Chemistry"
     },
     {
       "domain": "Social Sciences",
@@ -14251,17 +14237,17 @@
     },
     {
       "domain": "Physical Sciences",
-      "field": "Materials Science",
-      "id": "T10204",
-      "name": "Microstructure and mechanical properties",
-      "subfield": "Materials Chemistry"
+      "field": "Computer Science",
+      "id": "T10639",
+      "name": "Advanced Software Engineering Methodologies",
+      "subfield": "Artificial Intelligence"
     },
     {
-      "domain": "Social Sciences",
-      "field": "Social Sciences",
-      "id": "T13595",
-      "name": "Archaeology and Cultural Heritage",
-      "subfield": "Cultural Studies"
+      "domain": "Health Sciences",
+      "field": "Health Professions",
+      "id": "T12339",
+      "name": "Medical Malpractice and Liability Issues",
+      "subfield": "Pharmacy"
     },
     {
       "domain": "Life Sciences",
@@ -14276,6 +14262,20 @@
       "id": "T10487",
       "name": "Plant and animal studies",
       "subfield": "Ecology, Evolution, Behavior and Systematics"
+    },
+    {
+      "domain": "Health Sciences",
+      "field": "Health Professions",
+      "id": "T11396",
+      "name": "Artificial Intelligence in Healthcare",
+      "subfield": "Health Information Management"
+    },
+    {
+      "domain": "Life Sciences",
+      "field": "Neuroscience",
+      "id": "T10042",
+      "name": "Neural and Behavioral Psychology Studies",
+      "subfield": "Cognitive Neuroscience"
     }
   ]
 }
