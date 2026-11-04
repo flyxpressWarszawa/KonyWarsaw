@@ -1,0 +1,42 @@
+# Proposed paid worker; not provisioned by committing this file.
+services:
+- type: worker
+  name: msw-central-engine-worker
+  runtime: python
+  plan: 2c-4g
+  region: frankfurt
+  autoDeployTrigger: 'off'
+  numInstances: 1
+  buildCommand: python -m compileall -q msw_engine
+  startCommand: python -m msw_engine
+  disk:
+    name: msw-engine-state
+    mountPath: /var/data
+    sizeGB: 10
+  envVars:
+  - key: MSW_WP_URL
+    value: https://mobilny-serwis-warszawa.pl
+  - key: MSW_TRANSPORT_URL
+    sync: false
+  - key: MSW_NODE
+    sync: false
+  - key: MSW_SECRET
+    sync: false
+  - key: MSW_DATA_DIR
+    value: /var/data/msw-engine
+  - key: MSW_RUNTIME_MODE
+    value: vps
+  - key: MSW_MAX_JOB_SECONDS
+    value: '300'
+  - key: MSW_MAX_JOB_MEMORY_MB
+    value: '3072'
+  - key: MSW_WP_CRON_INTERVAL
+    value: '300'
+  - key: PYTHONDONTWRITEBYTECODE
+    value: '1'
+  - key: PYTHONUNBUFFERED
+    value: '1'
+  repo: https://github.com/flyxpressWarszawa/KonyWarsaw
+  branch: msw/engine-runtime-20261104
+  rootDir: msw-autonomous-engine
+  maxShutdownDelaySeconds: 300

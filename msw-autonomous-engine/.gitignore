@@ -1,0 +1,8 @@
+.env
+*.env
+!worker.env.example
+__pycache__/
+*.pyc
+*.sqlite3*
+*.log
+data/
