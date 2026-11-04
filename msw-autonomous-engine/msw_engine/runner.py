@@ -13,6 +13,10 @@ from .client import Client, TransportError, encode
 from .tasks import TaskError, dispatch, handlers
 
 
+class WorkerDraining(RuntimeError):
+    """Leave an unfinished lease for server-side recovery during shutdown."""
+
+
 class Journal:
     def __init__(self, data_dir: Path):
         self.data_dir = data_dir
@@ -134,6 +138,8 @@ class Worker:
                     result = json.loads(parent.recv_bytes(524289))
                     break
                 now = time.monotonic()
+                if self.stopping:
+                    raise WorkerDraining()
                 if now - started > self.max_seconds:
                     process.terminate()
                     result = {"ok": False, "error": "task_time_budget"}
@@ -158,6 +164,8 @@ class Worker:
 
     def run_once(self) -> dict:
         self.replay_receipts()
+        if self.stopping:
+            raise WorkerDraining()
         response = self.client.send("claim", {"capabilities": list(handlers())})
         self.last_server_contact = int(time.time())
         if response.get("state") != "claimed":
@@ -189,6 +197,9 @@ class Worker:
                 if poke_cron_seconds > 0 and time.monotonic() - last_poke > poke_cron_seconds:
                     self.client.poke_cron()
                     last_poke = time.monotonic()
+            except WorkerDraining:
+                self.health("draining")
+                return 0
             except TransportError as error:
                 print(json.dumps({"state": "connection_retry", "code": error.code, "http_status": error.status}), flush=True)
                 self.health("connection_retry")

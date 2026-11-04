@@ -39,4 +39,3 @@ services:
   repo: https://github.com/flyxpressWarszawa/KonyWarsaw
   branch: msw/engine-runtime-20261104
   rootDir: msw-autonomous-engine
-  maxShutdownDelaySeconds: 300
