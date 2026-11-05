@@ -4,7 +4,7 @@ import tempfile
 import unittest
 
 from msw_engine.client import TransportError
-from msw_engine.fotoatlas import FotoAtlas
+from msw_engine.fotoatlas_render_bridge import FotoAtlas
 
 
 ITEM = {"attachment_id": 10, "lease": "b" * 48, "source_sha256": "a" * 64}

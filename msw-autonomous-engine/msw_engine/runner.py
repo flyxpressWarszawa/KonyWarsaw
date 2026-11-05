@@ -229,7 +229,7 @@ class Worker:
             from .priority_lane import PriorityLane
             PriorityLane(self.client, self.journal.data_dir).start(lambda: self.stopping)
         if not once and os.environ.get("MSW_FOTOATLAS_ENABLED") == "1":
-            from .fotoatlas import AtlasClient, FotoAtlas
+            from .fotoatlas_render_bridge import AtlasClient, FotoAtlas
             FotoAtlas(AtlasClient(self.client), self.journal.data_dir).start(lambda: self.stopping)
         while not self.stopping:
             try:
