@@ -94,7 +94,21 @@ class FederationTests(unittest.TestCase):
     def test_redirect_or_provider_failure_never_exposes_response_body(self):
         with patch.dict(os.environ, {'MSW_WP_URL':'https://mobilny-serwis-warszawa.pl','MSW_NODE':'test-node','MSW_SECRET':'s'*64}), patch('msw_engine.federation.build_opener') as opener:
             opener.return_value.open.side_effect=HTTPError('https://other.invalid',302,'secret-body',{},None)
-            with self.assertRaisesRegex(TaskError,'^federation_http_302$'):gateway('snapshot')
+            with self.assertRaisesRegex(TaskError,'^fed_snapshot_http_302$'):gateway('snapshot')
+
+    def test_optional_peer_http_failure_is_explicit_and_does_not_fabricate_a_reply(self):
+        def unavailable(operation,values=None):
+            if operation=='owned_advice':raise TaskError('fed_owned_advice_http_502')
+            return self.fake_gateway(operation,values)
+        with patch('msw_engine.federation.gateway',side_effect=unavailable):result=generate({'prompt':'Spawanie MSW'},self.directory)
+        self.assertEqual(result['unavailable_peers'],['render_owned_llm'])
+        self.assertEqual(result['text'],'MSW współpracuje przez wspólną kolejkę.')
+        peer=next(r for r in result['contributors'] if r['component']=='render_owned_llm')
+        self.assertFalse(peer['transport_verified'])
+
+    def test_required_synthesis_failure_is_never_replaced_by_static_text(self):
+        with patch('msw_engine.federation.gateway',side_effect=TaskError('fed_generate_http_502')):
+            with self.assertRaises(TaskError):generate({'prompt':'Test','collaborate':False,'use_knowledge':False},self.directory)
 
     def test_credential_bearing_or_insecure_url_refused(self):
         for url in ['http://host.invalid','https://user:pass@host.invalid','https://host.invalid/?secret=x']:

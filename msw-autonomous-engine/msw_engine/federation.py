@@ -43,9 +43,25 @@ def gateway(operation: str, values: dict | None = None) -> dict:
             raise TaskError("federation_response_invalid")
         return result["data"]
     except HTTPError as error:
-        raise TaskError("federation_http_" + str(error.code)) from None
+        code = ""
+        try:
+            info = json.loads(error.read(8192))
+            candidate = info.get("code", "")
+            if isinstance(candidate,str) and re.fullmatch(r"[A-Za-z0-9_.-]{1,100}",candidate):
+                code = ":" + candidate
+        except (ValueError, OSError, AttributeError):
+            pass
+        raise TaskError("fed_"+operation+"_http_"+str(error.code)+code) from None
     except (URLError, TimeoutError, OSError, ValueError, KeyError):
         raise TaskError("federation_unavailable") from None
+
+
+def optional_gateway(operation: str, values: dict | None = None) -> dict:
+    from .tasks import TaskError
+    try:
+        return gateway(operation, values)
+    except TaskError as error:
+        return {"state":"transport_unavailable", "error":str(error)[:120], "transport_verified":False}
 
 
 def technical_peer() -> dict:
@@ -91,20 +107,20 @@ def generate(payload: dict, directory: Path) -> dict:
         steps.append({"component": "python_hub", **snapshot["python_hub"]})
         context.append("Stan sieci MSW (obserwacja, nie dowód jakości AI): " + json.dumps({
             "wordpress": snapshot["wordpress"], "python_hub": snapshot["python_hub"]}, ensure_ascii=False))
-        public = gateway("public_context", {"query": prompt})
+        public = optional_gateway("public_context", {"query": prompt})
         if public.get("service_query"):
             memory_query = public["service_query"]
         for item in public.get("items", [])[:3]:
             sources.append({"source": "python_hub", "url": item["source_url"], "title": item["title"]})
             context.append("Źródło Python HUB: " + json.dumps(item, ensure_ascii=False))
         steps.append({"component": "python_public_retrieval", "sources": len(public.get("items", [])),
-                      "source_readback_verified": bool(public.get("items"))})
-        advice = gateway("python_advice", {"query": prompt})
+                      "source_readback_verified": bool(public.get("items")), **{k:public[k] for k in ("state","error") if k in public}})
+        advice = optional_gateway("python_advice", {"query": prompt})
         steps.append({"component": "python_native_advice", **{k: v for k, v in advice.items() if k != "text"}})
         if advice.get("text"):
             context.append("Materiał doradczy z istniejącego serwera Python (niezweryfikowana propozycja): " + advice["text"][:1200])
         for operation, label in (("local_advice", "server_local_llm"), ("owned_advice", "render_owned_llm")):
-            suggestion = gateway(operation, {"query": prompt})
+            suggestion = optional_gateway(operation, {"query": prompt})
             steps.append({"component": label, **{key: value for key, value in suggestion.items() if key != "text"}})
             if suggestion.get("text"):
                 context.append("Niezweryfikowana propozycja modelu " + label + ": " + suggestion["text"][:1200])
@@ -143,4 +159,5 @@ def generate(payload: dict, directory: Path) -> dict:
     return {"schema": "msw.federation.result.v1", "text": answer["text"], "model": answer["model"],
             "provider": "wordpress_openai_router", "task": task, "contributors": steps, "sources": sources,
             "answer_sha256": hashlib.sha256(answer["text"].encode()).hexdigest(), "context_truncated": len(supplemental.encode()) > context_budget,
+            "unavailable_peers": [row["component"] for row in steps if row.get("state") in {"transport_unavailable","unavailable","pairing_or_transport_unavailable","unavailable_or_cold_start","generation_unavailable"}],
             "training_performed": False, "weights_modified": False, "publication_performed": False}

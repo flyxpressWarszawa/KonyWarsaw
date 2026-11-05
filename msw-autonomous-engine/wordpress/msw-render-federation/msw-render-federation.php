@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MSW AI Wspólny Silnik — WordPress, Render i Python
  * Description: Podpisany most współpracy, wspólna kolejka i potwierdzone wyniki istniejących silników MSW.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Requires PHP: 8.1
  * Author: Mobilny Serwis Warszawa
  */
@@ -88,7 +88,7 @@ final class MSW_Render_Federation
         $digest=hash('sha256',wp_json_encode($sources,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
         $text='Spawanie, bramy i pozostałe usługi MSW: zaproponuj trzy konkretne kroki rozwoju na podstawie aktualnego publicznego katalogu oraz wspólnej pamięci. Oddziel bieżące potwierdzenia techniczne od historycznych źródeł i propozycji. Nie deklaruj wykonania działań. Katalog: ';
         $text.=function_exists('mb_substr')?mb_substr(implode('; ',array_column($sources,'title')),0,1200):substr(implode('; ',array_column($sources,'title')),0,1200);
-        $r=self::submit(['request_id'=>'catalogue-'.$digest,'task'=>'business','prompt'=>$text,'max_tokens'=>1800,'use_knowledge'=>true,'collaborate'=>true]);
+        $r=self::submit(['request_id'=>'catalogue-2-'.$digest,'task'=>'business','prompt'=>$text,'max_tokens'=>1800,'use_knowledge'=>true,'collaborate'=>true]);
         if(!is_wp_error($r))update_option('msw_federation_catalogue_job',['source_sha256'=>$digest,'job_id'=>$r['job_id'],'state'=>$r['state'],'source_count'=>count($sources)],false);
     }
 
@@ -119,9 +119,9 @@ final class MSW_Render_Federation
         register_rest_route('msw-federation/v1', '/result/(?P<id>[a-f0-9-]{36})', ['methods' => 'GET', 'permission_callback' => [self::class, 'admin'],
             'callback' => [self::class, 'result']]);
         register_rest_route('msw-federation/v1', '/status', ['methods' => 'GET', 'permission_callback' => [self::class, 'admin'],
-            'callback' => static fn() => ['schema' => self::SCHEMA, 'version' => '1.2.0', 'queue_available' => class_exists('MSW\\UnifiedEngine\\RemoteStore'),
+            'callback' => static fn() => ['schema' => self::SCHEMA, 'version' => '1.2.1', 'queue_available' => class_exists('MSW\\UnifiedEngine\\RemoteStore'),
                 'router_loaded' => class_exists('MSW_ChatGPT_Router'), 'python_adapter_loaded' => class_exists('MSWH_Engine_Adapters'),
-                'last_result' => get_option('msw_federation_last_result', []), 'all_plugin_callbacks_automatically_migrated' => false]]);
+                'last_result' => get_option('msw_federation_last_result', []), 'last_fault'=>get_option('msw_federation_last_fault',[]), 'all_plugin_callbacks_automatically_migrated' => false]]);
     }
 
     public static function snapshot(): array
@@ -303,7 +303,10 @@ final class MSW_Render_Federation
                 || !in_array($p['task'] ?? '', ['technical','business','seo','article','review','voice'], true)
                 || !is_int($p['max_tokens'] ?? null) || $p['max_tokens'] < 64 || $p['max_tokens'] > 3000) return self::error('model_arguments');
             $answer = MSW_ChatGPT_Router::generate($p['task'], $p['text'], ['max_output_tokens' => $p['max_tokens']]);
-            if (is_wp_error($answer)) return self::error('model_'.$answer->get_error_code(), 502);
+            if (is_wp_error($answer)) {
+                update_option('msw_federation_last_fault',['at'=>time(),'stage'=>'generate','code'=>$answer->get_error_code()],false);
+                return self::error('model_'.$answer->get_error_code(), 502);
+            }
             $model = defined('MSW_CHATGPT_MODEL') ? (string)MSW_CHATGPT_MODEL : 'gpt-5-mini';
             $data = ['text' => $answer, 'model' => $model, 'provider' => 'openai_existing_router'];
         }
