@@ -218,6 +218,11 @@ class Worker:
             fleet_thread = FleetScheduler(self.client.wordpress_url, self.journal.data_dir,
                                          maintain=lambda: pump(self.client),
                                          consume=lambda: consume_data(self.client, self.journal.data_dir, lambda: self.stopping)).start(lambda: self.stopping)
+        # AI generation must not wait behind thousands of native callbacks.
+        # This consumes the SAME server queue with an explicit capability filter.
+        if not once and "llm.generate" in handlers():
+            from .priority_lane import PriorityLane
+            PriorityLane(self.client, self.journal.data_dir).start(lambda: self.stopping)
         while not self.stopping:
             try:
                 result = self.run_once()
@@ -253,5 +258,6 @@ class Worker:
             while not self.stopping and time.monotonic() < deadline:
                 time.sleep(min(1, max(0, deadline - time.monotonic())))
         return 0
+
 
 
