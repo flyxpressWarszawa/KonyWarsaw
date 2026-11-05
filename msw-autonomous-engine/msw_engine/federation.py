@@ -33,7 +33,7 @@ def gateway(operation: str, values: dict | None = None) -> dict:
     request = Request(base + "/wp-json/msw-federation/v1/gateway", data=raw,
                       headers=signed_headers("status", node, secret, raw), method="POST")
     try:
-        timeout = 85 if operation in {"local_advice", "owned_advice"} else 45
+        timeout = 85 if operation in {"local_advice", "owned_advice", "autonomy_execute"} else 45
         with build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context())).open(request, timeout=timeout) as response:
             body = response.read(262145)
         if len(body) > 262144:
