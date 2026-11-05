@@ -10,6 +10,8 @@ An authenticated `POST /msw-federation/v1/submit` accepts `request_id`, `prompt`
 
 The router retains its original API quota, input validation and provider configuration. Publication, private case export, arbitrary code execution and weight training are not enabled by this flow. All installed plugins are inventoried; inventory does not claim that every plugin has already adopted the submission hook, or that every original callback has been migrated.
 
+The authenticated `/msw-federation/v1/connect` action adds only `federation.submit` to the existing Central Engine write capability list, verifies its policy readback, and connects the existing public-catalogue change event. Repeated events use a source digest and the same queue idempotency key. No additional cron is created. `federation.status` and `federation.result` expose the shared state to existing Central Engine workflows; queue submission proof is explicitly distinct from finished inference.
+
 Python worker for the authenticated job queue of MSW Unified Engine on WordPress. Core computation uses the Python standard library. Pinned dependencies support the optional private compatibility adapters.
 
 Core handlers: static SEO measurements, evidence-based ranking, approved-source ingestion and lexical retrieval with SQLite FTS5. Ingestion does not train model weights. Optional local models and legacy adapters require explicitly configured resources. Private source and model weights are not part of this repository.

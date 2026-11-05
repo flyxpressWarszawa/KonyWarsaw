@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MSW AI Wspólny Silnik — WordPress, Render i Python
  * Description: Podpisany most współpracy, wspólna kolejka i potwierdzone wyniki istniejących silników MSW.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Requires PHP: 8.1
  * Author: Mobilny Serwis Warszawa
  */
@@ -18,6 +18,7 @@ final class MSW_Render_Federation
         add_filter('msw_ai_federation_submit', [self::class, 'submit_filter'], 10, 4);
         add_action('mswue_remote_result', [self::class, 'completed'], 30, 4);
         add_action('msw_central_engine_register_capabilities', [self::class, 'register_capabilities']);
+        add_action('mswh_integrations_synced', [self::class, 'catalogue_changed'], 40, 1);
     }
 
     private static function error(string $code, int $status = 400): WP_Error
@@ -38,6 +39,57 @@ final class MSW_Render_Federation
             'label'=>'MSW AI — odczyt potwierdzonego wyniku współpracy','plugin'=>'msw-render-federation/msw-render-federation.php','effect'=>'read',
             'input_schema'=>['type'=>'object','additionalProperties'=>false,'required'=>['job_id'],'properties'=>['job_id'=>['type'=>'string','pattern'=>'^[a-f0-9-]{36}$']]],
             'permission_callback'=>[self::class,'admin'],'callback'=>static fn($a)=>self::result(['id'=>$a['job_id']])]);
+        MSW_Central_Engine_Registry::register('federation.submit',[
+            'label'=>'MSW AI — wspólne zadanie rozwoju WordPress, Render i Python','plugin'=>'msw-render-federation/msw-render-federation.php','effect'=>'write',
+            'input_schema'=>['type'=>'object','additionalProperties'=>false,'required'=>['prompt'],
+                'properties'=>['prompt'=>['type'=>'string','minLength'=>1,'maxLength'=>6000],'task'=>['type'=>'string','enum'=>['technical','business','seo','article','review','voice']],
+                    'max_tokens'=>['type'=>'integer','minimum'=>64,'maximum'=>3000],'use_knowledge'=>['type'=>'boolean'],'collaborate'=>['type'=>'boolean']]],
+            'permission_callback'=>[self::class,'admin'],
+            'callback'=>static fn($a,$ctx)=>self::submit(array_merge($a,['request_id'=>'ce-'.hash('sha256',$ctx['request_id'])])),
+            'verify'=>static function($input,$result){
+                global $wpdb;$table=\MSW\UnifiedEngine\RemoteStore::table();
+                $row=$wpdb->get_row($wpdb->prepare("SELECT id,kind,payload_sha256 FROM {$table} WHERE id=%s",$result['job_id']??''),ARRAY_A);
+                $ok=is_array($row)&&$row['kind']==='llm.generate'&&hash_equals($row['payload_sha256'],(string)($result['payload_sha256']??''));
+                return ['verified'=>$ok,'evidence'=>['job_id'=>$row['id']??null,'queue_readback_verified'=>$ok,'generation_finished'=>false]];
+            }]);
+    }
+
+    public static function connect()
+    {
+        if(!class_exists('MSW_Central_Engine_Core'))return self::error('central_engine_missing',503);
+        $catalog=MSW_Central_Engine_Registry::catalog();
+        if(($catalog['federation.submit']['plugin']??'')!=='msw-render-federation/msw-render-federation.php')return self::error('central_capability_conflict',409);
+        $option=MSW_Central_Engine_Core::OPTION;$settings=(array)get_option($option,[]);
+        $caps=(array)($settings['write_capabilities']??MSW_Central_Engine_Core::defaults()['write_capabilities']);
+        if(!in_array('federation.submit',$caps,true))$caps[]='federation.submit';
+        $settings['write_capabilities']=$caps;update_option($option,$settings,false);
+        if((array)get_option($option,[])!==$settings)return self::error('central_policy_readback',503);
+        update_option('msw_federation_catalogue_auto',true,false);
+        if(class_exists('MSWH_Integrations')){
+            $feed=MSWH_Integrations::feed();
+            if(!is_wp_error($feed)&&($feed['complete']??false)===true)self::catalogue_changed($feed['entries']);
+        }
+        return ['connected'=>true,'central_capability'=>'federation.submit','policy_readback_verified'=>true,
+            'automatic_trigger'=>'existing_public_catalogue_change_event','additional_cron_created'=>false,
+            'catalogue_job'=>get_option('msw_federation_catalogue_job',[])];
+    }
+
+    public static function catalogue_changed($entries): void
+    {
+        if(get_option('msw_federation_catalogue_auto',false)!==true||!is_array($entries)||!$entries)return;
+        $sources=[];
+        foreach(array_slice($entries,0,100) as $e){
+            if(!is_array($e)||!is_string($e['url']??null)||!is_string($e['title']??null))continue;
+            if(wp_parse_url($e['url'],PHP_URL_HOST)!==wp_parse_url(home_url(),PHP_URL_HOST))continue;
+            $sources[]=['url'=>$e['url'],'title'=>$e['title'],'content_sha256'=>hash('sha256',(string)($e['text']??''))];
+        }
+        if(!$sources)return;
+        usort($sources,static fn($a,$b)=>strcmp($a['url'],$b['url']));
+        $digest=hash('sha256',wp_json_encode($sources,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+        $text='Spawanie, bramy i pozostałe usługi MSW: zaproponuj trzy konkretne kroki rozwoju na podstawie aktualnego publicznego katalogu oraz wspólnej pamięci. Oddziel bieżące potwierdzenia techniczne od historycznych źródeł i propozycji. Nie deklaruj wykonania działań. Katalog: ';
+        $text.=function_exists('mb_substr')?mb_substr(implode('; ',array_column($sources,'title')),0,1200):substr(implode('; ',array_column($sources,'title')),0,1200);
+        $r=self::submit(['request_id'=>'catalogue-'.$digest,'task'=>'business','prompt'=>$text,'max_tokens'=>1800,'use_knowledge'=>true,'collaborate'=>true]);
+        if(!is_wp_error($r))update_option('msw_federation_catalogue_job',['source_sha256'=>$digest,'job_id'=>$r['job_id'],'state'=>$r['state'],'source_count'=>count($sources)],false);
     }
 
     public static function permission($request)
@@ -63,10 +115,11 @@ final class MSW_Render_Federation
             'callback' => [self::class, 'gateway']]);
         register_rest_route('msw-federation/v1', '/submit', ['methods' => 'POST', 'permission_callback' => [self::class, 'admin'],
             'callback' => static fn($r) => self::submit((array)$r->get_json_params())]);
+        register_rest_route('msw-federation/v1', '/connect', ['methods'=>'POST','permission_callback'=>[self::class,'admin'],'callback'=>[self::class,'connect']]);
         register_rest_route('msw-federation/v1', '/result/(?P<id>[a-f0-9-]{36})', ['methods' => 'GET', 'permission_callback' => [self::class, 'admin'],
             'callback' => [self::class, 'result']]);
         register_rest_route('msw-federation/v1', '/status', ['methods' => 'GET', 'permission_callback' => [self::class, 'admin'],
-            'callback' => static fn() => ['schema' => self::SCHEMA, 'version' => '1.1.0', 'queue_available' => class_exists('MSW\\UnifiedEngine\\RemoteStore'),
+            'callback' => static fn() => ['schema' => self::SCHEMA, 'version' => '1.2.0', 'queue_available' => class_exists('MSW\\UnifiedEngine\\RemoteStore'),
                 'router_loaded' => class_exists('MSW_ChatGPT_Router'), 'python_adapter_loaded' => class_exists('MSWH_Engine_Adapters'),
                 'last_result' => get_option('msw_federation_last_result', []), 'all_plugin_callbacks_automatically_migrated' => false]]);
     }
@@ -244,7 +297,7 @@ final class MSW_Render_Federation
         elseif ($operation === 'public_context') {
             if (!is_string($p['query'] ?? null) || strlen($p['query']) > 6000) return self::error('query');
             $items = class_exists('MSWH_Engine_Adapters') ? MSWH_Engine_Adapters::lookup($p['query'], 'render_federation') : [];
-            $data = ['items' => array_slice($items, 0, 3), 'scope' => 'live_exported_public_service_sources', 'private_cases_exported' => false];
+            $data = ['items' => array_slice($items, 0, 3), 'service_query'=>class_exists('MSWH_Engine_Adapters')?MSWH_Engine_Adapters::service_query($p['query']):'', 'scope' => 'live_exported_public_service_sources', 'private_cases_exported' => false];
         } else {
             if (!class_exists('MSW_ChatGPT_Router') || !is_string($p['text'] ?? null) || strlen($p['text']) > 10000
                 || !in_array($p['task'] ?? '', ['technical','business','seo','article','review','voice'], true)
