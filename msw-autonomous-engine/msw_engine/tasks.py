@@ -114,6 +114,12 @@ def knowledge_ingest(payload: dict, data_dir: Path) -> dict:
 
 
 def knowledge_search(payload: dict, data_dir: Path) -> dict:
+    corpus = payload.get("corpus", "approved")
+    if corpus == "legacy_malta":
+        from .legacy_memory import search
+        return search(payload, data_dir)
+    if corpus != "approved":
+        raise TaskError("unknown_knowledge_corpus")
     query = str(payload.get("query", ""))[:2000]
     words = WORD.findall(query.casefold())[:20]
     limit = max(1, min(20, int(payload.get("limit", 5))))
@@ -239,7 +245,8 @@ def runtime_catalog(payload: dict, data_dir: Path) -> dict:
         status = json.loads((data_dir / "runtime-status.json").read_text())
     except (OSError, ValueError):
         return {"state": "not_configured", "modules": []}
-    return {"state": status["state"], "pack_sha256": status.get("pack_sha256"),
+    from .legacy_memory import status as legacy_status
+    return {"state": status["state"], "pack_sha256": status.get("pack_sha256"), "legacy_source_memory": legacy_status(data_dir),
             "modules": [{key: item[key] for key in ("id", "version", "source_sha256") if key in item}
                         for item in status.get("modules", [])], "capabilities": list(handlers())}
 

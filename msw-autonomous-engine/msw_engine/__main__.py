@@ -27,6 +27,9 @@ def main() -> int:
     os.umask(0o077)
     pack = install(directory)
     print(json.dumps({"runtime_pack": pack["state"], "modules": [item["id"] for item in pack["modules"]]}), flush=True)
+    from .legacy_memory import restore
+    legacy = restore(directory)
+    print(json.dumps({"legacy_source_memory": legacy}), flush=True)
     base = os.environ.get("MSW_WP_URL", "").rstrip("/")
     endpoint = os.environ.get("MSW_TRANSPORT_URL", base + "/wp-content/plugins/msw-unified-engine/transport.php")
     try:
