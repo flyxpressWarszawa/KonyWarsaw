@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 import re
 import ssl
+import tempfile
+import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import Request, HTTPSHandler, build_opener
@@ -81,9 +83,38 @@ def technical_peer() -> dict:
         return {"reachable": False, "state": "unavailable_or_cold_start"}
 
 
+def _finish_request(saved: dict) -> dict:
+    from .tasks import TaskError
+    values = saved["values"]
+    answer = gateway("generate", values)
+    deadline = time.monotonic() + 180
+    response_id = None
+    while answer.get("state") == "provider_pending":
+        current_id = answer.get("response_id")
+        if not isinstance(current_id, str) or not current_id.startswith("resp_"):
+            raise TaskError("federation_provider_not_accepted")
+        if response_id is not None and response_id != current_id:
+            raise TaskError("federation_response_identity_changed")
+        response_id = current_id
+        if time.monotonic() >= deadline:
+            raise TaskError("federation_provider_pending")
+        time.sleep(5)
+        # Same persisted prompt and request ID: the server polls the accepted
+        # provider response rather than issuing another paid generation.
+        answer = gateway("generate", values)
+    if not isinstance(answer.get("text"), str) or not answer["text"].strip():
+        raise TaskError("federation_empty_answer")
+    steps = saved["steps"] + [{"component": "openai_router", "api_text_verified": True, "model": answer["model"]}]
+    return {"schema": "msw.federation.result.v1", "text": answer["text"], "model": answer["model"],
+            "provider": "wordpress_openai_router", "task": values["task"], "contributors": steps, "sources": saved["sources"],
+            "answer_sha256": hashlib.sha256(answer["text"].encode()).hexdigest(), "context_truncated": saved["context_truncated"],
+            "unavailable_peers": [row["component"] for row in steps if row.get("state") in {"transport_unavailable","unavailable","pairing_or_transport_unavailable","unavailable_or_cold_start","generation_unavailable"}],
+            "training_performed": False, "weights_modified": False, "publication_performed": False}
+
+
 def generate(payload: dict, directory: Path) -> dict:
     from .tasks import TaskError, knowledge_search
-    allowed = {"prompt", "task", "max_tokens", "use_knowledge", "collaborate"}
+    allowed = {"prompt", "task", "max_tokens", "use_knowledge", "collaborate", "request_id"}
     if set(payload) - allowed:
         raise TaskError("federation_argument_unknown")
     prompt, task = payload.get("prompt"), payload.get("task", "technical")
@@ -97,6 +128,19 @@ def generate(payload: dict, directory: Path) -> dict:
     for key in ("use_knowledge", "collaborate"):
         if key in payload and type(payload[key]) is not bool:
             raise TaskError("federation_boolean_invalid")
+    request_id = payload.get("request_id")
+    if request_id is not None and (not isinstance(request_id, str) or not re.fullmatch(r"[A-Za-z0-9_.:-]{8,120}", request_id)):
+        raise TaskError("federation_request_id_invalid")
+    payload_hash = hashlib.sha256(encode(payload)).hexdigest()
+    cache_dir = directory / "federation-requests"
+    cache_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+    cache_path = cache_dir / (payload_hash + ".json")
+    if cache_path.exists():
+        saved = json.loads(cache_path.read_text())
+        if (saved.get("schema") != "msw.federation.request.v1" or saved.get("payload_sha256") != payload_hash
+                or saved.get("values_sha256") != hashlib.sha256(encode(saved.get("values", {}))).hexdigest()):
+            raise TaskError("federation_request_cache_integrity")
+        return _finish_request(saved)
     steps, context, sources = [], [], []
     memory_query = prompt
     if payload.get("collaborate", True):
@@ -152,12 +196,14 @@ def generate(payload: dict, directory: Path) -> dict:
     context_budget = max(0, 9000-len(prompt.encode())-len(prefix.encode())-40)
     context_text = supplemental.encode()[:context_budget].decode("utf-8", "ignore")
     text = prefix + context_text + "\nPytanie użytkownika:\n" + prompt
-    answer = gateway("generate", {"task": task, "text": text, "max_tokens": maximum})
-    if not isinstance(answer.get("text"), str) or not answer["text"].strip():
-        raise TaskError("federation_empty_answer")
-    steps.append({"component": "openai_router", "api_text_verified": True, "model": answer["model"]})
-    return {"schema": "msw.federation.result.v1", "text": answer["text"], "model": answer["model"],
-            "provider": "wordpress_openai_router", "task": task, "contributors": steps, "sources": sources,
-            "answer_sha256": hashlib.sha256(answer["text"].encode()).hexdigest(), "context_truncated": len(supplemental.encode()) > context_budget,
-            "unavailable_peers": [row["component"] for row in steps if row.get("state") in {"transport_unavailable","unavailable","pairing_or_transport_unavailable","unavailable_or_cold_start","generation_unavailable"}],
-            "training_performed": False, "weights_modified": False, "publication_performed": False}
+    values = {"task": task, "text": text, "max_tokens": maximum, "request_id": request_id or "payload:" + payload_hash}
+    saved = {"schema": "msw.federation.request.v1", "payload_sha256": payload_hash, "values": values,
+             "values_sha256": hashlib.sha256(encode(values)).hexdigest(), "steps": steps, "sources": sources,
+             "context_truncated": len(supplemental.encode()) > context_budget}
+    with tempfile.NamedTemporaryFile(mode="w", dir=cache_dir, delete=False) as handle:
+        json.dump(saved, handle, ensure_ascii=False)
+        handle.flush()
+        os.fsync(handle.fileno())
+        temporary = handle.name
+    os.replace(temporary, cache_path)
+    return _finish_request(saved)
