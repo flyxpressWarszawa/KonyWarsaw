@@ -228,6 +228,9 @@ class Worker:
         if not once and "llm.generate" in handlers():
             from .priority_lane import PriorityLane
             PriorityLane(self.client, self.journal.data_dir).start(lambda: self.stopping)
+        if not once and os.environ.get("MSW_FOTOATLAS_ENABLED") == "1":
+            from .fotoatlas import AtlasClient, FotoAtlas
+            FotoAtlas(AtlasClient(self.client), self.journal.data_dir).start(lambda: self.stopping)
         while not self.stopping:
             try:
                 result = self.run_once()
@@ -263,7 +266,6 @@ class Worker:
             while not self.stopping and time.monotonic() < deadline:
                 time.sleep(min(1, max(0, deadline - time.monotonic())))
         return 0
-
 
 
 
