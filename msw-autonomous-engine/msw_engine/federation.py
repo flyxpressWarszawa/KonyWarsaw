@@ -31,7 +31,8 @@ def gateway(operation: str, values: dict | None = None) -> dict:
     request = Request(base + "/wp-json/msw-federation/v1/gateway", data=raw,
                       headers=signed_headers("status", node, secret, raw), method="POST")
     try:
-        with build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context())).open(request, timeout=45) as response:
+        timeout = 85 if operation in {"local_advice", "owned_advice"} else 45
+        with build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context())).open(request, timeout=timeout) as response:
             body = response.read(262145)
         if len(body) > 262144:
             raise TaskError("federation_response_limit")
@@ -45,6 +46,23 @@ def gateway(operation: str, values: dict | None = None) -> dict:
         raise TaskError("federation_http_" + str(error.code)) from None
     except (URLError, TimeoutError, OSError, ValueError, KeyError):
         raise TaskError("federation_unavailable") from None
+
+
+def technical_peer() -> dict:
+    """Fixed public catalogue peer; profiles are never labelled running agents."""
+    url = "https://msw-technical-core-360.onrender.com/health"
+    try:
+        with build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context())).open(Request(url), timeout=12) as response:
+            raw = response.read(32769)
+        if len(raw) > 32768:
+            return {"reachable": False, "state": "response_limit"}
+        data = json.loads(raw)
+        if data.get("ok") is not True or data.get("service") != "MSW Technical Core 360":
+            return {"reachable": False, "state": "contract_unverified"}
+        return {"reachable": True, "role": "technical_catalogue", "counts": data.get("counts", {}),
+                "agents_running": data.get("counts", {}).get("agents_running"), "model_training": False}
+    except (HTTPError, URLError, TimeoutError, OSError, ValueError, AttributeError):
+        return {"reachable": False, "state": "unavailable_or_cold_start"}
 
 
 def generate(payload: dict, directory: Path) -> dict:
@@ -82,6 +100,19 @@ def generate(payload: dict, directory: Path) -> dict:
         steps.append({"component": "python_native_advice", **{k: v for k, v in advice.items() if k != "text"}})
         if advice.get("text"):
             context.append("Materiał doradczy z istniejącego serwera Python (niezweryfikowana propozycja): " + advice["text"][:1200])
+        for operation, label in (("local_advice", "server_local_llm"), ("owned_advice", "render_owned_llm")):
+            suggestion = gateway(operation, {"query": prompt})
+            steps.append({"component": label, **{key: value for key, value in suggestion.items() if key != "text"}})
+            if suggestion.get("text"):
+                context.append("Niezweryfikowana propozycja modelu " + label + ": " + suggestion["text"][:1200])
+        peer = technical_peer()
+        steps.append({"component": "render_technical_core", **peer})
+        context.append("Stan katalogu technicznego Render: " + json.dumps(peer, ensure_ascii=False))
+        from .own_model import available_handlers as research_handlers
+        if research_handlers():
+            steps.append({"component": "render_own_research_model", "connected_to_shared_queue": True,
+                          "research_only": True, "business_decision_authorized": False,
+                          "generated_research_text_used_for_business": False})
     if payload.get("use_knowledge", True):
         memory = knowledge_search({"query": prompt, "limit": 3}, directory)
         for item in memory.get("items", []):

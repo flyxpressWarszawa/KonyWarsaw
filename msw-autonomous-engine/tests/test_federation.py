@@ -16,6 +16,9 @@ class FederationTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.directory = Path(self.temp.name)
+        peer = patch('msw_engine.federation.technical_peer',return_value={'reachable':True,'agents_running':0})
+        peer.start()
+        self.addCleanup(peer.stop)
 
     def fake_gateway(self, operation, values=None):
         if operation == 'snapshot':
@@ -24,6 +27,8 @@ class FederationTests(unittest.TestCase):
             return {'items': [{'source_url': 'https://mobilny-serwis-warszawa.pl/', 'title': 'Spawanie', 'excerpt': 'Katalog publiczny'}]}
         if operation == 'python_advice':
             return {'state': 'native_text_received', 'text': 'Propozycja serwera Python.'}
+        if operation in {'local_advice','owned_advice'}:
+            return {'state':'verified_inference','text':'Propozycja modelu lokalnego.'}
         self.sent = values
         return {'text': 'MSW współpracuje przez wspólną kolejkę.', 'model': 'gpt-5-mini'}
 
@@ -32,7 +37,7 @@ class FederationTests(unittest.TestCase):
         with patch('msw_engine.federation.gateway', side_effect=self.fake_gateway):
             result = generate({'prompt': 'Spawanie MSW', 'task': 'business'}, self.directory)
         self.assertEqual(result['answer_sha256'], hashlib.sha256(result['text'].encode()).hexdigest())
-        self.assertEqual(len(result['contributors']), 6)
+        self.assertEqual(len(result['contributors']), 9)
         self.assertEqual(len(result['sources']), 2)
         self.assertIn('Katalog publiczny', self.sent['text'])
         self.assertIn('Usługi spawania MSW', self.sent['text'])

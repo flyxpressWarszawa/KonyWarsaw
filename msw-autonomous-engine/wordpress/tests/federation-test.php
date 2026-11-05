@@ -37,5 +37,11 @@ namespace {
     check(is_wp_error(MSW_Render_Federation::gateway(new Req(['schema'=>'msw.federation.v1','operation'=>'shell']))));
     check(is_wp_error(MSW_Render_Federation::submit(['prompt'=>'test','request_id'=>'bad/key'])));
     check(is_wp_error(MSW_Render_Federation::submit(['prompt'=>'test','request_id'=>'request-123','shell'=>'x'])));
+    $key=str_repeat("\0",32);$nonce=str_repeat('ab',16);$raw='{"ok":true}';
+    check(MSW_Render_Federation::node_signature($key,'w4z','GET','/health','1793880000',$nonce,'')==='01e8d3b904b2cfc1548465a6cac9f3454bab21e05e95a0c3d76ecbcfc17196df');
+    $digest=hash('sha256',$raw);$signature='9414caed977cfb707806e7db9166d54a868a22562522469de1950ae5478d73c3';
+    check(MSW_Render_Federation::node_response_valid($key,'w4z',$nonce,200,$raw,$digest,$signature));
+    check(!MSW_Render_Federation::node_response_valid($key,'w4z',$nonce,200,$raw.' ',$digest,$signature));
+    check(!MSW_Render_Federation::node_response_valid($key,'w4z',str_repeat('cd',16),200,$raw,$digest,$signature));
     echo "Federation PHP assertions: $count OK\n";
 }
