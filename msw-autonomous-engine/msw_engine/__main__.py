@@ -45,9 +45,7 @@ def main() -> int:
     try:
         client = Client(base, endpoint, os.environ.get("MSW_NODE", ""), os.environ.get("MSW_SECRET", ""))
         worker = Worker(client, directory, max_seconds=int(os.environ.get("MSW_MAX_JOB_SECONDS", "300")), memory_mb=int(os.environ.get("MSW_MAX_JOB_MEMORY_MB", "2048")))
-        if not args.once and base == "https://mobilny-serwis-warszawa.pl":
-            from .fotoatlas import Atlas
-            Atlas(client, directory).start(lambda: worker.stopping)
+        # Optional schedulers start once inside Worker.loop, including FotoAtlas.
         return worker.loop(once=args.once, poke_cron_seconds=max(0, int(os.environ.get("MSW_WP_CRON_INTERVAL", "300"))))
     except (ValueError, OSError):
         print(json.dumps({"state": "configuration_required", "message": "Configure the HTTPS WordPress URL, registered node, scoped secret and writable private data directory."}), file=sys.stderr)
