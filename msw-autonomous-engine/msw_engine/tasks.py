@@ -345,8 +345,9 @@ def handlers() -> dict:
         result["supreme.observe"] = supreme_observe
     from .private_adapters import available_handlers
     result.update(available_handlers())
-    if os.environ.get("MSW_LLM_MODEL"):
-        result["llm.generate"] = llm_generate
+    from .own_model import available_handlers as own_handlers
+    if os.environ.get("MSW_LLM_MODEL") or own_handlers():
+        result["llm.generate"] = llm_dispatch
     if os.environ.get("MSW_DISCOVERY_CORPUS"):
         result["legacy.discovery.topics"] = legacy_discovery
     if os.environ.get("MSW_LEGACY_DATA_DB") and importlib.util.find_spec("pyarrow"):
@@ -354,6 +355,16 @@ def handlers() -> dict:
     if os.environ.get("MSW_ENABLE_TRAINING") == "1" and importlib.util.find_spec("torch"):
         result["legacy.llm80.train"] = legacy_train
     return result
+
+
+def llm_dispatch(payload: dict, data_dir: Path) -> dict:
+    if payload.get('schema') == 'msw.own-model.job.v1':
+        from .own_model import handle
+        return handle(payload, data_dir)
+    from .federation import configured
+    if not os.environ.get('MSW_LLM_MODEL') and not configured():
+        raise TaskError('legacy_model_not_configured_no_silent_substitution')
+    return llm_generate(payload, data_dir)
 
 
 def dispatch(kind: str, payload: dict, data_dir: Path) -> dict:
