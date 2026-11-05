@@ -282,7 +282,90 @@ def research_dispatch(payload: dict, data_dir: Path) -> dict:
 BASE_HANDLERS = {"seo.analyze": seo_analyze, "knowledge.ingest": knowledge_ingest, "knowledge.search": knowledge_search, "research.rank": research_dispatch}
 
 
+def combo_engine_links(payload: dict, data_dir: Path) -> dict:
+    """Run exact read contracts through the existing scoped WordPress identity.
+
+    The shared control API remains on WordPress. These receipts establish
+    successful native reads, not model training or arbitrary business actions.
+    """
+    from .client import signed_headers, encode, NoRedirect
+    from urllib.request import HTTPSHandler
+    from urllib.error import HTTPError, URLError
+    import ssl
+    if set(payload) != {"engine_link"} or not isinstance(payload["engine_link"], dict):
+        raise TaskError("engine_link_arguments")
+    args = payload["engine_link"]
+    if set(args) != {"engines", "request_id"}:
+        raise TaskError("engine_link_arguments")
+    engines, rid = args["engines"], args["request_id"]
+    if (not isinstance(engines, list) or not 1 <= len(engines) <= 4
+            or not all(isinstance(e, str) and e in {"v3", "v5", "v7", "combo", "python"} for e in engines)
+            or len(set(engines)) != len(engines) or not isinstance(rid, str)
+            or re.fullmatch(r"[A-Za-z0-9_.:-]{8,70}", rid) is None):
+        raise TaskError("engine_link_arguments")
+    origin = os.environ.get("MSW_WP_URL", "").rstrip("/")
+    node, secret = os.environ.get("MSW_NODE", ""), os.environ.get("MSW_SECRET", "")
+    if origin != "https://mobilny-serwis-warszawa.pl" or not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", node) or len(secret) < 32:
+        raise TaskError("engine_link_configuration")
+    data_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+    path = data_dir / "engine-links.sqlite3"
+    if path.is_symlink():
+        raise TaskError("engine_link_storage_symlink")
+    with sqlite3.connect(path, timeout=10) as db:
+        db.execute("PRAGMA journal_mode=WAL")
+        db.execute("CREATE TABLE IF NOT EXISTS observations (id TEXT PRIMARY KEY,engine TEXT NOT NULL,body TEXT NOT NULL,sha256 TEXT NOT NULL)")
+    os.chmod(path, 0o600)
+    inspections = []
+    expected = {}
+    opener = build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context()))
+    for engine in engines:
+        ident = rid + ":" + engine
+        with sqlite3.connect(path, timeout=10) as db:
+            previous = db.execute("SELECT engine,body,sha256 FROM observations WHERE id=?", (ident,)).fetchone()
+        if previous:
+            if previous[0] != engine or hashlib.sha256(previous[1].encode()).hexdigest() != previous[2]:
+                raise TaskError("engine_link_receipt_conflict")
+            value, raw, digest = json.loads(previous[1]), previous[1], previous[2]
+        else:
+            request_raw = encode({"schema": "msw.combo.engine-inspect.v1", "engine": engine, "request_id": ident})
+            request = Request(origin + "/wp-json/msw-combo-engines/v1/inspect", data=request_raw,
+                              headers=signed_headers("status", node, secret, request_raw), method="POST")
+            try:
+                with opener.open(request, timeout=45) as response:
+                    response_raw = response.read(65537)
+                if len(response_raw) > 65536:
+                    raise TaskError("engine_link_response_limit")
+                value = json.loads(response_raw)
+            except HTTPError as error:
+                raise TaskError("engine_link_http_" + str(error.code)) from None
+            except (URLError, TimeoutError, OSError, ValueError):
+                raise TaskError("engine_link_transport") from None
+            if (not isinstance(value, dict) or value.get("schema") != "msw.combo.engine-inspection.v1"
+                    or value.get("engine") != engine or value.get("request_id") != ident
+                    or type(value.get("native_read_verified")) is not bool
+                    or value.get("business_execution_verified") is not False or not isinstance(value.get("data"), dict)):
+                raise TaskError("engine_link_response_contract")
+            raw = encode(value).decode()
+            digest = hashlib.sha256(raw.encode()).hexdigest()
+            with sqlite3.connect(path, timeout=10) as db:
+                db.execute("INSERT INTO observations VALUES(?,?,?,?) ON CONFLICT(id) DO NOTHING", (ident, engine, raw, digest))
+        expected[ident] = (engine, raw, digest)
+        inspections.append({"engine": engine, "native_read_verified": value["native_read_verified"],
+                            "state": value["data"].get("state", "native_status_read"), "source_sha256": digest})
+    # Independent connection verifies committed source bytes for every recipient.
+    with sqlite3.connect(path, timeout=10) as db:
+        for ident, wanted in expected.items():
+            found = db.execute("SELECT engine,body,sha256 FROM observations WHERE id=?", (ident,)).fetchone()
+            if found != wanted:
+                raise TaskError("engine_link_readback_failed")
+    return {"schema": "msw.combo.engine-links.result.v1", "request_id": rid, "inspections": inspections,
+            "durable_readback_verified": True, "all_native_reads_verified": all(r["native_read_verified"] for r in inspections),
+            "business_execution_verified": False, "training_performed": False}
+
+
 def runtime_catalog(payload: dict, data_dir: Path) -> dict:
+    if "engine_link" in payload:
+        return combo_engine_links(payload, data_dir)
     if "module_bus" in payload:
         from .module_bus import handle
         return handle(payload, data_dir)
@@ -385,4 +468,5 @@ def dispatch(kind: str, payload: dict, data_dir: Path) -> dict:
     if handler is None:
         raise TaskError("unsupported_or_unconfigured_capability")
     return handler(payload, data_dir)
+
 
