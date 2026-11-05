@@ -14,8 +14,24 @@ def execute(payload: dict, data_dir: Path) -> dict:
             or re.fullmatch(r"[a-f0-9]{64}", payload["execution_id"]) is None):
         raise TaskError("native_autonomy_arguments")
     deadline = time.monotonic() + 150
+    transport_failures = 0
     while True:
-        result = gateway("autonomy_execute", {"execution_id": payload["execution_id"]})
+        try:
+            result = gateway("autonomy_execute", {"execution_id": payload["execution_id"]})
+        except TaskError as error:
+            # A late PHP/HTTP failure can occur after the native receipt was
+            # committed. Ask for the SAME execution again while its lease is
+            # live. WordPress returns the durable receipt, or its CAS guard
+            # reports uncertainty; neither path repeats a started mutation.
+            code = str(error)
+            recoverable = code in {"federation_unavailable", "federation_response_invalid"} or bool(
+                re.fullmatch(r"fed_autonomy_execute_http_50[0234](?::[A-Za-z0-9_.-]{1,100})?", code)
+            )
+            if not recoverable or transport_failures >= 2 or time.monotonic() >= deadline:
+                raise
+            transport_failures += 1
+            time.sleep(2)
+            continue
         if result.get("state") == "running_or_uncertain":
             if time.monotonic() >= deadline:
                 raise TaskError("native_autonomy_uncertain_no_repeat")
@@ -27,4 +43,4 @@ def execute(payload: dict, data_dir: Path) -> dict:
                 or result.get("native_callbacks_executed") is not True
                 or result.get("storage_readback_verified") is not True):
             raise TaskError("native_autonomy_receipt_invalid")
-        return result
+        return {**result, "receipt_transport_recovered": True} if transport_failures else result
