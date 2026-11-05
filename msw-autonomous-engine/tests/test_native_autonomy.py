@@ -46,6 +46,25 @@ class NativeAutonomyTests(unittest.TestCase):
             with self.assertRaises(TaskError):
                 execute(self.payload, Path("."))
 
+    def test_satellite_receipt_is_bound_to_actual_site_and_hmac_readback(self):
+        site = "733bcd1b-a160-419b-8b2c-531811c2b6a0"
+        payload = {**self.payload, "site_id": site}
+        receipt = {**self.receipt, "site_id": site, "satellite_hmac_readback_verified": True}
+        with patch("msw_engine.federation.gateway", return_value=receipt) as gateway:
+            self.assertEqual(execute(payload, Path(".")), receipt)
+            gateway.assert_called_once_with("autonomy_execute", {"execution_id": "a"*64, "site_id": site})
+        for change in [{"site_id": "cb12cbaf-be8e-4679-b34f-cf0471d2d266"}, {"satellite_hmac_readback_verified": False}]:
+            with self.subTest(change=change), patch("msw_engine.federation.gateway", return_value={**receipt, **change}):
+                with self.assertRaisesRegex(TaskError, "receipt_invalid"):
+                    execute(payload, Path("."))
+
+    def test_satellite_address_or_hash_cannot_replace_actual_uuid(self):
+        for site in ["https://example.test", "a"*64, "../another", None]:
+            with self.subTest(site=site), patch("msw_engine.federation.gateway") as gateway:
+                with self.assertRaisesRegex(TaskError, "site_id"):
+                    execute({**self.payload, "site_id": site}, Path("."))
+                gateway.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()
