@@ -211,6 +211,11 @@ class Worker:
         print(json.dumps({"worker_version": __version__, "state": "ready"}), flush=True)
         signal.signal(signal.SIGTERM, lambda *_: setattr(self, "stopping", True))
         signal.signal(signal.SIGINT, lambda *_: setattr(self, "stopping", True))
+        # Catalogue scheduling shares this worker and its existing persistent disk.
+        if (not once and os.environ.get("MSW_CATALOG_PUBLISHER", "1") == "1"
+                and getattr(self.client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"):
+            from .catalog_publisher import CatalogPublisher
+            CatalogPublisher(self.client, self.journal.data_dir).start(lambda: self.stopping)
         # Keep cron independent of long model calls, queue errors and idle backoff.
         fleet_thread = None
         if not once and poke_cron_seconds > 0:
@@ -258,6 +263,7 @@ class Worker:
             while not self.stopping and time.monotonic() < deadline:
                 time.sleep(min(1, max(0, deadline - time.monotonic())))
         return 0
+
 
 
 
