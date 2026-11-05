@@ -283,6 +283,9 @@ BASE_HANDLERS = {"seo.analyze": seo_analyze, "knowledge.ingest": knowledge_inges
 
 
 def runtime_catalog(payload: dict, data_dir: Path) -> dict:
+    if "module_bus" in payload:
+        from .module_bus import handle
+        return handle(payload, data_dir)
     from . import __version__
     try:
         status = json.loads((data_dir / "runtime-status.json").read_text())
