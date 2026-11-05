@@ -53,7 +53,7 @@ class SuiteTests(unittest.TestCase):
     def test_catalog_without_pack_still_exposes_current_worker(self):
         with tempfile.TemporaryDirectory() as d, patch("msw_engine.tasks.handlers", return_value={"runtime.catalog": None}):
             catalog = runtime_catalog({}, Path(d))
-        self.assertEqual(catalog["worker_version"], "1.2.0")
+        self.assertEqual(catalog["worker_version"], "1.2.1")
         self.assertEqual(catalog["capabilities"], ["runtime.catalog"])
 
 

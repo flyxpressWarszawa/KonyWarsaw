@@ -22,6 +22,8 @@ class FederationTests(unittest.TestCase):
             return {'wordpress': {'installed': 286, 'active': 272}, 'python_hub': {'reachable': True}}
         if operation == 'public_context':
             return {'items': [{'source_url': 'https://mobilny-serwis-warszawa.pl/', 'title': 'Spawanie', 'excerpt': 'Katalog publiczny'}]}
+        if operation == 'python_advice':
+            return {'state': 'native_text_received', 'text': 'Propozycja serwera Python.'}
         self.sent = values
         return {'text': 'MSW współpracuje przez wspólną kolejkę.', 'model': 'gpt-5-mini'}
 
@@ -30,10 +32,11 @@ class FederationTests(unittest.TestCase):
         with patch('msw_engine.federation.gateway', side_effect=self.fake_gateway):
             result = generate({'prompt': 'Spawanie MSW', 'task': 'business'}, self.directory)
         self.assertEqual(result['answer_sha256'], hashlib.sha256(result['text'].encode()).hexdigest())
-        self.assertEqual(len(result['contributors']), 5)
+        self.assertEqual(len(result['contributors']), 6)
         self.assertEqual(len(result['sources']), 2)
         self.assertIn('Katalog publiczny', self.sent['text'])
         self.assertIn('Usługi spawania MSW', self.sent['text'])
+        self.assertIn('Propozycja serwera Python.', self.sent['text'])
         self.assertFalse(result['publication_performed'])
 
     def test_opt_out_does_not_read_other_systems_or_memory(self):
@@ -61,6 +64,14 @@ class FederationTests(unittest.TestCase):
     def test_empty_provider_text_is_not_reported_as_success(self):
         with patch('msw_engine.federation.gateway', return_value={'text': '', 'model': 'gpt-5-mini'}):
             with self.assertRaises(TaskError): generate({'prompt': 'Test','collaborate':False,'use_knowledge':False}, self.directory)
+
+    def test_source_contacts_do_not_disable_the_existing_router_guard(self):
+        def contacts(operation, values=None):
+            if operation == 'python_advice': return {'state':'native_text_received','text':'Kontakt 570 933 114 lub biuro@example.com'}
+            return self.fake_gateway(operation,values)
+        with patch('msw_engine.federation.gateway',side_effect=contacts): generate({'prompt':'Spawanie MSW'},self.directory)
+        self.assertNotIn('570 933 114',self.sent['text'])
+        self.assertNotIn('biuro@example.com',self.sent['text'])
 
     def test_fixed_same_origin_gateway_and_signing(self):
         class Response:
