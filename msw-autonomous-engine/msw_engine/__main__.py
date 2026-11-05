@@ -9,6 +9,7 @@ import time
 
 from .client import Client
 from .runner import Worker
+from .runtime_pack import install
 
 
 def main() -> int:
@@ -24,6 +25,8 @@ def main() -> int:
         except (OSError, ValueError, KeyError):
             return 1
     os.umask(0o077)
+    pack = install(directory)
+    print(json.dumps({"runtime_pack": pack["state"], "modules": [item["id"] for item in pack["modules"]]}), flush=True)
     base = os.environ.get("MSW_WP_URL", "").rstrip("/")
     endpoint = os.environ.get("MSW_TRANSPORT_URL", base + "/wp-content/plugins/msw-unified-engine/transport.php")
     try:

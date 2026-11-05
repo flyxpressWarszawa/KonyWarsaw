@@ -231,10 +231,65 @@ def legacy_train(payload: dict, data_dir: Path) -> dict:
 BASE_HANDLERS = {"seo.analyze": seo_analyze, "knowledge.ingest": knowledge_ingest, "knowledge.search": knowledge_search, "research.rank": research_rank}
 
 
+def runtime_catalog(payload: dict, data_dir: Path) -> dict:
+    try:
+        status = json.loads((data_dir / "runtime-status.json").read_text())
+    except (OSError, ValueError):
+        return {"state": "not_configured", "modules": []}
+    return {"state": status["state"], "pack_sha256": status.get("pack_sha256"),
+            "modules": [{key: item[key] for key in ("id", "version", "source_sha256") if key in item}
+                        for item in status.get("modules", [])], "capabilities": list(handlers())}
+
+
+def supreme_observe(payload: dict, data_dir: Path) -> dict:
+    from .runtime_pack import module_root
+    root = module_root("supreme-server")
+    if root is None:
+        raise TaskError("supreme_module_not_installed")
+    if payload.get("origin") != "https://mobilny-serwis-warszawa.pl" or payload.get("provenance") != "authenticated_wordpress_inventory":
+        raise TaskError("supreme_inventory_provenance")
+    inventory = payload.get("inventory")
+    if not isinstance(inventory, dict) or set(inventory) != {"installed", "active", "inactive"}:
+        raise TaskError("supreme_inventory_schema")
+    if any(type(value) is not int or not 0 <= value <= 100_000 for value in inventory.values()):
+        raise TaskError("supreme_inventory_bounds")
+    if inventory["installed"] != inventory["active"] + inventory["inactive"]:
+        raise TaskError("supreme_inventory_total")
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("msw_private_supreme_store", root / "msw_v5_client/msw_master_engine.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    state = data_dir / "supreme"
+    state.mkdir(parents=True, exist_ok=True, mode=0o700)
+    source_digest = hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()
+    observation = {"observed_status": "authenticated_snapshot_received", "plugin_count": inventory["installed"],
+                   "active_count": inventory["active"], "inactive_count": inventory["inactive"], "native_v5_ack": False,
+                   "source_sha256": source_digest}
+    db = module.Store(state / "msw-supreme-state.sqlite3")
+    try:
+        existing = db.search("msw-main", "unified-engine", source_digest, limit=1)
+        ident = existing[0]["id"] if existing and existing[0]["payload"] == observation else db.remember(
+            "msw-main", "unified-engine", "wp_status_observation", observation, {"source_sha256": source_digest}, ttl=86400)
+        found = db.search("msw-main", "unified-engine", source_digest, limit=25)
+        if not any(item["id"] == ident for item in found):
+            raise TaskError("supreme_durable_readback_failed")
+    finally:
+        db.close()
+    return {"module": "supreme-server", "module_version": "3.0.0", "record_id": ident, "source_sha256": source_digest,
+            "durable_local_readback_verified": True, "inventory": inventory, "transport": "scoped_unified_queue",
+            "v5_native_ack": False, "v5_signed_pairing": False}
+
+
 def handlers() -> dict:
     result = dict(BASE_HANDLERS)
+    result["runtime.catalog"] = runtime_catalog
     if os.environ.get('MSW_RUNTIME_MODE') == 'render-free':
         return {kind: result[kind] for kind in ('seo.analyze', 'research.rank')}
+    from .runtime_pack import module_root
+    if module_root("supreme-server") is not None:
+        result["supreme.observe"] = supreme_observe
+    from .private_adapters import available_handlers
+    result.update(available_handlers())
     if os.environ.get("MSW_LLM_MODEL"):
         result["llm.generate"] = llm_generate
     if os.environ.get("MSW_DISCOVERY_CORPUS"):

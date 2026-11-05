@@ -7,7 +7,7 @@ services:
   region: frankfurt
   autoDeployTrigger: 'off'
   numInstances: 1
-  buildCommand: python -m compileall -q msw_engine
+  buildCommand: python -m pip install -r requirements.txt && python -m compileall -q msw_engine
   startCommand: python -m msw_engine
   disk:
     name: msw-engine-state
@@ -35,6 +35,10 @@ services:
   - key: PYTHONDONTWRITEBYTECODE
     value: '1'
   - key: PYTHONUNBUFFERED
+    value: '1'
+  - key: OPENBLAS_NUM_THREADS
+    value: '1'
+  - key: OMP_NUM_THREADS
     value: '1'
   repo: https://github.com/flyxpressWarszawa/KonyWarsaw
   branch: msw/engine-runtime-20261104
