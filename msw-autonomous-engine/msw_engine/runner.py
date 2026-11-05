@@ -11,6 +11,7 @@ import time
 
 from .client import Client, TransportError, encode
 from .tasks import TaskError, dispatch, handlers
+from . import __version__
 
 
 class WorkerDraining(RuntimeError):
@@ -45,6 +46,9 @@ class Journal:
         digest = hashlib.sha256(raw.encode()).hexdigest()
         values = (job["id"], job["payload_sha256"], lease, raw, digest, "pending", int(time.time()))
         with self.connect() as db:
+            old = db.execute("SELECT payload_sha256 FROM receipts WHERE job_id=?", (job["id"],)).fetchone()
+            if old and old["payload_sha256"] != job["payload_sha256"]:
+                raise TransportError("journal_payload_conflict")
             db.execute("INSERT INTO receipts VALUES(?,?,?,?,?,?,?) ON CONFLICT(job_id) DO UPDATE SET lease_token=excluded.lease_token,result_json=excluded.result_json,result_sha256=excluded.result_sha256,state='pending',updated_at=excluded.updated_at", values)
         return self.lookup(job["id"], job["payload_sha256"])
 
@@ -87,6 +91,8 @@ class Worker:
         self.memory_mb = memory_mb
         self.stopping = False
         self.last_server_contact = 0
+        self.last_job_state = "not_run"
+        self.cron_state = "not_run"
 
     def acknowledge(self, receipt: dict) -> dict:
         fields = {key: receipt[key] for key in ("payload_sha256", "lease_token", "result_json", "result_sha256")}
@@ -98,6 +104,7 @@ class Worker:
             raise TransportError("result_readback_mismatch")
         self.journal.mark(receipt["job_id"], "acknowledged")
         self.last_server_contact = int(time.time())
+        self.last_job_state = readback["state"]
         return {"job_id": receipt["job_id"], "state": readback["state"], "server_ack_verified": True}
 
     def replay_receipts(self) -> int:
@@ -108,7 +115,16 @@ class Worker:
                 count += 1
             except TransportError as error:
                 if error.status == 409:
-                    self.journal.mark(receipt["job_id"], "stale_lease")
+                    # A completion can be committed even if its HTTP response was
+                    # lost. Verify the durable result before abandoning a receipt.
+                    readback = self.client.send("status", {"job_id": receipt["job_id"]})
+                    self.last_server_contact = int(time.time())
+                    if readback.get("state") in {"completed", "failed"} and readback.get("result_sha256") == receipt["result_sha256"]:
+                        self.journal.mark(receipt["job_id"], "acknowledged")
+                        self.last_job_state = readback["state"]
+                        count += 1
+                    else:
+                        self.journal.mark(receipt["job_id"], "stale_lease")
                 else:
                     raise
         return count
@@ -182,24 +198,31 @@ class Worker:
 
     def health(self, state: str) -> None:
         value = {"at": int(time.time()), "last_server_contact": self.last_server_contact, "state": state,
-                 "capabilities": list(handlers()), "pid": os.getpid()}
+                 "capabilities": list(handlers()), "pid": os.getpid(), "worker_version": __version__,
+                 "last_job_state": self.last_job_state, "cron_state": self.cron_state}
         target = self.journal.data_dir / "health.json"
         temporary = target.with_suffix(".tmp")
         temporary.write_bytes(encode(value))
         temporary.replace(target)
 
     def loop(self, *, once: bool = False, poke_cron_seconds: int = 300) -> int:
-        pause, last_poke = 30, 0.0
+        pause, last_poke = 15, 0.0
+        print(json.dumps({"worker_version": __version__, "state": "ready"}), flush=True)
         signal.signal(signal.SIGTERM, lambda *_: setattr(self, "stopping", True))
         signal.signal(signal.SIGINT, lambda *_: setattr(self, "stopping", True))
         while not self.stopping:
             try:
                 result = self.run_once()
                 print(json.dumps(result), flush=True)
-                pause = min(300, pause + 15) if result["state"] == "idle" else 1
+                pause = min(60, pause + 5) if result["state"] == "idle" else 1
                 self.health(result["state"])
                 if poke_cron_seconds > 0 and time.monotonic() - last_poke > poke_cron_seconds:
-                    self.client.poke_cron()
+                    try:
+                        self.client.poke_cron()
+                        self.cron_state = "requested"
+                    except TransportError as error:
+                        self.cron_state = "request_failed"
+                        print(json.dumps({"state": "scheduler_retry", "code": error.code}), flush=True)
                     last_poke = time.monotonic()
             except WorkerDraining:
                 self.health("draining")
@@ -207,7 +230,7 @@ class Worker:
             except TransportError as error:
                 print(json.dumps({"state": "connection_retry", "code": error.code, "http_status": error.status}), flush=True)
                 self.health("connection_retry")
-                pause = min(300, max(30, pause * 2))
+                pause = max(error.retry_after, min(300, max(30, pause * 2)))
                 if once:
                     return 1
             except Exception as error:
@@ -222,3 +245,4 @@ class Worker:
             while not self.stopping and time.monotonic() < deadline:
                 time.sleep(min(1, max(0, deadline - time.monotonic())))
         return 0
+

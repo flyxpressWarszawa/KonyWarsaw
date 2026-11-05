@@ -241,14 +241,19 @@ BASE_HANDLERS = {"seo.analyze": seo_analyze, "knowledge.ingest": knowledge_inges
 
 
 def runtime_catalog(payload: dict, data_dir: Path) -> dict:
+    from . import __version__
     try:
         status = json.loads((data_dir / "runtime-status.json").read_text())
     except (OSError, ValueError):
-        return {"state": "not_configured", "modules": []}
+        status = {"state": "not_configured", "modules": []}
     from .legacy_memory import status as legacy_status
-    return {"state": status["state"], "pack_sha256": status.get("pack_sha256"), "legacy_source_memory": legacy_status(data_dir),
+    result = {"state": status["state"], "worker_version": __version__, "pack_sha256": status.get("pack_sha256"), "legacy_source_memory": legacy_status(data_dir),
             "modules": [{key: item[key] for key in ("id", "version", "source_sha256") if key in item}
                         for item in status.get("modules", [])], "capabilities": list(handlers())}
+    if "suite_snapshot" in payload:
+        from .suite import analyze
+        result["suite"] = analyze(payload["suite_snapshot"])
+    return result
 
 
 def supreme_observe(payload: dict, data_dir: Path) -> dict:
@@ -316,3 +321,4 @@ def dispatch(kind: str, payload: dict, data_dir: Path) -> dict:
     if handler is None:
         raise TaskError("unsupported_or_unconfigured_capability")
     return handler(payload, data_dir)
+

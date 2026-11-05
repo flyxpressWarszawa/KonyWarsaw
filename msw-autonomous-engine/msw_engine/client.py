@@ -13,8 +13,9 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener, HTTPSHand
 
 
 class TransportError(RuntimeError):
-    def __init__(self, code: str, status: int = 0):
+    def __init__(self, code: str, status: int = 0, retry_after: int = 0):
         self.code, self.status = code, status
+        self.retry_after = max(0, min(900, retry_after))
         super().__init__(code)
 
 
@@ -67,7 +68,9 @@ class Client:
                 return result
         except HTTPError as error:
             # Do not print server HTML, request data or credentials.
-            raise TransportError("server_rejected_request", error.code) from None
+            retry = error.headers.get("Retry-After", "") if error.headers else ""
+            seconds = int(retry) if retry.isdigit() and len(retry) < 8 else 0
+            raise TransportError("server_rejected_request", error.code, seconds) from None
         except (URLError, TimeoutError, OSError, json.JSONDecodeError):
             raise TransportError("transport_unavailable") from None
 
@@ -78,3 +81,4 @@ class Client:
                 response.read(1024)
         except (HTTPError, URLError, TimeoutError, OSError):
             raise TransportError("wordpress_cron_unavailable") from None
+
