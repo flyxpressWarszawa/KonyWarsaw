@@ -32,6 +32,14 @@ check(str_contains(file_get_contents(WP_PLUGIN_DIR.'/second/second.php'),'MSW SU
 check(!isset($GLOBALS['options']['msw_suite_upgrade_20261105_lock']),'upgrade lock retained');
 MSW_Suite_Upgrade_20261105::apply();
 check(count(get_option('msw_suite_upgrade_20261105')['plugins'])===2,'idempotent replay failed');
+// Another portal may expose the exact companion source already upgraded above.
+$sharedSource=file_get_contents(WP_PLUGIN_DIR.'/common/common.php');
+$plan['sites']['mobilny-serwis-warszawa.pl']['plugins'][0]['already_applied_sha256']=hash('sha256',$sharedSource);
+file_put_contents($root.'/upgrader/plan.json',json_encode($plan));
+$GLOBALS['options']=[];file_put_contents(WP_PLUGIN_DIR.'/second/second.php',$second);
+MSW_Suite_Upgrade_20261105::apply();
+check(get_option('msw_suite_upgrade_20261105')['plugins'][0]['already_applied_shared_source']===true,'verified shared source not recognized');
+check(file_get_contents(WP_PLUGIN_DIR.'/common/common.php')===$sharedSource,'shared code changed twice');
 // A concurrent second-file change must abort and restore already-written files.
 $GLOBALS['options']=[];$GLOBALS['change_on_backup']=true;
 unlink(WP_PLUGIN_DIR.'/common/suite-health.php');
@@ -42,4 +50,4 @@ check(!is_file(WP_PLUGIN_DIR.'/common/suite-health.php'),'new helper not rolled 
 check(str_contains(file_get_contents(WP_PLUGIN_DIR.'/second/second.php'),'concurrent update'),'concurrent change overwritten');
 check(get_option('msw_suite_upgrade_20261105')['rollback_verified']===true,'rollback proof absent');
 check(get_option('msw_suite_upgrade_backup_20261105',null)===null,'failed-attempt backup retained');
-echo "upgrader_test_passed: complete batch, idempotency, concurrent change refusal, atomic rollback and lock cleanup\n";
+echo "upgrader_test_passed: complete batch, idempotency, verified shared code, concurrent change refusal, atomic rollback and lock cleanup\n";

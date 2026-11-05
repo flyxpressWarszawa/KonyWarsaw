@@ -61,6 +61,9 @@ def analyze(snapshot: dict) -> dict:
             if type(timestamp) is int and timestamp < observed - 900:
                 issues.append({"plugin": ident, "code": "cron_overdue", "severity": "high", "hook": item["hook"], "overdue_seconds": observed - timestamp})
         state = row.get("state", {})
+        # WordPress encodes an empty PHP associative result as [] rather than {}.
+        if state == []:
+            state = {}
         if not isinstance(state, dict):
             raise TaskError("suite_state_schema")
         if state.get("enabled") is False:

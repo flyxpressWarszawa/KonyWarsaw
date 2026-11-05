@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MSW Suite Upgrade — 2026-11-05
  * Description: Jednorazowe, odwracalne rozszerzenie diagnostyki istniejących modułów MSW.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Requires PHP: 8.1
  * Author: Mobilny Serwis Warszawa
  */
@@ -65,6 +65,17 @@ final class MSW_Suite_Upgrade_20261105 {
                 $source = file_get_contents($path);
                 if (!is_string($source) || strlen($source)>2000000) throw new RuntimeException('plugin_source_unavailable');
                 $header = get_file_data($path,['Version'=>'Version']);
+                // Some companion code is already deployed to another portal.
+                // Trust only the exact source digest from a verified receipt.
+                $shared=$item['already_applied_sha256']??null;
+                if (is_string($shared) && preg_match('/\A[a-f0-9]{64}\z/D',$shared)
+                    && str_contains($source,self::MARKER)
+                    && ($header['Version']??'')===self::version($item['expected_version'])
+                    && hash_equals($shared,hash('sha256',$source))) {
+                    $rows[]=['plugin'=>$item['file'],'from'=>$item['expected_version'],'to'=>$header['Version'],
+                        'source_before_sha256'=>$shared,'source_after_sha256'=>$shared,'contract_version'=>'1.0.0','already_applied_shared_source'=>true];
+                    continue;
+                }
                 if (($header['Version']??'')!==$item['expected_version']) throw new RuntimeException('plugin_version_changed:'.$item['file']);
                 if (str_contains($source,self::MARKER)) throw new RuntimeException('incomplete_prior_upgrade');
                 $next = self::version($item['expected_version']);

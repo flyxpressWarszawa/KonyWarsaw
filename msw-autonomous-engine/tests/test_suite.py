@@ -37,6 +37,14 @@ class SuiteTests(unittest.TestCase):
         snapshot["modules"][0].update(active=False, missing_dependencies=["woocommerce"])
         self.assertEqual(analyze(snapshot)["issues"], [])
 
+    def test_accepts_empty_php_array_as_empty_state_but_not_nonempty_lists(self):
+        snapshot = self.snapshot()
+        snapshot["modules"][0]["state"] = []
+        self.assertEqual(analyze(snapshot)["issues"], [])
+        snapshot["modules"][0]["state"] = ["not_an_object"]
+        with self.assertRaises(TaskError):
+            analyze(snapshot)
+
     def test_rejects_untrusted_origin_future_and_duplicate_modules(self):
         for changes in [{"origin": "https://attacker.invalid"}, {"observed_at": int(time.time()) + 3600}, {"modules": self.snapshot()["modules"] * 2}]:
             with self.subTest(changes=changes), self.assertRaises(TaskError):
@@ -45,7 +53,7 @@ class SuiteTests(unittest.TestCase):
     def test_catalog_without_pack_still_exposes_current_worker(self):
         with tempfile.TemporaryDirectory() as d, patch("msw_engine.tasks.handlers", return_value={"runtime.catalog": None}):
             catalog = runtime_catalog({}, Path(d))
-        self.assertEqual(catalog["worker_version"], "1.1.0")
+        self.assertEqual(catalog["worker_version"], "1.1.1")
         self.assertEqual(catalog["capabilities"], ["runtime.catalog"])
 
 
