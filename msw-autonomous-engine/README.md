@@ -39,3 +39,19 @@ Supported typed adapters reuse the owner's original module code: Supreme invento
 Run the integration suite with `MSW_TEST_PACK` pointing to the private pack and `python -m unittest discover -s tests -v`. Tests skip private adapters when the owner has not supplied their source. Never commit the private pack or production environment values.
 
 A pack can also contain the owner's legacy Malta JSONL source corpus. Its digest, byte count, row schema and row count are checked before an atomic private SQLite import. Cached data is checked and reused after restart. Legacy text remains labelled `legacy_unreviewed` in a separate database. It is available only when a `knowledge.search` job explicitly selects `corpus: legacy_malta`; default approved-source searches remain separate. Restoring this corpus does not verify its factual claims, authorize publication or train model weights.
+# MSW Business Hunter handoff and checkpoints
+
+The existing `research.rank` queue accepts the explicit `msw.business-hunter.job.v1`
+schema in addition to its original ranking requests. The `ingest` action persists a
+private Director evidence record in `business-hunter/research.sqlite3`; `status`
+creates an immutable checkpoint manifest with report identities and SHA-256 values.
+Receipts are verified through a fresh SQLite connection and replay the same result
+for the same request. Conflicting requests, injected code, private URLs, query tokens
+and claims of verified demand/revenue are rejected. No job executes generated code.
+
+Worker startup creates and independently reads a checkpoint, logging its digest and
+report count. An empty checkpoint explicitly means no Hunter reports are stored yet.
+Paid GPT research stays in the existing authenticated WordPress router; this module
+needs no additional OpenAI key, paid service, scheduler or compute instance. Existing
+publication, source admission and commerce checks still determine actual execution.
+

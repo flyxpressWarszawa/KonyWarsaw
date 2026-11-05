@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import sqlite3
 import sys
 import time
 
@@ -30,6 +31,12 @@ def main() -> int:
     from .own_model import install as install_own_model
     own_model = install_own_model(directory)
     print(json.dumps({'own_model': own_model}), flush=True)
+    from .business_hunter import checkpoint as hunter_checkpoint
+    try:
+        hunter = hunter_checkpoint(directory)
+    except (OSError, ValueError, sqlite3.Error):
+        hunter = {"state": "checkpoint_unavailable", "runtime_version": "1.0.0"}
+    print(json.dumps({"business_hunter": hunter}), flush=True)
     from .legacy_memory import restore
     legacy = restore(directory)
     print(json.dumps({"legacy_source_memory": legacy}), flush=True)

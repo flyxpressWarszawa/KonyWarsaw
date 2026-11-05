@@ -272,7 +272,14 @@ def legacy_train(payload: dict, data_dir: Path) -> dict:
     return training.train(mode, steps, dataset, output, lambda _: None)
 
 
-BASE_HANDLERS = {"seo.analyze": seo_analyze, "knowledge.ingest": knowledge_ingest, "knowledge.search": knowledge_search, "research.rank": research_rank}
+def research_dispatch(payload: dict, data_dir: Path) -> dict:
+    if payload.get("schema") == "msw.business-hunter.job.v1":
+        from .business_hunter import handle
+        return handle(payload, data_dir)
+    return research_rank(payload, data_dir)
+
+
+BASE_HANDLERS = {"seo.analyze": seo_analyze, "knowledge.ingest": knowledge_ingest, "knowledge.search": knowledge_search, "research.rank": research_dispatch}
 
 
 def runtime_catalog(payload: dict, data_dir: Path) -> dict:
