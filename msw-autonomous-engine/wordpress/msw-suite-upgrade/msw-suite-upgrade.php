@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MSW Suite Upgrade — 2026-11-05
  * Description: Jednorazowe, odwracalne rozszerzenie diagnostyki istniejących modułów MSW.
- * Version: 1.0.1
+ * Version: 1.0.3
  * Requires PHP: 8.1
  * Author: Mobilny Serwis Warszawa
  */
@@ -11,6 +11,27 @@ final class MSW_Suite_Upgrade_20261105 {
     private const RECEIPT = 'msw_suite_upgrade_20261105';
     private const BACKUP = 'msw_suite_upgrade_backup_20261105';
     private const MARKER = '// MSW SUITE HEALTH CONTRACT 20261105';
+
+    public static function activate(): void {
+        try { self::apply(); }
+        catch (Throwable $error) {
+            $receipt=(array)get_option(self::RECEIPT,[]);
+            if (($receipt['state']??'')!=='failed') update_option(self::RECEIPT,[
+                'state'=>'failed','at_utc'=>gmdate('c'),'code'=>substr($error->getMessage(),0,180),
+                'source_changes_applied'=>false],false);
+        }
+    }
+    public static function register_status(): void {
+        register_rest_route('msw-suite-upgrade/v1','/status',[
+            'methods'=>'GET','permission_callback'=>static fn()=>current_user_can('manage_options'),
+            'callback'=>static fn()=>new WP_REST_Response((array)get_option(self::RECEIPT,[]),200,['Cache-Control'=>'no-store, private'])]);
+        register_rest_route('msw-suite-upgrade/v1','/apply',[
+            'methods'=>'POST','permission_callback'=>static fn()=>current_user_can('manage_options')&&current_user_can('activate_plugins'),
+            'callback'=>static function () {
+                self::activate();
+                return new WP_REST_Response((array)get_option(self::RECEIPT,[]),200,['Cache-Control'=>'no-store, private']);
+            }]);
+    }
 
     private static function path(string $relative): string {
         if (!preg_match('~\A[a-z0-9_-]+/[a-zA-Z0-9_./-]+\z~D', $relative) || str_contains($relative,'..')) throw new RuntimeException('invalid_patch_path');
@@ -147,4 +168,5 @@ final class MSW_Suite_Upgrade_20261105 {
         }
     }
 }
-register_activation_hook(__FILE__, [MSW_Suite_Upgrade_20261105::class,'apply']);
+register_activation_hook(__FILE__, [MSW_Suite_Upgrade_20261105::class,'activate']);
+add_action('rest_api_init', [MSW_Suite_Upgrade_20261105::class,'register_status']);

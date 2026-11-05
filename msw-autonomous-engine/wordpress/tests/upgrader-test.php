@@ -14,6 +14,7 @@ function delete_option($key){unset($GLOBALS['options'][$key]);return true;}
 function get_file_data($path,$fields){preg_match('/Version:\s*([^\r\n]+)/',file_get_contents($path),$m);return ['Version'=>trim($m[1]??'')];}
 function wp_clean_plugins_cache($clear){}
 function register_activation_hook($file,$callback){}
+function add_action($hook,$callback){}
 function check($condition,$message){if(!$condition)throw new Exception($message);}
 copy(dirname(__DIR__).'/msw-suite-upgrade/msw-suite-upgrade.php',$root.'/upgrader/upgrader.php');
 copy(dirname(__DIR__).'/suite-health.php',$root.'/upgrader/suite-health.php');
