@@ -190,6 +190,9 @@ def research_rank(payload: dict, _: Path) -> dict:
 
 
 def llm_generate(payload: dict, _: Path) -> dict:
+    from .federation import configured, generate
+    if configured():
+        return generate(payload, _)
     model = os.environ.get("MSW_LLM_MODEL", "")
     base = os.environ.get("MSW_LLM_BASE_URL", "http://127.0.0.1:11434").rstrip("/")
     parsed = urlsplit(base)
@@ -285,6 +288,11 @@ def runtime_catalog(payload: dict, data_dir: Path) -> dict:
     if "suite_snapshot" in payload:
         from .suite import analyze
         result["suite"] = analyze(payload["suite_snapshot"])
+    from .federation import configured, gateway
+    result["federation"] = {"configured": configured(), "provider": os.environ.get("MSW_LLM_PROVIDER", "ollama"),
+                            "model": os.environ.get("MSW_LLM_MODEL", ""), "provider_credentials_retained_in_wordpress": True}
+    if payload.get("include_network") is True:
+        result["network"] = gateway("snapshot")
     return result
 
 

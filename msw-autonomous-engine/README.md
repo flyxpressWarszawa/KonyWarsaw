@@ -1,5 +1,13 @@
 # MSW background engine
 
+## Shared MSW AI flow
+
+With the accompanying `wordpress/msw-render-federation` bridge installed, set `MSW_LLM_PROVIDER=wordpress` and `MSW_LLM_MODEL=gpt-5-mini` on the existing worker. Enable `llm.generate` alongside its existing node capabilities. The worker uses the existing signed node credential; OpenAI and Python HUB provider secrets stay on WordPress.
+
+An authenticated `POST /msw-federation/v1/submit` accepts `request_id`, `prompt`, `task` (technical/business/seo/article/review/voice), `max_tokens` (64–3000), and optional `use_knowledge` and `collaborate` booleans. The cooperative flow reads actual WordPress plugin inventory and Python backend health, retrieves public service sources through the existing Python HUB adapter and approved Render memory, and asks the existing OpenAI router for a synthesis. Results have contributor evidence and a content digest; `GET /msw-federation/v1/result/{job_id}` independently verifies the queue result digest. Existing PHP modules can submit through `msw_ai_federation_submit` and consume `msw_ai_federation_result`. Submitting uses an idempotency key and does not synchronously block a customer chat.
+
+The router retains its original API quota, input validation and provider configuration. Publication, private case export, arbitrary code execution and weight training are not enabled by this flow. All installed plugins are inventoried; inventory does not claim that every plugin has already adopted the submission hook, or that every original callback has been migrated.
+
 Python worker for the authenticated job queue of MSW Unified Engine on WordPress. Core computation uses the Python standard library. Pinned dependencies support the optional private compatibility adapters.
 
 Core handlers: static SEO measurements, evidence-based ranking, approved-source ingestion and lexical retrieval with SQLite FTS5. Ingestion does not train model weights. Optional local models and legacy adapters require explicitly configured resources. Private source and model weights are not part of this repository.
