@@ -63,6 +63,18 @@ def seo_analyze(payload: dict, _: Path) -> dict:
             "suggestions": suggestions, "measurement": "Static content observations; not a search ranking or traffic prediction."}
 
 
+OWNER_CORPUS = "owner_packages_20261105"
+
+
+def corpus_directory(payload: dict, data_dir: Path) -> tuple[str, Path]:
+    corpus = payload.get("corpus", "approved")
+    if corpus == "approved":
+        return corpus, data_dir
+    if corpus == OWNER_CORPUS and payload.get("owner_authorized") is True:
+        return corpus, data_dir / "owner-packages-20261105"
+    raise TaskError("unknown_or_unauthorized_knowledge_corpus")
+
+
 def database(data_dir: Path) -> sqlite3.Connection:
     data_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
     db = sqlite3.connect(data_dir / "knowledge.sqlite3", timeout=10)
@@ -75,12 +87,18 @@ def database(data_dir: Path) -> sqlite3.Connection:
 
 
 def knowledge_ingest(payload: dict, data_dir: Path) -> dict:
+    corpus, directory = corpus_directory(payload, data_dir)
     records = payload.get("records", [])
     if not isinstance(records, list) or len(records) > 100:
         raise TaskError("record_limit")
     validated, skipped_empty = [], []
     for row in records:
-        if not isinstance(row, dict) or row.get("approved") is not True:
+        if not isinstance(row, dict):
+            raise TaskError("record_invalid")
+        if corpus == OWNER_CORPUS:
+            if row.get("approved") is not False or row.get("classification") != "owner_supplied_unverified":
+                raise TaskError("owner_source_classification_required")
+        elif row.get("approved") is not True:
             raise TaskError("record_not_approved")
         ident = row.get("id", "")
         if not isinstance(ident, str) or not re.fullmatch(r"[A-Za-z0-9_:.-]{1,200}", ident):
@@ -91,9 +109,11 @@ def knowledge_ingest(payload: dict, data_dir: Path) -> dict:
         if not text.strip():
             skipped_empty.append({"id": ident, "reason": "empty_source_body"})
             continue
+        if corpus == OWNER_CORPUS and row.get("text_sha256") != hashlib.sha256(text.encode()).hexdigest():
+            raise TaskError("owner_source_digest_mismatch")
         digest = hashlib.sha256((title + "\0" + text).encode()).hexdigest()
-        validated.append((ident, title, text, url, digest, str(row.get("provenance", "operator_approved"))[:200]))
-    db = database(data_dir)
+        validated.append((ident, title, text, url, digest, str(row.get("provenance", "operator_approved"))[:900]))
+    db = database(directory)
     stored, unchanged = 0, 0
     try:
         with db:
@@ -106,9 +126,16 @@ def knowledge_ingest(payload: dict, data_dir: Path) -> dict:
                 db.execute("DELETE FROM knowledge_fts WHERE id=?", (row[0],))
                 db.execute("INSERT INTO knowledge_fts VALUES(?,?,?)", row[:3])
                 stored += 1
-        total = db.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
-        return {"stored": stored, "unchanged": unchanged, "records_total": total, "skipped_empty": skipped_empty, "training_performed": False,
-                "weights_modified": False, "purpose": "Persistent approved source memory and lexical retrieval"}
+        # Read each committed digest through a separate connection before acknowledging ingestion.
+        with sqlite3.connect(directory / "knowledge.sqlite3", timeout=10) as fresh:
+            verified = sum(fresh.execute("SELECT digest FROM documents WHERE id=?", (row[0],)).fetchone() == (row[4],) for row in validated)
+            total = fresh.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
+        if verified != len(validated):
+            raise TaskError("knowledge_readback_mismatch")
+        return {"stored": stored, "unchanged": unchanged, "accepted_records": len(validated), "readback_verified_records": verified,
+                "records_total": total, "corpus": corpus, "classification": "owner_supplied_unverified" if corpus == OWNER_CORPUS else "operator_approved",
+                "skipped_empty": skipped_empty, "training_performed": False, "weights_modified": False,
+                "purpose": "Persistent source memory and lexical retrieval; ingestion does not verify source claims"}
     finally:
         db.close()
 
@@ -118,18 +145,23 @@ def knowledge_search(payload: dict, data_dir: Path) -> dict:
     if corpus == "legacy_malta":
         from .legacy_memory import search
         return search(payload, data_dir)
-    if corpus != "approved":
-        raise TaskError("unknown_knowledge_corpus")
+    corpus, directory = corpus_directory(payload, data_dir)
     query = str(payload.get("query", ""))[:2000]
     words = WORD.findall(query.casefold())[:20]
     limit = max(1, min(20, int(payload.get("limit", 5))))
     if not words:
         return {"items": []}
-    expression = " OR ".join('"' + word.replace('"', '') + '"' for word in words)
-    db = database(data_dir)
+    match = payload.get("match", "any")
+    if match not in {"any", "all"}:
+        raise TaskError("query_match_invalid")
+    expression = (" AND " if match == "all" else " OR ").join('"' + word.replace('"', '') + '"' for word in words)
+    db = database(directory)
     try:
-        rows = db.execute("SELECT d.id,d.title,d.body,d.url,d.digest,bm25(knowledge_fts) AS score FROM knowledge_fts JOIN documents d ON d.id=knowledge_fts.id WHERE knowledge_fts MATCH ? ORDER BY score LIMIT ?", (expression, limit)).fetchall()
-        return {"items": [{"id": row["id"], "title": row["title"], "excerpt": row["body"][:600], "url": row["url"], "sha256": row["digest"]} for row in rows], "measurement": "Lexical BM25 retrieval from approved stored sources"}
+        rows = db.execute("SELECT d.id,d.title,d.body,d.url,d.digest,d.provenance,snippet(knowledge_fts,2,'','',' … ',64) AS excerpt,bm25(knowledge_fts) AS score FROM knowledge_fts JOIN documents d ON d.id=knowledge_fts.id WHERE knowledge_fts MATCH ? ORDER BY score LIMIT ?", (expression, limit)).fetchall()
+        return {"items": [{"id": row["id"], "title": row["title"], "excerpt": row["excerpt"][:1800], "url": row["url"], "sha256": row["digest"], "provenance": row["provenance"],
+                            "classification": "owner_supplied_unverified" if corpus == OWNER_CORPUS else "operator_approved"} for row in rows],
+                "corpus": corpus, "records_total": db.execute("SELECT COUNT(*) FROM documents").fetchone()[0],
+                "training_performed": False, "measurement": "Lexical BM25 retrieval; source claims are not independently verified"}
     finally:
         db.close()
 
