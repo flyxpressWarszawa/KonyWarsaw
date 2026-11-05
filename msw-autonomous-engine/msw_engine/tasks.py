@@ -355,6 +355,9 @@ def handlers() -> dict:
         result["supreme.observe"] = supreme_observe
     from .private_adapters import available_handlers
     result.update(available_handlers())
+    from .native_autonomy import execute as native_execute
+    if os.environ.get('MSW_WP_URL') and os.environ.get('MSW_NODE') and len(os.environ.get('MSW_SECRET', '')) >= 32:
+        result['module.execute'] = native_execute
     from .own_model import available_handlers as own_handlers
     if os.environ.get("MSW_LLM_MODEL") or own_handlers():
         result["llm.generate"] = llm_dispatch
