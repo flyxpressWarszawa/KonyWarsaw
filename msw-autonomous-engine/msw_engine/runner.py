@@ -210,13 +210,18 @@ class Worker:
         print(json.dumps({"worker_version": __version__, "state": "ready"}), flush=True)
         signal.signal(signal.SIGTERM, lambda *_: setattr(self, "stopping", True))
         signal.signal(signal.SIGINT, lambda *_: setattr(self, "stopping", True))
+        # Keep cron independent of long model calls, queue errors and idle backoff.
+        fleet_thread = None
+        if not once and poke_cron_seconds > 0:
+            from .fleet_scheduler import FleetScheduler
+            fleet_thread = FleetScheduler(self.client.wordpress_url, self.journal.data_dir).start(lambda: self.stopping)
         while not self.stopping:
             try:
                 result = self.run_once()
                 print(json.dumps(result), flush=True)
                 pause = min(60, pause + 5) if result["state"] == "idle" else 1
                 self.health(result["state"])
-                if poke_cron_seconds > 0 and time.monotonic() - last_poke > poke_cron_seconds:
+                if fleet_thread is None and poke_cron_seconds > 0 and time.monotonic() - last_poke > poke_cron_seconds:
                     try:
                         self.client.poke_cron()
                         self.cron_state = "requested"
@@ -245,4 +250,5 @@ class Worker:
             while not self.stopping and time.monotonic() < deadline:
                 time.sleep(min(1, max(0, deadline - time.monotonic())))
         return 0
+
 
