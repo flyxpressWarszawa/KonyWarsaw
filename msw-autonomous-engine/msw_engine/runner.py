@@ -118,6 +118,10 @@ class Worker:
         if not isinstance(raw, str) or len(raw.encode()) > 262144 or hashlib.sha256(raw.encode()).hexdigest() != job.get("payload_sha256"):
             raise TransportError("job_payload_hash_mismatch")
         payload = json.loads(raw)
+        # PHP serializes its empty argument array as []; this one no-argument
+        # diagnostic accepts that representation after the raw hash is checked.
+        if payload == [] and job.get("kind") == "runtime.catalog":
+            payload = {}
         if not isinstance(payload, dict) or job.get("kind") not in handlers():
             raise TransportError("job_capability_mismatch")
         cached = self.journal.lookup(job["id"], job["payload_sha256"])

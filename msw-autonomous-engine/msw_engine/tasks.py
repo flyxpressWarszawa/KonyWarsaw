@@ -78,7 +78,7 @@ def knowledge_ingest(payload: dict, data_dir: Path) -> dict:
     records = payload.get("records", [])
     if not isinstance(records, list) or len(records) > 100:
         raise TaskError("record_limit")
-    validated = []
+    validated, skipped_empty = [], []
     for row in records:
         if not isinstance(row, dict) or row.get("approved") is not True:
             raise TaskError("record_not_approved")
@@ -86,8 +86,11 @@ def knowledge_ingest(payload: dict, data_dir: Path) -> dict:
         if not isinstance(ident, str) or not re.fullmatch(r"[A-Za-z0-9_:.-]{1,200}", ident):
             raise TaskError("record_id_invalid")
         text, title, url = (str(row.get(key, "")) for key in ("text", "title", "url"))
-        if not text.strip() or len(text) > 100_000 or len(title) > 1000 or len(url) > 2048:
+        if len(text) > 100_000 or len(title) > 1000 or len(url) > 2048:
             raise TaskError("record_invalid")
+        if not text.strip():
+            skipped_empty.append({"id": ident, "reason": "empty_source_body"})
+            continue
         digest = hashlib.sha256((title + "\0" + text).encode()).hexdigest()
         validated.append((ident, title, text, url, digest, str(row.get("provenance", "operator_approved"))[:200]))
     db = database(data_dir)
@@ -104,7 +107,7 @@ def knowledge_ingest(payload: dict, data_dir: Path) -> dict:
                 db.execute("INSERT INTO knowledge_fts VALUES(?,?,?)", row[:3])
                 stored += 1
         total = db.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
-        return {"stored": stored, "unchanged": unchanged, "records_total": total, "training_performed": False,
+        return {"stored": stored, "unchanged": unchanged, "records_total": total, "skipped_empty": skipped_empty, "training_performed": False,
                 "weights_modified": False, "purpose": "Persistent approved source memory and lexical retrieval"}
     finally:
         db.close()
