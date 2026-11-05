@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MSW AI Wspólny Silnik — WordPress, Render i Python
  * Description: Podpisany most współpracy, wspólna kolejka i potwierdzone wyniki istniejących silników MSW.
- * Version: 1.2.1
+ * Version: 1.2.3
  * Requires PHP: 8.1
  * Author: Mobilny Serwis Warszawa
  */
@@ -54,8 +54,10 @@ final class MSW_Render_Federation
             }]);
     }
 
-    public static function connect()
+    public static function connect($request = null)
     {
+        $args=$request?(array)$request->get_json_params():[];
+        if(array_diff(array_keys($args),['verify_job_id'])||(isset($args['verify_job_id'])&&(!is_string($args['verify_job_id'])||!preg_match('/^[a-f0-9-]{36}$/D',$args['verify_job_id']))))return self::error('connect_arguments');
         if(!class_exists('MSW_Central_Engine_Core'))return self::error('central_engine_missing',503);
         $catalog=MSW_Central_Engine_Registry::catalog();
         if(($catalog['federation.submit']['plugin']??'')!=='msw-render-federation/msw-render-federation.php')return self::error('central_capability_conflict',409);
@@ -64,6 +66,13 @@ final class MSW_Render_Federation
         if(!in_array('federation.submit',$caps,true))$caps[]='federation.submit';
         $settings['write_capabilities']=$caps;update_option($option,$settings,false);
         if((array)get_option($option,[])!==$settings)return self::error('central_policy_readback',503);
+        $readback=null;
+        if(isset($args['verify_job_id'])){
+            $read=MSW_Central_Engine_Registry::execute('federation.result',['job_id'=>$args['verify_job_id']],'fed-connect-readback-'.hash('sha256',$args['verify_job_id']));
+            if(is_wp_error($read))return $read;
+            $readback=['capability'=>$read['capability']??'', 'effect'=>$read['effect']??'',
+                'job_id'=>$read['result']['job_id']??'', 'result_digest_verified'=>$read['result']['digest_verified']??false];
+        }
         update_option('msw_federation_catalogue_auto',true,false);
         if(class_exists('MSWH_Integrations')){
             $feed=MSWH_Integrations::feed();
@@ -71,7 +80,7 @@ final class MSW_Render_Federation
         }
         return ['connected'=>true,'central_capability'=>'federation.submit','policy_readback_verified'=>true,
             'automatic_trigger'=>'existing_public_catalogue_change_event','additional_cron_created'=>false,
-            'catalogue_job'=>get_option('msw_federation_catalogue_job',[])];
+            'catalogue_job'=>get_option('msw_federation_catalogue_job',[]),'central_adapter_readback'=>$readback];
     }
 
     public static function catalogue_changed($entries): void
@@ -86,9 +95,9 @@ final class MSW_Render_Federation
         if(!$sources)return;
         usort($sources,static fn($a,$b)=>strcmp($a['url'],$b['url']));
         $digest=hash('sha256',wp_json_encode($sources,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
-        $text='Spawanie, bramy i pozostałe usługi MSW: zaproponuj trzy konkretne kroki rozwoju na podstawie aktualnego publicznego katalogu oraz wspólnej pamięci. Oddziel bieżące potwierdzenia techniczne od historycznych źródeł i propozycji. Nie deklaruj wykonania działań. Katalog: ';
+        $text='Spawanie, bramy i pozostałe usługi MSW: zaproponuj trzy konkretne kroki rozwoju na podstawie aktualnego publicznego katalogu oraz wspólnej pamięci. Cała odpowiedź: maksymalnie 180 słów, trzy krótkie punkty. Oddziel bieżące potwierdzenia techniczne od historycznych źródeł i propozycji. Nie deklaruj wykonania działań. Katalog: ';
         $text.=function_exists('mb_substr')?mb_substr(implode('; ',array_column($sources,'title')),0,1200):substr(implode('; ',array_column($sources,'title')),0,1200);
-        $r=self::submit(['request_id'=>'catalogue-2-'.$digest,'task'=>'business','prompt'=>$text,'max_tokens'=>1800,'use_knowledge'=>true,'collaborate'=>true]);
+        $r=self::submit(['request_id'=>'catalogue-3-'.$digest,'task'=>'business','prompt'=>$text,'max_tokens'=>3000,'use_knowledge'=>true,'collaborate'=>true]);
         if(!is_wp_error($r))update_option('msw_federation_catalogue_job',['source_sha256'=>$digest,'job_id'=>$r['job_id'],'state'=>$r['state'],'source_count'=>count($sources)],false);
     }
 
@@ -119,7 +128,7 @@ final class MSW_Render_Federation
         register_rest_route('msw-federation/v1', '/result/(?P<id>[a-f0-9-]{36})', ['methods' => 'GET', 'permission_callback' => [self::class, 'admin'],
             'callback' => [self::class, 'result']]);
         register_rest_route('msw-federation/v1', '/status', ['methods' => 'GET', 'permission_callback' => [self::class, 'admin'],
-            'callback' => static fn() => ['schema' => self::SCHEMA, 'version' => '1.2.1', 'queue_available' => class_exists('MSW\\UnifiedEngine\\RemoteStore'),
+            'callback' => static fn() => ['schema' => self::SCHEMA, 'version' => '1.2.3', 'queue_available' => class_exists('MSW\\UnifiedEngine\\RemoteStore'),
                 'router_loaded' => class_exists('MSW_ChatGPT_Router'), 'python_adapter_loaded' => class_exists('MSWH_Engine_Adapters'),
                 'last_result' => get_option('msw_federation_last_result', []), 'last_fault'=>get_option('msw_federation_last_fault',[]), 'all_plugin_callbacks_automatically_migrated' => false]]);
     }
