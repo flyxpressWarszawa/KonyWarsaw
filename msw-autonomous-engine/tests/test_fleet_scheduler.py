@@ -9,6 +9,16 @@ from msw_engine.fleet_scheduler import FleetScheduler, public_base
 
 
 class FleetSchedulerTest(unittest.TestCase):
+    def test_control_plane_failure_keeps_all_satellite_wakes_independent(self):
+        def unavailable():
+            raise TimeoutError()
+        with tempfile.TemporaryDirectory() as folder:
+            s = FleetScheduler("https://central.pl", Path(folder), fetch=lambda: [{"site_id": "one", "url": "https://one.pl"}],
+                               wake=lambda url: 200, maintain=unavailable, clock=lambda: 100000)
+            result = s.step()
+            self.assertEqual(result["central_control_plane"]["state"], "retry")
+            self.assertEqual(result["accepted_this_cycle"], 2)
+
     def test_exact_public_url_boundary(self):
         for url in ["http://peer.pl", "https://peer.pl?token=secret", "https://user:pass@peer.pl", "https://127.0.0.1",
                     "https://localhost", "https://x.internal", "https://peer.pl/../root", "https://peer.pl/%2froot"]:
@@ -28,7 +38,7 @@ class FleetSchedulerTest(unittest.TestCase):
                 s.step()
                 now[0] += 60
             self.assertEqual(len(s.observed), 39)
-            self.assertEqual(calls.count("https://central.pl"), 13)
+            self.assertEqual(calls.count("https://central.pl"), 3)
             data = json.loads(s.path.read_text())
             self.assertTrue(all(x["cron_request_accepted"] for x in data["nodes"].values()))
             self.assertTrue(all(not x["combo_execution_verified"] for x in data["nodes"].values()))

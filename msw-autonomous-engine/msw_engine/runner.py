@@ -85,11 +85,12 @@ def child_task(connection, kind: str, payload: dict, directory: str, max_seconds
 
 
 class Worker:
-    def __init__(self, client: Client, data_dir: Path, *, max_seconds: int = 300, memory_mb: int = 2048):
+    def __init__(self, client: Client, data_dir: Path, *, max_seconds: int = 300, memory_mb: int = 2048, cancel_check=None):
         self.client, self.journal = client, Journal(data_dir)
         self.max_seconds = max(5, min(86400, max_seconds))
         self.memory_mb = memory_mb
         self.stopping = False
+        self.cancel_check = cancel_check
         self.last_server_contact = 0
         self.last_job_state = "not_run"
         self.cron_state = "not_run"
@@ -158,7 +159,7 @@ class Worker:
                     result = json.loads(parent.recv_bytes(524289))
                     break
                 now = time.monotonic()
-                if self.stopping:
+                if self.stopping or (self.cancel_check is not None and self.cancel_check()):
                     raise WorkerDraining()
                 if now - started > self.max_seconds:
                     process.terminate()
@@ -213,13 +214,15 @@ class Worker:
         # Keep cron independent of long model calls, queue errors and idle backoff.
         fleet_thread = None
         if not once and poke_cron_seconds > 0:
-            from .fleet_scheduler import FleetScheduler
-            fleet_thread = FleetScheduler(self.client.wordpress_url, self.journal.data_dir).start(lambda: self.stopping)
+            from .fleet_scheduler import FleetScheduler, pump, consume_data
+            fleet_thread = FleetScheduler(self.client.wordpress_url, self.journal.data_dir,
+                                         maintain=lambda: pump(self.client),
+                                         consume=lambda: consume_data(self.client, self.journal.data_dir, lambda: self.stopping)).start(lambda: self.stopping)
         while not self.stopping:
             try:
                 result = self.run_once()
                 print(json.dumps(result), flush=True)
-                pause = min(60, pause + 5) if result["state"] == "idle" else 1
+                pause = min(60, pause + 5) if result["state"] == "idle" else (30 if result["state"] == "failed" else 10)
                 self.health(result["state"])
                 if fleet_thread is None and poke_cron_seconds > 0 and time.monotonic() - last_poke > poke_cron_seconds:
                     try:
