@@ -42,7 +42,21 @@ class AtlasClient:
                 raise TransportError("atlas_response_schema")
             return result
         except HTTPError as error:
-            raise TransportError("atlas_bridge_http", error.code) from None
+            # WordPress may return structured prerequisite errors or a host error page.
+            # Report recognised codes only. Never log HTML, headers or provider payloads.
+            code = "atlas_bridge_http"
+            try:
+                detail = json.loads(error.read(4096)).get("code")
+                allowed = {"msw_atlas_render_" + value for value in (
+                    "owner_required", "scope", "transport_missing", "native_dependencies",
+                    "provider_missing", "claim_readback", "claim_receipt_readback",
+                    "reservation_readback", "lease", "arguments"
+                )}
+                if isinstance(detail, str) and detail in allowed:
+                    code = detail
+            except (ValueError, AttributeError, OSError):
+                pass
+            raise TransportError(code, error.code) from None
         except (URLError, OSError, ValueError):
             raise TransportError("atlas_bridge_unavailable") from None
 
