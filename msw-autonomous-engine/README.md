@@ -59,8 +59,9 @@ publication, source admission and commerce checks still determine actual executi
 
 The central site's existing worker starts `AutonomousAgent` when the WordPress
 provider is configured. It needs no browser, desktop, new service or database.
-Its two independent lanes inspect V3/V5/V7/COMBO/Python every 15 minutes and
-develop a private business brief and product specification hourly using the
+Its three independent lanes review available private historical sources each
+minute, inspect V3/V5/V7/COMBO/Python every 15 minutes, and develop a private
+business brief and product specification hourly using the
 existing paid GPT router. The existing fleet pump, native work queue, catalogue
 publisher and FotoAtlas keep their current ownership and execution controls.
 
@@ -81,6 +82,23 @@ brief, or `MSW_AUTONOMOUS_AGENT=0` to pause this agent only.
 Connection recovery continues through the existing COMBO pump; new credentials,
 new paid infrastructure and arbitrary integration grants are not created.
 
+The historical lane walks the existing pinned legacy corpus and owner-imported
+source database in bounded UTF-8 fragments. Large records span several batches;
+the source cursor advances only after a digest-checked model response and a
+separate committed readback. Interrupted paid calls reuse their exact payload
+and request identity. Summaries stay private, remain labelled unverified, and
+inform subsequent business planning. Historical text never grants tool access.
+Only program code is committed; archives, notes and credentials stay on the
+existing private disk. This does not provide full ChatGPT account/conversation
+access or train model weights. Additional account history requires an owner
+export imported through the private source ingestion workflow.
+
+A durable integration continuation tracks each engine's native-read evidence,
+pending repairs and transport retries across restarts. Even five successful
+reads do not mark every active plugin or satellite autonomous: native execution
+receipts remain required. Existing signed COMBO and native queue lanes own
+execution; inactive plugins remain inactive and no new Render service is created.
+
 All central transport lanes share a disk-backed outage circuit. Three 429/502/
 503/504 responses or network timeouts within a minute pause requests to that
 origin. Cooldown grows to 15 minutes; one request probes recovery, and a dead
@@ -89,4 +107,5 @@ decides whether a timed-out mutation committed. Authorization failures stay
 authorization failures. Satellite circuits are independent. This mitigates
 request overload; PHP defects and hosting resource limits still need a diagnosed
 code or hosting fix. `runtime.catalog.transport_recovery` exposes cooldown state.
+
 

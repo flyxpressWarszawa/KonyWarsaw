@@ -100,6 +100,35 @@ class AgentTest(unittest.TestCase):
         self.generator.side_effect = TaskError('customer content / secret token')
         self.assertEqual(self.agent().step('business')['code'], 'TaskError')
 
+    def test_continuation_survives_restart_and_does_not_claim_full_autonomy(self):
+        def inspect(payload):
+            return {'inspections': [{'engine': n, 'native_read_verified': n != 'v5', 'state': 'checked'} for n in payload['engine_link']['engines']]}
+        first = self.agent(inspect=inspect)
+        first.step('connections')
+        self.assertEqual(self.agent().continuation()['pending_engines'], ['v5'])
+        self.now[0] += 900
+        second = self.agent(inspect=lambda p: {'inspections': [{'engine': n, 'native_read_verified': True} for n in p['engine_link']['engines']]})
+        second.step('connections')
+        plan = second.continuation()
+        self.assertEqual(plan['pending_engines'], [])
+        self.assertEqual(plan['state'], 'execution_verification_pending')
+        self.assertFalse(plan['all_engines_autonomous_verified'])
+        self.assertTrue(plan['inactive_plugins_must_remain_inactive'])
+
+    def test_transport_failure_preserves_pending_work(self):
+        agent = self.agent(inspect=Mock(side_effect=TimeoutError()))
+        self.assertEqual(agent.step('connections')['state'], 'retry')
+        self.assertEqual(self.agent().continuation()['state'], 'transport_retry')
+        self.assertFalse(self.agent().continuation()['all_engines_autonomous_verified'])
+
+    def test_history_learning_is_separate_from_business_generation(self):
+        agent = self.agent()
+        result = agent.step('learning')
+        self.assertEqual(result['state'], 'completed')
+        self.assertNotIn('business_brief_created', result)
+        self.generator.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main()
+
