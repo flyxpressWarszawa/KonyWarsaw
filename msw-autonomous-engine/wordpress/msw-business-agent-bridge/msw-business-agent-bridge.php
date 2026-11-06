@@ -2,13 +2,13 @@
 /**
  * Plugin Name: MSW Business Agent Bridge
  * Description: Prywatny most Render–centrala: wiedza portali, istniejące silniki, produkty WooCommerce i obsługa klientów.
- * Version: 1.1.3
+ * Version: 1.1.4
  * Author: MSW
  */
 defined('ABSPATH') || exit;
 
 final class MSW_Business_Agent_Bridge {
-    const VERSION = '1.1.3';
+    const VERSION = '1.1.4';
     const GRANT = 'msw_business_agent_owner_v1';
     const INPUT = 'msw_business_agent_command';
     const OUTPUT = 'msw_business_agent_result';
@@ -271,7 +271,10 @@ final class MSW_Business_Agent_Bridge {
             $saved=['state'=>'prepared','input_sha256'=>$fingerprint,'capability'=>$id,'request_id'=>$p['request_id']];
             if(!add_option($key,$saved,'',false))return self::error('tool_busy',409);
             $before=get_current_user_id(); $owner=(int)get_option(self::GRANT,[])['owner']; wp_set_current_user($owner);
-            try {$result=MSW_Central_Engine_Registry::execute($id,$p['arguments'],$p['request_id']);}
+            try {
+                $result = str_starts_with($id,'director.') ? self::enqueueDirector($id,$p['arguments'],$owner)
+                    : MSW_Central_Engine_Registry::execute($id,$p['arguments'],$p['request_id']);
+            }
             finally {wp_set_current_user($before);}
             if(is_wp_error($result))$result=['state'=>'blocked','code'=>$result->get_error_code()];
             $saved['state']='completed'; $saved['result']=self::scrub($result);
@@ -280,6 +283,35 @@ final class MSW_Business_Agent_Bridge {
             if(get_option($key,null)!==$saved)return self::error('tool_readback',503);
             return $saved+['storage_readback_verified'=>true];
         } finally {$wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)',$lock));}
+    }
+    private static function enqueueDirector(string $id,array $arguments,int $owner) {
+        $action=substr($id,9);
+        if(!in_array($action,['review','strategy','research','factory','marketing','memory'],true)||$arguments!==[] ||
+            !is_callable(['MSW_Business_Director','canExecute'])||!is_callable(['MSW_Central_Engine_Store','enqueue'])||
+            !is_callable(['MSW_Central_Engine_Store','pending_adapter'])||!is_callable(['MSW_Central_Engine_Store','get_job'])||
+            !is_callable(['MSW_Central_Engine_Core','settings'])||!is_callable(['MSW_Central_Engine_Workflows','validate']))
+            return self::error('director_adapter_unavailable',503);
+        $settings=MSW_Central_Engine_Core::settings();
+        if(empty($settings['enabled'])||empty($settings['autonomy_enabled'])||
+            !in_array($id,(array)($settings['write_capabilities']??[]),true)||MSW_Business_Director::canExecute($action)!==true)
+            return self::error('director_policy_denied',403);
+        $input=['capability'=>$id,'arguments'=>[]];
+        $validated=MSW_Central_Engine_Workflows::validate('adapter.run',$input);
+        if(is_wp_error($validated))return $validated;
+        if(MSW_Central_Engine_Store::pending_adapter($id))return ['state'=>'existing_job_pending',
+            'queue_query_verified'=>true,'job_readback_verified'=>false,'native_action_completed'=>false];
+        // Match the native scheduler's idempotency slot so independent triggers
+        // cannot enqueue a second factory or director cycle for the same slot.
+        $slot=$action==='factory'?(string)floor(time()/300):gmdate('YmdH');
+        $job=MSW_Central_Engine_Store::enqueue('adapter.run',$input,'director-v24-'.$action.'-'.$slot,$owner);
+        if(is_wp_error($job))return $job;
+        $fresh=MSW_Central_Engine_Store::get_job((int)($job['id']??0));
+        if(!is_array($fresh)||(int)($fresh['owner_id']??0)!==$owner||($fresh['type']??'')!=='adapter.run'||
+            ($fresh['input']['capability']??'')!==$id||($fresh['input']['arguments']??null)!==[])
+            return self::error('director_queue_readback',503);
+        return ['state'=>'native_job_'.sanitize_key((string)($fresh['state']??'unknown')), 'job_id'=>(int)$fresh['id'],
+            'job_readback_verified'=>true,'native_action_completed'=>($fresh['state']??'')==='completed',
+            'product_delivery_verified'=>false];
     }
     public static function context(int $offset): array {
         $rows = get_posts(['post_type' => ['post', 'page'], 'post_status' => 'publish', 'posts_per_page' => 40,

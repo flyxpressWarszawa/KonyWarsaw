@@ -275,9 +275,21 @@ class BusinessBridge:
             batch = tools[start:start + 100]
             if knowledge_ingest({'records': batch}, self.directory)['readback_verified_records'] != len(batch):
                 raise ValueError('business_capabilities_readback')
+        factory = {'state': 'not_enabled'}
+        native_factory = next((cap for cap in capabilities.get('capabilities', [])
+                               if cap.get('id') == 'director.factory' and cap.get('enabled') is True), None)
+        catalog_sha = capabilities.get('catalog_sha256')
+        if native_factory and isinstance(catalog_sha, str) and re.fullmatch('[a-f0-9]{64}', catalog_sha):
+            slot = int(time.time()) // 300
+            ident = 'business-director-factory-' + str(slot) + '-' + catalog_sha[:12]
+            factory = self.call('capability.execute', request_id=ident, capability='director.factory',
+                                arguments={}, catalog_sha256=catalog_sha)
+            self.record(ident, factory)
+            factory = factory.get('result', {'state': 'unverified'})
         summary = {'state': 'completed', 'content_records_readback': imported['readback_verified_records'],
             'owner_business_knowledge': knowledge,
             'active_tools_catalogued': len(tools),
+            'factory': factory,
             'products_observed': len(products.get('records', [])), 'products_published_readback': published,
             'paypal_enabled': status.get('paypal', {}).get('enabled') is True,
             'telegram_transport_verified': status.get('telegram', {}).get('customer_reply_transport_verified') is True,

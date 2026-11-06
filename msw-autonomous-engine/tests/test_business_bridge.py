@@ -92,5 +92,21 @@ class BridgeTest(unittest.TestCase):
         result=BusinessBridge(self.client,self.root,remote=call).sync_owner_knowledge()
         self.assertEqual(result['state'],'awaiting_central_knowledge_adapter')
 
+    def test_enabled_native_factory_is_queued_without_claiming_delivery(self):
+        def remote(op,**fields):
+            if op=='status': return {'owner_authorized':True,'paypal':{},'telegram':{}}
+            if op=='knowledge': return {'state':'not_configured'}
+            if op=='context': return {'origin':self.client.wordpress_url,'records':[],'next_offset':None}
+            if op=='products': return {'records':[],'next_offset':None}
+            if op=='capabilities': return {'catalog_sha256':'f'*64,'capabilities':[{'id':'director.factory','enabled':True}]}
+            if op=='capability.execute':
+                self.assertEqual(fields['capability'],'director.factory')
+                return {'state':'completed','result':{'state':'native_job_pending','job_readback_verified':True,'native_action_completed':False,'product_delivery_verified':False}}
+            raise AssertionError(op)
+        answer=BusinessBridge(self.client,self.root,remote=remote).step()
+        self.assertEqual(answer['factory']['state'],'native_job_pending')
+        self.assertFalse(answer['factory']['native_action_completed'])
+        self.assertFalse(answer['factory']['product_delivery_verified'])
+
 
 if __name__=='__main__':unittest.main()
