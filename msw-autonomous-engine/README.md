@@ -94,6 +94,14 @@ existing private disk. This does not provide full ChatGPT account/conversation
 access or train model weights. Additional account history requires an owner
 export imported through the private source ingestion workflow.
 
+### Direct paid OpenAI from the Render worker
+
+The existing background worker can send its own Responses API requests directly to OpenAI. Render runs the persistent agent and stores its API credential as a secret; OpenAI hosts the model inference. This path bypasses the failing WordPress generation bridge for these worker requests.
+
+Configure the existing Render worker with `MSW_LLM_PROVIDER=wordpress`, `MSW_LLM_MODEL=gpt-6.1-sol`, `MSW_PAID_AI_TRANSPORT=direct_openai`, and optionally `MSW_OPENAI_MODEL=gpt-6.1-sol`. Add `OPENAI_API_KEY` only in the Render service's secret environment settings. Never commit the key or expose it in WordPress content.
+
+The direct transport stores request identity and the completed answer in the worker's persistent data directory, verifies a digest on readback, and does not resend requests with an uncertain outcome. This avoids duplicate paid calls after timeouts or restarts. Existing signed WordPress capabilities still control business actions; generated text alone does not count as an executed change or verified publication.
+
 A durable integration continuation tracks each engine's native-read evidence,
 pending repairs and transport retries across restarts. Even five successful
 reads do not mark every active plugin or satellite autonomous: native execution
