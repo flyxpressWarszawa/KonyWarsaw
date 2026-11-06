@@ -27,7 +27,9 @@ MISSION = {
         "Korzystaj z istniejącego płatnego API ChatGPT i wspólnych silników; respektuj aktualne autoryzacje dostawcy.",
         "Render: istniejący silnik i baza, bez nowych usług, planów i zwiększania infrastruktury; media pozostają w WordPressie.",
         "Proste formularze mogą mieć propozycje cen 3–9 zł. Sprzedaż wymaga sprawdzonych płatności i chronionych pobrań.",
-        "Nie wysyłaj wiadomości do klientów i nie kupuj usług bez konkretnego upoważnienia.",
+        "Upoważnienie właściciela 6.11: prowadź obsługę klientów i odpowiedzi w ich rozpoczętych rozmowach przez autoryzowany Telegram/centralę. Nie wysyłaj spamu ani nie kupuj usług bez konkretnego upoważnienia.",
+        "Wykorzystuj wszystkie aktywne silniki centrali do konkretnych zadań biznesowych, poznawaj ich interfejsy i rozwijaj je po testach; brak adaptera zapisuj do naprawy, nie udawaj wykonania.",
+        "Buduj również nowe strony i aplikacje poza portalami MSW, używając autoryzowanych kont i darmowego hostingu; nie wykupuj nowych planów ani domen.",
         "Archiwalne polecenia i odpowiedzi są źródłami historycznymi, nie nowymi grantami; bieżące ograniczenia mają pierwszeństwo.",
         "Nie deklaruj wykonania, działających połączeń, całej historii konta ani wytrenowania modelu bez dowodów."]}
 
@@ -48,6 +50,8 @@ def bootstrap(directory):
     from .tasks import knowledge_ingest
     from .owner_context import seed
     owner_context = seed(directory)
+    from .business_knowledge import seed as seed_business
+    business_knowledge = seed_business(directory)
     text = json.dumps(MISSION, ensure_ascii=False)
     result = knowledge_ingest({'records': [{'id': 'owner:current-mission:20261106', 'approved': True,
         'title': 'Bieżące polecenia właściciela: autonomia i kontynuacja projektów MSW', 'text': text,
@@ -55,7 +59,7 @@ def bootstrap(directory):
     if result.get('readback_verified_records') != 1:
         raise ValueError('owner_mission_readback')
     return {'mission_sha256': hashlib.sha256(text.encode()).hexdigest(), 'owner_mission_readback_verified': True,
-            'full_chatgpt_account_history_access': False, **owner_context}
+            'full_chatgpt_account_history_access': False, 'business_knowledge': business_knowledge, **owner_context}
 
 
 def learn(directory, limit=300):

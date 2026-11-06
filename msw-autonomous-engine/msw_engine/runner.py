@@ -221,6 +221,10 @@ class Worker:
         signal.signal(signal.SIGTERM, lambda *_: setattr(self, "stopping", True))
         signal.signal(signal.SIGINT, lambda *_: setattr(self, "stopping", True))
         # Catalogue scheduling shares this worker and its existing persistent disk.
+        if (not once and os.environ.get("MSW_BUSINESS_BRIDGE", "0") == "1"
+                and getattr(self.client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"):
+            from .business_bridge import BusinessBridge
+            BusinessBridge(self.client, self.journal.data_dir).start(lambda: self.stopping)
         if (not once and os.environ.get("MSW_CATALOG_PUBLISHER", "1") == "1"
                 and getattr(self.client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"):
             from .catalog_publisher import CatalogPublisher
