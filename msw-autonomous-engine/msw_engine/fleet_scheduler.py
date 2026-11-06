@@ -50,7 +50,15 @@ def poke(base: str) -> int:
 
 def fetch_roster() -> list:
     from .federation import gateway
-    return gateway("snapshot").get("combo108_roster", [])
+    snapshot = gateway("snapshot")
+    # A transient or partial signed snapshot is NOT a revocation of every site.
+    # Only an explicitly returned empty list can remove the existing roster.
+    if not isinstance(snapshot, dict) or "combo108_roster" not in snapshot:
+        raise ValueError("combo_roster_missing")
+    roster = snapshot["combo108_roster"]
+    if not isinstance(roster, list):
+        raise ValueError("combo_roster_shape")
+    return roster
 
 
 def pump(client) -> dict:
