@@ -6,8 +6,10 @@ import ssl
 from urllib.error import HTTPError, URLError
 from urllib.request import HTTPSHandler, HTTPRedirectHandler, Request, build_opener
 
-HOST = 'sxb1plzcpnl508218.prod.sxb1.secureserver.net'
-URL = 'https://' + HOST + ':2083/execute/ServerInformation/get_information'
+ALLOWED_HOSTS = frozenset({
+    'sxb1plzcpnl508218.prod.sxb1.secureserver.net',
+    'sxb1plzcpnl507797.prod.sxb1.secureserver.net',
+})
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -20,7 +22,11 @@ def probe(environ=None, opener=None):
     username, token = env.get('MSW_CPANEL_USER', ''), env.get('MSW_CPANEL_API_TOKEN', '')
     if not re.fullmatch(r'[A-Za-z0-9_-]{1,64}', username) or not re.fullmatch(r'[A-Za-z0-9_-]{16,256}', token):
         return {'state': 'not_configured', 'verified': False}
-    request = Request(URL, headers={'Authorization': 'cpanel ' + username + ':' + token, 'Accept': 'application/json'})
+    host = env.get('MSW_CPANEL_HOST', '')
+    if host not in ALLOWED_HOSTS:
+        return {'state': 'host_not_configured_or_not_allowed', 'verified': False}
+    url = 'https://' + host + ':2083/execute/ServerInformation/get_information'
+    request = Request(url, headers={'Authorization': 'cpanel ' + username + ':' + token, 'Accept': 'application/json'})
     opener = opener or build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context()))
     try:
         with opener.open(request, timeout=15) as response:
