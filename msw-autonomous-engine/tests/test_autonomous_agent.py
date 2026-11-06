@@ -92,6 +92,14 @@ class AgentTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.agent().step('shell')
 
+    def test_known_transport_error_code_is_logged_without_arbitrary_details(self):
+        from msw_engine.tasks import TaskError
+        self.generator.side_effect = TaskError('fed_generate_http_503:provider_unavailable')
+        self.assertEqual(self.agent().step('business')['code'], 'fed_generate_http_503:provider_unavailable')
+        self.now[0] += 3600
+        self.generator.side_effect = TaskError('customer content / secret token')
+        self.assertEqual(self.agent().step('business')['code'], 'TaskError')
+
 
 if __name__ == '__main__':
     unittest.main()

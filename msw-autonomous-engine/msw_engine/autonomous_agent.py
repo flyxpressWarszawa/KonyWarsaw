@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import sqlite3
 import threading
 import time
@@ -190,12 +191,15 @@ class AutonomousAgent:
                     raise ValueError("agent_receipt_readback")
                 return {"lane": lane, "state": "completed", "job_id": job["id"],
                         "result_sha256": sha, "storage_readback_verified": True,
-                        **({"verified_native_reads": result["verified_native_reads"]} if lane == "connections" else {"business_brief_created": True})}
+                        **({"verified_native_reads": result["verified_native_reads"], "inspections": result["inspections"]} if lane == "connections" else {"business_brief_created": True})}
             except Exception as error:
                 attempts = job["attempts"] + 1
                 delay = min(3600, 60 * 2 ** min(attempts, 6))
                 # Never abandon an uncertain paid request in favour of a new ID.
                 code = type(error).__name__
+                from .tasks import TaskError
+                if isinstance(error, TaskError) and re.fullmatch(r"[A-Za-z0-9_.:-]{1,140}", str(error)):
+                    code = str(error)
                 with self.connect() as db:
                     db.execute("UPDATE jobs SET attempts=?,retry_at=?,error=? WHERE id=?", (attempts, int(self.clock()) + delay, code, job["id"]))
                 return {"lane": lane, "state": "retry", "job_id": job["id"], "code": code, "retry_in_seconds": delay}

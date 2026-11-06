@@ -380,7 +380,7 @@ def runtime_catalog(payload: dict, data_dir: Path) -> dict:
     from .recovery import status as recovery_status
     result = {"state": status["state"], "worker_version": __version__, "pack_sha256": status.get("pack_sha256"), "legacy_source_memory": legacy_status(data_dir),
             "transport_recovery": recovery_status(data_dir),
-            "autonomous_agent": agent_status(data_dir, include_report=payload.get("include_director_report") is True),
+            "autonomous_agent": agent_status(data_dir, include_report=payload.get("include_director_report", True) is True),
             "modules": [{key: item[key] for key in ("id", "version", "source_sha256") if key in item}
                         for item in status.get("modules", [])], "capabilities": list(handlers())}
     if "suite_snapshot" in payload:

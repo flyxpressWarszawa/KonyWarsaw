@@ -74,9 +74,10 @@ publication, revenue or model training. The agent executes fixed signed tools;
 it never runs GPT code or commands. Existing publication lanes execute approved
 native work, not instructions parsed from the model's prose.
 
-`runtime.catalog` includes agent heartbeat and job counts. Add
-`include_director_report: true` to an authorized catalogue request to retrieve
-the latest private brief. Set `MSW_AUTONOMOUS_AGENT=0` to pause this agent only.
+An authorized `runtime.catalog` includes agent heartbeat, job counts and the
+latest private brief, so the existing no-argument caller can pass it to the
+owner's business workflow. Set `include_director_report: false` to omit the
+brief, or `MSW_AUTONOMOUS_AGENT=0` to pause this agent only.
 Connection recovery continues through the existing COMBO pump; new credentials,
 new paid infrastructure and arbitrary integration grants are not created.
 
