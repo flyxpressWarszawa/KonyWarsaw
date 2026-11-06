@@ -1,6 +1,8 @@
 """One bounded flow across Render memory, WordPress and the existing Python HUB."""
 from __future__ import annotations
 
+from .recovery import protected_open
+
 import hashlib
 import json
 import os
@@ -34,7 +36,7 @@ def gateway(operation: str, values: dict | None = None) -> dict:
                       headers=signed_headers("status", node, secret, raw), method="POST")
     try:
         timeout = 85 if operation in {"local_advice", "owned_advice", "autonomy_execute"} else 45
-        with build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context())).open(request, timeout=timeout) as response:
+        with protected_open(build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context())), request, timeout=timeout) as response:
             body = response.read(262145)
         if len(body) > 262144:
             raise TaskError("federation_response_limit")

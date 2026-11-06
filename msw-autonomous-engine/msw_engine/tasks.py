@@ -289,6 +289,7 @@ def combo_engine_links(payload: dict, data_dir: Path) -> dict:
     successful native reads, not model training or arbitrary business actions.
     """
     from .client import signed_headers, encode, NoRedirect
+    from .recovery import protected_open
     from urllib.request import HTTPSHandler
     from urllib.error import HTTPError, URLError
     import ssl
@@ -331,7 +332,7 @@ def combo_engine_links(payload: dict, data_dir: Path) -> dict:
             request = Request(origin + "/wp-json/msw-combo-engines/v1/inspect", data=request_raw,
                               headers=signed_headers("status", node, secret, request_raw), method="POST")
             try:
-                with opener.open(request, timeout=45) as response:
+                with protected_open(opener, request, timeout=45) as response:
                     response_raw = response.read(65537)
                 if len(response_raw) > 65536:
                     raise TaskError("engine_link_response_limit")
@@ -375,7 +376,11 @@ def runtime_catalog(payload: dict, data_dir: Path) -> dict:
     except (OSError, ValueError):
         status = {"state": "not_configured", "modules": []}
     from .legacy_memory import status as legacy_status
+    from .autonomous_agent import status as agent_status
+    from .recovery import status as recovery_status
     result = {"state": status["state"], "worker_version": __version__, "pack_sha256": status.get("pack_sha256"), "legacy_source_memory": legacy_status(data_dir),
+            "transport_recovery": recovery_status(data_dir),
+            "autonomous_agent": agent_status(data_dir, include_report=payload.get("include_director_report") is True),
             "modules": [{key: item[key] for key in ("id", "version", "source_sha256") if key in item}
                         for item in status.get("modules", [])], "capabilities": list(handlers())}
     if "suite_snapshot" in payload:

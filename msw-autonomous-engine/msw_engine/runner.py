@@ -231,6 +231,14 @@ class Worker:
         if not once and os.environ.get("MSW_FOTOATLAS_ENABLED") == "1":
             from .fotoatlas_render_bridge import AtlasClient, FotoAtlas
             FotoAtlas(AtlasClient(self.client), self.journal.data_dir).start(lambda: self.stopping)
+        if (not once and os.environ.get("MSW_AUTONOMOUS_AGENT", "1") == "1"
+                and getattr(self.client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"
+                and os.environ.get("MSW_LLM_PROVIDER") == "wordpress"):
+            from .autonomous_agent import AutonomousAgent
+            try:
+                AutonomousAgent(self.journal.data_dir).start(lambda: self.stopping)
+            except (OSError, ValueError, sqlite3.Error) as error:
+                print(json.dumps({"autonomous_agent": {"state": "startup_blocked", "code": type(error).__name__}}), flush=True)
         while not self.stopping:
             try:
                 result = self.run_once()

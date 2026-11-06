@@ -55,3 +55,37 @@ Paid GPT research stays in the existing authenticated WordPress router; this mod
 needs no additional OpenAI key, paid service, scheduler or compute instance. Existing
 publication, source admission and commerce checks still determine actual execution.
 
+## Independent owner agent
+
+The central site's existing worker starts `AutonomousAgent` when the WordPress
+provider is configured. It needs no browser, desktop, new service or database.
+Its two independent lanes inspect V3/V5/V7/COMBO/Python every 15 minutes and
+develop a private business brief and product specification hourly using the
+existing paid GPT router. The existing fleet pump, native work queue, catalogue
+publisher and FotoAtlas keep their current ownership and execution controls.
+
+Schedules, exact GPT inputs, retries and SHA-256 receipts persist under
+`MSW_DATA_DIR/autonomous-agent/`. A restart resumes the same request ID and prompt;
+timeouts never cause a new paid request to replace an uncertain one. Process locks
+prevent parallel duplicate calls. A failed connection lane cannot stop business
+work. Completed receipts are independently read back from SQLite. Generated
+proposals remain outside approved RAG and are not claims of verified demand,
+publication, revenue or model training. The agent executes fixed signed tools;
+it never runs GPT code or commands. Existing publication lanes execute approved
+native work, not instructions parsed from the model's prose.
+
+`runtime.catalog` includes agent heartbeat and job counts. Add
+`include_director_report: true` to an authorized catalogue request to retrieve
+the latest private brief. Set `MSW_AUTONOMOUS_AGENT=0` to pause this agent only.
+Connection recovery continues through the existing COMBO pump; new credentials,
+new paid infrastructure and arbitrary integration grants are not created.
+
+All central transport lanes share a disk-backed outage circuit. Three 429/502/
+503/504 responses or network timeouts within a minute pause requests to that
+origin. Cooldown grows to 15 minutes; one request probes recovery, and a dead
+probe expires. The circuit never replays a write. Existing lease/ACK recovery
+decides whether a timed-out mutation committed. Authorization failures stay
+authorization failures. Satellite circuits are independent. This mitigates
+request overload; PHP defects and hosting resource limits still need a diagnosed
+code or hosting fix. `runtime.catalog.transport_recovery` exposes cooldown state.
+

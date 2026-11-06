@@ -1,6 +1,8 @@
 """Wake owner-approved WordPress cron independently of long-running AI jobs."""
 from __future__ import annotations
 
+from .recovery import protected_open
+
 import ipaddress
 import json
 import re
@@ -41,7 +43,7 @@ def poke(base: str) -> int:
     base = public_base(base)
     request = Request(base + "/wp-cron.php", headers={"User-Agent": "MSW-Owner-Fleet-Scheduler/108"})
     opener = build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context()))
-    with opener.open(request, timeout=8) as response:
+    with protected_open(opener, request, timeout=8) as response:
         response.read(1024)
         return response.status
 
@@ -57,7 +59,7 @@ def pump(client) -> dict:
     request = Request(base + "/wp-json/msw-portal-combo/v1/runtime108/pump", data=raw,
                       headers=signed_headers("status", client.node, client.secret, raw), method="POST")
     opener = build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context()))
-    with opener.open(request, timeout=38) as response:
+    with protected_open(opener, request, timeout=38) as response:
         body = response.read(16385)
     if len(body) > 16384:
         raise ValueError("pump_response_limit")

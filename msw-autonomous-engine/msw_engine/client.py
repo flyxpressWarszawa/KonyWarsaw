@@ -1,6 +1,8 @@
 """Outbound-only, signed WordPress transport. No WordPress administrator password."""
 from __future__ import annotations
 
+from .recovery import protected_open
+
 import hashlib
 import hmac
 import json
@@ -58,7 +60,7 @@ class Client:
         raw = encode(payload)
         request = Request(self.url, data=raw, headers=signed_headers(action, self.node, self.secret, raw), method="POST")
         try:
-            with self.opener.open(request, timeout=45) as response:
+            with protected_open(self.opener, request, timeout=45) as response:
                 body = response.read(1_100_001)
                 if len(body) > 1_100_000:
                     raise TransportError("response_limit")
@@ -77,7 +79,7 @@ class Client:
     def poke_cron(self) -> None:
         request = Request(self.wordpress_url + "/wp-cron.php", headers={"User-Agent": "MSW-External-Scheduler/1.0"})
         try:
-            with self.opener.open(request, timeout=45) as response:
+            with protected_open(self.opener, request, timeout=45) as response:
                 response.read(1024)
         except (HTTPError, URLError, TimeoutError, OSError):
             raise TransportError("wordpress_cron_unavailable") from None

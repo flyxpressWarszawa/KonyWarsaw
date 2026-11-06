@@ -6,6 +6,8 @@ Render service or filesystem-wide media copy is created.
 """
 from __future__ import annotations
 
+from .recovery import protected_open
+
 import json
 import os
 from pathlib import Path
@@ -33,7 +35,7 @@ class AtlasClient:
         request = Request(self.client.wordpress_url + "/wp-json/msw-fotoatlas-render/v1/control",
                           data=raw, method="POST", headers=signed_headers("status", self.client.node, self.client.secret, raw))
         try:
-            with build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context())).open(request, timeout=35) as response:
+            with protected_open(build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context())), request, timeout=35) as response:
                 body = response.read(65537)
             if len(body) > 65536:
                 raise TransportError("atlas_response_limit")

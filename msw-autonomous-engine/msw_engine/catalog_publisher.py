@@ -6,6 +6,8 @@ No paid provider, new database service, or general-purpose REST proxy is used.
 """
 from __future__ import annotations
 
+from .recovery import protected_open
+
 import fcntl
 import json
 import os
@@ -53,7 +55,7 @@ class CatalogPublisher:
         request = Request(self.client.wordpress_url + "/wp-json/msw-catalog-recovery/v1/external",
                           data=raw, headers=signed_headers("status", self.client.node, self.client.secret, raw), method="POST")
         try:
-            with build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context())).open(request, timeout=45) as response:
+            with protected_open(build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context())), request, timeout=45) as response:
                 body = response.read(131073)
             if len(body) > 131072:
                 raise CatalogError("catalog_response_limit")
