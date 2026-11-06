@@ -65,6 +65,7 @@ class WordPressToolsTests(unittest.TestCase):
 
     def test_dynamic_catalogue_never_inspects_inactive_plugin(self):
         with patch('msw_engine.federation.gateway', return_value={'catalog_sha256': self.sha, 'total': 3}), \
+             patch('msw_engine.fleet_scheduler.fetch_roster', return_value=[]), \
              patch('msw_engine.module_bus.probe', return_value={'modules': [{'id': 'active/a.php', 'native_read_executed': True}]}) as probe:
             result = wordpress_agent.discover(self.root)
         self.assertEqual(result['active_modules'], 2)
