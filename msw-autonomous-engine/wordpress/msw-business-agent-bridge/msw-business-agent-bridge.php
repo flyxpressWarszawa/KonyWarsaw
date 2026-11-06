@@ -2,13 +2,13 @@
 /**
  * Plugin Name: MSW Business Agent Bridge
  * Description: Prywatny most Render–centrala: wiedza portali, istniejące silniki, produkty WooCommerce i obsługa klientów.
- * Version: 1.1.7
+ * Version: 1.1.8
  * Author: MSW
  */
 defined('ABSPATH') || exit;
 
 final class MSW_Business_Agent_Bridge {
-    const VERSION = '1.1.7';
+    const VERSION = '1.1.8';
     const GRANT = 'msw_business_agent_owner_v1';
     const INPUT = 'msw_business_agent_command';
     const OUTPUT = 'msw_business_agent_result';
@@ -130,6 +130,23 @@ final class MSW_Business_Agent_Bridge {
         if ($op === 'director.tick') return self::directorTick($p);
         return self::error('operation');
     }
+    public static function directorCronCallbacks(): array {
+        global $wp_filter;
+        $hook=$wp_filter['msw_central_engine_tick']??null;
+        $callbacks=is_object($hook)&&isset($hook->callbacks)&&is_array($hook->callbacks)?$hook->callbacks:[];
+        $names=[];
+        foreach($callbacks as $priority=>$entries) foreach($entries as $entry) {
+            $fn=$entry['function']??null;
+            if(is_array($fn)&&count($fn)===2) $label=(is_object($fn[0])?get_class($fn[0]):(string)$fn[0]).'::'.(string)$fn[1];
+            elseif(is_string($fn)) $label=$fn;
+            elseif($fn instanceof Closure) $label='closure';
+            elseif(is_object($fn)) $label=get_class($fn).'::__invoke';
+            else $label='unknown';
+            $names[]=['priority'=>(int)$priority,'callback'=>substr($label,0,160)];
+            if(count($names)>=30) return $names;
+        }
+        return $names;
+    }
     public static function directorStatus(): array {
         if(!is_callable(['MSW_Business_Director','settings'])||!is_callable(['MSW_Central_Engine_Store','jobs'])||
             !is_callable(['MSW_Central_Engine_Store','counts'])||!is_callable(['MSW_Central_Engine_Store','pending_adapter']))
@@ -160,6 +177,7 @@ final class MSW_Business_Agent_Bridge {
             'native_cron_next_utc'=>$cron?gmdate('c',$cron):null,
             'native_cron_callback_registered'=>has_action('msw_central_engine_tick',['MSW_Central_Engine_Core','cron_tick'])!==false,
             'native_cron_any_callback_registered'=>has_action('msw_central_engine_tick')!==false,
+            'native_cron_callbacks'=>self::directorCronCallbacks(),
             'wp_cron_disabled'=>defined('DISABLE_WP_CRON')&&DISABLE_WP_CRON,
             'last_core_tick'=>get_option('msw_central_engine_last_tick',null),
             'product_delivery_verified'=>false];

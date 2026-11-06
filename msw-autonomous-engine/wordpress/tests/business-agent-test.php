@@ -55,6 +55,8 @@ function wc_get_products($p){global$product;return[$product];}
 require dirname(__DIR__).'/msw-business-agent-bridge/msw-business-agent-bridge.php';
 $n=0;function check($v,$name){global$n;if(!$v)throw new RuntimeException($name);$n++;}
 $c='MSW_Business_Agent_Bridge';$c::activate();
+$wp_filter=['msw_central_engine_tick'=>(object)['callbacks'=>[10=>[['function'=>['Example_Cron','observe']],['function'=>static function(){}]]]]];
+$cron_names=$c::directorCronCallbacks();check($cron_names===[['priority'=>10,'callback'=>'Example_Cron::observe'],['priority'=>10,'callback'=>'closure']],'diagnostic_reports_callback_names_only');unset($wp_filter);
 check($c::owner(),'activation_records_real_owner');
 $c::restoreDirectorCron();check(has_action('msw_central_engine_tick',['MSW_Central_Engine_Core','cron_tick'])!==false,'missing_enabled_native_cron_is_restored');
 $c::restoreDirectorCron();check(count($hooks['msw_central_engine_tick'])===1,'existing_cron_is_not_duplicated');
