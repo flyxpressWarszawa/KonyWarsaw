@@ -2,13 +2,13 @@
 /**
  * Plugin Name: MSW Business Agent Bridge
  * Description: Prywatny most Render–centrala: wiedza portali, istniejące silniki, produkty WooCommerce i obsługa klientów.
- * Version: 1.1.4
+ * Version: 1.1.5
  * Author: MSW
  */
 defined('ABSPATH') || exit;
 
 final class MSW_Business_Agent_Bridge {
-    const VERSION = '1.1.4';
+    const VERSION = '1.1.5';
     const GRANT = 'msw_business_agent_owner_v1';
     const INPUT = 'msw_business_agent_command';
     const OUTPUT = 'msw_business_agent_result';
@@ -111,7 +111,34 @@ final class MSW_Business_Agent_Bridge {
         if ($op === 'telegram.verify') return self::telegramVerify();
         if ($op === 'telegram.inbox') return MSW_Business_Telegram::inbox();
         if ($op === 'telegram.reply') return MSW_Business_Telegram::reply($p);
+        if ($op === 'director.status') return self::directorStatus();
         return self::error('operation');
+    }
+    public static function directorStatus(): array {
+        if(!is_callable(['MSW_Business_Director','settings'])||!is_callable(['MSW_Central_Engine_Store','jobs'])||
+            !is_callable(['MSW_Central_Engine_Store','counts'])||!is_callable(['MSW_Central_Engine_Store','pending_adapter']))
+            return ['state'=>'native_director_unavailable'];
+        $s=MSW_Business_Director::settings();$jobs=[];
+        foreach(MSW_Central_Engine_Store::jobs(30) as $job){
+            $id=$job['input']['capability']??'';
+            if(($job['type']??'')!=='adapter.run'||!in_array($id,['director.factory','director.research','director.strategy','director.review','director.marketing','director.memory'],true))continue;
+            $jobs[]=array_intersect_key($job,array_flip(['id','state','failures','runs','due_at','updated_at']));
+            $jobs[count($jobs)-1]['capability']=$id;
+            if(count($jobs)>=30)break;
+        }
+        $operations=[];
+        foreach(['factory','research','strategy','review','marketing','memory'] as $id){
+            $last=get_option('msw_business_director_last_'.$id,null);
+            if(is_array($last))$operations[$id]=['at_utc'=>$last['at_utc']??null,'state'=>$last['native']['state']??null,
+                'next_action'=>$last['native']['next_action']??null,'jobs'=>$last['native']['jobs']??null];
+        }
+        $board=(array)get_option('msw_business_director_board_v2',[]);
+        return ['state'=>'native_director_observed','enabled'=>($s['enabled']??false)===true,
+            'owner_permission'=>user_can((int)($s['owner_id']??0),'manage_options'),'actions'=>$s['actions']??[],
+            'queue'=>MSW_Central_Engine_Store::counts(),'recent_jobs'=>$jobs,'last_operations'=>$operations,
+            'factory_pending'=>MSW_Central_Engine_Store::pending_adapter('director.factory'),
+            'factory'=>$board['factory']??null,'execution_cycle'=>get_option('msw_business_director_cycle_v3',null),
+            'product_delivery_verified'=>false];
     }
     public static function seedKnowledge(array $p) {
         if(!self::admin())return self::error('owner_knowledge_grant',403);

@@ -28,13 +28,14 @@ function strip_shortcodes($x){return$x;} function clean_post_cache($x){}
 function get_posts($p){return[(object)['ID'=>10,'post_title'=>'Usługa','post_content'=>'Informacja publiczna','post_type'=>'page']];}
 if(!function_exists('mb_substr')){function mb_substr($x,$s,$l){return substr($x,$s,$l);}}
 class WP_Error{function __construct(public$code,public$message='',public$data=[]){} function get_error_code(){return$this->code;}}
-class MSW_Business_Director {static $allowed=true;static function canExecute($action){return self::$allowed;}}
+class MSW_Business_Director {static $allowed=true;static function canExecute($action){return self::$allowed;}static function settings(){return ['enabled'=>true,'owner_id'=>1,'actions'=>['factory']];}}
 class MSW_Central_Engine_Core {static $enabled=true;static function settings(){return ['enabled'=>self::$enabled,'autonomy_enabled'=>true,'write_capabilities'=>['director.factory']];}}
 class MSW_Central_Engine_Workflows {static function validate($kind,$input){return true;}}
 class MSW_Central_Engine_Store {
  static $jobs=[];static function pending_adapter($id){return count(self::$jobs)>0;}
  static function enqueue($type,$input,$request,$owner){$job=['id'=>12,'owner_id'=>$owner,'type'=>$type,'input'=>$input,'state'=>'pending','request'=>$request];self::$jobs[]=$job;return$job;}
  static function get_job($id){return self::$jobs[0]??null;}
+ static function jobs($limit){return array_reverse(self::$jobs);}static function counts(){return ['pending'=>count(self::$jobs)];}
 }
 class MSW_Render_Federation{static function permission($r){return new WP_Error('original_node_scope_rejected');}}
 class Gateways{function payment_gateways(){return['ppcp-gateway'=>(object)['enabled'=>'yes']];}}
@@ -86,6 +87,8 @@ check($f['result']['native_action_completed']===false&&count(MSW_Central_Engine_
 $c::executeCapability($factory);check(count(MSW_Central_Engine_Store::$jobs)===1,'native_factory_request_deduplicated');
 $f2=$c::executeCapability(array_merge($factory,['request_id'=>'factory-test-0002']));
 check($f2['result']['state']==='existing_job_pending'&&count(MSW_Central_Engine_Store::$jobs)===1,'existing_factory_job_not_duplicated');
+$observed=$c::directorStatus();check($observed['factory_pending']===true&&$observed['recent_jobs'][0]['id']===12,'director_status_reads_native_queue');
+check($observed['product_delivery_verified']===false,'queued_factory_does_not_imply_product_delivery');
 MSW_Central_Engine_Core::$enabled=false;
 $f3=$c::executeCapability(array_merge($factory,['request_id'=>'factory-test-0003']));
 check($f3['result']['code']==='msw_business_agent_director_policy_denied','native_stop_is_respected');
