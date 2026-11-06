@@ -22,6 +22,7 @@ class BridgeTest(unittest.TestCase):
             if op=='products': return {'records':[{'id':42,'status':'draft','qa_receipt_present':False}],'next_offset':None}
             if op=='capabilities': return {'capabilities':[]}
             if op=='knowledge': return {'state':'not_configured'}
+            if op=='director.tick': return {'native':{'state':'idle'}}
             raise AssertionError('Unreviewed product must not be published')
         call=Mock(side_effect=remote)
         result=BusinessBridge(self.client,self.root,remote=call).step()
@@ -102,11 +103,13 @@ class BridgeTest(unittest.TestCase):
             if op=='capability.execute':
                 self.assertEqual(fields['capability'],'director.factory')
                 return {'state':'completed','result':{'state':'native_job_pending','job_readback_verified':True,'native_action_completed':False,'product_delivery_verified':False}}
+            if op=='director.tick':return {'native':{'state':'step_completed','job_id':12}}
             raise AssertionError(op)
         answer=BusinessBridge(self.client,self.root,remote=remote).step()
         self.assertEqual(answer['factory']['state'],'native_job_pending')
         self.assertFalse(answer['factory']['native_action_completed'])
         self.assertFalse(answer['factory']['product_delivery_verified'])
+        self.assertEqual(answer['director_tick']['job_id'],12)
 
 
 if __name__=='__main__':unittest.main()

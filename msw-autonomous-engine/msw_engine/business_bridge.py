@@ -37,7 +37,7 @@ class BusinessBridge:
         return sqlite3.connect(self.path, timeout=10)
 
     def remote(self, operation, **fields):
-        raw = encode({'schema': 'msw.federation.v1', 'operation': 'autonomy_execute' if operation in {'product.publish', 'capability.execute', 'telegram.reply'} else 'snapshot',
+        raw = encode({'schema': 'msw.federation.v1', 'operation': 'autonomy_execute' if operation in {'product.publish', 'capability.execute', 'telegram.reply', 'director.tick'} else 'snapshot',
                       'business_operation': operation, **fields})
         request = Request(self.client.wordpress_url + '/wp-json/msw-business-agent/v1/gateway', data=raw,
                           headers=signed_headers('status', self.client.node, self.client.secret, raw), method='POST')
@@ -286,10 +286,20 @@ class BusinessBridge:
                                 arguments={}, catalog_sha256=catalog_sha)
             self.record(ident, factory)
             factory = factory.get('result', {'state': 'unverified'})
+        director_tick = {'state': 'adapter_unavailable'}
+        try:
+            director_tick = self.call('director.tick', request_id='business-director-tick-' + str(int(time.time()) // 300))
+            self.record('director_tick', director_tick)
+            native = director_tick.get('native', {})
+            director_tick = {k: native[k] for k in ('state','job_id','type','code','executed') if k in native}
+        except ValueError as error:
+            if not str(error).startswith(('business_http_404','business_http_400:msw_business_agent_operation')):
+                raise
         summary = {'state': 'completed', 'content_records_readback': imported['readback_verified_records'],
             'owner_business_knowledge': knowledge,
             'active_tools_catalogued': len(tools),
             'factory': factory,
+            'director_tick': director_tick,
             'products_observed': len(products.get('records', [])), 'products_published_readback': published,
             'paypal_enabled': status.get('paypal', {}).get('enabled') is True,
             'telegram_transport_verified': status.get('telegram', {}).get('customer_reply_transport_verified') is True,

@@ -1,13 +1,14 @@
 <?php
 define('ABSPATH', __DIR__ . '/'); define('WP_PLUGIN_DIR', dirname(__DIR__));
-$options=[]; $actor=1;
-function register_activation_hook(...$x){} function add_action(...$x){} function add_filter(...$x){} function register_post_meta(...$x){}
+$options=[]; $actor=1;$hooks=[];
+function register_activation_hook(...$x){} function add_action($name,$callback,...$x){global$hooks;$hooks[$name][]=$callback;} function add_filter(...$x){} function register_post_meta(...$x){}
+function wp_next_scheduled($x){return 123;} function has_action($x,$y=null){global$hooks;foreach($hooks[$x]??[] as $v)if($y===null||$v===$y)return 10;return false;}
 function get_current_user_id(){global$actor;return$actor;} function current_user_can($c){global$actor;return$actor===1;}
 function user_can($u,$c){return$u===1;} function update_option($k,$v,...$x){global$options;$options[$k]=$v;}
 function get_option($k,$v=false){global$options;return$options[$k]??$v;}
 function add_option($k,$v,...$x){global$options;if(isset($options[$k]))return false;$options[$k]=$v;return true;}
 function wp_cache_delete(...$x){} function wp_set_current_user($id){global$actor;$actor=$id;}
-function is_plugin_active($p){return$p==='active/a.php';}
+function is_plugin_active($p){return in_array($p,['active/a.php','msw-central-engine/msw-central-engine.php'],true);}
 class MSW_Module_Autonomy{const OPTION='native_owner';}
 class DB{function prepare($q,...$a){return$q;}function get_var($q){return'1';}}$wpdb=new DB;
 class MSW_Central_Engine_Registry{
@@ -29,7 +30,7 @@ function get_posts($p){return[(object)['ID'=>10,'post_title'=>'Usługa','post_co
 if(!function_exists('mb_substr')){function mb_substr($x,$s,$l){return substr($x,$s,$l);}}
 class WP_Error{function __construct(public$code,public$message='',public$data=[]){} function get_error_code(){return$this->code;}}
 class MSW_Business_Director {static $allowed=true;static function canExecute($action){return self::$allowed;}static function settings(){return ['enabled'=>true,'owner_id'=>1,'actions'=>['factory']];}}
-class MSW_Central_Engine_Core {static $enabled=true;static function settings(){return ['enabled'=>self::$enabled,'autonomy_enabled'=>true,'write_capabilities'=>['director.factory']];}}
+class MSW_Central_Engine_Core {static $enabled=true,$ticks=0;static function settings(){return ['enabled'=>self::$enabled,'autonomy_enabled'=>true,'owner_id'=>1,'write_capabilities'=>['director.factory']];}static function tick(){self::$ticks++;return ['state'=>'step_completed','job_id'=>12];}static function cron_tick(){}}
 class MSW_Central_Engine_Workflows {static function validate($kind,$input){return true;}}
 class MSW_Central_Engine_Store {
  static $jobs=[];static function pending_adapter($id){return count(self::$jobs)>0;}
@@ -55,6 +56,12 @@ require dirname(__DIR__).'/msw-business-agent-bridge/msw-business-agent-bridge.p
 $n=0;function check($v,$name){global$n;if(!$v)throw new RuntimeException($name);$n++;}
 $c='MSW_Business_Agent_Bridge';$c::activate();
 check($c::owner(),'activation_records_real_owner');
+$c::restoreDirectorCron();check(has_action('msw_central_engine_tick',['MSW_Central_Engine_Core','cron_tick'])!==false,'missing_enabled_native_cron_is_restored');
+$c::restoreDirectorCron();check(count($hooks['msw_central_engine_tick'])===1,'existing_cron_is_not_duplicated');
+unset($hooks['msw_central_engine_tick']);MSW_Central_Engine_Core::$enabled=false;$c::restoreDirectorCron();
+check(!isset($hooks['msw_central_engine_tick']),'paused_native_engine_is_not_reenabled');MSW_Central_Engine_Core::$enabled=true;
+$hooks['msw_central_engine_tick']=['existing_alternative'];$c::restoreDirectorCron();
+check(count($hooks['msw_central_engine_tick'])===1,'alternative_callback_is_preserved');unset($hooks['msw_central_engine_tick']);
 check($c::admin(),'current_owner_can_control');
 check($c::permission(null)===true,'actual_admin_allowed');
 $actor=0;check($c::permission(null)->get_error_code()==='original_node_scope_rejected','node_permission_never_bypassed');$actor=1;
@@ -89,9 +96,14 @@ $f2=$c::executeCapability(array_merge($factory,['request_id'=>'factory-test-0002
 check($f2['result']['state']==='existing_job_pending'&&count(MSW_Central_Engine_Store::$jobs)===1,'existing_factory_job_not_duplicated');
 $observed=$c::directorStatus();check($observed['factory_pending']===true&&$observed['recent_jobs'][0]['id']===12,'director_status_reads_native_queue');
 check($observed['product_delivery_verified']===false,'queued_factory_does_not_imply_product_delivery');
+$tick=$c::directorTick(['request_id'=>'director-tick-test-1']);
+check($tick['native']['job_id']===12&&$tick['storage_readback_verified']===true,'native_tick_readback');
+$c::directorTick(['request_id'=>'director-tick-test-1']);
+check(MSW_Central_Engine_Core::$ticks===1,'native_tick_request_is_not_repeated');
 MSW_Central_Engine_Core::$enabled=false;
 $f3=$c::executeCapability(array_merge($factory,['request_id'=>'factory-test-0003']));
 check($f3['result']['code']==='msw_business_agent_director_policy_denied','native_stop_is_respected');
+check(is_wp_error($c::directorTick(['request_id'=>'director-tick-test-2'])),'stopped_core_is_never_ticked');
 MSW_Central_Engine_Core::$enabled=true;
 $options[$c::GRANT]['enabled']=false;check(!$c::owner(),'owner_stop_retained');
 unset($options[$c::GRANT]);$options['native_owner']=['enabled'=>true,'owner_id'=>1];$actor=0;$c::recoverActivationGrant();check(!isset($options[$c::GRANT]),'anonymous_cannot_recover_grant');

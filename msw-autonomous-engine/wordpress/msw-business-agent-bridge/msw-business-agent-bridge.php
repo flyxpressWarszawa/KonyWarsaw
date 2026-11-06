@@ -2,13 +2,13 @@
 /**
  * Plugin Name: MSW Business Agent Bridge
  * Description: Prywatny most Render–centrala: wiedza portali, istniejące silniki, produkty WooCommerce i obsługa klientów.
- * Version: 1.1.5
+ * Version: 1.1.7
  * Author: MSW
  */
 defined('ABSPATH') || exit;
 
 final class MSW_Business_Agent_Bridge {
-    const VERSION = '1.1.5';
+    const VERSION = '1.1.7';
     const GRANT = 'msw_business_agent_owner_v1';
     const INPUT = 'msw_business_agent_command';
     const OUTPUT = 'msw_business_agent_result';
@@ -22,10 +22,25 @@ final class MSW_Business_Agent_Bridge {
     }
     public static function boot(): void {
         add_action('init', [self::class, 'recoverActivationGrant'], 1);
+        add_action('init', [self::class, 'restoreDirectorCron'], PHP_INT_MAX);
         add_action('rest_api_init', [self::class, 'routes']);
         add_action('init', [self::class, 'meta']);
         add_action('updated_post_meta', [self::class, 'changed'], 20, 4);
         add_action('added_post_meta', [self::class, 'changed'], 20, 4);
+    }
+    public static function restoreDirectorCron(): void {
+        if (!self::owner() || !is_callable(['MSW_Central_Engine_Core','settings']) ||
+            !is_callable(['MSW_Central_Engine_Core','cron_tick'])) return;
+        if (!function_exists('is_plugin_active')) require_once ABSPATH.'wp-admin/includes/plugin.php';
+        if (!is_plugin_active('msw-central-engine/msw-central-engine.php')) return;
+        $settings=MSW_Central_Engine_Core::settings();$grant=(array)get_option(self::GRANT,[]);
+        if (empty($settings['enabled']) || empty($settings['autonomy_enabled']) ||
+            (int)($settings['owner_id']??0)!==(int)($grant['owner']??0) ||
+            !user_can((int)($settings['owner_id']??0),'manage_options')) return;
+        // Preserve alternative callbacks and existing schedules. Restore only a
+        // completely missing hook for the active owner's enabled native engine.
+        if (has_action('msw_central_engine_tick')===false)
+            add_action('msw_central_engine_tick',['MSW_Central_Engine_Core','cron_tick'],10,0);
     }
     public static function recoverActivationGrant(): void {
         // A timed-out plugin activation can finish its active_plugins write
@@ -55,7 +70,7 @@ final class MSW_Business_Agent_Bridge {
         $verified = MSW_Render_Federation::permission($r);
         if (is_wp_error($verified) || $verified !== true) return $verified;
         $p = json_decode($r->get_body(), true);
-        if (in_array($p['business_operation'] ?? '', ['product.publish','capability.execute','telegram.reply','telegram.inbox'], true)) {
+        if (in_array($p['business_operation'] ?? '', ['product.publish','capability.execute','telegram.reply','telegram.inbox','director.tick'], true)) {
             // The original verifier authenticates/consumes the nonce once. A
             // write additionally needs this same authenticated node's write kind.
             if (!class_exists('MSW\\UnifiedEngine\\RemoteStore')) return self::error('write_scope', 403);
@@ -91,7 +106,7 @@ final class MSW_Business_Agent_Bridge {
         $p = json_decode($r->get_body(), true);
         if (!is_array($p) || ($p['schema'] ?? '') !== 'msw.federation.v1') return self::error('schema');
         $op = $p['business_operation'] ?? '';
-        if (in_array($op, ['product.publish','capability.execute','telegram.reply'], true) && ($p['operation'] ?? '') !== 'autonomy_execute') return self::error('write_scope', 403);
+        if (in_array($op, ['product.publish','capability.execute','telegram.reply','director.tick'], true) && ($p['operation'] ?? '') !== 'autonomy_execute') return self::error('write_scope', 403);
         $answer = self::dispatch($p);
         return is_wp_error($answer) ? $answer : new WP_REST_Response(['schema' => 'msw.business-agent.v1', 'ok' => true, 'data' => $answer], 200, ['Cache-Control' => 'no-store, private']);
     }
@@ -112,6 +127,7 @@ final class MSW_Business_Agent_Bridge {
         if ($op === 'telegram.inbox') return MSW_Business_Telegram::inbox();
         if ($op === 'telegram.reply') return MSW_Business_Telegram::reply($p);
         if ($op === 'director.status') return self::directorStatus();
+        if ($op === 'director.tick') return self::directorTick($p);
         return self::error('operation');
     }
     public static function directorStatus(): array {
@@ -133,12 +149,42 @@ final class MSW_Business_Agent_Bridge {
                 'next_action'=>$last['native']['next_action']??null,'jobs'=>$last['native']['jobs']??null];
         }
         $board=(array)get_option('msw_business_director_board_v2',[]);
+        $core=is_callable(['MSW_Central_Engine_Core','settings'])?MSW_Central_Engine_Core::settings():[];
+        $cron=is_callable(['MSW_Central_Engine_Core','cron_tick'])?wp_next_scheduled('msw_central_engine_tick'):false;
         return ['state'=>'native_director_observed','enabled'=>($s['enabled']??false)===true,
             'owner_permission'=>user_can((int)($s['owner_id']??0),'manage_options'),'actions'=>$s['actions']??[],
             'queue'=>MSW_Central_Engine_Store::counts(),'recent_jobs'=>$jobs,'last_operations'=>$operations,
             'factory_pending'=>MSW_Central_Engine_Store::pending_adapter('director.factory'),
             'factory'=>$board['factory']??null,'execution_cycle'=>get_option('msw_business_director_cycle_v3',null),
+            'core_enabled'=>!empty($core['enabled']),'core_autonomy_enabled'=>!empty($core['autonomy_enabled']),
+            'native_cron_next_utc'=>$cron?gmdate('c',$cron):null,
+            'native_cron_callback_registered'=>has_action('msw_central_engine_tick',['MSW_Central_Engine_Core','cron_tick'])!==false,
+            'native_cron_any_callback_registered'=>has_action('msw_central_engine_tick')!==false,
+            'wp_cron_disabled'=>defined('DISABLE_WP_CRON')&&DISABLE_WP_CRON,
+            'last_core_tick'=>get_option('msw_central_engine_last_tick',null),
             'product_delivery_verified'=>false];
+    }
+    public static function directorTick(array $p) {
+        if(!self::owner()||!is_callable(['MSW_Central_Engine_Core','settings'])||!is_callable(['MSW_Central_Engine_Core','tick']))
+            return self::error('director_tick_unavailable',503);
+        $s=MSW_Central_Engine_Core::settings();
+        if(empty($s['enabled'])||empty($s['autonomy_enabled']))return self::error('director_tick_paused',403);
+        $key='msw_business_director_tick_'.hash('sha256',(string)$p['request_id']);global $wpdb;
+        $lock='msw-biz-tick-'.substr(hash('sha256',$key),0,32);
+        if((string)$wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s,0)',$lock))!=='1')return self::error('director_tick_busy',409);
+        try {
+            wp_cache_delete($key,'options');$old=get_option($key,null);
+            if(is_array($old))return ($old['state']??'')==='completed'?$old:self::error('director_tick_outcome_uncertain',409);
+            $saved=['state'=>'prepared','request_id'=>$p['request_id']];
+            if(!add_option($key,$saved,'',false))return self::error('director_tick_busy',409);
+            $before=get_current_user_id();wp_set_current_user((int)get_option(self::GRANT,[])['owner']);
+            try {$result=MSW_Central_Engine_Core::tick();}finally{wp_set_current_user($before);}
+            if(is_wp_error($result))$result=['state'=>'blocked','code'=>$result->get_error_code()];
+            $saved['state']='completed';$saved['native']=self::scrub($result);
+            update_option($key,$saved,false);wp_cache_delete($key,'options');
+            if(get_option($key,null)!==$saved)return self::error('director_tick_readback',503);
+            return $saved+['storage_readback_verified'=>true,'product_delivery_implied'=>false];
+        }finally{$wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)',$lock));}
     }
     public static function seedKnowledge(array $p) {
         if(!self::admin())return self::error('owner_knowledge_grant',403);
@@ -250,7 +296,7 @@ final class MSW_Business_Agent_Bridge {
     public static function status(): array {
         return ['version' => self::VERSION, 'owner_authorized' => self::owner(), 'wordpress' => home_url(),
             'paypal' => self::payment(), 'telegram' => self::telegramMetadata(),
-            'tools' => ['status', 'context', 'products', 'product.publish', 'capabilities', 'capability.execute', 'telegram.inbox', 'telegram.reply', 'telegram.verify'], 'scope' => 'existing_owner_authorized_central_site',
+            'tools' => ['status', 'context', 'products', 'product.publish', 'capabilities', 'capability.execute', 'director.status', 'director.tick', 'telegram.inbox', 'telegram.reply', 'telegram.verify'], 'scope' => 'existing_owner_authorized_central_site',
             'all_active_engines' => class_exists('MSW_Federation_Module_Bus'),
             'no_new_render_services' => true];
     }
