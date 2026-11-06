@@ -162,7 +162,13 @@ class BusinessBridge:
 
     def sync_owner_knowledge(self):
         from .tasks import knowledge_ingest
-        first = self.call('knowledge', request_id='business-knowledge-head', offset=0)
+        try:
+            first = self.call('knowledge', request_id='business-knowledge-head', offset=0)
+        except ValueError as error:
+            # A staged central upgrade cannot suspend the other business lanes.
+            if str(error).startswith(('business_http_404', 'business_http_400:msw_business_agent_operation')):
+                return {'state': 'awaiting_central_knowledge_adapter'}
+            raise
         if first.get('state') == 'not_configured':
             return {'state': 'not_configured'}
         sha, total = first.get('source_sha256'), first.get('total')

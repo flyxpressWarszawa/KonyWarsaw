@@ -87,5 +87,10 @@ class BridgeTest(unittest.TestCase):
         bad={**page,'source_sha256':'e'*64,'payload_sha256':'0'*64};call.return_value=bad
         with self.assertRaises(ValueError):b.sync_owner_knowledge()
 
+    def test_central_adapter_upgrade_does_not_suspend_other_lanes(self):
+        call=Mock(side_effect=ValueError('business_http_400:msw_business_agent_operation'))
+        result=BusinessBridge(self.client,self.root,remote=call).sync_owner_knowledge()
+        self.assertEqual(result['state'],'awaiting_central_knowledge_adapter')
+
 
 if __name__=='__main__':unittest.main()

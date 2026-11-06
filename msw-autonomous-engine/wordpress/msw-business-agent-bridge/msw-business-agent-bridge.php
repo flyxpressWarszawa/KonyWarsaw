@@ -2,13 +2,13 @@
 /**
  * Plugin Name: MSW Business Agent Bridge
  * Description: Prywatny most Render–centrala: wiedza portali, istniejące silniki, produkty WooCommerce i obsługa klientów.
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author: MSW
  */
 defined('ABSPATH') || exit;
 
 final class MSW_Business_Agent_Bridge {
-    const VERSION = '1.1.1';
+    const VERSION = '1.1.2';
     const GRANT = 'msw_business_agent_owner_v1';
     const INPUT = 'msw_business_agent_command';
     const OUTPUT = 'msw_business_agent_result';
@@ -97,11 +97,12 @@ final class MSW_Business_Agent_Bridge {
     }
     public static function dispatch(array $p) {
         $op = $p['business_operation'] ?? '';
-        $allowed = ['schema', 'operation', 'business_operation', 'request_id', 'offset', 'product_id', 'expected_sha256', 'capability', 'arguments', 'catalog_sha256', 'conversation_id', 'reply'];
+        $allowed = ['schema', 'operation', 'business_operation', 'request_id', 'offset', 'product_id', 'expected_sha256', 'capability', 'arguments', 'catalog_sha256', 'conversation_id', 'reply', 'chunk', 'chunk_count', 'chunk_text'];
         if (array_diff(array_keys($p), $allowed) || !preg_match('/^[A-Za-z0-9_.:-]{8,120}$/D', (string) ($p['request_id'] ?? ''))) return self::error('arguments');
         if ($op === 'status') return self::status();
         if ($op === 'context') return self::context(max(0, (int) ($p['offset'] ?? 0)));
         if ($op === 'knowledge') return self::knowledge(max(0, (int) ($p['offset'] ?? 0)));
+        if ($op === 'knowledge.seed') return self::seedKnowledge($p);
         if ($op === 'products') return self::products(max(0, (int) ($p['offset'] ?? 0)));
         if ($op === 'product.publish') return self::publish($p);
         if ($op === 'capabilities') return self::capabilities();
@@ -111,6 +112,29 @@ final class MSW_Business_Agent_Bridge {
         if ($op === 'telegram.inbox') return MSW_Business_Telegram::inbox();
         if ($op === 'telegram.reply') return MSW_Business_Telegram::reply($p);
         return self::error('operation');
+    }
+    public static function seedKnowledge(array $p) {
+        if(!self::admin())return self::error('owner_knowledge_grant',403);
+        $sha='2fca35d93838ebea0acb55343c5955c84e1e6c5ac56427f7732db6cb7acbfcec';
+        if(($p['expected_sha256']??'')!==$sha||!is_int($p['chunk']??null)||!is_int($p['chunk_count']??null)||
+            $p['chunk_count']<1||$p['chunk_count']>20||$p['chunk']<0||$p['chunk']>=$p['chunk_count']||
+            !is_string($p['chunk_text']??null)||strlen($p['chunk_text'])>24000)return self::error('knowledge_chunk_arguments');
+        $target='msw_business_owner_knowledge_v1';$saved=get_option($target,false);
+        if(is_array($saved)&&($saved['source_sha256']??'')===$sha&&hash('sha256',$saved['source_json'])===$sha)
+            return ['state'=>'persisted_verified','source_sha256'=>$sha,'records'=>count(json_decode($saved['source_json'],true)['records'])];
+        $prefix='msw_business_knowledge_part_'.substr($sha,0,16).'_';$key=$prefix.$p['chunk'];
+        $old=get_option($key,false);
+        if($old!==false&&$old!==$p['chunk_text'])return self::error('knowledge_chunk_conflict',409);
+        update_option($key,$p['chunk_text'],false);wp_cache_delete($key,'options');
+        if(get_option($key,false)!==$p['chunk_text'])return self::error('knowledge_chunk_readback',503);
+        $raw='';$received=0;
+        for($i=0;$i<$p['chunk_count'];$i++){$part=get_option($prefix.$i,false);if(is_string($part)){$raw.=$part;$received++;}}
+        if($received!==$p['chunk_count'])return ['state'=>'receiving','received_chunks'=>$received,'expected_chunks'=>$p['chunk_count']];
+        $pack=json_decode($raw,true);
+        if(hash('sha256',$raw)!==$sha||($pack['schema']??'')!=='msw.business-knowledge.v1'||!is_array($pack['records']??null))return self::error('knowledge_package_digest');
+        $saved=['source_json'=>$raw,'source_sha256'=>$sha];update_option($target,$saved,false);wp_cache_delete($target,'options');
+        if(get_option($target,false)!==$saved)return self::error('knowledge_package_readback',503);
+        return ['state'=>'persisted_verified','source_sha256'=>$sha,'records'=>count($pack['records'])];
     }
     public static function knowledge(int $offset): array {
         $key='msw_business_owner_knowledge_v1';$s=get_option($key,false);
