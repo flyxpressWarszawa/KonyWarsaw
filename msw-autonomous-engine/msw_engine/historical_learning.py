@@ -44,6 +44,11 @@ class HistoricalLearning:
         from .legacy_memory import status
         info = status(self.directory)
         result = []
+        from .chatgpt_export import status as export_status
+        exported = export_status(self.directory)
+        export_sha = exported.get('archive_sha256', '')
+        if exported.get('state') == 'imported_verified' and re.fullmatch(r'[a-f0-9]{64}', export_sha):
+            result.append(('chatgpt-export:' + export_sha, self.directory / 'chatgpt-imports' / (export_sha + '.sqlite3')))
         fingerprint = info.get('source_sha256', '')
         if info.get('state') == 'ready' and re.fullmatch(r'[a-f0-9]{64}', fingerprint):
             result.append(('legacy:' + fingerprint, self.directory / ('legacy-malta-' + fingerprint + '.sqlite3')))
@@ -53,6 +58,8 @@ class HistoricalLearning:
         return result
 
     def prepare(self):
+        from .chatgpt_export import import_configured
+        import_configured(self.directory)
         with self.connect() as db:
             pending = db.execute("SELECT * FROM batches WHERE state='pending' ORDER BY rowid LIMIT 1").fetchone()
             if pending:
@@ -140,5 +147,7 @@ class HistoricalLearning:
         with self.connect() as db:
             counts = {row[0]: row[1] for row in db.execute('SELECT state,COUNT(*) FROM batches GROUP BY state')}
             records = db.execute('SELECT COALESCE(SUM(records_reviewed),0) FROM cursors').fetchone()[0]
+        from .chatgpt_export import status as export_status
         return {'reviewed_batches': counts.get('completed', 0), 'pending_batches': counts.get('pending', 0),
+                'chatgpt_export': export_status(self.directory),
                 'records_reviewed': records, 'full_chatgpt_account_history_available': False, 'model_weight_training': False}

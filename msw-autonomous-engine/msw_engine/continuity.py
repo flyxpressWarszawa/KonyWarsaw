@@ -46,6 +46,8 @@ def database(directory):
 
 def bootstrap(directory):
     from .tasks import knowledge_ingest
+    from .owner_context import seed
+    owner_context = seed(directory)
     text = json.dumps(MISSION, ensure_ascii=False)
     result = knowledge_ingest({'records': [{'id': 'owner:current-mission:20261106', 'approved': True,
         'title': 'Bieżące polecenia właściciela: autonomia i kontynuacja projektów MSW', 'text': text,
@@ -53,7 +55,7 @@ def bootstrap(directory):
     if result.get('readback_verified_records') != 1:
         raise ValueError('owner_mission_readback')
     return {'mission_sha256': hashlib.sha256(text.encode()).hexdigest(), 'owner_mission_readback_verified': True,
-            'full_chatgpt_account_history_access': False}
+            'full_chatgpt_account_history_access': False, **owner_context}
 
 
 def learn(directory, limit=300):
@@ -107,3 +109,4 @@ def context(directory, query):
         except (TaskError, sqlite3.Error, OSError):
             continue
     return {'owner_mission': MISSION, 'sources': sources, 'full_chatgpt_account_history_access': False}
+

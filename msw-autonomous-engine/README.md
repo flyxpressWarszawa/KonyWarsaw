@@ -147,3 +147,9 @@ readback. A roster entry or accepted cron request alone never proves native work
 Gateway HTTP502 can mean a model-specific terminal error, so it does not trip
 the shared origin circuit. HTTP503/504, rate-limit responses and network timeouts
 still activate backoff. This keeps provider errors separate from site outages.
+
+## Private owner handoff and ChatGPT export
+
+`MSW_OWNER_CONTEXT_JSON` plus its exact `MSW_OWNER_CONTEXT_SHA256` seed up to 100 owner-provided source records (`msw.owner-context.v1`, records with id/title/text/provenance) into the private owner corpus. Startup independently verifies the committed records and a private source checkpoint. Keep actual context out of this public repository.
+
+After the owner requests an account export and an authentic ready email arrives, place only its official HTTPS download grant in the service secret `MSW_CHATGPT_EXPORT_URL`. No account session or browser credential is used. The learning lane retains the original ZIP privately, imports every text-bearing message from all exported branches into a separate SQLite source, verifies its count/readback, and prioritizes that source. Attachments are retained in the original ZIP but are not claimed semantically reviewed. The same completed grant reuses the imported database after restart. Exports are snapshots, not live account access. Current importer bounds are 512 MiB for the archive and 256 MiB for conversations.json. Unsupported export layouts or authentication requirements fail explicitly.
