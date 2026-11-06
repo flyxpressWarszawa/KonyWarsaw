@@ -116,6 +116,7 @@ def import_zip(archive, directory, *, grant_sha256='local-owner-supplied'):
     temp.replace(directory / 'chatgpt-export-status.json')
     if status(directory) != receipt:
         raise ValueError('export_receipt_readback')
+    print(json.dumps({'chatgpt_export_import': receipt}), flush=True)
     return receipt
 
 
