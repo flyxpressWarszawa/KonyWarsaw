@@ -106,6 +106,15 @@ class Worker:
         self.journal.mark(receipt["job_id"], "acknowledged")
         self.last_server_contact = int(time.time())
         self.last_job_state = readback["state"]
+        if (getattr(self.client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"
+                and os.environ.get("MSW_AUTONOMOUS_AGENT", "1") == "1"):
+            from .wordpress_agent import record_native_receipt
+            try:
+                record_native_receipt(self.journal.data_dir, receipt)
+            except (ValueError, OSError, sqlite3.Error):
+                # The remote ACK is already verified. Never repeat native work
+                # because an auxiliary coverage ledger could not be written.
+                print(json.dumps({"autonomous_agent": {"state": "native_ledger_unavailable"}}), flush=True)
         return {"job_id": receipt["job_id"], "state": readback["state"], "server_ack_verified": True}
 
     def replay_receipts(self) -> int:

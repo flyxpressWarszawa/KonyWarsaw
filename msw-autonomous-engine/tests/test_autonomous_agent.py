@@ -100,6 +100,16 @@ class AgentTest(unittest.TestCase):
         self.generator.side_effect = TaskError('customer content / secret token')
         self.assertEqual(self.agent().step('business')['code'], 'TaskError')
 
+    def test_terminal_uncertainty_does_not_rebill_or_block_future_topics(self):
+        from msw_engine.tasks import TaskError
+        self.generator.side_effect = TaskError('fed_generate_http_502:mswf_model_msw_brain_uncertain')
+        self.assertEqual(self.agent().step('business')['state'], 'blocked_provider_outcome_unknown')
+        self.assertEqual(self.agent().step('business')['state'], 'waiting')
+        self.generator.assert_called_once()
+        self.now[0] += 3600
+        self.generator.side_effect = answer
+        self.assertEqual(self.agent().step('business')['state'], 'completed')
+
     def test_continuation_survives_restart_and_does_not_claim_full_autonomy(self):
         def inspect(payload):
             return {'inspections': [{'engine': n, 'native_read_verified': n != 'v5', 'state': 'checked'} for n in payload['engine_link']['engines']]}
@@ -131,4 +141,3 @@ class AgentTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

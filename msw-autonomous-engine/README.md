@@ -59,9 +59,10 @@ publication, source admission and commerce checks still determine actual executi
 
 The central site's existing worker starts `AutonomousAgent` when the WordPress
 provider is configured. It needs no browser, desktop, new service or database.
-Its three independent lanes review available private historical sources each
-minute, inspect V3/V5/V7/COMBO/Python every 15 minutes, and develop a private
-business brief and product specification hourly using the
+Five independent lanes review historical sources each minute, catalogue source
+records every five minutes, discover active WordPress tools and the live COMBO
+roster every ten minutes, inspect V3/V5/V7/COMBO/Python every 15 minutes, and
+develop a private business brief and product specification hourly using the
 existing paid GPT router. The existing fleet pump, native work queue, catalogue
 publisher and FotoAtlas keep their current ownership and execution controls.
 
@@ -108,4 +109,37 @@ authorization failures. Satellite circuits are independent. This mitigates
 request overload; PHP defects and hosting resource limits still need a diagnosed
 code or hosting fix. `runtime.catalog.transport_recovery` exposes cooldown state.
 
+### All active WordPress engines and owner continuity (worker 1.7)
 
+The agent's priority is to continue the owner's available work. Startup persists
+the current owner mission with a verified RAG readback. Every five minutes it
+catalogues up to 300 records from the already installed legacy corpus, validating
+each source digest and retaining a resumable cursor. This is source indexing,
+not a claim to have semantically reviewed every record or to possess the entire
+ChatGPT account history. Business context retrieves approved sources, labelled
+legacy sources and available owner packages. Current owner rules take precedence
+over historical text. No archive text executes code or grants permissions.
+
+Every ten minutes a WordPress lane discovers the live installed-module catalogue,
+uses the existing synchronized cache, retains only active modules in its tool
+inventory and rotates up to four registered native diagnostic probes. The
+existing shared worker continues executing due native actions through
+`module.execute` leases; no second native executor or fleet clock is created.
+After a verified server ACK, a private ledger records the actual callback,
+module IDs and receipt digest, so discovery and execution remain distinguishable.
+Inactive plugins are never activated, updated or probed by this lane. The
+business planner receives relevant registered tool descriptions instead of
+assuming every plugin supports every operation. Missing adapters remain missing.
+
+A provider request with terminal `msw_brain_uncertain` is retained as blocked;
+it is not resubmitted under another identity. Future hourly topics can proceed
+instead of all business planning hanging behind that one uncertain outcome.
+The catalogue includes WordPress tool coverage and continuity progress. Full
+history requires an actual authorized export/source; no account-history access
+is inferred from an API key or ChatGPT subscription.
+
+
+
+The live COMBO roster supplies all satellite identities. A separate ledger keeps
+central receipts apart from satellite receipts, which require the receiver HMAC
+readback. A roster entry or accepted cron request alone never proves native work.
