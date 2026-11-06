@@ -12,6 +12,35 @@ from msw_engine.federation import generate as federated_generate
 
 
 class RuntimeBridgeTest(unittest.TestCase):
+    def test_known_incomplete_probe_migrates_once_and_unknown_outcome_stays_pinned(self):
+        observation = {'plugins': [], 'installed_plugins': 0, 'active_plugins': 0,
+                       'paid_openai': {'key_configured': True}}
+        for code, revision, should_generate in (
+            ('native_bridge_terminal_failure:msw_openai_incomplete', 1, True),
+            ('native_bridge_terminal_failure:msw_openai_incomplete', 2, False),
+            ('native_bridge_transport', 1, False),
+            ('native_bridge_terminal_failure:provider_outcome_unknown', 1, False),
+        ):
+            with self.subTest(code=code, revision=revision), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                target = root / 'autonomous-agent/paid-openai-bridge-check.json'
+                target.parent.mkdir()
+                old = {'api_text_verified': False, 'code': code, 'probe_revision': revision}
+                target.write_text(json.dumps(old))
+                with patch('msw_engine.runtime_bridge.call', return_value=observation), patch(
+                    'msw_engine.runtime_bridge.generate', side_effect=TaskError('native_bridge_terminal_failure:msw_openai_incomplete')
+                ) as remote:
+                    inspect(root)
+                    inspect(root)
+                    self.assertEqual(remote.call_count, int(should_generate))
+                    if should_generate:
+                        payload = remote.call_args.args[0]
+                        self.assertEqual(payload['request_id'], 'msw-native-openai-bridge-check-v2')
+                        self.assertEqual(payload['max_tokens'], 2000)
+                        self.assertEqual(json.loads(target.read_text())['probe_revision'], 2)
+                    else:
+                        self.assertEqual(json.loads(target.read_text()), old)
+
     def test_generation_requires_same_request_and_independent_readback(self):
         values = {'request_id': 'stable-paid-id'}
         text = 'MSW-BRIDGE-OK'

@@ -108,16 +108,23 @@ def inspect(directory: Path):
     verified = None
     if probe.exists():
         verified = json.loads(probe.read_text())
-    if verified is None and paid.get('key_configured') is True:
+    # A known incomplete v1 probe must not permanently cache a false outage.
+    # Migrate only this definitive failure, once; keep unknown outcomes pinned.
+    retry_incomplete = (isinstance(verified, dict)
+                        and verified.get('api_text_verified') is False
+                        and verified.get('code') == 'native_bridge_terminal_failure:msw_openai_incomplete'
+                        and verified.get('probe_revision', 1) == 1)
+    if (verified is None or retry_incomplete) and paid.get('key_configured') is True:
         from .tasks import TaskError
         try:
-            answer = generate({'request_id': 'msw-native-openai-bridge-check-v1', 'task': 'review',
-                               'text': 'Test połączenia. Odpowiedz wyłącznie MSW-BRIDGE-OK.', 'max_tokens': 1000})
+            answer = generate({'request_id': 'msw-native-openai-bridge-check-v2', 'task': 'review',
+                               'text': 'Test połączenia. Odpowiedz wyłącznie MSW-BRIDGE-OK.', 'max_tokens': 2000})
             verified = {'request_id': answer['request_id'], 'model': answer.get('model'),
                         'answer_sha256': answer['answer_sha256'], 'api_text_verified': 'MSW-BRIDGE-OK' in answer['text'],
                         'server_result_readback_verified': answer['storage_readback_verified'], 'at': int(time.time())}
         except TaskError as error:
             verified = {'api_text_verified': False, 'code': str(error), 'at': int(time.time())}
+        verified['probe_revision'] = 2
         tmp = probe.with_suffix('.tmp')
         tmp.write_bytes(encode(verified))
         tmp.chmod(0o600)
