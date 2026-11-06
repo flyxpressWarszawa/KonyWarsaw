@@ -132,9 +132,22 @@ class FotoAtlas:
     def start(self, stopping) -> threading.Thread:
         def run():
             delay = 2
+            next_queue_report = 0.0
             while not stopping():
                 try:
                     result = self.step()
+                    if result["claim"].get("state") == "no_eligible_work" and time.monotonic() >= next_queue_report:
+                        next_queue_report = time.monotonic() + 3600
+                        try:
+                            status = self.client.call("status")
+                            result["native_queue"] = {
+                                state: count for state, count in status.get("native_queue", {}).items()
+                                if isinstance(state, str) and state.isidentifier() and type(count) is int
+                            } if isinstance(status.get("native_queue"), dict) else {}
+                            result["budget"] = {kind: status.get("budget", {}).get(kind)
+                                                for kind in ("photos", "cards")}
+                        except TransportError as error:
+                            result["queue_report_error"] = error.code
                     print(json.dumps({"fotoatlas_render": result}), flush=True)
                     delay = 60 if not result["results"] and result["claim"].get("state") in {"no_eligible_work", "hourly_photo_limit"} else 2
                 except Exception as error:
