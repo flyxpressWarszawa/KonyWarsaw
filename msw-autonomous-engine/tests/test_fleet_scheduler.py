@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from msw_engine.fleet_scheduler import FleetScheduler, public_base
+from msw_engine.fleet_scheduler import FleetScheduler, public_base, fetch_roster
 
 
 class FleetSchedulerTest(unittest.TestCase):
@@ -27,6 +27,34 @@ class FleetSchedulerTest(unittest.TestCase):
         self.assertEqual(public_base("https://peer.pl/wp/", resolve=False), "https://peer.pl/wp")
         with patch.object(socket, "getaddrinfo", return_value=[(2, 1, 6, "", ("10.0.0.1", 443))]), self.assertRaises(ValueError):
             public_base("https://peer.pl")
+
+    def test_missing_signed_roster_is_not_reported_as_empty(self):
+        # Missing field means an incomplete control-plane response, not an
+        # explicit owner revocation. Keep the previous signed lease until TTL.
+        with patch('msw_engine.federation.gateway', return_value={'state': 'temporary'}):
+            with self.assertRaisesRegex(ValueError, 'combo_roster_missing'):
+                fetch_roster()
+        with patch('msw_engine.federation.gateway', return_value={'combo108_roster': 'bad'}):
+            with self.assertRaisesRegex(ValueError, 'combo_roster_shape'):
+                fetch_roster()
+        with patch('msw_engine.federation.gateway', return_value={'combo108_roster': []}):
+            self.assertEqual(fetch_roster(), [])
+
+    def test_missing_roster_during_refresh_retains_signed_lease_only_until_expiry(self):
+        clock = [100000]
+        source = [[{'site_id': 'one', 'url': 'https://peer.pl'}]]
+        def read():
+            if source[0] is None:
+                raise ValueError('combo_roster_missing')
+            return source[0]
+        with tempfile.TemporaryDirectory() as folder:
+            scheduler = FleetScheduler('https://central.pl', Path(folder), fetch=read, wake=lambda url: 200, clock=lambda: clock[0])
+            self.assertEqual(scheduler.step()['approved_satellites'], 1)
+            source[0] = None
+            clock[0] += 301
+            self.assertEqual(scheduler.step()['approved_satellites'], 1)
+            clock[0] += 86400
+            self.assertEqual(scheduler.step()['approved_satellites'], 0)
 
     def test_rotates_all_39_and_retains_readback_distinction(self):
         now, calls = [100000], []
