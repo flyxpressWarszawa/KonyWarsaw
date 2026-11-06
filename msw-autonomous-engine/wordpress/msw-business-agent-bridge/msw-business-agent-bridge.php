@@ -2,13 +2,13 @@
 /**
  * Plugin Name: MSW Business Agent Bridge
  * Description: Prywatny most Render–centrala: wiedza portali, istniejące silniki, produkty WooCommerce i obsługa klientów.
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: MSW
  */
 defined('ABSPATH') || exit;
 
 final class MSW_Business_Agent_Bridge {
-    const VERSION = '1.1.0';
+    const VERSION = '1.1.1';
     const GRANT = 'msw_business_agent_owner_v1';
     const INPUT = 'msw_business_agent_command';
     const OUTPUT = 'msw_business_agent_result';
@@ -101,6 +101,7 @@ final class MSW_Business_Agent_Bridge {
         if (array_diff(array_keys($p), $allowed) || !preg_match('/^[A-Za-z0-9_.:-]{8,120}$/D', (string) ($p['request_id'] ?? ''))) return self::error('arguments');
         if ($op === 'status') return self::status();
         if ($op === 'context') return self::context(max(0, (int) ($p['offset'] ?? 0)));
+        if ($op === 'knowledge') return self::knowledge(max(0, (int) ($p['offset'] ?? 0)));
         if ($op === 'products') return self::products(max(0, (int) ($p['offset'] ?? 0)));
         if ($op === 'product.publish') return self::publish($p);
         if ($op === 'capabilities') return self::capabilities();
@@ -110,6 +111,26 @@ final class MSW_Business_Agent_Bridge {
         if ($op === 'telegram.inbox') return MSW_Business_Telegram::inbox();
         if ($op === 'telegram.reply') return MSW_Business_Telegram::reply($p);
         return self::error('operation');
+    }
+    public static function knowledge(int $offset): array {
+        $key='msw_business_owner_knowledge_v1';$s=get_option($key,false);
+        if($s===false){
+            $file=__DIR__.'/private-knowledge-bootstrap.php';
+            if(!is_file($file))return ['state'=>'not_configured'];
+            $source=require $file;$raw=trim(is_string($source)?$source:'');$pack=json_decode($raw,true);
+            if(hash('sha256',$raw)!=='2fca35d93838ebea0acb55343c5955c84e1e6c5ac56427f7732db6cb7acbfcec'||
+                ($pack['schema']??'')!=='msw.business-knowledge.v1'||!is_array($pack['records']??null)||count($pack['records'])>1000)
+                return ['state'=>'bootstrap_invalid'];
+            $s=['source_json'=>$raw,'source_sha256'=>hash('sha256',$raw)];
+            update_option($key,$s,false);wp_cache_delete($key,'options');
+            if(get_option($key,false)!==$s)return ['state'=>'bootstrap_readback_failed'];
+        }
+        $pack=json_decode($s['source_json'],true);
+        if(!is_array($pack)||hash('sha256',$s['source_json'])!==$s['source_sha256'])return ['state'=>'storage_digest_failed'];
+        $all=$pack['records'];$page=array_slice($all,$offset,100);$raw=wp_json_encode($page);
+        return ['state'=>'ready','origin'=>home_url(),'source_sha256'=>$s['source_sha256'],'total'=>count($all),
+            'offset'=>$offset,'next_offset'=>$offset+count($page)<count($all)?$offset+count($page):null,
+            'payload_json'=>$raw,'payload_sha256'=>hash('sha256',$raw),'private_owner_authorized'=>true];
     }
     public static function telegramAudit(): array {
         $methods=[];

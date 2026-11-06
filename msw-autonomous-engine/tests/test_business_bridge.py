@@ -21,6 +21,7 @@ class BridgeTest(unittest.TestCase):
             if op=='context': return {'origin':self.client.wordpress_url,'records':[{'id':10,'title':'Service','excerpt':'Source content','url':self.client.wordpress_url+'/service'}],'next_offset':40}
             if op=='products': return {'records':[{'id':42,'status':'draft','qa_receipt_present':False}],'next_offset':None}
             if op=='capabilities': return {'capabilities':[]}
+            if op=='knowledge': return {'state':'not_configured'}
             raise AssertionError('Unreviewed product must not be published')
         call=Mock(side_effect=remote)
         result=BusinessBridge(self.client,self.root,remote=call).step()
@@ -30,7 +31,7 @@ class BridgeTest(unittest.TestCase):
         self.assertEqual(BusinessBridge(self.client,self.root,remote=call).position('content_offset'),40)
 
     def test_foreign_content_never_enters_memory(self):
-        call=Mock(side_effect=[{'owner_authorized':True}, {'origin':'https://foreign.example','records':[]}])
+        call=Mock(side_effect=[{'owner_authorized':True}, {'state':'not_configured'}, {'origin':'https://foreign.example','records':[]}])
         with self.assertRaises(ValueError):BusinessBridge(self.client,self.root,remote=call).step()
         self.assertFalse((self.root/'knowledge.sqlite3').exists())
 
@@ -74,6 +75,17 @@ class BridgeTest(unittest.TestCase):
         model=Mock(return_value={'text':'Zapłać tutaj https://foreign.example/payment'})
         BusinessBridge(self.client,self.root,remote=remote).customer_step(generate=model)
         self.assertNotIn('foreign.example',replies[0]);self.assertIn('/zgloszenie',replies[0])
+
+    def test_private_owner_knowledge_is_authenticated_hashed_and_read_back(self):
+        raw=json.dumps([{'id':'business:owner:test','approved':True,'title':'Cel MSW','text':'Rozwijaj istniejący biznes','provenance':'owner_instruction'}])
+        page={'state':'ready','origin':self.client.wordpress_url,'private_owner_authorized':True,
+            'source_sha256':'d'*64,'total':1,'offset':0,'next_offset':None,'payload_json':raw,
+            'payload_sha256':hashlib.sha256(raw.encode()).hexdigest()}
+        call=Mock(return_value=page);b=BusinessBridge(self.client,self.root,remote=call)
+        result=b.sync_owner_knowledge();self.assertEqual(result['records_readback_verified'],1)
+        self.assertEqual(b.sync_owner_knowledge(),result)
+        bad={**page,'source_sha256':'e'*64,'payload_sha256':'0'*64};call.return_value=bad
+        with self.assertRaises(ValueError):b.sync_owner_knowledge()
 
 
 if __name__=='__main__':unittest.main()

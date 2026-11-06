@@ -160,11 +160,56 @@ class BusinessBridge:
                     raise
         return {'state': 'observed', 'inbound_observed': len(items), 'customer_replies_readback': sent, 'held_for_review': blocked}
 
+    def sync_owner_knowledge(self):
+        from .tasks import knowledge_ingest
+        first = self.call('knowledge', request_id='business-knowledge-head', offset=0)
+        if first.get('state') == 'not_configured':
+            return {'state': 'not_configured'}
+        sha, total = first.get('source_sha256'), first.get('total')
+        if (first.get('state') != 'ready' or first.get('origin') != self.client.wordpress_url
+                or first.get('private_owner_authorized') is not True or not isinstance(sha,str)
+                or not re.fullmatch('[a-f0-9]{64}', sha) or type(total) is not int or not 1 <= total <= 1000):
+            raise ValueError('business_knowledge_source')
+        with self.connect() as db:
+            row = db.execute("SELECT body,sha256 FROM receipts WHERE id='owner_knowledge'").fetchone()
+            if row and hashlib.sha256(row[0].encode()).hexdigest() == row[1]:
+                old = json.loads(row[0])
+                if old.get('source_sha256') == sha and old.get('records_readback_verified') == total:
+                    return old
+        offset = verified = 0
+        while True:
+            page = first if offset == 0 else self.call('knowledge', request_id='business-knowledge-' + sha[:24] + '-' + str(offset), offset=offset)
+            raw = page.get('payload_json')
+            if (page.get('state') != 'ready' or page.get('origin') != self.client.wordpress_url
+                    or page.get('source_sha256') != sha or page.get('total') != total or page.get('offset') != offset
+                    or not isinstance(raw,str) or hashlib.sha256(raw.encode()).hexdigest() != page.get('payload_sha256')):
+                raise ValueError('business_knowledge_page')
+            records = json.loads(raw)
+            if not isinstance(records,list) or not 1 <= len(records) <= 100:
+                raise ValueError('business_knowledge_page_records')
+            result = knowledge_ingest({'records': records}, self.directory)
+            if result['readback_verified_records'] != len(records):
+                raise ValueError('business_knowledge_storage_readback')
+            verified += len(records); next_offset = page.get('next_offset')
+            if next_offset is None:
+                break
+            if type(next_offset) is not int or next_offset != verified or next_offset <= offset:
+                raise ValueError('business_knowledge_cursor')
+            offset = next_offset
+        if verified != total:
+            raise ValueError('business_knowledge_incomplete')
+        result = {'state': 'persisted_verified', 'source_sha256': sha, 'records_readback_verified': verified,
+            'credentials_exported': False, 'source': 'private_owner_pack_via_authenticated_wordpress'}
+        self.record('owner_knowledge',result)
+        print(json.dumps({'business_knowledge_import': result}),flush=True)
+        return result
+
     def step(self):
         status = self.call('status', request_id='business-status-' + str(int(time.time()) // 300))
         self.record('status', status)
         if status.get('owner_authorized') is not True:
             raise ValueError('business_owner_grant')
+        knowledge = self.sync_owner_knowledge()
         if not self.reported_configuration:
             telegram = status.get('telegram', {})
             print(json.dumps({'business_connection_configuration': {
@@ -225,6 +270,7 @@ class BusinessBridge:
             if knowledge_ingest({'records': batch}, self.directory)['readback_verified_records'] != len(batch):
                 raise ValueError('business_capabilities_readback')
         summary = {'state': 'completed', 'content_records_readback': imported['readback_verified_records'],
+            'owner_business_knowledge': knowledge,
             'active_tools_catalogued': len(tools),
             'products_observed': len(products.get('records', [])), 'products_published_readback': published,
             'paypal_enabled': status.get('paypal', {}).get('enabled') is True,
