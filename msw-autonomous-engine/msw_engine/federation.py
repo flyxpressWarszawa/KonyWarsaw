@@ -85,10 +85,13 @@ def technical_peer() -> dict:
         return {"reachable": False, "state": "unavailable_or_cold_start"}
 
 
-def _finish_request(saved: dict) -> dict:
+def _finish_request(saved: dict, directory: Path) -> dict:
     from .tasks import TaskError
     values = saved["values"]
-    if saved.get("transport") == "native_runtime":
+    if saved.get("transport") == "direct_openai":
+        from .openai_direct import generate as direct_generate
+        answer = direct_generate(values, directory)
+    elif saved.get("transport") == "native_runtime":
         from .runtime_bridge import generate as native_generate
         answer = native_generate(values, allow_fallback=True)
     else:
@@ -146,7 +149,7 @@ def generate(payload: dict, directory: Path) -> dict:
         if (saved.get("schema") != "msw.federation.request.v1" or saved.get("payload_sha256") != payload_hash
                 or saved.get("values_sha256") != hashlib.sha256(encode(saved.get("values", {}))).hexdigest()):
             raise TaskError("federation_request_cache_integrity")
-        return _finish_request(saved)
+        return _finish_request(saved, directory)
     steps, context, sources = [], [], []
     memory_query = prompt
     if payload.get("collaborate", True):
@@ -207,7 +210,10 @@ def generate(payload: dict, directory: Path) -> dict:
              "values_sha256": hashlib.sha256(encode(values)).hexdigest(), "steps": steps, "sources": sources,
              "context_truncated": len(supplemental.encode()) > context_budget}
     # Existing accepted/uncertain requests retain their original transport.
-    if os.environ.get("MSW_PAID_AI_TRANSPORT") == "native_runtime":
+    transport = os.environ.get("MSW_PAID_AI_TRANSPORT")
+    if transport == "direct_openai":
+        saved["transport"] = "direct_openai"
+    elif transport == "native_runtime":
         saved["transport"] = "native_runtime"
     with tempfile.NamedTemporaryFile(mode="w", dir=cache_dir, delete=False) as handle:
         json.dump(saved, handle, ensure_ascii=False)
@@ -215,4 +221,4 @@ def generate(payload: dict, directory: Path) -> dict:
         os.fsync(handle.fileno())
         temporary = handle.name
     os.replace(temporary, cache_path)
-    return _finish_request(saved)
+    return _finish_request(saved, directory)
