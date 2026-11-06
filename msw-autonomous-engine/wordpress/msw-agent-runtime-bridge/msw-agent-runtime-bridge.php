@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MSW Agent Runtime — podpisany most API
  * Description: Istniejący worker, prywatne potwierdzenia żądań i natywny płatny router. Bez kopiowania kluczy.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Requires PHP: 8.1
  */
 defined('ABSPATH') || exit;
@@ -65,7 +65,7 @@ final class MSW_Agent_Runtime_Bridge {
         $result=self::generate(['schema'=>self::SCHEMA,'operation'=>'generate','request_id'=>'fed-native-recovery-v2:'.hash('sha256',$identity),
             'task'=>$p['task']??'','text'=>$p['text']??'','max_tokens'=>3000]);
         if(is_wp_error($result))return $result;
-        if(($result['state']??'')!=='completed')return self::error('native_'.sanitize_key($result['state']??'unavailable'),502);
+        if(($result['state']??'')!=='completed')return self::error('native_'.(in_array($result['state']??'',['provider_failed','provider_outcome_unknown'],true)?'terminal_failure':sanitize_key($result['state']??'unavailable')),502);
         $result['legacy_journal_preserved']=true;
         return $result;
     }
@@ -108,7 +108,7 @@ final class MSW_Agent_Runtime_Bridge {
         foreach((array)($providers['providers']??[]) as $name=>$item)$providerFlags[$name]=[
             'configured'=>($item['configured']??false)===true,'last_state'=>$item['last']['state']??'not_observed',
             'last_http'=>$item['last']['http']??null,'last_checked'=>$item['last']['time']??null];
-        return ['version'=>'1.0.2','origin'=>home_url(),'observed_at'=>time(),'plugins'=>$rows,'active_plugins'=>count(array_filter($rows,static fn($r)=>$r['active'])),
+        return ['version'=>'1.0.3','origin'=>home_url(),'observed_at'=>time(),'plugins'=>$rows,'active_plugins'=>count(array_filter($rows,static fn($r)=>$r['active'])),
             'legacy_bridge_repair'=>get_option('msw_agent_runtime_repair_v1',[]),
             'installed_plugins'=>count($rows),'capabilities'=>$caps,'payment_gateways'=>$gateways,'existing_api_providers'=>$providerFlags,
             'secondary_generation_allowed'=>!class_exists('MSW_Spending_Policy')||MSW_Spending_Policy::secondary_allowed('Niezależna recenzja techniczna MSW'),
