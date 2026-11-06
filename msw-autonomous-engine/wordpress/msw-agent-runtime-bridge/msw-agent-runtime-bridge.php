@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MSW Agent Runtime — podpisany most API
  * Description: Istniejący worker, prywatne potwierdzenia żądań i natywny płatny router. Bez kopiowania kluczy.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Requires PHP: 8.1
  */
 defined('ABSPATH') || exit;
@@ -11,12 +11,63 @@ final class MSW_Agent_Runtime_Bridge {
     const SCHEMA='msw.agent.runtime.v1';
     private static string $node='';
     public static function boot(): void {
+        add_action('admin_init',[self::class,'repair_legacy_federation']);
         add_action('rest_api_init',static function(){
             register_rest_route('msw-agent-runtime/v1','/gateway',['methods'=>'POST','permission_callback'=>[self::class,'permission'],'callback'=>[self::class,'gateway']]);
         });
     }
     private static function error(string $code,int $status=400): WP_Error {
         return new WP_Error('mswar_'.$code,'MSW Agent: '.$code,['status'=>$status]);
+    }
+    public static function repair_legacy_federation(): void {
+        if(!current_user_can('manage_options')||!current_user_can('update_plugins')||!class_exists('MSWPC_Core')||!MSWPC_Core::is_hub())return;
+        $path=WP_PLUGIN_DIR.'/msw-render-federation/msw-render-federation.php';
+        $state=['state'=>'not_patched','at'=>time()];
+        try {
+            if(!is_file($path)||is_link($path)||!is_readable($path)||!is_writable($path)||filesize($path)>100000)throw new RuntimeException('source_unavailable');
+            $old=file_get_contents($path);$before=hash('sha256',$old);
+            $marker='// MSW AGENT NATIVE GENERATION RECOVERY 1';
+            if(str_contains($old,$marker))return;
+            $needle="            \$tokens=max(3000,\$p['max_tokens']);\n";
+            if(substr_count($old,$needle)!==1)throw new RuntimeException('source_changed');
+            $insert="            ".$marker."\n            if(class_exists('MSW_Agent_Runtime_Bridge')){\n                \$native=MSW_Agent_Runtime_Bridge::from_federation(\$p,self::\$verifiedNode);\n                if(is_wp_error(\$native))return \$native;\n                return new WP_REST_Response(['schema'=>self::SCHEMA,'ok'=>true,'data'=>\$native],200,['Cache-Control'=>'no-store, private']);\n            }\n";
+            $new=str_replace($needle,$insert.$needle,$old);
+            token_get_all($new,TOKEN_PARSE);
+            $home=realpath('/home/vy9w5irftdq0');
+            if(!$home||!str_starts_with((string)realpath($path),$home.'/'))throw new RuntimeException('private_backup_root');
+            $backup=$home.'/msw-agent-repairs';if(!is_dir($backup)&&!mkdir($backup,0700,true))throw new RuntimeException('backup_unavailable');
+            $backup.='/federation-'.$before.'.php';
+            if(!is_file($backup)){if(file_put_contents($backup,$old,LOCK_EX)!==strlen($old))throw new RuntimeException('backup_write');chmod($backup,0600);}
+            if(!hash_equals($before,hash_file('sha256',$backup)))throw new RuntimeException('backup_readback');
+            if(!hash_equals($before,hash_file('sha256',$path)))throw new RuntimeException('concurrent_source_change');
+            $tmp=tempnam(dirname($path),'msw-bridge-');
+            if(file_put_contents($tmp,$new,LOCK_EX)!==strlen($new)){@unlink($tmp);throw new RuntimeException('source_write');}
+            chmod($tmp,fileperms($path)&0777);
+            if(!rename($tmp,$path)){@unlink($tmp);throw new RuntimeException('source_replace');}
+            if(function_exists('opcache_invalidate'))opcache_invalidate($path,true);
+            if(!hash_equals(hash('sha256',$new),hash_file('sha256',$path)))throw new RuntimeException('source_readback');
+            $state=['state'=>'patched_verified','before_sha256'=>$before,'after_sha256'=>hash('sha256',$new),'backup_readback_verified'=>true,'php_parse_verified'=>true,'at'=>time()];
+        }catch(Throwable $e){$state['code']=preg_replace('/[^a-z_]/','',strtolower($e->getMessage()));}
+        update_option('msw_agent_runtime_repair_v1',$state,false);
+    }
+    public static function from_federation(array $p,string $node) {
+        if($node===''){
+            if(!current_user_can('manage_options'))return self::error('verified_identity_required',403);
+            self::$node='interactive_owner';
+        }else{
+            $config=\MSW\UnifiedEngine\RemoteStore::config();
+            if(!in_array('llm.generate',$config['nodes'][$node]['kinds']??[],true))return self::error('scope',403);
+            self::$node=$node;
+        }
+        // The superseded provider journal remains intact. One stable replacement
+        // ID per original request makes this explicit recovery restart-safe.
+        $identity=$p['request_id']??hash('sha256',wp_json_encode([$p['task']??'',$p['text']??'']));
+        $result=self::generate(['schema'=>self::SCHEMA,'operation'=>'generate','request_id'=>'fed-native-recovery-v1:'.hash('sha256',$identity),
+            'task'=>$p['task']??'','text'=>$p['text']??'','max_tokens'=>$p['max_tokens']??0]);
+        if(is_wp_error($result))return $result;
+        if(($result['state']??'')!=='completed')return self::error('native_'.sanitize_key($result['state']??'unavailable'),502);
+        $result['legacy_journal_preserved']=true;
+        return $result;
     }
     public static function permission($r) {
         self::$node='';
@@ -57,7 +108,8 @@ final class MSW_Agent_Runtime_Bridge {
         foreach((array)($providers['providers']??[]) as $name=>$item)$providerFlags[$name]=[
             'configured'=>($item['configured']??false)===true,'last_state'=>$item['last']['state']??'not_observed',
             'last_http'=>$item['last']['http']??null,'last_checked'=>$item['last']['time']??null];
-        return ['version'=>'1.0.0','origin'=>home_url(),'observed_at'=>time(),'plugins'=>$rows,'active_plugins'=>count(array_filter($rows,static fn($r)=>$r['active'])),
+        return ['version'=>'1.0.1','origin'=>home_url(),'observed_at'=>time(),'plugins'=>$rows,'active_plugins'=>count(array_filter($rows,static fn($r)=>$r['active'])),
+            'legacy_bridge_repair'=>get_option('msw_agent_runtime_repair_v1',[]),
             'installed_plugins'=>count($rows),'capabilities'=>$caps,'payment_gateways'=>$gateways,'existing_api_providers'=>$providerFlags,
             'secondary_generation_allowed'=>!class_exists('MSW_Spending_Policy')||MSW_Spending_Policy::secondary_allowed('Niezależna recenzja techniczna MSW'),
             'paid_openai'=>['router_loaded'=>class_exists('MSW_ChatGPT_Router'),'key_configured'=>is_callable(['MSW_ChatGPT_Router','key'])&&MSW_ChatGPT_Router::key()!=='','credential_location'=>'wordpress_native_router'],
