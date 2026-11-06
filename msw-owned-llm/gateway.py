@@ -12,7 +12,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 MODEL = 'SmolLM2-135M-Instruct-Q4_K_M'
 MODEL_SHA = '2e8040ceae7815abe0dcb3540b9995eaa1fa0d2ca9e797d0a635ae4433c68c2d'
 MODEL_BYTES = 105454432
@@ -121,10 +121,10 @@ class ModelRuntime:
         except Exception as exc:
             self.failure=exc.code if isinstance(exc,Fault) else 'startup_failed'
             print(json.dumps({'event':'model_start_failed','code':self.failure}),flush=True)
-    def _generate(self,prompt,maximum=64):
+    def _generate(self,prompt,maximum=16):
         full='<|im_start|>system\n'+SYSTEM+'<|im_end|>\n<|im_start|>user\n'+prompt+'<|im_end|>\n<|im_start|>assistant\n'
         tok=self.backend('/tokenize',{'content':full,'add_special':False}).get('tokens')
-        if not isinstance(tok,list) or len(tok)>420: raise Fault('context_too_long',413)
+        if not isinstance(tok,list) or len(tok)>256: raise Fault('context_too_long',413)
         started=time.monotonic()
         result=self.backend('/completion',{'prompt':full,'n_predict':maximum,'temperature':0.2,'seed':42,'cache_prompt':False,'stop':['<|im_end|>']})
         text=result.get('content');n=result.get('tokens_predicted')
@@ -138,11 +138,11 @@ class ModelRuntime:
             while self.calls and self.calls[0]<now-60: self.calls.popleft()
             if len(self.calls)>=4: raise Fault('rate_limit',429)
             self.calls.append(now)
-            return self._generate(prompt)
+            return self._generate(prompt,16)
         finally:self.lock.release()
     def status(self):
         alive=bool(self.proc and self.proc.poll() is None)
-        return {'schema':'msw.owned-llm.status.v1','version':VERSION,'ready':self.ready and alive,'failure':self.failure,'model':MODEL,'weights':{'sha256':MODEL_SHA,'bytes':MODEL_BYTES,'revision':MODEL_REVISION,'origin':'HuggingFaceTB/SmolLM2-135M-Instruct','quantizer':'bartowski','license':'Apache-2.0'},'context_tokens':512,'maximum_output_tokens':64,'language_scope':'primarily_English; Polish_business_quality_not_validated','authentication':'RSA_SHA256_from_fixed_WordPress_HTTPS_identity','central_origin':CENTRAL,'public_generation':False,'external_inference_API':False,'weight_training':False,'autonomous_code_changes':False,'business_autonomy_verified':False,'self_test':self.proof}
+        return {'schema':'msw.owned-llm.status.v1','version':VERSION,'ready':self.ready and alive,'failure':self.failure,'model':MODEL,'weights':{'sha256':MODEL_SHA,'bytes':MODEL_BYTES,'revision':MODEL_REVISION,'origin':'HuggingFaceTB/SmolLM2-135M-Instruct','quantizer':'bartowski','license':'Apache-2.0'},'context_tokens':512,'maximum_output_tokens':16,'language_scope':'primarily_English; Polish_business_quality_not_validated','authentication':'RSA_SHA256_from_fixed_WordPress_HTTPS_identity','central_origin':CENTRAL,'public_generation':False,'external_inference_API':False,'weight_training':False,'autonomous_code_changes':False,'business_autonomy_verified':False,'self_test':self.proof}
     def stop(self):
         if self.proc and self.proc.poll() is None:self.proc.terminate()
 
