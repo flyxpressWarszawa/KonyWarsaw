@@ -1,7 +1,7 @@
 <?php
 define('ABSPATH', __DIR__ . '/'); define('WP_PLUGIN_DIR', dirname(__DIR__));
 $options=[]; $actor=1;
-function register_activation_hook(...$x){} function add_action(...$x){} function register_post_meta(...$x){}
+function register_activation_hook(...$x){} function add_action(...$x){} function add_filter(...$x){} function register_post_meta(...$x){}
 function get_current_user_id(){global$actor;return$actor;} function current_user_can($c){global$actor;return$actor===1;}
 function user_can($u,$c){return$u===1;} function update_option($k,$v,...$x){global$options;$options[$k]=$v;}
 function get_option($k,$v=false){global$options;return$options[$k]??$v;}

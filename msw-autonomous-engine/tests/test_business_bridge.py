@@ -42,5 +42,38 @@ class BridgeTest(unittest.TestCase):
         with patch.dict('os.environ',{**env,'MSW_BUSINESS_KNOWLEDGE_SHA256':'0'*64}):
             with self.assertRaises(ValueError):seed(self.root)
 
+    def test_customer_welcome_is_bound_and_never_generates_or_resends(self):
+        item={'id':'tg-update-1','input_sha256':'a'*64,'type':'welcome','text':'/ai'}
+        def remote(op,**fields):
+            if op=='telegram.inbox':return {'items':[item]}
+            self.assertEqual(op,'telegram.reply');self.assertEqual(fields['conversation_id'],item['id'])
+            self.assertNotIn('chat_id',fields)
+            return {'state':'sent','delivery_readback_verified':True}
+        call=Mock(side_effect=remote);model=Mock(side_effect=AssertionError('Welcome requires no paid API'))
+        b=BusinessBridge(self.client,self.root,remote=call)
+        self.assertEqual(b.customer_step(generate=model)['customer_replies_readback'],1)
+        self.assertEqual(b.customer_step(generate=model)['customer_replies_readback'],0)
+        self.assertEqual(sum(c.args[0]=='telegram.reply' for c in call.call_args_list),1)
+
+    def test_customer_model_failure_uses_fixed_response_without_new_paid_request(self):
+        item={'id':'tg-update-2','input_sha256':'b'*64,'type':'question','text':'Czy mogę zamówić usługę?'}
+        def remote(op,**fields):
+            if op=='telegram.inbox':return {'items':[item]}
+            self.assertIn('/zgloszenie',fields['reply']);return {'state':'sent','delivery_readback_verified':True}
+        model=Mock(side_effect=ValueError('native_bridge_terminal_failure:outcome_unknown'))
+        bridge=BusinessBridge(self.client,self.root,remote=remote)
+        self.assertEqual(bridge.customer_step(generate=model)['customer_replies_readback'],1)
+        bridge.customer_step(generate=model);self.assertEqual(model.call_count,1)
+
+    def test_model_link_is_rejected_and_source_prompt_is_durable(self):
+        item={'id':'tg-update-3','input_sha256':'c'*64,'type':'question','text':'Kupno produktu'}
+        replies=[]
+        def remote(op,**fields):
+            if op=='telegram.inbox':return {'items':[item]}
+            replies.append(fields['reply']);return {'state':'sent','delivery_readback_verified':True}
+        model=Mock(return_value={'text':'Zapłać tutaj https://foreign.example/payment'})
+        BusinessBridge(self.client,self.root,remote=remote).customer_step(generate=model)
+        self.assertNotIn('foreign.example',replies[0]);self.assertIn('/zgloszenie',replies[0])
+
 
 if __name__=='__main__':unittest.main()

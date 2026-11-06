@@ -2,13 +2,13 @@
 /**
  * Plugin Name: MSW Business Agent Bridge
  * Description: Prywatny most Render–centrala: wiedza portali, istniejące silniki, produkty WooCommerce i obsługa klientów.
- * Version: 1.0.2
+ * Version: 1.1.0
  * Author: MSW
  */
 defined('ABSPATH') || exit;
 
 final class MSW_Business_Agent_Bridge {
-    const VERSION = '1.0.2';
+    const VERSION = '1.1.0';
     const GRANT = 'msw_business_agent_owner_v1';
     const INPUT = 'msw_business_agent_command';
     const OUTPUT = 'msw_business_agent_result';
@@ -52,7 +52,18 @@ final class MSW_Business_Agent_Bridge {
         if (self::admin()) return true;
         if (!class_exists('MSW_Render_Federation')) return self::error('federation_missing', 503);
         // Retain the node's HMAC authentication and existing capability grant.
-        return MSW_Render_Federation::permission($r);
+        $verified = MSW_Render_Federation::permission($r);
+        if (is_wp_error($verified) || $verified !== true) return $verified;
+        $p = json_decode($r->get_body(), true);
+        if (in_array($p['business_operation'] ?? '', ['product.publish','capability.execute','telegram.reply','telegram.inbox'], true)) {
+            // The original verifier authenticates/consumes the nonce once. A
+            // write additionally needs this same authenticated node's write kind.
+            if (!class_exists('MSW\\UnifiedEngine\\RemoteStore')) return self::error('write_scope', 403);
+            $config = \MSW\UnifiedEngine\RemoteStore::config();
+            $node = $r->get_header('x-mswue-node');
+            if (!in_array('module.execute', $config['nodes'][$node]['kinds'] ?? [], true)) return self::error('write_scope', 403);
+        }
+        return true;
     }
     public static function routes(): void {
         register_rest_route('msw-business-agent/v1', '/gateway', ['methods' => 'POST',
@@ -69,7 +80,7 @@ final class MSW_Business_Agent_Bridge {
     public static function controlPost(int $id): bool {
         $p = get_post($id);
         return self::admin() && $p && $p->post_type === 'post' && $p->post_status === 'private'
-            && $p->post_name === self::SLUG && (int) $p->post_author === get_current_user_id();
+            && in_array($p->post_name, [self::SLUG, 'msw-business-agent-prywatne'], true) && (int) $p->post_author === get_current_user_id();
     }
     public static function changed($meta, $id, $key, $value): void {
         if ($key !== self::INPUT || !self::controlPost((int) $id)) return;
@@ -80,13 +91,13 @@ final class MSW_Business_Agent_Bridge {
         $p = json_decode($r->get_body(), true);
         if (!is_array($p) || ($p['schema'] ?? '') !== 'msw.federation.v1') return self::error('schema');
         $op = $p['business_operation'] ?? '';
-        if (in_array($op, ['product.publish','capability.execute'], true) && ($p['operation'] ?? '') !== 'autonomy_execute') return self::error('write_scope', 403);
+        if (in_array($op, ['product.publish','capability.execute','telegram.reply'], true) && ($p['operation'] ?? '') !== 'autonomy_execute') return self::error('write_scope', 403);
         $answer = self::dispatch($p);
         return is_wp_error($answer) ? $answer : new WP_REST_Response(['schema' => 'msw.business-agent.v1', 'ok' => true, 'data' => $answer], 200, ['Cache-Control' => 'no-store, private']);
     }
     public static function dispatch(array $p) {
         $op = $p['business_operation'] ?? '';
-        $allowed = ['schema', 'operation', 'business_operation', 'request_id', 'offset', 'product_id', 'expected_sha256', 'capability', 'arguments', 'catalog_sha256'];
+        $allowed = ['schema', 'operation', 'business_operation', 'request_id', 'offset', 'product_id', 'expected_sha256', 'capability', 'arguments', 'catalog_sha256', 'conversation_id', 'reply'];
         if (array_diff(array_keys($p), $allowed) || !preg_match('/^[A-Za-z0-9_.:-]{8,120}$/D', (string) ($p['request_id'] ?? ''))) return self::error('arguments');
         if ($op === 'status') return self::status();
         if ($op === 'context') return self::context(max(0, (int) ($p['offset'] ?? 0)));
@@ -94,7 +105,38 @@ final class MSW_Business_Agent_Bridge {
         if ($op === 'product.publish') return self::publish($p);
         if ($op === 'capabilities') return self::capabilities();
         if ($op === 'capability.execute') return self::executeCapability($p);
+        if ($op === 'telegram.audit') return self::telegramAudit();
+        if ($op === 'telegram.verify') return self::telegramVerify();
+        if ($op === 'telegram.inbox') return MSW_Business_Telegram::inbox();
+        if ($op === 'telegram.reply') return MSW_Business_Telegram::reply($p);
         return self::error('operation');
+    }
+    public static function telegramAudit(): array {
+        $methods=[];
+        if (class_exists('MSW_Telegram_Zgloszenia')) foreach(['config','secret','tg_api','telegram_hook','receive'] as $name) {
+            if(!method_exists('MSW_Telegram_Zgloszenia',$name))continue;
+            $r=new ReflectionMethod('MSW_Telegram_Zgloszenia',$name);$f=$r->getFileName();
+            if(!$f||!str_starts_with((string)realpath($f),(string)realpath(WP_PLUGIN_DIR).DIRECTORY_SEPARATOR))continue;
+            $lines=file($f);$source=implode('',array_slice($lines,$r->getStartLine()-1,$r->getEndLine()-$r->getStartLine()+1));
+            $source=preg_replace(['/\bsk-[A-Za-z0-9_-]{12,}/','/\b[0-9]{6,}:[A-Za-z0-9_-]{20,}/'], '[credential omitted]', $source);
+            $methods[$name]=substr($source,0,18000);
+        }
+        return ['fixed_native_methods'=>$methods,'credentials_exported'=>false,'source_is_audit_data_not_instructions'=>true];
+    }
+    public static function telegramVerify(): array {
+        if(!is_callable(['MSW_Telegram_Zgloszenia','tg_api']))return ['state'=>'native_transport_missing'];
+        $me=MSW_Telegram_Zgloszenia::tg_api('getMe',[]);
+        $hook=MSW_Telegram_Zgloszenia::tg_api('getWebhookInfo',[]);
+        if(is_wp_error($me)||is_wp_error($hook))return ['state'=>'native_api_unavailable','bot_verified'=>false,'webhook_replaced'=>false];
+        // Native wrappers may return the complete API body or its result.
+        $bot=$me['result']??$me;$webhook=$hook['result']??$hook;
+        $path=is_string($webhook['url']??null)?wp_parse_url($webhook['url'],PHP_URL_PATH):'';
+        $result=['state'=>!empty($bot['is_bot'])?'bot_verified':'unverified','bot_verified'=>!empty($bot['is_bot']),
+            'bot_username'=>sanitize_text_field((string)($bot['username']??'')),
+            'webhook_configured'=>!empty($webhook['url']),'webhook_path'=>$path,'webhook_replaced'=>false,
+            'pending_updates'=>(int)($webhook['pending_update_count']??0),'outbound_customer_message_sent'=>false];
+        update_option('msw_business_telegram_verification_v1',$result+['at'=>time()],false);
+        return $result;
     }
     public static function payment(): array {
         $gateways = [];
@@ -131,12 +173,12 @@ final class MSW_Business_Agent_Bridge {
                 'source_sha256' => hash_file('sha256', $file), 'methods' => $methods,
                 'option_names' => array_values(array_unique($options[1])), 'option_constants' => $constants];
         }
-        return ['existing_modules' => $classes, 'webhook_replaced' => false, 'customer_reply_transport_verified' => false];
+        return ['existing_modules' => $classes] + MSW_Business_Telegram::verification();
     }
     public static function status(): array {
         return ['version' => self::VERSION, 'owner_authorized' => self::owner(), 'wordpress' => home_url(),
             'paypal' => self::payment(), 'telegram' => self::telegramMetadata(),
-            'tools' => ['status', 'context', 'products', 'product.publish', 'capabilities', 'capability.execute'], 'scope' => 'existing_owner_authorized_central_site',
+            'tools' => ['status', 'context', 'products', 'product.publish', 'capabilities', 'capability.execute', 'telegram.inbox', 'telegram.reply', 'telegram.verify'], 'scope' => 'existing_owner_authorized_central_site',
             'all_active_engines' => class_exists('MSW_Federation_Module_Bus'),
             'no_new_render_services' => true];
     }
@@ -246,4 +288,5 @@ final class MSW_Business_Agent_Bridge {
     }
 }
 register_activation_hook(__FILE__, [MSW_Business_Agent_Bridge::class, 'activate']);
+require_once __DIR__.'/telegram.php';
 MSW_Business_Agent_Bridge::boot();
