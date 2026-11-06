@@ -34,6 +34,18 @@ MISSION = {
         "Nie deklaruj wykonania, działających połączeń, całej historii konta ani wytrenowania modelu bez dowodów."]}
 
 
+MISSION["authority"] = {
+    "scope": "all_active_central_and_live_authorized_satellite_engines",
+    "paid_apis": "existing_configured_OpenAI_and_other_native_provider_adapters",
+    "products": "build_test_install_and_publish_verified_products_through_native_workflows",
+    "inbound_customer_service": "reply_to_received_inquiries_in_existing_authorized_channels",
+    "payments": "existing_PayPal_WooCommerce_checkout_and_verified_payment_status",
+    "self_improvement": "versioned_changes_with_tests_readback_and_rollback",
+    "external_apps": "free_deployment_on_existing_authorized_external_accounts",
+    "missing_credentials": "persist_concrete_blocker_never_claim_connected",
+    "new_render_services": 0}
+
+
 def database(directory):
     root = directory / 'owner-continuity'
     root.mkdir(parents=True, exist_ok=True, mode=0o700)

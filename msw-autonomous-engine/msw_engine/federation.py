@@ -88,7 +88,11 @@ def technical_peer() -> dict:
 def _finish_request(saved: dict) -> dict:
     from .tasks import TaskError
     values = saved["values"]
-    answer = gateway("generate", values)
+    if saved.get("transport") == "native_runtime":
+        from .runtime_bridge import generate as native_generate
+        answer = native_generate(values, allow_fallback=True)
+    else:
+        answer = gateway("generate", values)
     deadline = time.monotonic() + 180
     response_id = None
     while answer.get("state") == "provider_pending":
@@ -106,9 +110,9 @@ def _finish_request(saved: dict) -> dict:
         answer = gateway("generate", values)
     if not isinstance(answer.get("text"), str) or not answer["text"].strip():
         raise TaskError("federation_empty_answer")
-    steps = saved["steps"] + [{"component": "openai_router", "api_text_verified": True, "model": answer["model"]}]
+    steps = saved["steps"] + [{"component": answer.get("provider", "openai_router"), "api_text_verified": True, "model": answer["model"]}]
     return {"schema": "msw.federation.result.v1", "text": answer["text"], "model": answer["model"],
-            "provider": "wordpress_openai_router", "task": values["task"], "contributors": steps, "sources": saved["sources"],
+            "provider": answer.get("provider", "wordpress_openai_router"), "task": values["task"], "contributors": steps, "sources": saved["sources"],
             "answer_sha256": hashlib.sha256(answer["text"].encode()).hexdigest(), "context_truncated": saved["context_truncated"],
             "unavailable_peers": [row["component"] for row in steps if row.get("state") in {"transport_unavailable","unavailable","pairing_or_transport_unavailable","unavailable_or_cold_start","generation_unavailable"}],
             "training_performed": False, "weights_modified": False, "publication_performed": False}
@@ -202,6 +206,9 @@ def generate(payload: dict, directory: Path) -> dict:
     saved = {"schema": "msw.federation.request.v1", "payload_sha256": payload_hash, "values": values,
              "values_sha256": hashlib.sha256(encode(values)).hexdigest(), "steps": steps, "sources": sources,
              "context_truncated": len(supplemental.encode()) > context_budget}
+    # Existing accepted/uncertain requests retain their original transport.
+    if os.environ.get("MSW_PAID_AI_TRANSPORT") == "native_runtime":
+        saved["transport"] = "native_runtime"
     with tempfile.NamedTemporaryFile(mode="w", dir=cache_dir, delete=False) as handle:
         json.dump(saved, handle, ensure_ascii=False)
         handle.flush()
