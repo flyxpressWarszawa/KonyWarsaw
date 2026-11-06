@@ -85,7 +85,9 @@ def protected_open(opener, request, *, timeout):
         with opener.open(request, timeout=timeout) as response:
             yield response
     except HTTPError as error:
-        if error.code in {429, 502, 503, 504}:
+        # This WordPress gateway also returns 502 for a provider's terminal
+        # model error. That does not establish a WordPress origin outage.
+        if error.code in {429, 503, 504}:
             retry = error.headers.get('Retry-After', '') if error.headers else ''
             circuit.failure(origin, retry_after=int(retry) if retry.isdigit() and len(retry) < 7 else 0)
         else:

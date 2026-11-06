@@ -95,6 +95,17 @@ class RecoveryTests(unittest.TestCase):
                         pass
         self.assertEqual(opener.open.call_count, 5)
 
+    def test_provider_502_does_not_pause_other_wordpress_operations(self):
+        opener = MagicMock()
+        opener.open.side_effect = HTTPError(self.origin, 502, 'provider outcome unknown', Message(), None)
+        with patch.dict('os.environ', {'MSW_DATA_DIR': self.tmp.name}):
+            for _ in range(5):
+                with self.assertRaises(HTTPError):
+                    with protected_open(opener, Request(self.origin), timeout=45):
+                        pass
+        self.assertEqual(opener.open.call_count, 5)
+        self.assertFalse(self.circuit.enter(self.origin, 45))
+
 
 if __name__ == '__main__':
     unittest.main()

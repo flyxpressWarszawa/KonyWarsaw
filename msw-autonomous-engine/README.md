@@ -100,7 +100,7 @@ reads do not mark every active plugin or satellite autonomous: native execution
 receipts remain required. Existing signed COMBO and native queue lanes own
 execution; inactive plugins remain inactive and no new Render service is created.
 
-All central transport lanes share a disk-backed outage circuit. Three 429/502/
+All central transport lanes share a disk-backed outage circuit. Three 429/
 503/504 responses or network timeouts within a minute pause requests to that
 origin. Cooldown grows to 15 minutes; one request probes recovery, and a dead
 probe expires. The circuit never replays a write. Existing lease/ACK recovery
@@ -143,3 +143,7 @@ is inferred from an API key or ChatGPT subscription.
 The live COMBO roster supplies all satellite identities. A separate ledger keeps
 central receipts apart from satellite receipts, which require the receiver HMAC
 readback. A roster entry or accepted cron request alone never proves native work.
+
+Gateway HTTP502 can mean a model-specific terminal error, so it does not trip
+the shared origin circuit. HTTP503/504, rate-limit responses and network timeouts
+still activate backoff. This keeps provider errors separate from site outages.
