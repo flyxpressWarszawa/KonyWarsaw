@@ -41,6 +41,12 @@ jobs:
         run: python -m unittest discover -s msw-coding-bridge/tests/python -v
       - name: Verify the WordPress admission and OIDC contracts offline
         run: php -n msw-coding-bridge/tests/php/run.php
+      - name: Set up Node for the public coding manifest
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+      - name: Verify the public manifest and existing Technical Core contracts
+        run: node --test msw-ai-technical-core/tests/*.test.mjs
       - name: Prepare the reviewed package without installing it
         run: python msw-coding-bridge/package.py --output-dir "$RUNNER_TEMP/msw-coding-package"
       - name: Retain the reviewed package and checksums
