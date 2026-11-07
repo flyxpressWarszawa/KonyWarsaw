@@ -1,0 +1,16 @@
+# Isolated build/import probe only. This is NOT the production queue worker.
+# No disk, credentials, external connection, scheduler, or queue consumer.
+services:
+  - type: worker
+    name: msw-central-engine-worker-standby
+    runtime: python
+    region: frankfurt
+    plan: 0.5c-512mb
+    rootDir: msw-autonomous-engine
+    autoDeployTrigger: 'off'
+    numInstances: 1
+    buildCommand: python -m pip install --disable-pip-version-check --no-input -r requirements.txt && python -m compileall -q msw_engine
+    startCommand: python -u -m msw_engine.render_standby
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
