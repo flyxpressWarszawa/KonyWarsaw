@@ -101,7 +101,13 @@ def import_zip(archive, directory, *, grant_sha256='local-owner-supplied'):
                     if not isinstance(content, dict):
                         continue
                     parts = content.get('parts', [])
-                    text_parts = [part if isinstance(part, str) else part.get('text', '') if isinstance(part, dict) and isinstance(part.get('text', ''), str) else '' for part in parts] if isinstance(parts, list) else []
+                    text_parts = []
+                    if isinstance(parts, list):
+                        for part in parts:
+                            if isinstance(part, str):
+                                text_parts.append(part)
+                            elif isinstance(part, dict) and isinstance(part.get('text'), str):
+                                text_parts.append(part['text'])
                     body = scrub('\n'.join(text_parts))
                     if not body.strip():
                         continue
@@ -177,3 +183,4 @@ def import_configured(directory):
         return import_zip(archived, directory, grant_sha256=grant)
     finally:
         temporary.unlink(missing_ok=True)
+
