@@ -256,6 +256,19 @@ class Worker:
             except (OSError, ValueError, sqlite3.Error) as error:
                 self.doctor = None
                 print(json.dumps({"render_doctor": {"state": "startup_blocked", "code": type(error).__name__}}), flush=True)
+        # Optional permanent-start integration. Explicit opt-in is required
+        # because older releases may still run the no-build sidecar separately.
+        # Activate only when a service restart replaces that instance.
+        if (not once and os.environ.get("MSW_DOCTOR_RUNTIME") == "1"
+                and getattr(self.client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"):
+            try:
+                from .doctor_compute_lane import ComputeLane
+                ComputeLane(self.journal.data_dir, client=self.client).start(lambda: self.stopping)
+                from .doctor_receipts import ReceiptDoctor
+                ReceiptDoctor(self.journal.data_dir, client=self.client).start(lambda: self.stopping)
+                print(json.dumps({"doctor_runtime": {"state": "supervisors_started"}}), flush=True)
+            except (OSError, ValueError, sqlite3.Error) as error:
+                print(json.dumps({"doctor_runtime": {"state": "startup_blocked", "code": type(error).__name__}}), flush=True)
         # Catalogue scheduling shares this worker and its existing persistent disk.
         if (not once and os.environ.get("MSW_CATALOG_PUBLISHER", "1") == "1"
                 and getattr(self.client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"):
