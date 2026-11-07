@@ -35,6 +35,22 @@ final class MSW_GCB_Contract
         if (strlen($raw)>$limit || !str_starts_with(ltrim($raw),'{')) self::fail('json_object');
         try { $value=json_decode($raw,true,32,JSON_THROW_ON_ERROR); }
         catch (JsonException $e) { self::fail('invalid_json'); }
+        // json_decode accepts duplicate keys. Scan the already valid JSON tokens
+        // so all signers/readers see exactly one value, including escaped keys.
+        preg_match_all('/"(?:[^"\\\\]|\\\\.)*"|[{}\\[\\]:,]/s',$raw,$matches);
+        $stack=[];
+        foreach($matches[0] as $token){
+            if($token==='{'){$stack[]=['object'=>true,'key'=>true,'seen'=>[]];continue;}
+            if($token==='['){$stack[]=['object'=>false];continue;}
+            if($token==='}'||$token===']'){array_pop($stack);continue;}
+            $i=count($stack)-1;if($i<0||!$stack[$i]['object'])continue;
+            if($token===','){$stack[$i]['key']=true;continue;}
+            if($token[0]==='"'&&$stack[$i]['key']){
+                $key=json_decode($token,true,2,JSON_THROW_ON_ERROR);
+                if(array_key_exists($key,$stack[$i]['seen']))self::fail('duplicate_json_key');
+                $stack[$i]['seen'][$key]=true;$stack[$i]['key']=false;
+            }
+        }
         if (!is_array($value)) self::fail('json_object');
         return $value;
     }

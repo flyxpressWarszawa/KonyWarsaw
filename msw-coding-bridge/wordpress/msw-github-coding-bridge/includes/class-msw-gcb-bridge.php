@@ -28,7 +28,8 @@ final class MSW_GCB_Bridge
     private static function must_admin(): void { if(!self::admin())MSW_GCB_Contract::fail('forbidden',403); }
     private static function central_available(): bool
     {
-        return is_callable(['MSW_Central_Engine_Store','enqueue']) && is_callable(['MSW_Central_Engine_Store','artifact']) &&
+        return is_callable(['MSW_Central_Engine_Store','enqueue']) && is_callable(['MSW_Central_Engine_Store','get_job']) &&
+            is_callable(['MSW_Central_Engine_Store','live']) && is_callable(['MSW_Central_Engine_Store','artifact']) &&
             is_callable(['MSW_Central_Engine_Workflows','validate']) && is_callable(['MSW_Central_Engine_Registry','catalog']) &&
             is_callable(['MSW_Central_Engine_Core','defaults']);
     }
@@ -82,7 +83,22 @@ final class MSW_GCB_Bridge
         $read=MSW_Central_Engine_Store::get_job($job['id']);
         if(!is_array($read)||!self::native_matches($read,$input,$owner))MSW_GCB_Contract::fail('native_admission_readback',503);
         return ['schema'=>'msw.coding-admission.v1','state'=>'admitted','task_id'=>$id,'central_job_id'=>$job['id'],
-            'duplicate'=>!empty($job['duplicate']),'code_executed'=>false,'production_changed'=>false];
+            'central_state'=>$read['state'],'duplicate'=>!empty($job['duplicate']),'code_executed'=>false,'production_changed'=>false];
+    }
+    public static function capability(array $input,array $context): array
+    {
+        // Existing authorized registry clients enter the same native queue.
+        // Only the native adapter.run context may materialize its projection.
+        if(($context['source']??'')!=='msw-central-engine'||!is_string($context['request_id']??null)||
+            !preg_match('/\A[A-Za-z0-9_.:-]{1,200}\z/D',$context['request_id']))MSW_GCB_Contract::fail('native_context_required',403);
+        return preg_match('/\Amsw-ce-[1-9][0-9]{0,17}\z/D',$context['request_id'])?self::record($input,$context):self::submit($input);
+    }
+    public static function verify_effect(array $input,array $result): array
+    {
+        if(($result['schema']??'')!=='msw.coding-admission.v1')return self::verify_record($input,$result);
+        $id=MSW_GCB_Contract::id($input);$job=MSW_Central_Engine_Store::get_job((int)($result['central_job_id']??0));
+        $ok=is_array($job)&&self::native_matches($job,$input,(int)get_current_user_id())&&($result['task_id']??'')===$id&&($result['state']??'')==='admitted';
+        return ['verified'=>$ok,'evidence'=>['task_id'=>$id,'central_job_id'=>$job['id']??null,'native_admission_readback_verified'=>$ok,'projection_created'=>false,'coding_executed'=>false]];
     }
     public static function record(array $input,array $context): array
     {
@@ -214,7 +230,7 @@ final class MSW_GCB_Bridge
     }
     public static function connect(array $args): array
     {
-        self::must_admin();if(array_diff(array_keys($args),['transport_enabled'])||(isset($args['transport_enabled'])&&!is_bool($args['transport_enabled'])))MSW_GCB_Contract::fail('connect_fields');
+        self::must_admin();if(array_diff(array_keys($args),['transport_enabled'])||(array_key_exists('transport_enabled',$args)&&!is_bool($args['transport_enabled'])))MSW_GCB_Contract::fail('connect_fields');
         $core=self::core_settings();$catalog=MSW_Central_Engine_Registry::catalog();
         if(($catalog['coding.submit']['plugin']??'')!==self::PLUGIN)MSW_GCB_Contract::fail('capability_conflict',409);
         $settings=$core['stored'];$caps=$core['settings']['write_capabilities']??[];
@@ -243,9 +259,19 @@ final class MSW_GCB_Bridge
     }
     public static function result(array $args): array
     {
-        self::must_admin();MSW_GCB_Contract::keys($args,['task_id']);
-        if(!is_string($args['task_id']))MSW_GCB_Contract::fail('task_id');
-        $row=MSW_GCB_Options::read($args['task_id']);if(!$row)MSW_GCB_Contract::fail('task_missing',404);
+        self::must_admin();
+        if(array_diff(array_keys($args),['task_id','central_job_id'])||!is_string($args['task_id']??null))MSW_GCB_Contract::fail('task_id');
+        if(array_key_exists('central_job_id',$args)&&(!is_int($args['central_job_id'])||$args['central_job_id']<1))MSW_GCB_Contract::fail('central_job_id');
+        $row=MSW_GCB_Options::read($args['task_id']);
+        if(!$row){
+            $job=isset($args['central_job_id'])&&self::central_available()?MSW_Central_Engine_Store::get_job($args['central_job_id']):null;
+            $input=$job['input']['arguments']??null;
+            if(!is_array($job)||!is_array($input)||!isset($input['source_engine'],$input['request_id'])||
+                !self::native_matches($job,$input,(int)get_current_user_id())||MSW_GCB_Contract::id($input)!==$args['task_id'])MSW_GCB_Contract::fail('task_missing',404);
+            return ['task_id'=>$args['task_id'],'state'=>'admitted','central_job_id'=>$job['id'],'central_state'=>$job['state'],
+                'delivery'=>null,'coding_result_verified'=>false,'tests_verified'=>false,'deployed_verified'=>false];
+        }
+        if(isset($args['central_job_id'])&&($row['value']['central_job_id']??0)!==$args['central_job_id'])MSW_GCB_Contract::fail('task_missing',404);
         return self::public_row($row['value']);
     }
     public static function listing(): array
@@ -260,7 +286,8 @@ final class MSW_GCB_Bridge
             'objective'=>['type'=>'string','minLength'=>1,'maxLength'=>4000],'acceptance'=>['type'=>'array','minItems'=>1,'maxItems'=>8,'items'=>['type'=>'string','minLength'=>1,'maxLength'=>400]],
             'public_data'=>['type'=>'boolean','enum'=>[true]]]];
     }
-    private static function result_schema(): array { return ['type'=>'object','additionalProperties'=>false,'required'=>['task_id'],'properties'=>['task_id'=>['type'=>'string','pattern'=>'^[a-f0-9]{32}$']]]; }
+    private static function result_schema(): array { return ['type'=>'object','additionalProperties'=>false,'required'=>['task_id'],'properties'=>[
+        'task_id'=>['type'=>'string','pattern'=>'^[a-f0-9]{32}$'],'central_job_id'=>['type'=>'integer','minimum'=>1]]]; }
     private static function empty_schema(): array { return ['type'=>'object','additionalProperties'=>false,'properties'=>new stdClass()]; }
     public static function register(): void
     {
@@ -269,7 +296,7 @@ final class MSW_GCB_Bridge
         MSW_Central_Engine_Registry::register('coding.status',$common+['label'=>'MSW GitHub — stan transportu','effect'=>'read','input_schema'=>self::empty_schema(),'callback'=>static fn()=>self::guarded(fn()=>self::status())]);
         MSW_Central_Engine_Registry::register('coding.result',$common+['label'=>'MSW GitHub — odczyt potwierdzenia','effect'=>'read','input_schema'=>self::result_schema(),'callback'=>static fn($a)=>self::guarded(fn()=>self::result($a))]);
         MSW_Central_Engine_Registry::register('coding.submit',$common+['label'=>'MSW GitHub — transport publicznego zadania','effect'=>'write','input_schema'=>self::input_schema(),
-            'callback'=>static fn($a,$ctx)=>self::guarded(fn()=>self::record($a,$ctx)),'verify'=>static fn($a,$r)=>self::guarded(fn()=>self::verify_record($a,$r))]);
+            'callback'=>static fn($a,$ctx)=>self::guarded(fn()=>self::capability($a,$ctx)),'verify'=>static fn($a,$r)=>self::guarded(fn()=>self::verify_effect($a,$r))]);
     }
     public static function tools(array $tools): array
     {
@@ -299,7 +326,11 @@ final class MSW_GCB_Bridge
     public static function routes(): void
     {
         foreach(['/status'=>static fn()=>self::status(),'/tasks'=>static fn()=>self::listing()] as $path=>$fn)register_rest_route(self::NS,$path,['methods'=>'GET','permission_callback'=>[self::class,'admin'],'callback'=>static fn()=>self::guarded($fn)]);
-        register_rest_route(self::NS,'/tasks/(?P<task_id>[a-f0-9]{32})',['methods'=>'GET','permission_callback'=>[self::class,'admin'],'callback'=>static fn($r)=>self::guarded(fn()=>self::result(['task_id'=>(string)$r['task_id']]))]);
+        register_rest_route(self::NS,'/tasks/(?P<task_id>[a-f0-9]{32})',['methods'=>'GET','permission_callback'=>[self::class,'admin'],'callback'=>static fn($r)=>self::guarded(static function()use($r){
+            $args=['task_id'=>(string)$r['task_id']];$native=$r->get_param('central_job_id');
+            if($native!==null){if(!is_scalar($native)||!preg_match('/\A[1-9][0-9]{0,17}\z/D',(string)$native))MSW_GCB_Contract::fail('central_job_id');$args['central_job_id']=(int)$native;}
+            return self::result($args);
+        })]);
         foreach(['/submit'=>'submit','/connect'=>'connect'] as $path=>$method)register_rest_route(self::NS,$path,['methods'=>'POST','permission_callback'=>[self::class,'admin'],'callback'=>static fn($r)=>self::guarded(fn()=>self::{$method}(MSW_GCB_Contract::json((string)$r->get_body(),16384)))]);
         register_rest_route(self::NS,'/exchange',['methods'=>'POST','permission_callback'=>'__return_true','callback'=>static fn($r)=>self::guarded(static function()use($r){
             $p=MSW_GCB_Contract::json((string)$r->get_body(),4096);$auth=self::authenticate($r);return self::exchange($p,$auth);
