@@ -42,6 +42,22 @@ class DoctorSidecarTests(unittest.TestCase):
                 enable_verified_pack(root)
             self.assertNotIn('MSW_RUNTIME_PACK_ROOT', os.environ)
 
+    def test_integrity_baseline_comes_from_verified_archive(self):
+        from msw_engine.doctor_pack_integrity import PackIntegrity
+        from test_runtime_pack import make_pack
+        raw, digest = make_pack()
+        configured = {'MSW_RUNTIME_PACK_CHUNKS': '1', 'MSW_RUNTIME_PACK_00': base64.b64encode(raw).decode(),
+                      'MSW_RUNTIME_PACK_SHA256': digest}
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, configured, clear=True):
+            guards = []
+            state = enable_verified_pack(Path(tmp), lambda root, files, checksum:
+                                         guards.append(PackIntegrity(root, files, checksum, interval=0)))
+            self.assertEqual(state['state'], 'installed_verified')
+            self.assertEqual(guards[0].check()['state'], 'verified')
+            (guards[0].root / 'example/code.py').write_text('tampered')
+            self.assertEqual(guards[0].check()['state'], 'integrity_blocked')
+            self.assertNotIn('MSW_RUNTIME_PACK_ROOT', os.environ)
+
     def test_observation_does_not_claim_queue_repair_or_disclose_extra_data(self):
         local = {'measurement': {'at': 10, 'cpu_percent': 80, 'memory_percent': 20,
                                  'fresh': True, 'secret': 'do-not-copy'}}
