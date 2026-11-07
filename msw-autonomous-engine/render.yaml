@@ -7,7 +7,7 @@ services:
   region: frankfurt
   autoDeployTrigger: '@branch'
   numInstances: 1
-  buildCommand: python -m pip install -r requirements.txt && python -m compileall -q msw_engine
+  buildCommand: echo 'Installing core worker dependencies' && python -m pip install --disable-pip-version-check --no-input -r requirements.txt && echo 'Compiling worker modules' && python -m compileall -q msw_engine
   startCommand: python -m msw_engine
   disk:
     name: msw-engine-state
