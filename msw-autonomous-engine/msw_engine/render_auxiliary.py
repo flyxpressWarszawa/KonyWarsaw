@@ -146,12 +146,21 @@ class OriginPressureGate:
         self.last_at = None
 
     def check(self, client: Client) -> dict:
-        value = self.reader(client)
+        try:
+            value = self.reader(client)
+        except Exception:
+            # A transport error is a telemetry gap, not evidence that the
+            # previous healthy sample is still safe for a later claim.
+            self.open, self.low_samples, self.last_at = False, 0, None
+            raise
         if not isinstance(value, dict):
             value = {}
         at, cpu, ram = value.get("measured_at"), value.get("cpu_percent"), value.get("physical_memory_percent")
+        now = int(self.clock())
+        if self.last_at is not None and now - self.last_at > 90:
+            self.open, self.low_samples, self.last_at = False, 0, None
         valid = (value.get("schema") == "msw.render.account-health.v1" and value.get("state") == "fresh"
-                 and type(at) is int and 0 <= int(self.clock()) - at <= 90
+                 and type(at) is int and 0 <= now - at <= 90
                  and type(cpu) in (int, float) and type(ram) in (int, float)
                  and math.isfinite(cpu) and math.isfinite(ram) and 0 <= cpu <= 100 and 0 <= ram <= 100)
         if not valid or (self.last_at is not None and at < self.last_at):
