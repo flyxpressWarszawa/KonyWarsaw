@@ -1,0 +1,21 @@
+{
+  "schema": "msw.github-engine.policy.v1",
+  "enabled": true,
+  "active_from": "2026-11-07T00:00:00+01:00",
+  "active_until": "2026-12-07T00:00:00+01:00",
+  "max_files": 12,
+  "max_bytes": 204800,
+  "allowed_prefixes": [
+    "msw-ai-technical-core/",
+    "msw-ai-centrum-robotow/app/",
+    "msw-ai-centrum-robotow/tests/",
+    "msw-compute-node-adapters/",
+    "msw-research-engine/"
+  ],
+  "priorities": [
+    "Fix a reproducible public application defect and add a regression test.",
+    "Improve the portal API's authorization, validation and observable correctness.",
+    "Improve the public technical catalogue and existing compute adapters with test evidence.",
+    "Keep existing COMBO, WordPress and Render production execution in their current authenticated lanes."
+  ]
+}

@@ -1,0 +1,80 @@
+name: MSW GitHub Engine - verification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'msw-github-engine/**'
+      - '.github/workflows/msw-github-engine*'
+      - 'msw-ai-technical-core/**'
+      - 'msw-ai-centrum-robotow/**'
+      - 'msw-compute-node-adapters/**'
+      - 'msw-research-engine/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'msw-github-engine/**'
+      - '.github/workflows/msw-github-engine*'
+      - 'msw-ai-technical-core/**'
+      - 'msw-ai-centrum-robotow/**'
+      - 'msw-compute-node-adapters/**'
+      - 'msw-research-engine/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: msw-github-engine-ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the exact revision without persisted credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+      - name: Install the verified test environment
+        run: python -m pip install --disable-pip-version-check -r msw-github-engine/requirements-ci.txt
+      - name: Verify the engine's decision and diff controls
+        run: python -m unittest discover -s msw-github-engine/tests -v
+      - name: Run all existing local contracts including the portal API
+        run: python msw-github-engine/controller.py baseline
+      - name: Validate an engine proposal with the immutable base controller
+        if: >-
+          github.event_name == 'pull_request' &&
+          (startsWith(github.event.pull_request.title, '[MSW GitHub Engine]') ||
+           (github.event.pull_request.head.repo.full_name == github.repository &&
+            (github.event.pull_request.user.login == 'github-actions[bot]' ||
+             startsWith(github.event.pull_request.head.ref, 'msw-github-engine/'))))
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          trusted_dir="$RUNNER_TEMP/msw-engine-trusted"
+          mkdir -p "$trusted_dir"
+          git show "$BASE_SHA:msw-github-engine/controller.py" > "$trusted_dir/controller.py"
+          git show "$BASE_SHA:msw-github-engine/policy.json" > "$trusted_dir/policy.json"
+          python "$trusted_dir/controller.py" validate --base "$BASE_SHA"
+      - name: Retain verification evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: msw-github-engine-verification-${{ github.run_id }}
+          path: .msw-github-engine/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 14

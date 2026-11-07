@@ -1,0 +1,9 @@
+# Local verification state is never part of an engine pull request.
+.msw-github-engine/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+.env.*
+!.env.example
