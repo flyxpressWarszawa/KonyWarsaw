@@ -29,19 +29,59 @@ class PackError(ValueError):
 
 def safe_name(value: str) -> bool:
     path = PurePosixPath(value)
-    return bool(value and len(value) <= 400 and not path.is_absolute()
+    return bool(value and path.parts and len(value) <= 400 and not path.is_absolute()
                 and ".." not in path.parts and "\\" not in value
                 and not re.search(r"[\x00-\x1f:]", value)
                 and path.as_posix() == value)
 
 
 def verify_directory(root: Path, files: dict[str, str]) -> None:
-    for name, digest in files.items():
-        if not safe_name(name) or not re.fullmatch(r"[a-f0-9]{64}", digest):
-            raise PackError("invalid_file_manifest")
-        path = root / name
-        if path.is_symlink() or not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
-            raise PackError("private_pack_file_mismatch")
+    # Re-check cached files using directory-relative descriptors, not path
+    # resolution that could follow a substituted intermediate symlink.
+    if not isinstance(files, dict) or len(files) > 3000:
+        raise PackError("invalid_file_manifest")
+    if not hasattr(os, "O_NOFOLLOW") or not hasattr(os, "O_DIRECTORY"):
+        raise PackError("secure_directory_open_unsupported")
+    try:
+        root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    except OSError as error:
+        raise PackError("private_pack_file_mismatch") from error
+    total_bytes = 0
+    try:
+        for name, digest in files.items():
+            if not isinstance(name, str) or not isinstance(digest, str) or not safe_name(name) or not re.fullmatch(r"[a-f0-9]{64}", digest):
+                raise PackError("invalid_file_manifest")
+            parts = PurePosixPath(name).parts
+            current_fd = os.dup(root_fd)
+            file_fd = None
+            try:
+                for component in parts[:-1]:
+                    next_fd = os.open(component, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=current_fd)
+                    os.close(current_fd)
+                    current_fd = next_fd
+                file_fd = os.open(parts[-1], os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=current_fd)
+                info = os.fstat(file_fd)
+                if not stat.S_ISREG(info.st_mode) or info.st_size > MAX_EXPANDED:
+                    raise PackError("private_pack_file_mismatch")
+                checksum = hashlib.sha256()
+                while True:
+                    block = os.read(file_fd, 65536)
+                    if not block:
+                        break
+                    total_bytes += len(block)
+                    if total_bytes > MAX_EXPANDED:
+                        raise PackError("private_pack_expanded_limit")
+                    checksum.update(block)
+                if checksum.hexdigest() != digest:
+                    raise PackError("private_pack_file_mismatch")
+            except OSError as error:
+                raise PackError("private_pack_file_mismatch") from error
+            finally:
+                if file_fd is not None:
+                    os.close(file_fd)
+                os.close(current_fd)
+    finally:
+        os.close(root_fd)
 
 
 def unpack(raw: bytes, digest: str, data_dir: Path) -> tuple[Path, dict]:
@@ -78,6 +118,8 @@ def unpack(raw: bytes, digest: str, data_dir: Path) -> tuple[Path, dict]:
                 raise PackError("private_pack_module_invalid")
         cache = data_dir / "runtime-packs"
         cache.mkdir(parents=True, exist_ok=True, mode=0o700)
+        if cache.is_symlink():
+            raise PackError("private_pack_cache_symlink")
         target = cache / digest
         if target.is_symlink():
             raise PackError("private_pack_cache_symlink")
