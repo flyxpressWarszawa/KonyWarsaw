@@ -60,6 +60,11 @@ def run(data_dir: Path, release: str) -> int:
         signal.signal(signal.SIGTERM, request_stop); signal.signal(signal.SIGINT, request_stop)
         local = RenderDoctor(data_dir, monitor_only=True); local.start(lambda: stop)
         backup = FailoverDoctor(data_dir); backup.start(lambda: stop)
+        try:
+            from .doctor_compute_lane import ComputeLane
+            ComputeLane(data_dir).start(lambda: stop)
+        except (OSError, ValueError) as error:
+            print(json.dumps({'doctor_compute_lane': {'state': 'startup_blocked', 'code': type(error).__name__}}), flush=True)
         started, next_publish, shared = int(time.time()), 0, False
         print(json.dumps({'doctor_sidecar': {'state': 'started', 'release': release, 'pid': os.getpid()}}), flush=True)
         while not stop:

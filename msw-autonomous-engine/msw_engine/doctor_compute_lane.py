@@ -1,0 +1,131 @@
+"""Slow, leased Render execution of pure SEO analysis jobs.
+
+The existing WordPress queue remains authoritative. One job at most per ten
+minutes is attempted. This lane never runs PHP callbacks, publishes content,
+or claims to measure hosting CPU. Uncertain acknowledgements are retained.
+"""
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+import re
+import threading
+import time
+
+from .client import Client, TransportError
+from .failover_doctor import status as hosting_status
+from .render_doctor import status as render_status
+from .runner import Worker
+
+
+class ComputeLane:
+    def __init__(self, directory, *, client=None, clock=time.time, worker_factory=Worker):
+        self.directory, self.clock = Path(directory), clock
+        self.root = self.directory / 'msw-doctor-sidecar'
+        self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
+        self.pending = self.root / 'seo-pending.json'
+        self.status_path = self.root / 'seo-status.json'
+        if client is None:
+            base = os.environ.get('MSW_WP_URL', '').rstrip('/')
+            endpoint = os.environ.get('MSW_TRANSPORT_URL', base + '/wp-content/plugins/msw-unified-engine/transport.php')
+            client = Client(base, endpoint, os.environ.get('MSW_NODE', ''), os.environ.get('MSW_SECRET', ''))
+        self.client = client
+        self.worker = worker_factory(client, self.directory, max_seconds=30, memory_mb=384)
+
+    def write(self, path, body):
+        if path.is_symlink(): raise ValueError('unsafe_lane_state')
+        tmp = path.with_suffix('.tmp')
+        if tmp.is_symlink(): raise ValueError('unsafe_lane_temporary')
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, 'w') as stream:
+            json.dump(body, stream, separators=(',', ':'), sort_keys=True)
+            stream.flush(); os.fsync(stream.fileno())
+        os.replace(tmp, path)
+
+    def report(self, state, **fields):
+        body = {'at': int(self.clock()), 'state': state, 'kind': 'seo.analyze',
+                'minimum_interval_seconds': 600, 'hosting_cpu_measured': False,
+                'publication_performed': False, **fields}
+        self.write(self.status_path, body)
+        print(json.dumps({'doctor_compute_lane': body}, separators=(',', ':')), flush=True)
+        return body
+
+    def finish_pending(self):
+        ref = json.loads(self.pending.read_text())
+        ident, digest = ref.get('id'), ref.get('digest')
+        if not (isinstance(ident, str) and re.fullmatch(r'[A-Za-z0-9_-]{1,100}', ident)
+                and isinstance(digest, str) and re.fullmatch(r'[0-9a-f]{64}', digest)):
+            raise ValueError('invalid_pending_reference')
+        receipt = self.worker.journal.lookup(ident, digest)
+        if receipt is None:
+            if self.clock() - int(ref.get('created', 0)) < 1800:
+                return self.report('waiting_for_unfinished_lease')
+            self.pending.unlink()
+            return self.report('unfinished_lease_expired_unverified')
+        if receipt.get('state') == 'acknowledged':
+            self.pending.unlink()
+            return self.report('previous_result_acknowledged', server_ack_verified=True)
+        try:
+            existing = self.client.send('status', {'job_id': ident})
+            if (existing.get('state') in {'completed', 'failed'}
+                    and existing.get('result_sha256') == receipt['result_sha256']):
+                self.worker.journal.mark(ident, 'acknowledged')
+                self.pending.unlink()
+                return self.report('previous_result_acknowledged', server_ack_verified=True)
+            result = self.worker.acknowledge(receipt)
+            self.pending.unlink()
+            return self.report('previous_result_acknowledged', server_ack_verified=result.get('server_ack_verified') is True)
+        except TransportError as error:
+            return self.report('result_ack_unverified', code=error.code, http_status=error.status)
+
+    def step(self, stopping=lambda: False):
+        if stopping(): return self.report('stopping')
+        if self.pending.exists(): return self.finish_pending()
+        site, render = hosting_status(self.directory), render_status(self.directory)
+        measurement = render.get('measurement') or {}
+        cpu, memory = measurement.get('cpu_percent'), measurement.get('memory_percent')
+        if not (site.get('state') == 'reachable' and site.get('sample_fresh') is True
+                and measurement.get('fresh') is True and isinstance(cpu, (int, float))
+                and isinstance(memory, (int, float)) and cpu < 70 and memory < 70):
+            return self.report('deferred_missing_health_or_render_pressure')
+        claim = self.client.send('claim', {'capabilities': ['seo.analyze']})
+        if claim.get('state') != 'claimed': return self.report('idle')
+        job, lease = claim.get('job'), claim.get('lease_token')
+        if (not isinstance(job, dict) or job.get('kind') != 'seo.analyze' or not isinstance(lease, str)
+                or not re.fullmatch(r'[A-Za-z0-9_-]{1,100}', str(job.get('id', '')))
+                or not re.fullmatch(r'[0-9a-f]{64}', str(job.get('payload_sha256', '')))):
+            raise ValueError('unexpected_claim')
+        self.write(self.pending, {'id': job['id'], 'digest': job['payload_sha256'], 'created': int(self.clock())})
+        self.worker.cancel_check = stopping
+        receipt = self.worker.execute(job, lease)
+        try:
+            ack = self.worker.acknowledge(receipt)
+        except TransportError as error:
+            return self.report('result_ack_unverified', code=error.code, http_status=error.status)
+        self.pending.unlink()
+        return self.report('completed' if ack.get('state') == 'completed' else 'job_failed_verified',
+                           server_ack_verified=ack.get('server_ack_verified') is True,
+                           result_sha256=receipt['result_sha256'])
+
+    def start(self, stopping):
+        def run():
+            try:
+                last = int(json.loads(self.status_path.read_text())['at'])
+            except (OSError, ValueError, KeyError, TypeError):
+                self.report('scheduled')
+                last = int(self.clock())
+            while not stopping():
+                elapsed = max(0, self.clock() - last)
+                deadline = time.monotonic() + max(0, 600 - elapsed)
+                while not stopping() and time.monotonic() < deadline:
+                    time.sleep(min(1, max(0, deadline-time.monotonic())))
+                if stopping(): break
+                try: self.step(stopping)
+                except Exception as error:
+                    try: self.report('lane_error', code=type(error).__name__)
+                    except OSError: pass
+                last = int(self.clock())
+        thread = threading.Thread(target=run, name='msw-doctor-compute-lane', daemon=True)
+        thread.start()
+        return thread
