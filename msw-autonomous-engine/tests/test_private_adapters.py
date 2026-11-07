@@ -7,9 +7,12 @@ import sqlite3
 import tempfile
 import unittest
 import uuid
+from unittest.mock import patch
 
 from msw_engine.runtime_pack import unpack
 from msw_engine.tasks import dispatch, TaskError
+from msw_engine.doctor_compute_lane import ComputeLane
+from msw_engine.runner import Worker
 
 
 @unittest.skipUnless(os.environ.get("MSW_TEST_PACK"), "owner-supplied private runtime pack required")
@@ -82,6 +85,40 @@ class PrivateAdapterTests(unittest.TestCase):
         self.assertEqual(raised.exception.status_code, 422)
         with self.assertRaises(TaskError):
             self.run_job("engine.v3.ingest", {**payload, "command": "unapproved"})
+
+    def test_v3_priority_lane_runs_real_worker_with_bounded_resources(self):
+        payload = self.envelope()
+        raw = json.dumps(payload, ensure_ascii=False, separators=(',', ':'))
+        job = {'id': 'isolated-priority-test', 'kind': 'engine.v3.ingest', 'payload': raw,
+               'payload_sha256': hashlib.sha256(raw.encode()).hexdigest()}
+
+        class Queue:
+            def send(self, action, fields):
+                if action == 'claim':
+                    self.capabilities = fields['capabilities']
+                    return {'state': 'claimed', 'job': job, 'lease_token': 'test-lease'}
+                if action == 'complete':
+                    self.result = json.loads(fields['result_json'])
+                    self.digest = fields['result_sha256']
+                    return {'stored': True, 'result_sha256': self.digest}
+                if action == 'status':
+                    return {'state': 'completed' if self.result['ok'] else 'failed', 'result_sha256': self.digest}
+                raise AssertionError(action)
+
+        queue = Queue()
+        lane = ComputeLane(self.directory, client=queue, worker_factory=Worker,
+                           supported_kinds=('engine.v3.ingest',), lane='engine-v3')
+        with patch('msw_engine.doctor_compute_lane.hosting_status', return_value={'state':'reachable','sample_fresh':True}), \
+             patch('msw_engine.doctor_compute_lane.render_status', return_value={'measurement':{'fresh':True,'cpu_percent':1,'memory_percent':20}}), \
+             patch('msw_engine.account_health.read_account_health', return_value={'state':'fresh','cpu_percent':30,'physical_memory_percent':20}):
+            result = lane.step()
+        self.assertEqual(queue.capabilities, ['engine.v3.ingest'])
+        self.assertTrue(queue.result['ok'], queue.result)
+        self.assertEqual(result['state'], 'completed')
+        self.assertTrue(result['server_ack_verified'])
+        self.assertTrue(queue.result['data']['durable_local_readback_verified'])
+        with sqlite3.connect(self.directory / 'engine-v3/datasets.sqlite3') as db:
+            self.assertEqual(db.execute('SELECT body FROM msw_datasets').fetchone()[0], payload['raw'])
 
     def test_scheduler_finds_optimum_without_dispatching(self):
         problem = {"currency": "PLN", "travel_buffer_minutes": 0, "candidates": [

@@ -7,6 +7,7 @@ claim that its queue was throttled. Restart persistence needs separate setup.
 from __future__ import annotations
 
 import fcntl
+import base64
 import json
 import os
 from pathlib import Path
@@ -19,6 +20,24 @@ from .failover_doctor import FailoverDoctor, status as failover_status
 from .render_doctor import RenderDoctor, status as render_status
 
 SERVICE = 'srv-dbltdb9srm7s73ec0v00'
+
+
+def enable_verified_pack(data_dir: Path) -> dict:
+    """Reuse the owner's hash-pinned runtime without changing the worker's status file."""
+    from .runtime_pack import MAX_ENCODED, PackError, unpack
+    os.environ.pop('MSW_RUNTIME_PACK_ROOT', None)
+    count = int(os.environ.get('MSW_RUNTIME_PACK_CHUNKS', '0'))
+    if count == 0:
+        return {'state': 'not_configured', 'modules': []}
+    if not 1 <= count <= 32:
+        raise PackError('private_pack_chunk_limit')
+    encoded = ''.join(os.environ.get(f'MSW_RUNTIME_PACK_{i:02d}', '') for i in range(count))
+    if not encoded or len(encoded) > MAX_ENCODED:
+        raise PackError('private_pack_encoded_limit')
+    raw = base64.b64decode(encoded, validate=True)
+    root, manifest = unpack(raw, os.environ.get('MSW_RUNTIME_PACK_SHA256', ''), data_dir)
+    os.environ['MSW_RUNTIME_PACK_ROOT'] = str(root)
+    return {'state': 'installed_verified', 'modules': [item['id'] for item in manifest['modules']]}
 
 
 def publish_evidence(directory: Path, observation: dict) -> bool:
@@ -61,8 +80,15 @@ def run(data_dir: Path, release: str) -> int:
         local = RenderDoctor(data_dir, monitor_only=True); local.start(lambda: stop)
         backup = FailoverDoctor(data_dir); backup.start(lambda: stop)
         try:
+            pack = enable_verified_pack(data_dir)
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            pack = {'state': 'blocked', 'modules': []}
+            print(json.dumps({'doctor_private_pack': {'state': 'blocked', 'code': type(error).__name__}}), flush=True)
+        try:
             from .doctor_compute_lane import ComputeLane
             ComputeLane(data_dir).start(lambda: stop)
+            if pack['state'] == 'installed_verified' and 'engine-v3' in pack['modules']:
+                ComputeLane(data_dir, lane='engine-v3').start(lambda: stop)
         except (OSError, ValueError) as error:
             print(json.dumps({'doctor_compute_lane': {'state': 'startup_blocked', 'code': type(error).__name__}}), flush=True)
         try:

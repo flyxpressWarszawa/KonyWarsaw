@@ -1,4 +1,5 @@
 import importlib.util
+import base64
 import os
 from pathlib import Path
 import shutil
@@ -7,7 +8,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from msw_engine.doctor_sidecar import publish_evidence, safe_observation
+from msw_engine.doctor_sidecar import enable_verified_pack, publish_evidence, safe_observation
 from msw_engine.render_doctor import RenderDoctor, status
 from msw_engine.tasks import knowledge_search
 
@@ -24,6 +25,23 @@ class Probe:
 
 
 class DoctorSidecarTests(unittest.TestCase):
+    def test_private_pack_is_verified_without_overwriting_worker_status(self):
+        from test_runtime_pack import make_pack
+        raw, digest = make_pack()
+        configured = {'MSW_RUNTIME_PACK_CHUNKS':'1', 'MSW_RUNTIME_PACK_00':base64.b64encode(raw).decode(),
+                      'MSW_RUNTIME_PACK_SHA256':digest}
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, configured, clear=True):
+            root = Path(tmp)
+            (root / 'runtime-status.json').write_text('worker-owned')
+            state = enable_verified_pack(root)
+            self.assertEqual(state, {'state':'installed_verified', 'modules':['example']})
+            self.assertEqual((root / 'runtime-status.json').read_text(), 'worker-owned')
+            self.assertTrue(Path(os.environ['MSW_RUNTIME_PACK_ROOT']).is_dir())
+            os.environ['MSW_RUNTIME_PACK_SHA256'] = '0' * 64
+            with self.assertRaisesRegex(ValueError, 'digest_mismatch'):
+                enable_verified_pack(root)
+            self.assertNotIn('MSW_RUNTIME_PACK_ROOT', os.environ)
+
     def test_observation_does_not_claim_queue_repair_or_disclose_extra_data(self):
         local = {'measurement': {'at': 10, 'cpu_percent': 80, 'memory_percent': 20,
                                  'fresh': True, 'secret': 'do-not-copy'}}

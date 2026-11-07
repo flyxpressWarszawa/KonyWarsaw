@@ -21,16 +21,21 @@ from .tasks import handlers
 
 
 COMPUTE_KINDS = ('seo.analyze', 'research.rank', 'knowledge.ingest', 'knowledge.search')
+V3_KINDS = ('engine.v3.ingest',)
 
 
 class ComputeLane:
     def __init__(self, directory, *, client=None, clock=time.time, worker_factory=Worker,
-                 supported_kinds=None):
+                 supported_kinds=None, lane='seo'):
+        if lane not in ('seo', 'engine-v3'):
+            raise ValueError('unknown_compute_lane')
+        self.lane = lane
+        self.allowed_kinds = COMPUTE_KINDS if lane == 'seo' else V3_KINDS
         self.directory, self.clock = Path(directory), clock
         self.root = self.directory / 'msw-doctor-sidecar'
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
-        self.pending = self.root / 'seo-pending.json'
-        self.status_path = self.root / 'seo-status.json'
+        self.pending = self.root / (lane + '-pending.json')
+        self.status_path = self.root / (lane + '-status.json')
         if client is None:
             base = os.environ.get('MSW_WP_URL', '').rstrip('/')
             endpoint = os.environ.get('MSW_TRANSPORT_URL', base + '/wp-content/plugins/msw-unified-engine/transport.php')
@@ -38,7 +43,7 @@ class ComputeLane:
         self.client = client
         self.worker = worker_factory(client, self.directory, max_seconds=30, memory_mb=384)
         supported = handlers() if supported_kinds is None else supported_kinds
-        self.kinds = tuple(kind for kind in COMPUTE_KINDS if kind in supported)
+        self.kinds = tuple(kind for kind in self.allowed_kinds if kind in supported)
 
     def write(self, path, body):
         if path.is_symlink(): raise ValueError('unsafe_lane_state')
@@ -51,7 +56,7 @@ class ComputeLane:
         os.replace(tmp, path)
 
     def report(self, state, **fields):
-        body = {'at': int(self.clock()), 'state': state, 'kinds': list(self.kinds),
+        body = {'at': int(self.clock()), 'state': state, 'lane': self.lane, 'kinds': list(self.kinds),
                 'minimum_interval_seconds': 600, 'hosting_cpu_measured': False,
                 'publication_performed': False, **fields}
         self.write(self.status_path, body)
@@ -61,10 +66,10 @@ class ComputeLane:
     def finish_pending(self):
         ref = json.loads(self.pending.read_text())
         ident, digest = ref.get('id'), ref.get('digest')
-        kind = ref.get('kind', 'seo.analyze')  # Existing SEO-only state remains valid.
+        kind = ref.get('kind', 'seo.analyze' if self.lane == 'seo' else None)
         if not (isinstance(ident, str) and re.fullmatch(r'[A-Za-z0-9_-]{1,100}', ident)
                 and isinstance(digest, str) and re.fullmatch(r'[0-9a-f]{64}', digest)
-                and kind in COMPUTE_KINDS):
+                and kind in self.allowed_kinds):
             raise ValueError('invalid_pending_reference')
         receipt = self.worker.journal.lookup(ident, digest)
         if receipt is None:
@@ -99,6 +104,15 @@ class ComputeLane:
                 and measurement.get('fresh') is True and isinstance(cpu, (int, float))
                 and isinstance(memory, (int, float)) and cpu < 70 and memory < 70):
             return self.report('deferred_missing_health_or_render_pressure')
+        if self.lane == 'engine-v3':
+            from .account_health import read_account_health
+            health = read_account_health(self.client, clock=self.clock)
+            if health.get('state') != 'fresh':
+                return self.report('deferred_host_health_unavailable')
+            if health['cpu_percent'] >= 70 or health['physical_memory_percent'] >= 70:
+                return self.report('deferred_host_pressure', hosting_cpu_measured=True,
+                                   hosting_cpu_percent=health['cpu_percent'],
+                                   hosting_memory_percent=health['physical_memory_percent'])
         claim = self.client.send('claim', {'capabilities': list(self.kinds)})
         if claim.get('state') != 'claimed': return self.report('idle')
         job, lease = claim.get('job'), claim.get('lease_token')
@@ -117,6 +131,7 @@ class ComputeLane:
         self.pending.unlink()
         return self.report('completed' if ack.get('state') == 'completed' else 'job_failed_verified',
                            kind=job['kind'], server_ack_verified=ack.get('server_ack_verified') is True,
+                           hosting_cpu_measured=self.lane == 'engine-v3',
                            result_sha256=receipt['result_sha256'])
 
     def start(self, stopping):
@@ -125,7 +140,8 @@ class ComputeLane:
                 last = int(json.loads(self.status_path.read_text())['at'])
             except (OSError, ValueError, KeyError, TypeError):
                 self.report('scheduled')
-                last = int(self.clock())
+                # Spread the first additional v3 claim away from the existing lane.
+                last = int(self.clock()) - (540 if self.lane == 'engine-v3' else 0)
             while not stopping():
                 elapsed = max(0, self.clock() - last)
                 deadline = time.monotonic() + max(0, 600 - elapsed)
@@ -137,6 +153,6 @@ class ComputeLane:
                     try: self.report('lane_error', code=type(error).__name__)
                     except OSError: pass
                 last = int(self.clock())
-        thread = threading.Thread(target=run, name='msw-doctor-compute-lane', daemon=True)
+        thread = threading.Thread(target=run, name='msw-doctor-' + self.lane + '-lane', daemon=True)
         thread.start()
         return thread
