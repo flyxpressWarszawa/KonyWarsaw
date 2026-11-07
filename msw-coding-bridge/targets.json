@@ -1,0 +1,112 @@
+{
+  "schema": "msw.coding-targets.v1",
+  "repository": "flyxpressWarszawa/KonyWarsaw",
+  "repository_id": 405190198,
+  "queue_branch": "msw/coding-queue",
+  "task_directory": "msw-coding-tasks",
+  "wordpress_bridge": "https://mobilny-serwis-warszawa.pl/wp-json/msw-github-coding/v1",
+  "connection_lifetime": "persistent",
+  "contract_status": "proposed_not_agreed_not_deployed",
+  "production_hold": true,
+  "live_connection_verified": false,
+  "targets": {
+    "technical-core": {
+      "branch": "main",
+      "paths": [
+        "msw-ai-technical-core/"
+      ],
+      "execution_support": "github_agent_scope",
+      "deployment": {
+        "provider": "render",
+        "service": "msw-technical-core-360",
+        "url": "https://msw-technical-core-360.onrender.com",
+        "auto_deploy_observed": true
+      }
+    },
+    "portal": {
+      "branch": "main",
+      "paths": [
+        "msw-ai-centrum-robotow/app/",
+        "msw-ai-centrum-robotow/tests/"
+      ],
+      "execution_support": "github_agent_scope",
+      "deployment": {
+        "provider": "existing_msw_adapter",
+        "live_target_requires_verification": true
+      }
+    },
+    "compute-adapters": {
+      "branch": "main",
+      "paths": [
+        "msw-compute-node-adapters/"
+      ],
+      "execution_support": "github_agent_scope",
+      "deployment": {
+        "provider": "existing_msw_adapter",
+        "live_target_requires_verification": true
+      }
+    },
+    "research": {
+      "branch": "main",
+      "paths": [
+        "msw-research-engine/"
+      ],
+      "execution_support": "github_agent_scope",
+      "deployment": {
+        "provider": "existing_msw_adapter",
+        "live_target_requires_verification": true
+      }
+    },
+    "runtime": {
+      "branch": "msw/engine-runtime-20261104",
+      "paths": [
+        "msw-autonomous-engine/"
+      ],
+      "execution_support": "chatgpt_branch_worker",
+      "deployment": {
+        "provider": "render",
+        "service": "msw-central-engine-worker",
+        "auto_deploy_observed": false
+      }
+    },
+    "owned-llm": {
+      "branch": "msw/local-llm-20261031",
+      "paths": [
+        "msw-owned-llm/"
+      ],
+      "execution_support": "chatgpt_branch_worker",
+      "deployment": {
+        "provider": "render",
+        "service": "msw-owned-llm",
+        "auto_deploy_observed": false
+      }
+    },
+    "wordpress": {
+      "branch": null,
+      "paths": [],
+      "execution_support": "source_sync_required",
+      "deployment": {
+        "provider": "existing_msw_adapter",
+        "live_target_requires_verification": true
+      }
+    }
+  },
+  "python_hub": {
+    "url": "https://mobilny-serwis-warszawa.pl/msw-backend",
+    "adapter": "msw-ai-hub/msw-ai-hub.php",
+    "source_in_repository": false,
+    "coding_entry": "existing_msw_adapter_pending_contract_and_verification",
+    "source_required_before_backend_change": true
+  },
+  "verification_adapter": {
+    "pull_request": "https://github.com/flyxpressWarszawa/KonyWarsaw/pull/3",
+    "source_branch": "msw/github-verification-20261107",
+    "enabled_by_default": false,
+    "deployed_verified": false
+  },
+  "notes": [
+    "Routing metadata is not a live connection proof.",
+    "Source labels do not grant execution permission.",
+    "File verification does not prove tests, merge or deployment."
+  ]
+}
