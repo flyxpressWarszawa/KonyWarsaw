@@ -164,18 +164,19 @@ okna workflow Copilota.
 
 ## Pozostająca integracja wykonawcy kodowania
 
-Obecny `msw-github-engine/controller.py context` przekazuje statyczne priorytety
-i rejestr testów. Workflow `msw-github-engine.md` oraz jego skompilowany lock nie
-konsumują jeszcze `msw.coding-task.v1` z `msw/coding-queue`. Włączenie samego
-transportu nie zmieni tego zachowania. Publiczny manifest także nie jest
-wykonawcą ani potwierdzeniem dostępności modelu.
+Dotychczasowy `msw-github-engine/controller.py context` przekazuje statyczne
+priorytety i rejestr testów. Workflow `msw-github-engine.md` pozostaje bez zmian.
+Osobny [workflow zadaniowy](../.github/workflows/msw-coding-task.md) przygotowuje
+zweryfikowane `msw.coding-task.v1` z `msw/coding-queue` do rzeczywistego promptu
+wykonawcy. Wiąże zadanie z dokładną gałęzią, raportem testów, commitem i PR.
+Szczegóły opisuje [TASK-EXECUTOR.md](../msw-github-engine/TASK-EXECUTOR.md).
 
-Pełna integracja wymaga przekazania jednego zweryfikowanego zadania do rzeczywistego
-promptu wykonawcy oraz powiązania wyniku z `task_id`, `request_sha256`, commitem
-źródłowym kolejki, commitem zmiany, testami i konkretnym PR. Zakończenie trzeba
-potwierdzić osobnym odczytem; dane zadania nie mogą wybierać nowych uprawnień,
-poleceń powłoki ani obejść istniejącej polityki. Wygenerowanego locka nie należy
-ręcznie zmieniać bez odpowiadającego źródła workflow i walidacji kompilatorem.
+Obecny etap ma stałą bramkę `execution_backend_not_integrated`: zarówno wykonanie,
+jak i publikacja pozostają zablokowane nawet po ustawieniu zmiennej repozytorium.
+Transport i poprawny hash nie są przydziałem do wykonania. Aktywacja wymaga
+uzgodnionego backendu, jednorazowego uprawnienia, sprawdzania STOP/HOLD i osobnego
+potwierdzenia wyniku w centrali. Wygenerowanego locka nie należy ręcznie zmieniać;
+CI odtwarza go przypiętym oficjalnym kompilatorem i porównuje z zapisaną wersją.
 
 Istniejący automatyczny wykonawca ma zakres czterech obszarów na `main`.
 `runtime` i `owned-llm` mają odrębne gałęzie, a brakujące źródła WordPressa i
