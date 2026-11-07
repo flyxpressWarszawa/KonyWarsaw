@@ -55,9 +55,11 @@ def safe_observation(directory: Path) -> dict:
     failover = failover_status(directory)
     current = local.get('measurement') if isinstance(local.get('measurement'), dict) else {}
     # Exclude API outputs, secrets, provider responses and unverified summaries.
+    from .hermes_observer import inspect_hermes
     return {'at': int(time.time()), 'source': 'render_doctor_sidecar',
             'render': {k: current.get(k) for k in ('at', 'cpu_percent', 'memory_percent', 'fresh')},
             'hosting': {k: failover.get(k) for k in ('at', 'state', 'http_status', 'outage_confirmed', 'sample_fresh')},
+            'hermes': inspect_hermes(),
             'worker_queue_throttled_by_sidecar': False, 'automatic_restart_after_instance_replacement_verified': False}
 
 
