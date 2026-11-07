@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import re
 import signal
+import sqlite3
 import subprocess
 import sys
 import time
@@ -27,9 +28,9 @@ def atomic(path: Path, text: str):
 
 
 class Factory:
-    def __init__(self, directory: Path, model=None, writer=None):
+    def __init__(self, directory: Path, model=None, writer=None, authorize=None):
         self.directory=Path(directory);self.memory=Memory(directory)
-        self.model=model;self.writer=writer
+        self.model=model;self.writer=writer;self.authorize=authorize
         with self.memory.connect() as db:
             db.executescript('''
             CREATE TABLE IF NOT EXISTS factory_jobs(
@@ -118,6 +119,8 @@ class Factory:
             row=db.execute("SELECT * FROM factory_jobs WHERE state IN ('queued','building') ORDER BY updated_at,id LIMIT 1").fetchone()
             if not row:return {'state':'idle'}
             if sha(json.loads(row['spec']))!=row['spec_sha']:raise ValueError('factory_spec_integrity')
+            if self.authorize is not None and self.authorize(json.loads(row['spec']),row['cursor']) is not True:
+                return {'state':'waiting_authorization','request_id':row['id'],'portal_live_verified':False}
             db.execute("UPDATE factory_jobs SET state='running',lease_until=?,updated_at=? WHERE id=?",(now+900,now,row['id']))
         rid,spec,cursor=row['id'],json.loads(row['spec']),row['cursor']
         try:
@@ -270,14 +273,22 @@ def main():
             print(canonical({'combo_slm_probe':{'state':'not_verified','error_class':type(error).__name__,'inference_verified':False}}),flush=True)
             if args.command=='probe':raise SystemExit(1)
     if args.command=='daemon':
+        from .combo_command_lane import CommandLane, LinkError
+        lane=CommandLane(factory)
+        factory.authorize=lane.authorized
         stopping=False
         def stop(*unused):
             nonlocal stopping
             stopping=True
         signal.signal(signal.SIGTERM,stop);signal.signal(signal.SIGINT,stop)
         while not stopping:
-            result=factory.tick()
-            if result['state'] not in {'idle','busy'}:print(canonical({'combo_factory':result}),flush=True)
+            try:
+                command=lane.poll()
+                if command['state'] not in {'idle','busy'}:print(canonical({'combo_factory_command':command}),flush=True)
+                result=factory.tick()
+                if result['state'] not in {'idle','busy'}:print(canonical({'combo_factory':result}),flush=True)
+            except (LinkError, OSError, sqlite3.Error, ValueError):
+                print(canonical({'combo_factory_command':{'state':'link_unavailable','executed':False}}),flush=True)
             for _ in range(60):
                 if stopping:break
                 time.sleep(1)
