@@ -50,17 +50,20 @@ def publish_evidence(directory: Path, observation: dict) -> bool:
     return result.get('readback_verified_records') == 1
 
 
-def safe_observation(directory: Path) -> dict:
+def safe_observation(directory: Path, failure_insights=None) -> dict:
     local = render_status(directory)
     failover = failover_status(directory)
     current = local.get('measurement') if isinstance(local.get('measurement'), dict) else {}
     # Exclude API outputs, secrets, provider responses and unverified summaries.
     from .hermes_observer import inspect_hermes
-    return {'at': int(time.time()), 'source': 'render_doctor_sidecar',
+    observation = {'at': int(time.time()), 'source': 'render_doctor_sidecar',
             'render': {k: current.get(k) for k in ('at', 'cpu_percent', 'memory_percent', 'fresh')},
             'hosting': {k: failover.get(k) for k in ('at', 'state', 'http_status', 'outage_confirmed', 'sample_fresh')},
             'hermes': inspect_hermes(),
             'worker_queue_throttled_by_sidecar': False, 'automatic_restart_after_instance_replacement_verified': False}
+    if failure_insights is not None:
+        observation['acknowledged_failure_receipts'] = failure_insights.snapshot()
+    return observation
 
 
 def run(data_dir: Path, release: str) -> int:
@@ -100,12 +103,14 @@ def run(data_dir: Path, release: str) -> int:
             ReceiptDoctor(data_dir).start(lambda: stop)
         except (OSError, ValueError, sqlite3.Error) as error:
             print(json.dumps({'receipt_doctor': {'state': 'startup_blocked', 'code': type(error).__name__}}), flush=True)
+        from .doctor_failure_insights import FailureInsights
+        failure_insights = FailureInsights(data_dir)
         started, next_publish, shared = int(time.time()), 0, False
         print(json.dumps({'doctor_sidecar': {'state': 'started', 'release': release, 'pid': os.getpid()}}), flush=True)
         while not stop:
             now = int(time.time())
             try:
-                observation = safe_observation(data_dir)
+                observation = safe_observation(data_dir, failure_insights)
                 if now >= next_publish:
                     try:
                         shared = publish_evidence(data_dir, observation)
