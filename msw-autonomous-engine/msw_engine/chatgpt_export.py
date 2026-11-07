@@ -8,12 +8,20 @@ import json
 import os
 from pathlib import Path
 import sqlite3
+import time
 from urllib.parse import urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 from zipfile import ZipFile
 
 MAX_ARCHIVE = 512 * 1024 * 1024
 MAX_JSON = 256 * 1024 * 1024
+DOWNLOAD_TIMEOUT_SECONDS = 30
+PROGRESS_INTERVAL = 1000
+
+
+def progress(state, **details):
+    """Emit safe, content-free progress so long imports are visible in Render logs."""
+    print(json.dumps({'chatgpt_export_import': {'state': state, **details}}, separators=(',', ':')), flush=True)
 
 
 def trusted_url(url):
@@ -58,16 +66,20 @@ def import_zip(archive, directory, *, grant_sha256='local-owner-supplied'):
     temporary = root / (sha + '.tmp.sqlite3')
     if temporary.is_symlink() or target.is_symlink():
         raise ValueError('export_storage_link')
+    progress('archive_opening', archive_bytes=archive.stat().st_size)
     with ZipFile(archive) as zipped:
         candidates = [item for item in zipped.infolist() if item.filename.replace('\\','/').split('/')[-1] == 'conversations.json']
         if len(candidates) != 1 or candidates[0].file_size > MAX_JSON:
             raise ValueError('export_conversations_json_missing_or_large')
+        progress('conversations_json_reading', json_bytes=candidates[0].file_size)
         with zipped.open(candidates[0]) as stream:
             data = json.load(stream)
     if not isinstance(data, list) or len(data) > 200000:
         raise ValueError('export_conversation_schema')
+    progress('database_import_started', conversations=len(data))
     temporary.unlink(missing_ok=True)
     count = conversations = 0
+    started = time.monotonic()
     try:
         with sqlite3.connect(temporary) as db:
             db.execute('CREATE TABLE documents (id INTEGER PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT NULL,source TEXT NOT NULL,kind TEXT NOT NULL,digest TEXT NOT NULL)')
@@ -85,15 +97,17 @@ def import_zip(archive, directory, *, grant_sha256='local-owner-supplied'):
                         continue
                     parts = content.get('parts', [])
                     text_parts = [part if isinstance(part,str) else part.get('text','') if isinstance(part,dict) else '' for part in parts] if isinstance(parts,list) else []
-                    body = scrub('\n'.join(text_parts))
+                    body = scrub('\\n'.join(text_parts))
                     if not body.strip():
                         continue
                     role = str((message.get('author') or {}).get('role','unknown'))
                     source = 'chatgpt-export:' + sha + ':' + str(conversation.get('id') or conversation.get('conversation_id') or conversations) + ':' + str(node_id)
                     count += 1
                     record_title = title + ' [' + role[:60] + ']'
-                    digest = hashlib.sha256((record_title + '\0' + body).encode()).hexdigest()
+                    digest = hashlib.sha256((record_title + '\\0' + body).encode()).hexdigest()
                     db.execute('INSERT INTO documents VALUES(?,?,?,?,?,?)', (count,record_title,body,source,'chatgpt_export_unreviewed',digest))
+                if conversations % PROGRESS_INTERVAL == 0:
+                    progress('database_import_progress', conversations=conversations, total_conversations=len(data), text_records=count, elapsed_seconds=round(time.monotonic()-started))
             if db.execute('SELECT COUNT(*) FROM documents').fetchone()[0] != count or db.execute('PRAGMA quick_check').fetchone()[0] != 'ok':
                 raise ValueError('export_database_verification')
         with sqlite3.connect(temporary) as fresh:
@@ -116,7 +130,7 @@ def import_zip(archive, directory, *, grant_sha256='local-owner-supplied'):
     temp.replace(directory / 'chatgpt-export-status.json')
     if status(directory) != receipt:
         raise ValueError('export_receipt_readback')
-    print(json.dumps({'chatgpt_export_import': receipt}), flush=True)
+    progress('import_completed', conversations=conversations, text_records=count, elapsed_seconds=round(time.monotonic()-started), archive_sha256=sha)
     return receipt
 
 
@@ -136,15 +150,20 @@ def import_configured(directory):
     if temporary.is_symlink():
         raise ValueError('export_download_link')
     total = 0
+    started = time.monotonic()
     try:
         request = Request(url, headers={'User-Agent':'MSW-Owner-Authorized-Export/1.0'})
-        with build_opener(ExportRedirect()).open(request, timeout=60) as response, temporary.open('wb') as target:
+        progress('download_started', maximum_bytes=MAX_ARCHIVE, timeout_seconds=DOWNLOAD_TIMEOUT_SECONDS)
+        with build_opener(ExportRedirect()).open(request, timeout=DOWNLOAD_TIMEOUT_SECONDS) as response, temporary.open('wb') as target:
             temporary.chmod(0o600)
             for chunk in iter(lambda: response.read(1024 * 1024), b''):
                 total += len(chunk)
                 if total > MAX_ARCHIVE:
                     raise ValueError('export_download_limit')
                 target.write(chunk)
+                if total // (16 * 1024 * 1024) > (total-len(chunk)) // (16 * 1024 * 1024):
+                    progress('download_progress', downloaded_bytes=total, maximum_bytes=MAX_ARCHIVE, elapsed_seconds=round(time.monotonic()-started))
+        progress('download_completed', downloaded_bytes=total, elapsed_seconds=round(time.monotonic()-started))
         archived = root / (fingerprint(temporary) + '.zip')
         temporary.replace(archived)
         return import_zip(archived,directory,grant_sha256=grant)
