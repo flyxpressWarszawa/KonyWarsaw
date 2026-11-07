@@ -153,3 +153,46 @@ still activate backoff. This keeps provider errors separate from site outages.
 `MSW_OWNER_CONTEXT_JSON` plus its exact `MSW_OWNER_CONTEXT_SHA256` seed up to 100 owner-provided source records (`msw.owner-context.v1`, records with id/title/text/provenance) into the private owner corpus. Startup independently verifies the committed records and a private source checkpoint. Keep actual context out of this public repository.
 
 After the owner requests an account export and an authentic ready email arrives, place only its official HTTPS download grant in the service secret `MSW_CHATGPT_EXPORT_URL`. No account session or browser credential is used. The learning lane retains the original ZIP privately, imports every text-bearing message from all exported branches into a separate SQLite source, verifies its count/readback, and prioritizes that source. Attachments are retained in the original ZIP but are not claimed semantically reviewed. The same completed grant reuses the imported database after restart. Exports are snapshots, not live account access. Current importer bounds are 512 MiB for the archive and 256 MiB for conversations.json. Unsupported export layouts or authentication requirements fail explicitly.
+
+## Render Doctor and hosting failover
+
+This source describes the candidate code; deployment and production behavior
+must be verified separately. It uses the existing worker and persistent disk.
+The failover observer probes the fixed central HTTPS origin once per minute,
+confirms an outage after three failed observations, and resumes the main queue
+only after two successful observations. It records bounded, checksum-verified
+incident evidence on the existing private disk. This is not a replica of the
+website and cannot recover a provider-wide outage by itself.
+
+The hosting repair bridge invokes only the pre-existing scoped
+`hosting_doctor_tick` MCP tool. It requires a separately authorized OAuth grant
+with `hosting.read`, `hosting.write`, and `offline_access`, provided securely as
+Render secret environment variables `MSW_DOCTOR_BRIDGE_CLIENT_ID`,
+`MSW_DOCTOR_BRIDGE_ACCESS_TOKEN`, `MSW_DOCTOR_BRIDGE_REFRESH_TOKEN`, and
+`MSW_DOCTOR_BRIDGE_EXPIRES_AT` (Unix seconds). Never commit these credentials.
+The rotating grant is stored mode 0600 on the persistent disk. An uncertain
+refresh is not replayed because doing so can revoke the grant family; a fresh
+authorization is then required. The independent bridge cannot act while the
+hosting MCP endpoint itself is unavailable.
+
+Optional direct paid AI advice requires the existing service secrets
+`OPENAI_API_KEY` and `MSW_OPENAI_MODEL` (or `MSW_LLM_MODEL`). It receives only
+bounded technical observations and relevant local evidence, and its output is
+advisory, never an executable instruction. A durable ledger prevents a second
+paid request when the first outcome is unknown. The existing small local model
+is experimental; no additional model-weight training is claimed.
+
+To allow this worker to cancel its own confirmed stalled builds, configure the
+scoped Render management key in `MSW_RENDER_DOCTOR_API_KEY` and set
+`MSW_RENDER_DOCTOR_CONTROLLER=render`. Use exactly one Render deployment
+controller: disable the WordPress-side Render controller if this one is enabled.
+This controller handles only one unchanged `build_in_progress` over three hours,
+after three observations across at least ten minutes, an existing live deploy,
+an immediate recheck, and cancellation readback. It does not silently replay an
+uncertain request or deploy arbitrary commits. It cannot act if this worker is
+itself not running. Render's persistent disk prevents zero-downtime redeploys.
+
+The existing autonomous agent and `runtime.catalog` receive the Doctor status
+and can retrieve incident cases; retrieved observations are data, not commands.
+An independently running Hermes process and its tool contract require their own
+verification; this code does not claim a Hermes handshake.
