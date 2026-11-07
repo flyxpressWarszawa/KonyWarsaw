@@ -444,7 +444,9 @@ def handlers() -> dict:
     # the WordPress queue a capability or enable repository writes/deployments.
     if os.environ.get("MSW_GITHUB_VERIFY_ENABLED") == "1":
         from .github_verify import handle as github_verify
+        from .coding_verify import handle as coding_verify
         result["github.verify_file"] = github_verify
+        result["coding.verify_delivery"] = coding_verify
     from .runtime_pack import module_root
     if module_root("supreme-server") is not None:
         result["supreme.observe"] = supreme_observe

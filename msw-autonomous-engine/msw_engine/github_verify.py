@@ -26,14 +26,16 @@ SCHEMA = "msw.github.verify-file.v1"
 PREFIXES = (
     "msw-autonomous-engine/", "msw-github-engine/", "msw-ai-technical-core/",
     "msw-ai-centrum-robotow/", "msw-compute-node-adapters/", "msw-research-engine/",
+    "msw-coding-bridge/", "msw-owned-llm/",
 )
-EXTENSIONS = {".py", ".js", ".mjs", ".cjs", ".json", ".md", ".txt", ".html", ".css"}
+EXTENSIONS = {".py", ".js", ".mjs", ".cjs", ".json", ".md", ".txt", ".html", ".css", ".php"}
 MAX_FILE = 256 * 1024
 MAX_RESPONSE = 2 * 1024 * 1024
 HEX40 = re.compile(r"[0-9a-f]{40}\Z")
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 SEGMENT = re.compile(r"[A-Za-z0-9_-][A-Za-z0-9_.-]{0,99}\Z")
 REQUEST_ID = re.compile(r"[A-Za-z0-9_-]{12,96}\Z")
+TASK_PATH = re.compile(r"msw-coding-tasks/[0-9a-f]{32}\.json\Z")
 
 
 def _pairs(pairs):
@@ -85,7 +87,7 @@ def _validate(payload: dict) -> tuple[str, str, str, str]:
     if not REQUEST_ID.fullmatch(rid) or not HEX40.fullmatch(commit) or not HEX64.fullmatch(expected):
         raise TaskError("github_invalid_identity")
     parts = path.split("/")
-    if (not path.startswith(PREFIXES) or not 2 <= len(parts) <= 8
+    if ((not path.startswith(PREFIXES) and not TASK_PATH.fullmatch(path)) or not 2 <= len(parts) <= 8
             or any(not SEGMENT.fullmatch(part) or part in {".", ".."} for part in parts)
             or any(part.lower() in {"data", "runtime", "secrets", "credentials", "node_modules", "__pycache__"} for part in parts)
             or ".env" in parts[-1].lower() or Path(parts[-1]).suffix.lower() not in EXTENSIONS):
@@ -110,7 +112,14 @@ def _tree_entry(tree_sha: str, segment: str, leaf: bool) -> str:
     return sha
 
 
-def handle(payload: dict, _data_dir: Path) -> dict:
+def verified_file(payload: dict, *, max_file: int = MAX_FILE) -> tuple[dict, bytes]:
+    """Return verified metadata and bounded bytes to another trusted handler.
+
+    The caller cannot choose an API host or skip the same public-path validation.
+    Bytes are for in-process contract validation, never a public result field.
+    """
+    if type(max_file) is not int or not 1 <= max_file <= MAX_FILE:
+        raise TaskError("github_invalid_size_limit")
     rid, commit, path, expected = _validate(payload)
     result = _get("/git/commits/" + commit)
     tree = result.get("tree")
@@ -124,12 +133,12 @@ def handle(payload: dict, _data_dir: Path) -> dict:
         object_sha = _tree_entry(object_sha, segment, index == len(segments) - 1)
     value = _get("/git/blobs/" + object_sha)
     if (value.get("sha") != object_sha or value.get("encoding") != "base64"
-            or type(value.get("size")) is not int or not 0 <= value["size"] <= MAX_FILE
+            or type(value.get("size")) is not int or not 0 <= value["size"] <= max_file
             or not isinstance(value.get("content"), str)):
         raise TaskError("github_blob_not_verified")
     try:
         encoded = "".join(value["content"].splitlines()).encode("ascii")
-        if len(encoded) > ((MAX_FILE + 2) // 3) * 4:
+        if len(encoded) > ((max_file + 2) // 3) * 4:
             raise ValueError("blob too large")
         raw = base64.b64decode(encoded, validate=True)
     except (ValueError, UnicodeError, binascii.Error):
@@ -140,8 +149,14 @@ def handle(payload: dict, _data_dir: Path) -> dict:
         raise TaskError("github_blob_hash_mismatch")
     if not hmac.compare_digest(digest, expected):
         raise TaskError("github_expected_sha256_mismatch")
-    return {"schema": "msw.github.verify-file.result.v1", "request_id": rid,
+    receipt = {"schema": "msw.github.verify-file.result.v1", "request_id": rid,
             "repository": REPOSITORY, "commit_sha": commit, "root_tree_sha": tree_sha,
             "path": path, "git_blob_sha": object_sha, "content_sha256": digest,
             "size": len(raw), "github_file_verified": True,
             "tests_verified": False, "deployed_verified": False}
+    return receipt, raw
+
+
+def handle(payload: dict, _data_dir: Path) -> dict:
+    receipt, _raw = verified_file(payload)
+    return receipt
