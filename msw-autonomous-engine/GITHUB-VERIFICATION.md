@@ -42,6 +42,15 @@ verification result must not be described as a WordPress ACK until that separate
 readback succeeds. This candidate adds no new production endpoint, token, secret,
 queue, cron, deployment or user-facing GitHub integration on its own.
 
+The installed WordPress queue's allowlist, read on 2026-11-07, does not currently
+include `github.verify_file`. Its claim operation requires the intersection of
+the queue's allowed types, the individual node grant, and the worker's advertised
+capabilities. Until the queue contract is extended and the chosen node receives
+an explicit scoped grant, a real claim cannot succeed. Adding the new type must
+not silently give it to newly registered nodes: the current registration flow
+uses the default type list for non-free nodes. Do not hide this operation inside
+another already-granted capability.
+
 Run the focused tests in the worker checkout:
 
 ```sh
@@ -54,4 +63,6 @@ payload digest, SQLite journal, and completion/readback code. GitHub HTTP and
 the central queue are simulated. They cover successful verification, a failed
 file digest, a changed payload, disabled capability, a mismatched server
 readback, and reuse of a previously recorded result. Passing them does not
-establish that a production queue accepts or authorizes this capability.
+establish that a production queue accepts or authorizes this capability. A
+separate test checks that a simulated queue stays idle when the kind is missing
+from the allowlist or from the node's grant.
