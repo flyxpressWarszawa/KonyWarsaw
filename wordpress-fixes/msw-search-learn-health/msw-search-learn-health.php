@@ -151,7 +151,10 @@ if (!class_exists('MSW_Search_Learn_Health_Endpoint', false)) {
                 return $response;
             }
             $data = self::snapshot((bool) $request->get_param('deep'));
-            // Degraded means the core is ready, but an optional cron is missing.\n            // Return 200 with status=degraded / ok=false in JSON, rather than\n            // signalling a host outage to native health probes and backoff.\n            $response = new WP_REST_Response($data, $data['status'] === 'unavailable' ? 503 : 200);
+            // Degraded means the core is ready, but an optional cron is missing.
+            // Return 200 with status=degraded / ok=false in JSON, rather than
+            // signalling a host outage to native health probes and backoff.
+            $response = new WP_REST_Response($data, $data['status'] === 'unavailable' ? 503 : 200);
             $response->header('Cache-Control', 'private, no-store, max-age=0');
             return $response;
         }
