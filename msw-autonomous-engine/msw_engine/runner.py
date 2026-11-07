@@ -100,6 +100,13 @@ class Worker:
         self.cron_state = "not_run"
         self.doctor = None
         self.failover_doctor = None
+        self.host_guard = None
+        # Explicit opt-in: deployment must verify the signed account-health
+        # endpoint and decide which background jobs may be deferred.
+        if (getattr(client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"
+                and os.environ.get("MSW_HOST_PRESSURE_GUARD") == "1"):
+            from .doctor_host_guard import HostPressureGuard
+            self.host_guard = HostPressureGuard(client)
 
     def acknowledge(self, receipt: dict) -> dict:
         fields = {key: receipt[key] for key in ("payload_sha256", "lease_token", "result_json", "result_sha256")}
@@ -216,7 +223,13 @@ class Worker:
             raise WorkerDraining()
         if self.doctor is not None and self.doctor.defer_claim():
             return {"state": "doctor_deferred", "reason": "sustained_render_pressure"}
-        response = self.client.send("claim", {"capabilities": list(handlers())})
+        capabilities = list(handlers())
+        if self.host_guard is not None:
+            capabilities, host = self.host_guard.capabilities(capabilities)
+            if not capabilities or (host.get("pressure_active") and not self.host_guard.claim_allowed()):
+                return {"state": "doctor_host_deferred", "reason": "account_pressure"}
+            self.host_guard.mark_claim()
+        response = self.client.send("claim", {"capabilities": capabilities})
         self.last_server_contact = int(time.time())
         if response.get("state") != "claimed":
             return {"state": "idle"}
@@ -224,6 +237,10 @@ class Worker:
         token = response.get("lease_token")
         if not isinstance(job, dict) or not isinstance(token, str):
             raise TransportError("claim_schema_invalid")
+        if self.host_guard is not None and job.get("kind") not in capabilities:
+            # Never run a server response outside the advertised safe kinds.
+            # Let the lease expire rather than executing an unsafe callback.
+            raise TransportError("host_guard_claim_outside_capabilities")
         return self.acknowledge(self.execute(job, token))
 
     def health(self, state: str) -> None:
@@ -301,7 +318,7 @@ class Worker:
             try:
                 result = self.run_once()
                 print(json.dumps(result), flush=True)
-                pause = min(60, pause + 5) if result["state"] == "idle" else (30 if result["state"] in {"failed", "doctor_deferred", "origin_unavailable"} else 10)
+                pause = min(60, pause + 5) if result["state"] == "idle" else (30 if result["state"] in {"failed", "doctor_deferred", "doctor_host_deferred", "origin_unavailable"} else 10)
                 if self.doctor is not None and self.doctor.high_pressure():
                     pause = max(pause, 30)
                 self.health(result["state"])
