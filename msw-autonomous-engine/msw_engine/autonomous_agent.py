@@ -50,6 +50,8 @@ def status(directory: Path, *, include_report=False) -> dict:
         try:
             from .render_doctor import status as doctor_status
             result["render_doctor"] = doctor_status(directory)
+            from .failover_doctor import status as failover_status
+            result["render_doctor"]["failover"] = failover_status(directory)
         except (OSError, ValueError, sqlite3.Error):
             result["render_doctor"] = {"state": "memory_unavailable", "render_api_connected": False}
         history = directory / "owner-continuity" / "status.json"

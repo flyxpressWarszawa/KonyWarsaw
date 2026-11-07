@@ -99,6 +99,7 @@ class Worker:
         self.last_job_state = "not_run"
         self.cron_state = "not_run"
         self.doctor = None
+        self.failover_doctor = None
 
     def acknowledge(self, receipt: dict) -> dict:
         fields = {key: receipt[key] for key in ("payload_sha256", "lease_token", "result_json", "result_sha256")}
@@ -208,6 +209,8 @@ class Worker:
         return self.journal.save(job, lease, result)
 
     def run_once(self) -> dict:
+        if self.failover_doctor is not None and self.failover_doctor.in_outage():
+            return {"state": "origin_unavailable", "reason": "independent_origin_probes"}
         self.replay_receipts()
         if self.stopping:
             raise WorkerDraining()
@@ -237,6 +240,14 @@ class Worker:
         print(json.dumps({"worker_version": __version__, "state": "ready"}), flush=True)
         signal.signal(signal.SIGTERM, lambda *_: setattr(self, "stopping", True))
         signal.signal(signal.SIGINT, lambda *_: setattr(self, "stopping", True))
+        if not once and os.environ.get("MSW_FAILOVER_DOCTOR", "1") == "1":
+            from .failover_doctor import FailoverDoctor
+            try:
+                self.failover_doctor = FailoverDoctor(self.journal.data_dir)
+                self.failover_doctor.start(lambda: self.stopping)
+            except (OSError, ValueError, sqlite3.Error) as error:
+                self.failover_doctor = None
+                print(json.dumps({"failover_doctor": {"state": "startup_blocked", "code": type(error).__name__}}), flush=True)
         if not once and os.environ.get("MSW_RENDER_DOCTOR", "1") == "1":
             from .render_doctor import RenderDoctor
             try:
@@ -277,7 +288,7 @@ class Worker:
             try:
                 result = self.run_once()
                 print(json.dumps(result), flush=True)
-                pause = min(60, pause + 5) if result["state"] == "idle" else (30 if result["state"] in {"failed", "doctor_deferred"} else 10)
+                pause = min(60, pause + 5) if result["state"] == "idle" else (30 if result["state"] in {"failed", "doctor_deferred", "origin_unavailable"} else 10)
                 if self.doctor is not None and self.doctor.high_pressure():
                     pause = max(pause, 30)
                 self.health(result["state"])

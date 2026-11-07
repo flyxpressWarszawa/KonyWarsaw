@@ -386,6 +386,8 @@ def runtime_catalog(payload: dict, data_dir: Path) -> dict:
     try:
         from .render_doctor import status as doctor_status
         result["render_doctor"] = doctor_status(data_dir)
+        from .failover_doctor import status as failover_status
+        result["render_doctor"]["failover"] = failover_status(data_dir)
         if "render_doctor_query" in payload:
             from .render_doctor import search_cases
             result["render_doctor"]["retrieved_cases"] = search_cases(data_dir, payload["render_doctor_query"])
