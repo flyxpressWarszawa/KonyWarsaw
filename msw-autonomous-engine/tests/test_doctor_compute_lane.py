@@ -137,6 +137,20 @@ class ComputeTests(unittest.TestCase):
         self.assertEqual(self.step()['state'], 'no_supported_compute_kinds')
         self.assertFalse(self.client.calls)
 
+    def test_integrity_block_prevents_new_private_claims_but_preserves_pending_ack(self):
+        class Guard:
+            blocked = True
+        self.lane = ComputeLane(self.root, client=self.client, worker_factory=Worker,
+                                supported_kinds=('engine.v3.ingest',), clock=lambda: 1000,
+                                lane='engine-v3', integrity_guard=Guard())
+        self.assertEqual(self.step()['state'], 'deferred_integrity_blocked')
+        self.assertFalse(self.client.calls)
+        self.lane.write(self.lane.pending, {'id': 'example-123', 'digest': 'a' * 64,
+                                            'created': 990, 'kind': 'engine.v3.ingest'})
+        self.lane.worker.journal.receipt = {'state': 'acknowledged'}
+        self.assertEqual(self.step()['state'], 'previous_result_acknowledged')
+        self.assertFalse(self.lane.pending.exists())
+
     def test_supreme_lane_is_scoped_and_respects_host_pressure(self):
         self.job['kind'] = 'supreme.observe'
         self.lane = ComputeLane(self.root, client=self.client, worker_factory=Worker,
