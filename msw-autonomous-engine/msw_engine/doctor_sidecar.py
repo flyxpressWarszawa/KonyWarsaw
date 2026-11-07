@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import fcntl
 import base64
+import hashlib
+import io
 import json
 import os
 from pathlib import Path
@@ -15,6 +17,7 @@ import signal
 import sqlite3
 import sys
 import time
+import zipfile
 
 from .failover_doctor import FailoverDoctor, status as failover_status
 from .render_doctor import RenderDoctor, status as render_status
@@ -22,9 +25,9 @@ from .render_doctor import RenderDoctor, status as render_status
 SERVICE = 'srv-dbltdb9srm7s73ec0v00'
 
 
-def enable_verified_pack(data_dir: Path) -> dict:
+def enable_verified_pack(data_dir: Path, verified_callback=None) -> dict:
     """Reuse the owner's hash-pinned runtime without changing the worker's status file."""
-    from .runtime_pack import MAX_ENCODED, PackError, unpack
+    from .runtime_pack import MANIFEST, MAX_ENCODED, PackError, unpack
     os.environ.pop('MSW_RUNTIME_PACK_ROOT', None)
     count = int(os.environ.get('MSW_RUNTIME_PACK_CHUNKS', '0'))
     if count == 0:
@@ -37,6 +40,11 @@ def enable_verified_pack(data_dir: Path) -> dict:
     raw = base64.b64decode(encoded, validate=True)
     root, manifest = unpack(raw, os.environ.get('MSW_RUNTIME_PACK_SHA256', ''), data_dir)
     os.environ['MSW_RUNTIME_PACK_ROOT'] = str(root)
+    if verified_callback is not None:
+        # Anchor the baseline to the verified archive, not the writable cache.
+        with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+            manifest_digest = hashlib.sha256(archive.read(MANIFEST)).hexdigest()
+        verified_callback(root, manifest['files'], manifest_digest)
     return {'state': 'installed_verified', 'modules': [item['id'] for item in manifest['modules']]}
 
 
@@ -50,7 +58,7 @@ def publish_evidence(directory: Path, observation: dict) -> bool:
     return result.get('readback_verified_records') == 1
 
 
-def safe_observation(directory: Path, failure_insights=None) -> dict:
+def safe_observation(directory: Path, failure_insights=None, integrity_guard=None) -> dict:
     local = render_status(directory)
     failover = failover_status(directory)
     current = local.get('measurement') if isinstance(local.get('measurement'), dict) else {}
@@ -63,6 +71,8 @@ def safe_observation(directory: Path, failure_insights=None) -> dict:
             'worker_queue_throttled_by_sidecar': False, 'automatic_restart_after_instance_replacement_verified': False}
     if failure_insights is not None:
         observation['acknowledged_failure_receipts'] = failure_insights.snapshot()
+    if integrity_guard is not None:
+        observation['private_pack_integrity'] = integrity_guard.snapshot()
     return observation
 
 
@@ -85,17 +95,24 @@ def run(data_dir: Path, release: str) -> int:
         local = RenderDoctor(data_dir, monitor_only=True); local.start(lambda: stop)
         backup = FailoverDoctor(data_dir); backup.start(lambda: stop)
         try:
-            pack = enable_verified_pack(data_dir)
+            from .doctor_pack_integrity import PackIntegrity
+            guards = []
+            pack = enable_verified_pack(data_dir, lambda root, files, digest: guards.append(PackIntegrity(root, files, digest)))
+            integrity_guard = guards[0] if guards else None
+            if integrity_guard is not None and integrity_guard.check()['state'] == 'integrity_blocked':
+                pack = {'state': 'blocked', 'modules': []}
         except (OSError, ValueError, KeyError, TypeError) as error:
             pack = {'state': 'blocked', 'modules': []}
+            integrity_guard = None
+            os.environ.pop('MSW_RUNTIME_PACK_ROOT', None)
             print(json.dumps({'doctor_private_pack': {'state': 'blocked', 'code': type(error).__name__}}), flush=True)
         try:
             from .doctor_compute_lane import ComputeLane
             ComputeLane(data_dir).start(lambda: stop)
             if pack['state'] == 'installed_verified' and 'engine-v3' in pack['modules']:
-                ComputeLane(data_dir, lane='engine-v3').start(lambda: stop)
+                ComputeLane(data_dir, lane='engine-v3', integrity_guard=integrity_guard).start(lambda: stop)
             if pack['state'] == 'installed_verified' and 'supreme-server' in pack['modules']:
-                ComputeLane(data_dir, lane='supreme').start(lambda: stop)
+                ComputeLane(data_dir, lane='supreme', integrity_guard=integrity_guard).start(lambda: stop)
         except (OSError, ValueError) as error:
             print(json.dumps({'doctor_compute_lane': {'state': 'startup_blocked', 'code': type(error).__name__}}), flush=True)
         try:
@@ -110,7 +127,9 @@ def run(data_dir: Path, release: str) -> int:
         while not stop:
             now = int(time.time())
             try:
-                observation = safe_observation(data_dir, failure_insights)
+                if integrity_guard is not None:
+                    integrity_guard.check()
+                observation = safe_observation(data_dir, failure_insights, integrity_guard)
                 if now >= next_publish:
                     try:
                         shared = publish_evidence(data_dir, observation)
