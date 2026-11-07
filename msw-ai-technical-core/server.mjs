@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash,timingSafeEqual} from 'node:crypto';
+import {readCodingManifest} from './coding-manifest.mjs';
 
 const DIR=path.dirname(fileURLToPath(import.meta.url));
 const DATA=path.join(DIR,'data');
@@ -94,6 +95,10 @@ const server=http.createServer(async(req,res)=>{
  if(req.method==='GET'&&(p==='/'||p==='/msw-technical-university-360/'))return serveStatic(res,'index.html','text/html; charset=utf-8');
  if(req.method==='GET'&&p==='/app.js')return serveStatic(res,'app.js','text/javascript; charset=utf-8');
  if(req.method==='GET'&&p==='/style.css')return serveStatic(res,'style.css','text/css; charset=utf-8');
+ if(req.method==='GET'&&p==='/api/coding/manifest'){
+  try{return json(res,200,readCodingManifest())}
+  catch{return json(res,503,{error:'coding_manifest_unavailable',connections_verified:false})}
+ }
  if(req.method==='GET'&&(p==='/health'||p==='/api/status'))return json(res,200,{ok:true,version:'1.0.0',service:'MSW Technical Core 360',environment:'independent_render_node',counts:{families:families.length,specializations:spec.length,agent_profiles:agents.length,agents_running:0,lessons:lessons.length,labs:labs.length},lastResearch:research.checkedAt,lastLinksAudit:audit.checkedAt,research_persistent:false,model_training:false,hardware_qpu_connected:false,peer_messaging_persistent:false,wordpress_bridge:'public_read_only_when_available',links});
  if(req.method==='GET'&&p==='/api/families')return json(res,200,search(families,url.searchParams));
  if(req.method==='GET'&&p==='/api/specializations')return json(res,200,search(spec,url.searchParams));
