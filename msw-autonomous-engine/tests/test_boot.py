@@ -20,6 +20,14 @@ class BootTest(unittest.TestCase):
                 self.assertEqual(entry.main(), 0)
                 worker.loop.assert_called_once_with(once=False, poke_cron_seconds=300)
 
+    def test_optional_startup_failure_is_reported_without_raising(self):
+        result = entry.optional_startup('optional_test', lambda: (_ for _ in ()).throw(RuntimeError('private detail')))
+        self.assertIsNone(result)
+
+    def test_optional_startup_returns_successful_result(self):
+        marker = object()
+        self.assertIs(entry.optional_startup('optional_test', lambda: marker), marker)
+
 
 if __name__ == '__main__':
     unittest.main()
