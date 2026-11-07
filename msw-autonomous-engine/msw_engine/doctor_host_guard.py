@@ -16,9 +16,12 @@ LOCAL_KINDS = frozenset(('seo.analyze', 'research.rank', 'knowledge.ingest', 'kn
 
 class HostPressureGuard:
     def __init__(self, client, *, reader=read_account_health, clock=time.monotonic, wall_clock=time.time,
-                 sample_interval=60, pressure_claim_interval=60):
+                 sample_interval=60, pressure_claim_interval=60, unknown_policy='keep_running'):
+        if unknown_policy not in ('keep_running', 'local_only'):
+            raise ValueError('invalid_host_telemetry_policy')
         self.client, self.reader, self.clock = client, reader, clock
         self.wall_clock = wall_clock
+        self.unknown_policy, self._restricted = unknown_policy, False
         self.sample_interval, self.pressure_claim_interval = sample_interval, pressure_claim_interval
         self._sample_at, self._last_claim_at = None, None
         self._active, self._recovery_samples = False, 0
@@ -65,16 +68,21 @@ class HostPressureGuard:
 
     def capabilities(self, available):
         observation = self.observe()
-        if not self._active:
+        self._restricted = self._active or (self.unknown_policy == 'local_only' and observation.get('state') != 'fresh')
+        if self.unknown_policy == 'local_only':
+            observation = {**observation, 'restriction_active': self._restricted,
+                           'restriction_reason': ('account_pressure' if self._active else
+                                                  'account_health_unavailable' if self._restricted else None)}
+        if not self._restricted:
             return list(available), observation
         return [kind for kind in available if kind in LOCAL_KINDS], observation
 
     def claim_allowed(self):
-        if not self._active or self._last_claim_at is None:
+        if not self._restricted or self._last_claim_at is None:
             return True
         elapsed = self.clock() - self._last_claim_at
         return elapsed < 0 or elapsed >= self.pressure_claim_interval
 
     def mark_claim(self):
-        if self._active:
+        if self._restricted:
             self._last_claim_at = self.clock()

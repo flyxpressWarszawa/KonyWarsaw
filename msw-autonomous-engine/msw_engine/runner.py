@@ -106,7 +106,8 @@ class Worker:
         if (getattr(client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"
                 and os.environ.get("MSW_HOST_PRESSURE_GUARD") == "1"):
             from .doctor_host_guard import HostPressureGuard
-            self.host_guard = HostPressureGuard(client)
+            policy = 'local_only' if os.environ.get('MSW_HOST_PRESSURE_UNKNOWN_POLICY') == 'local_only' else 'keep_running'
+            self.host_guard = HostPressureGuard(client, unknown_policy=policy)
 
     def acknowledge(self, receipt: dict) -> dict:
         fields = {key: receipt[key] for key in ("payload_sha256", "lease_token", "result_json", "result_sha256")}
@@ -226,8 +227,9 @@ class Worker:
         capabilities = list(handlers())
         if self.host_guard is not None:
             capabilities, host = self.host_guard.capabilities(capabilities)
-            if not capabilities or (host.get("pressure_active") and not self.host_guard.claim_allowed()):
-                return {"state": "doctor_host_deferred", "reason": "account_pressure"}
+            restricted = host.get("restriction_active", host.get("pressure_active"))
+            if not capabilities or (restricted and not self.host_guard.claim_allowed()):
+                return {"state": "doctor_host_deferred", "reason": host.get("restriction_reason") or "account_pressure"}
             self.host_guard.mark_claim()
         response = self.client.send("claim", {"capabilities": capabilities})
         self.last_server_contact = int(time.time())

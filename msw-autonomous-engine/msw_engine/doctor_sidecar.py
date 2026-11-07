@@ -73,6 +73,11 @@ def safe_observation(directory: Path, failure_insights=None, integrity_guard=Non
         observation['acknowledged_failure_receipts'] = failure_insights.snapshot()
     if integrity_guard is not None:
         observation['private_pack_integrity'] = integrity_guard.snapshot()
+    try:
+        from .doctor_learning import diagnose
+        observation['incident_learning'] = diagnose(directory, observation)
+    except (OSError, ValueError, sqlite3.Error):
+        observation['incident_learning'] = {'state': 'unavailable', 'repair_performed': False}
     return observation
 
 
@@ -122,13 +127,20 @@ def run(data_dir: Path, release: str) -> int:
             print(json.dumps({'receipt_doctor': {'state': 'startup_blocked', 'code': type(error).__name__}}), flush=True)
         from .doctor_failure_insights import FailureInsights
         failure_insights = FailureInsights(data_dir)
-        started, next_publish, shared = int(time.time()), 0, False
+        started, next_publish, next_learning, shared = int(time.time()), 0, 0, False
         print(json.dumps({'doctor_sidecar': {'state': 'started', 'release': release, 'pid': os.getpid()}}), flush=True)
         while not stop:
             now = int(time.time())
             try:
                 if integrity_guard is not None:
                     integrity_guard.check()
+                if now >= next_learning:
+                    try:
+                        from .doctor_learning import learn_recent
+                        learn_recent(data_dir, now=now)
+                    except (OSError, ValueError, sqlite3.Error) as error:
+                        print(json.dumps({'doctor_learning': {'state': 'unavailable', 'code': type(error).__name__}}), flush=True)
+                    next_learning = now + 300
                 observation = safe_observation(data_dir, failure_insights, integrity_guard)
                 if now >= next_publish:
                     try:

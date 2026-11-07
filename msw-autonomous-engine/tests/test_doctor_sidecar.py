@@ -69,6 +69,8 @@ class DoctorSidecarTests(unittest.TestCase):
         self.assertNotIn('secret', str(result))
         self.assertFalse(result['worker_queue_throttled_by_sidecar'])
         self.assertFalse(result['automatic_restart_after_instance_replacement_verified'])
+        self.assertEqual(result['incident_learning']['signals'], ['hosting_outage', 'http_503', 'render_cpu_70'])
+        self.assertFalse(result['incident_learning']['repair_performed'])
 
     def test_shared_agent_memory_is_saved_and_retrievable(self):
         with tempfile.TemporaryDirectory() as root:

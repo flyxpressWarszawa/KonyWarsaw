@@ -196,3 +196,29 @@ The existing autonomous agent and `runtime.catalog` receive the Doctor status
 and can retrieve incident cases; retrieved observations are data, not commands.
 An independently running Hermes process and its tool contract require their own
 verification; this code does not claim a Hermes handshake.
+
+### Local incident learning and hosting pressure
+
+The sidecar can analyze fresh, bounded technical observations locally on Render
+with a small Bernoulli Naive Bayes classifier. The model abstains until it has
+at least six usable examples across two labels; its score is not calibrated and
+its prediction cannot execute a repair. Every five minutes it scans at most 50
+recent acknowledged worker receipts for `msw.doctor.repair_feedback.v1`. A
+receipt is eligible only if its result hash matches, the job reports success,
+and it explicitly asserts a verified effect, a fixed cause, an evidence digest,
+and at least one supported pre-repair signal. ACK and checksum verify transport
+and storage, not the asserted effect or its cause. Current production must be
+checked separately for an actual producer of these feedback receipts; until
+then this model has no verified training data. Only fixed incident flags and
+the receipt hash are persisted; request URLs and customer content are excluded.
+This is a lightweight statistical model, not a trained language model.
+
+`MSW_HOST_PRESSURE_GUARD=1` enables the separate, existing main-worker claim
+filter. With `MSW_HOST_PRESSURE_UNKNOWN_POLICY=local_only`, unavailable account
+telemetry also limits new claims to the known local-compute capabilities and
+slows those claims to at most one per minute. WordPress still receives the
+queue requests and completions, already running jobs continue, and other
+workers/cron/traffic are unaffected. The default unknown policy is unchanged;
+changing this option can delay WordPress callbacks and requires verifying the
+telemetry, queue and recovery behavior first. Neither mode guarantees a 90%
+server-wide CPU cap or uptime.

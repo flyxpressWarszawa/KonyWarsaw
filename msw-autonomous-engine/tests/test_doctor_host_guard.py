@@ -60,6 +60,37 @@ class HostGuardTests(unittest.TestCase):
         self.assertEqual(kinds, ['module.execute'])
         self.assertEqual(status, {'state': 'unavailable', 'pressure_active': False})
 
+    def test_opt_in_unknown_telemetry_defers_callbacks_but_allows_local_work(self):
+        clock = Clock()
+        readings = iter([{'state': 'unavailable'},
+                         {'state': 'fresh', 'at': 10060, 'cpu_percent': 35, 'physical_memory_percent': 20}])
+        guard = HostPressureGuard(None, reader=lambda _: next(readings), clock=clock,
+                                  wall_clock=lambda: 10000 + clock.now, unknown_policy='local_only')
+        kinds = ['module.execute', 'seo.analyze', 'knowledge.search']
+        selected, status = guard.capabilities(kinds)
+        self.assertEqual(selected, ['seo.analyze', 'knowledge.search'])
+        self.assertEqual(status['restriction_reason'], 'account_health_unavailable')
+        guard.mark_claim()
+        self.assertFalse(guard.claim_allowed())
+        clock.now = 60
+        selected, status = guard.capabilities(kinds)
+        self.assertEqual(selected, kinds)
+        self.assertFalse(status['restriction_active'])
+
+    def test_worker_respects_local_only_unknown_policy_and_throttles_polls(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {
+                'MSW_HOST_PRESSURE_GUARD': '1', 'MSW_HOST_PRESSURE_UNKNOWN_POLICY': 'local_only'}):
+            client = Client()
+            worker = Worker(client, Path(folder))
+            self.assertEqual(worker.host_guard.unknown_policy, 'local_only')
+            worker.host_guard.reader = lambda _: {'state': 'unavailable'}
+            with patch('msw_engine.runner.handlers', return_value={'module.execute': object(), 'seo.analyze': object()}):
+                self.assertEqual(worker.run_once()['state'], 'idle')
+                self.assertEqual(client.calls[0], ('claim', {'capabilities': ['seo.analyze']}))
+                result = worker.run_once()
+                self.assertEqual(result, {'state': 'doctor_host_deferred', 'reason': 'account_health_unavailable'})
+                self.assertEqual(len(client.calls), 1)
+
     def test_worker_does_not_send_empty_capabilities_or_execute_unexpected_claim(self):
         clock = Clock()
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {'MSW_HOST_PRESSURE_GUARD': '1'}):
