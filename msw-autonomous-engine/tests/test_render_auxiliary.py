@@ -45,11 +45,12 @@ class AuxiliaryTest(unittest.TestCase):
         self.env = patch.dict(os.environ, {"MSW_RUNTIME_MODE": "render-free", "MSW_AUTONOMOUS_AGENT": "0"})
         self.env.start()
         self.addCleanup(self.env.stop)
+        self.gate = type("TestReadyGate", (), {"check": lambda self, client: {"state": "ready"}})()
 
     def test_real_local_seo_job_and_signed_queue_receipt_contract(self):
         client = FakeClient()
         worker = Worker(client, Path(self.tmp.name), max_seconds=30, memory_mb=256)
-        out = step(client, worker)
+        out = step(client, worker, gate=self.gate)
         self.assertEqual(out["state"], "completed")
         self.assertTrue(out["server_ack_verified"])
         self.assertEqual([x[0] for x in client.calls], ["claim", "complete", "status"])
@@ -61,7 +62,7 @@ class AuxiliaryTest(unittest.TestCase):
         client = FakeClient("module.execute")
         worker = Worker(client, Path(self.tmp.name), max_seconds=30, memory_mb=256)
         with self.assertRaises(ProtocolError):
-            step(client, worker)
+            step(client, worker, gate=self.gate)
         self.assertEqual([x[0] for x in client.calls], ["claim"])
 
     def test_503_after_result_keeps_receipt_and_retries_same_result(self):
@@ -85,9 +86,9 @@ class AuxiliaryTest(unittest.TestCase):
         client = FailingOnceClient()
         worker = Worker(client, Path(self.tmp.name), max_seconds=30, memory_mb=256)
         with self.assertRaises(TransportError):
-            step(client, worker)
+            step(client, worker, gate=self.gate)
         self.assertEqual(len(worker.journal.pending()), 1)
-        self.assertEqual(step(client, worker)["state"], "idle")
+        self.assertEqual(step(client, worker, gate=self.gate)["state"], "idle")
         completed = [payload for action, payload in client.calls if action == "complete"]
         self.assertEqual(len(completed), 2)
         self.assertEqual(completed[0], completed[1])
@@ -97,7 +98,7 @@ class AuxiliaryTest(unittest.TestCase):
         client = FakeClient()
         worker = Worker(client, Path(self.tmp.name))
         with self.assertRaises(WorkerDraining):
-            step(client, worker, lambda: True)
+            step(client, worker, lambda: True, gate=self.gate)
         self.assertEqual(client.calls, [])
 
     def test_backoff_is_at_least_five_minutes_and_increases(self):
