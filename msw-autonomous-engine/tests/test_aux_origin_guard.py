@@ -122,6 +122,37 @@ class OriginGuardTests(unittest.TestCase):
         self.current = sample(NOW - 2)
         self.assertEqual(self.gate.check(self.client)["state"], "origin_unknown")
 
+    def test_transport_failure_closes_gate_until_two_new_low_samples(self):
+        self.gate.check(self.client)
+        self.current = sample(NOW)
+        self.assertEqual(self.gate.check(self.client)["state"], "ready")
+
+        def failed_reader(_):
+            raise TransportError("offline", 503, 300)
+
+        self.gate.reader = failed_reader
+        with self.assertRaises(TransportError):
+            self.gate.check(self.client)
+        self.assertFalse(self.gate.open)
+        self.gate.reader = lambda _: self.current
+        self.assertEqual(self.gate.check(self.client)["state"], "origin_warmup")
+        self.assertEqual(self.gate.check(self.client)["state"], "origin_warmup")
+
+    def test_long_unobserved_interval_requires_two_new_low_samples(self):
+        clock = [NOW]
+        current = [sample(NOW - 1)]
+        gate = OriginPressureGate(reader=lambda _: current[0], clock=lambda: clock[0])
+        self.assertEqual(gate.check(self.client)["state"], "origin_warmup")
+        current[0] = sample(NOW)
+        self.assertEqual(gate.check(self.client)["state"], "ready")
+        clock[0] = NOW + 91
+        current[0] = sample(clock[0])
+        self.assertEqual(gate.check(self.client)["state"], "origin_warmup")
+        self.assertFalse(gate.open)
+        clock[0] += 1
+        current[0] = sample(clock[0])
+        self.assertEqual(gate.check(self.client)["state"], "ready")
+
     def test_503_retry_after_is_not_shortened(self):
         headers = Message()
         headers["Retry-After"] = "1800"
