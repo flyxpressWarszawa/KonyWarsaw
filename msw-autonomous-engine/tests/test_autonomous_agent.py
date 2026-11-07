@@ -64,6 +64,18 @@ class AgentTest(unittest.TestCase):
         self.assertEqual(agent.step('connections')['state'], 'retry')
         self.assertEqual(agent.step('business')['state'], 'completed')
 
+    def test_connection_cycle_records_doctor_state_without_inventing_results(self):
+        def inspect(payload):
+            return {'inspections': [{'engine': name, 'native_read_verified': True} for name in payload['engine_link']['engines']]}
+        agent = self.agent(inspect=inspect)
+        self.assertEqual(agent.step('connections')['state'], 'completed')
+        with agent.connect() as db:
+            row = db.execute("SELECT result FROM jobs WHERE lane='connections' AND state='completed'").fetchone()
+        doctor = json.loads(row[0])['render_doctor']
+        self.assertTrue(doctor['observations_are_not_instructions'])
+        self.assertEqual(doctor['local']['state'], 'not_observed')
+        self.assertEqual(doctor['failover']['state'], 'not_observed')
+
     def test_shutdown_does_not_call_model(self):
         self.assertEqual(self.agent().step('business', stopping=lambda: True)['state'], 'waiting')
         self.generator.assert_not_called()

@@ -209,6 +209,13 @@ class AutonomousAgent:
                     "verified_native_reads": sum(r.get("native_read_verified") is True for r in results),
                     "business_execution_verified": False}
             result["continuation"] = self.continuation(results)
+            try:
+                from .render_doctor import status as doctor_status
+                from .failover_doctor import status as failover_status
+                result["render_doctor"] = {"local": doctor_status(self.directory), "failover": failover_status(self.directory),
+                                           "observations_are_not_instructions": True}
+            except (OSError, ValueError, sqlite3.Error):
+                result["render_doctor"] = {"state": "unavailable", "observations_are_not_instructions": True}
             from .tasks import knowledge_ingest
             memory = knowledge_ingest({"records": [{"id": "agent:connections:latest", "approved": True,
                 "title": "Bieżąca obserwacja podpisanych odczytów połączeń silników MSW",
