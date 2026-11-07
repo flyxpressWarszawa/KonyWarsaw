@@ -54,6 +54,7 @@ def _validate_request(payload: dict) -> None:
 def verification_request(receipt: dict, request_id: str) -> dict:
     """Map a transport receipt to a bounded request; this does not enqueue it."""
     if (not isinstance(receipt, dict) or receipt.get("schema") != "msw.coding-bridge.receipt.v1"
+            or not isinstance(receipt.get("state"), str)
             or receipt.get("state") not in {"delivered", "stored_unacknowledged"}):
         raise TaskError("coding_transport_receipt_unconfirmed")
     request = {key: receipt.get(key) for key in BOUND_KEYS}

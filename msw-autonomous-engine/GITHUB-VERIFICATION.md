@@ -55,3 +55,71 @@ the central queue are simulated. They cover successful verification, a failed
 file digest, a changed payload, disabled capability, a mismatched server
 readback, and reuse of a previously recorded result. Passing them does not
 establish that a production queue accepts or authorizes this capability.
+
+## Coding bridge delivery adapter
+
+The follow-up module `msw_engine/coding_verify.py` connects this verifier to the
+proposed coding transport at `msw-coding-bridge/` on the main development line.
+It registers `coding.verify_delivery` alongside `github.verify_file` under the
+same `MSW_GITHUB_VERIFY_ENABLED=1` opt-in. Both remain absent when the switch is
+unset and in `render-free` mode. This is proposed code, not a production grant.
+
+The adapter accepts only `msw-coding-tasks/<32 lowercase hex>.json` for a fixed
+repository and the fixed `msw/coding-queue` branch. It first reuses the commit,
+tree, blob and file hash checks from PR #3, with a smaller 16 KiB limit. It then
+validates the exact `msw.coding-task.v1` schema, canonical UTF-8 bytes and trailing
+LF, public-data flag, task identity and internal request digest. Polish text,
+emoji and U+2028/U+2029 use the same golden fixture as the PHP/Python transport.
+Credential patterns are rejected; this check cannot detect every kind of
+private content, so the transport is restricted to public requirements.
+
+There are two different SHA-256 values:
+
+| Field | Bytes covered |
+| --- | --- |
+| `file_sha256` | The whole canonical task file, including `request_sha256` and its final LF |
+| `request_sha256` | Canonical task object with the `request_sha256` field omitted |
+
+`verification_request(transport_receipt, request_id)` maps a `delivered` or
+`stored_unacknowledged` transport receipt into the bounded verification payload.
+It performs no network call and does not enqueue or authorize a job. Its output
+has schema `msw.coding-verify-delivery.v1`, a separate verifier `request_id`, and
+`repository`, `queue_branch`, `task_id`, `request_sha256`, `commit_sha`,
+`task_path`, and `file_sha256`. A receipt without the file hash is rejected;
+the internal request hash must never be substituted for it.
+
+After validating the file and task, the handler obtains the current queue ref.
+If the supplied commit is not that head, it checks that the commit is an ancestor
+using the GitHub compare API with exact commit IDs. Diverged, unrelated, missing
+or malformed branch evidence fails closed. The result records `queue_head_sha`
+and `verified_at` so this observation is tied to the head actually read. A replay
+of the same native job reuses its immutable journal result; it does not claim a
+new observation. A fresh independent observation needs a newly admitted request.
+
+The result separately sets `github_file_verified`, `task_identity_verified`,
+`canonical_task_verified` and `queue_branch_membership_verified`. It never sets
+`wordpress_ack_verified`, `tests_verified`, `code_executed`, or
+`deployed_verified` to true. A source-engine label is not an authenticated
+identity. GitHub file identity does not prove a model ran or the request was
+implemented.
+
+The existing native worker supplies payload-hash checks, bounded child process,
+heartbeat, SQLite journal and complete/status readback. Its currently observed
+WordPress RemoteStore kind list does not admit `coding.verify_delivery` or
+`github.verify_file`. Adding handlers to the worker does **not** add that grant.
+The server-side capability admission and shared STOP/HOLD contract must be
+reviewed and agreed before activation; this patch does not route around them
+through `module.execute`, change the native kind list, or introduce a second
+queue. The production hold on WordPress and Render remains in effect.
+
+Run the additional focused contracts from the worker checkout:
+
+```sh
+python -m unittest discover -s tests -p 'test_coding_verify.py' -v
+```
+
+These tests include the shared Unicode bytes, both digests, immutable file and
+branch evidence, rejected task substitutions, strict paths and default-off
+registration. Two tests exercise the new handler through the actual spawned
+worker and SQLite journal. Their GitHub and queue ports are explicitly synthetic;
+they are not a live WordPress ACK, model run or deployment.
