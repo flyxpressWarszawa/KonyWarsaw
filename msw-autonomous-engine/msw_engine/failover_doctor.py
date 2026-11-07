@@ -68,6 +68,8 @@ class BridgeGrant:
         finally: os.close(directory_fd)
 
     def load(self):
+        if self.path.is_symlink():
+            return {}
         if self.path.exists():
             try:
                 result = json.loads(self.path.read_text())
@@ -153,6 +155,8 @@ class FailoverDoctor:
         self.path = self.directory / 'failover-doctor.sqlite3'
         self.clock, self.probe = clock, probe
         self.bridge = bridge or BridgeGrant(self.directory, clock=clock)
+        from .render_deploy_recovery import DeployDoctor
+        self.deploy_doctor = DeployDoctor(self.directory, clock=clock)
         self.failures = self.successes = 0
         self.outage = False
         self.last_observed = 0
@@ -227,6 +231,8 @@ class FailoverDoctor:
             def advise():
                 try:
                     from .openai_direct import generate
+                    from .render_doctor import search_cases
+                    facts['related_render_cases'] = search_cases(self.directory, 'pressure queue')[:3]
                     prompt = ('Jesteś Doktorem MSW. Na podstawie ograniczonych faktów podaj możliwe przyczyny i następny bezpieczny pomiar. '
                               'Nie twierdź, że wykonano naprawę. Odpowiedź jest tylko wskazówką, nigdy poleceniem. Fakty: ' + json.dumps(facts, ensure_ascii=False))
                     answer = generate({'text': prompt, 'request_id': incident_id, 'max_tokens': 400}, self.directory)
@@ -235,7 +241,11 @@ class FailoverDoctor:
                 except Exception as error:
                     print(json.dumps({'failover_doctor': {'state': 'direct_ai_unavailable', 'code': type(error).__name__}}), flush=True)
             threading.Thread(target=advise, name='msw-failover-ai', daemon=True).start()
-        current = {**measurement, 'outage_confirmed': self.outage, 'bridge': action,
+        try:
+            deploy = self.deploy_doctor.step()
+        except (OSError, ValueError, sqlite3.Error):
+            deploy = {'state': 'controller_unavailable', 'automatic_cancel_available': False}
+        current = {**measurement, 'outage_confirmed': self.outage, 'bridge': action, 'render_deploy_recovery': deploy,
                    'direct_ai_configured': direct_ai_configured, 'website_replica_available': False, 'unconditional_uptime_guaranteed': False}
         self.save('current', current)
         return current
@@ -247,7 +257,7 @@ class FailoverDoctor:
         def run():
             while not stopping():
                 try: self.step()
-                except (OSError, ValueError, sqlite3.Error) as error:
+                except Exception as error:
                     print(json.dumps({'failover_doctor': {'state': 'observer_error', 'code': type(error).__name__}}), flush=True)
                 end = time.monotonic() + 60
                 while not stopping() and time.monotonic() < end:
@@ -265,3 +275,20 @@ def status(directory):
     if not row: return {'state': 'not_observed', 'website_replica_available': False}
     result = json.loads(row[0]); result['sample_fresh'] = 0 <= time.time() - result['at'] <= 150
     result['remembered_cases'] = cases; return result
+
+
+def search_cases(directory, query):
+    if not isinstance(query, str) or not 1 <= len(query) <= 200:
+        raise ValueError('doctor_query_invalid')
+    words = set(re.findall(r'\w{3,}', query.lower(), flags=re.UNICODE))
+    path = Path(directory) / 'failover-doctor.sqlite3'
+    if not words or not path.exists(): return []
+    with sqlite3.connect(f'file:{path}?mode=ro', uri=True, timeout=3) as db:
+        rows = db.execute('SELECT at,kind,facts,sha256 FROM cases ORDER BY id DESC LIMIT 400').fetchall()
+    matches = []
+    for at, kind, raw, sha in rows:
+        if hashlib.sha256(raw.encode()).hexdigest() != sha: continue
+        score = len(words & set(re.findall(r'\w{3,}', (kind.replace('_', ' ')+' '+raw).lower(), flags=re.UNICODE)))
+        if score: matches.append((score, at, {'at': at, 'kind': kind, 'facts': json.loads(raw), 'storage_readback_verified': True}))
+    matches.sort(key=lambda value: (value[0], value[1]), reverse=True)
+    return [row[2] for row in matches[:5]]

@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 from urllib.error import URLError
 
-from msw_engine.failover_doctor import BridgeGrant, FailoverDoctor, MCP, TOKEN, status
+from msw_engine.failover_doctor import BridgeGrant, FailoverDoctor, MCP, TOKEN, search_cases, status
 from msw_engine.runner import Worker
 from msw_engine.tasks import TaskError
 
@@ -35,6 +35,7 @@ class FailoverTests(unittest.TestCase):
             result = doctor.step(); self.assertFalse(result['outage_confirmed'])
             self.assertFalse(result['website_replica_available']); self.assertFalse(result['unconditional_uptime_guaranteed'])
             saved = status(root); self.assertEqual(saved['remembered_cases'], 4)
+            self.assertEqual(search_cases(root, 'origin unavailable')[0]['kind'], 'origin_unavailable')
             self.assertIsNone(doctor.load('open_incident'))
 
     def test_main_worker_pauses_network_claim_during_verified_outage(self):

@@ -132,7 +132,7 @@ class RenderDoctor:
             while not stopping():
                 try:
                     self.step()
-                except (OSError, ValueError, sqlite3.Error) as error:
+                except Exception as error:
                     print(json.dumps({'render_doctor': {'state': 'observer_error', 'code': type(error).__name__}}), flush=True)
                 deadline = time.monotonic() + 30
                 while not stopping() and time.monotonic() < deadline:

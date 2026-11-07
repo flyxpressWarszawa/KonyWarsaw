@@ -391,6 +391,8 @@ def runtime_catalog(payload: dict, data_dir: Path) -> dict:
         if "render_doctor_query" in payload:
             from .render_doctor import search_cases
             result["render_doctor"]["retrieved_cases"] = search_cases(data_dir, payload["render_doctor_query"])
+            from .failover_doctor import search_cases as failover_search
+            result["render_doctor"]["failover"]["retrieved_cases"] = failover_search(data_dir, payload["render_doctor_query"])
     except (OSError, ValueError, sqlite3.Error):
         result["render_doctor"] = {"state": "memory_unavailable", "external_monitor": False, "render_api_connected": False}
     if "suite_snapshot" in payload:
