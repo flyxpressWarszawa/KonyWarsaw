@@ -32,6 +32,19 @@ final class MSW_GCB_Options
         $n=$wpdb->query($wpdb->prepare($q,...array_merge($joinArgs,[$after,$name,$before],$guardArgs)));
         if($n===false)MSW_GCB_Contract::fail('storage_write',503);self::flush($name);return $n===1;
     }
+    public static function insert_guarded(string $name,string $raw,array $guards): bool
+    {
+        if(!$guards)return self::insert($name,$raw);
+        global $wpdb;$from=[];$where=[];$args=[$name,$raw];
+        foreach($guards as $guardName=>$guardRaw){
+            $alias='g'.count($from);$from[]="{$wpdb->options} AS $alias";
+            $where[]="$alias.option_name=%s AND BINARY $alias.option_value=BINARY %s";
+            $args[]=$guardName;$args[]=$guardRaw;
+        }
+        $q="INSERT IGNORE INTO {$wpdb->options} (option_name,option_value,autoload) SELECT %s,%s,'no' FROM ".implode(',',$from).' WHERE '.implode(' AND ',$where);
+        $n=$wpdb->query($wpdb->prepare($q,...$args));
+        if($n===false)MSW_GCB_Contract::fail('storage_write',503);self::flush($name);return $n===1;
+    }
     public static function read(string $id): ?array
     {
         if(!preg_match('/\A[a-f0-9]{32}\z/D',$id))MSW_GCB_Contract::fail('task_id');
