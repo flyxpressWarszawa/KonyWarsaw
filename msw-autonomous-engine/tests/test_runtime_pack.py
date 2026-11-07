@@ -56,7 +56,7 @@ class RuntimePackTests(unittest.TestCase):
             unpack(raw, "0" * 64, self.directory)
 
     def test_rejects_traversal_absolute_and_windows_paths(self):
-        for name in ("../code.py", "/code.py", "example/../code.py", "C:/code.py", "example\\code.py"):
+        for name in (".", "../code.py", "/code.py", "example/../code.py", "C:/code.py", "example\\code.py"):
             with self.subTest(name=name):
                 raw, digest = make_pack(name=name)
                 with self.assertRaises(PackError):
@@ -86,6 +86,26 @@ class RuntimePackTests(unittest.TestCase):
         root, _ = unpack(raw, digest, self.directory)
         (root / "example/code.py").write_text("tampered")
         with self.assertRaisesRegex(PackError, "file_mismatch"):
+            unpack(raw, digest, self.directory)
+
+    def test_cached_parent_symlink_is_rejected_even_if_file_digest_matches(self):
+        raw, digest = make_pack()
+        root, _ = unpack(raw, digest, self.directory)
+        outside = self.directory / "outside"
+        outside.mkdir()
+        (outside / "code.py").write_bytes(b"VALUE = 42\n")
+        (root / "example/code.py").unlink()
+        (root / "example").rmdir()
+        (root / "example").symlink_to(outside, target_is_directory=True)
+        with self.assertRaisesRegex(PackError, "file_mismatch"):
+            unpack(raw, digest, self.directory)
+
+    def test_cached_runtime_pack_directory_symlink_is_rejected(self):
+        raw, digest = make_pack()
+        outside = self.directory / "outside"
+        outside.mkdir()
+        (self.directory / "runtime-packs").symlink_to(outside, target_is_directory=True)
+        with self.assertRaisesRegex(PackError, "cache_symlink"):
             unpack(raw, digest, self.directory)
 
     def test_detects_modified_cached_manifest(self):
