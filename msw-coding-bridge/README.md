@@ -162,6 +162,27 @@ GitHub Copilot pozostaje oddzielnie wstrzymany po `model_not_supported`. Ten mos
 nie zmienia planu ani uprawnień do modeli. Jego trwałość nie zależy od miesięcznego
 okna workflow Copilota.
 
+## Pozostająca integracja wykonawcy kodowania
+
+Obecny `msw-github-engine/controller.py context` przekazuje statyczne priorytety
+i rejestr testów. Workflow `msw-github-engine.md` oraz jego skompilowany lock nie
+konsumują jeszcze `msw.coding-task.v1` z `msw/coding-queue`. Włączenie samego
+transportu nie zmieni tego zachowania. Publiczny manifest także nie jest
+wykonawcą ani potwierdzeniem dostępności modelu.
+
+Pełna integracja wymaga przekazania jednego zweryfikowanego zadania do rzeczywistego
+promptu wykonawcy oraz powiązania wyniku z `task_id`, `request_sha256`, commitem
+źródłowym kolejki, commitem zmiany, testami i konkretnym PR. Zakończenie trzeba
+potwierdzić osobnym odczytem; dane zadania nie mogą wybierać nowych uprawnień,
+poleceń powłoki ani obejść istniejącej polityki. Wygenerowanego locka nie należy
+ręcznie zmieniać bez odpowiadającego źródła workflow i walidacji kompilatorem.
+
+Istniejący automatyczny wykonawca ma zakres czterech obszarów na `main`.
+`runtime` i `owned-llm` mają odrębne gałęzie, a brakujące źródła WordPressa i
+Python HUB wymagają autoryzowanego eksportu. Te różnice trzeba obsłużyć w
+wykonawcy przed ogłoszeniem samoczynnego kodowania wszystkich silników.
+Aktualny pakiet i oba PR-y pozostają w fazie przygotowania pod produkcyjnym HOLD.
+
 ## Dokumentacja mechanizmów
 
 - [GitHub OIDC](https://docs.github.com/en/actions/reference/security/oidc)
