@@ -3,6 +3,22 @@
 Use the existing authenticated GitHub, MSW Direct Control and Render connectors.
 Never copy ChatGPT credentials or production secrets into code or tasks.
 
+## Required GitHub workflow for every MSW engine
+
+`flyxpressWarszawa/KonyWarsaw` is the required system of record for MSW coding
+tasks from ChatGPT, Render, Python HUB and the registered MSW engines. Resolve
+the target's existing branch and allowed source paths from `targets.json` before
+changing code. Missing source must be imported with authorization before that
+component can be changed; a source label or health response is not a checkout.
+
+Develop and test on an isolated branch. Publish the exact tested changes to
+GitHub, read back the resulting commit and open a PR against the target branch.
+Report the commit, changed paths, test results and PR URL. A local-only patch,
+queued request or matching file hash must not be reported as completed coding.
+Runtime workers use the same admission and result contract; they must not create
+an alternate write channel that bypasses its authorization, lease or STOP/HOLD.
+Deployment is a separate authorized operation with its own observed result.
+
 ## Current phase
 
 The latest shared-contract instruction keeps production on HOLD. Work on an

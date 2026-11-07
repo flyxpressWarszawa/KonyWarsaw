@@ -102,8 +102,9 @@ WordPressa. Zgodność payloadu i lokalny test nie stanowią zdalnego ACK.
 
 ## Bieżąca dostawa i aktywacja
 
-Kod powstaje na izolowanej gałęzi z CI. WordPress HOLD i zmienna GitHub
-`MSW_CODING_BRIDGE_ENABLED` są domyślnie wyłączone. Pakiet ZIP i SHA-256 służą
+Kod powstaje na izolowanej gałęzi z CI. Transport WordPress jest domyślnie
+wyłączony, a HOLD pozostaje aktywny. Workflow wymaga jawnego ustawienia
+`MSW_CODING_BRIDGE_ENABLED=true`. Pakiet ZIP i SHA-256 służą
 do przeglądu; ich utworzenie nie instaluje ani nie aktywuje wtyczki.
 
 Przed fazą produkcyjną trzeba uzgodnić admission, globalny STOP/HOLD, rzeczywiste
