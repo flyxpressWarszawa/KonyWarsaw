@@ -13,7 +13,7 @@ on:
       - msw-github-engine/**
   stop-after: "2026-12-07T00:00:00+01:00"
   skip-if-match: 'is:pr is:open in:title "[MSW GitHub Engine]"'
-if: vars.MSW_GITHUB_ENGINE_ENABLED != 'false' && vars.MSW_GITHUB_ENGINE_ENABLED != '0' && github.ref == 'refs/heads/main'
+if: (vars.MSW_GITHUB_ENGINE_ENABLED || 'true') != 'false' && (vars.MSW_GITHUB_ENGINE_ENABLED || 'true') != '0' && github.ref == 'refs/heads/main'
 permissions:
   contents: read
   actions: read
