@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+from contextlib import closing
 from pathlib import Path
 import re
 import sqlite3
@@ -99,7 +100,7 @@ def _executions(home: Path):
         return {'state': 'not_found'}
     try:
         uri = 'file:' + quote(str(path), safe='/') + '?mode=ro'
-        with sqlite3.connect(uri, uri=True, timeout=1) as db:
+        with closing(sqlite3.connect(uri, uri=True, timeout=1)) as db:
             db.execute('PRAGMA query_only=ON')
             rows = db.execute('SELECT job_id,status,started_at,finished_at FROM executions '
                               'ORDER BY started_at DESC LIMIT 8').fetchall()
