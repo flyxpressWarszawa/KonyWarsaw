@@ -60,6 +60,35 @@ class AuxiliaryTest(unittest.TestCase):
             step(client, worker)
         self.assertEqual([x[0] for x in client.calls], ["claim"])
 
+    def test_503_after_result_keeps_receipt_and_retries_same_result(self):
+        class FailingOnceClient(FakeClient):
+            complete_attempts = 0
+            claims = 0
+
+            def send(self, action, payload):
+                if action == "claim":
+                    self.claims += 1
+                    if self.claims > 1:
+                        self.calls.append((action, payload))
+                        return {"state": "idle"}
+                if action == "complete":
+                    self.complete_attempts += 1
+                    if self.complete_attempts == 1:
+                        self.calls.append((action, payload))
+                        raise TransportError("server_rejected_request", 503)
+                return super().send(action, payload)
+
+        client = FailingOnceClient()
+        worker = Worker(client, Path(self.tmp.name), max_seconds=30, memory_mb=256)
+        with self.assertRaises(TransportError):
+            step(client, worker)
+        self.assertEqual(len(worker.journal.pending()), 1)
+        self.assertEqual(step(client, worker)["state"], "idle")
+        completed = [payload for action, payload in client.calls if action == "complete"]
+        self.assertEqual(len(completed), 2)
+        self.assertEqual(completed[0], completed[1])
+        self.assertEqual(worker.journal.pending(), [])
+
     def test_draining_does_not_claim_work(self):
         client = FakeClient()
         worker = Worker(client, Path(self.tmp.name))
