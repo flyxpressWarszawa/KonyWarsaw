@@ -21,7 +21,7 @@ permissions:
   copilot-requests: write
 engine:
   id: copilot
-  model: auto
+  model: gpt-6.1-sol
   harness:
     max-retries: 0
 timeout-minutes: 20
@@ -97,6 +97,9 @@ safe-outputs:
       - msw-research-engine/**
   threat-detection:
     max-ai-credits: 25
+    engine:
+      id: copilot
+      model: gpt-6.1-sol
   steps:
     - name: Download independent candidate verification
       uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
