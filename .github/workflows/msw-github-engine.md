@@ -13,7 +13,7 @@ on:
       - msw-github-engine/**
   stop-after: "2026-12-07T00:00:00+01:00"
   skip-if-match: 'is:pr is:open in:title "[MSW GitHub Engine]"'
-if: (vars.MSW_GITHUB_ENGINE_ENABLED || 'true') != 'false' && (vars.MSW_GITHUB_ENGINE_ENABLED || 'true') != '0' && github.ref == 'refs/heads/main'
+if: vars.MSW_GITHUB_ENGINE_ENABLED == 'true' && github.ref == 'refs/heads/main'
 permissions:
   contents: read
   actions: read
@@ -178,7 +178,7 @@ jobs:
     if: needs.agent.result == 'success'
 env:
   MSW_ENGINE_BASE_SHA: ${{ github.sha }}
-  MSW_GITHUB_ENGINE_ENABLED: ${{ vars.MSW_GITHUB_ENGINE_ENABLED || 'true' }}
+  MSW_GITHUB_ENGINE_ENABLED: ${{ vars.MSW_GITHUB_ENGINE_ENABLED || 'false' }}
 steps:
   - name: Set up Python
     uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0

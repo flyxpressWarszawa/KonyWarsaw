@@ -24,6 +24,19 @@ Wynik testów lokalnych nie jest potwierdzeniem pracy satelitów.
 
 ## Działanie
 
+### Dostęp do automatycznego kodowania
+
+Test połączenia z 7 listopada 2026 przeszedł przygotowanie i testy, ale usługa
+Copilot odrzuciła zarówno wybór automatyczny, jak i jawny `gpt-6.1-sol` błędem
+`model_not_supported`. [Dokładny przebieg diagnostyczny](https://github.com/flyxpressWarszawa/KonyWarsaw/actions/runs/42396484831)
+nie utworzył poprawki ani pull requestu. Automatyczne wywołania Copilota są
+domyślnie wstrzymane, aby nie powtarzać znanego błędu. Po potwierdzeniu dostępu
+zmienna repozytorium `MSW_GITHUB_ENGINE_ENABLED=true` włącza cykle.
+
+Połączenie ChatGPT–GitHub, kontrola testów oraz konfiguracja mostu zadań MSW nie
+wymagają włączenia tej zmiennej. Dostęp do repozytorium nie jest potwierdzeniem
+uprawnienia do modelu.
+
 Źródłem automatyzacji jest `.github/workflows/msw-github-engine.md`.
 Plik `.lock.yml` jest jego kompilacją przez `github/gh-aw` 1.0.1. GitHub
 uruchamia skompilowany workflow; sam Markdown nie stanowi uruchomienia.
