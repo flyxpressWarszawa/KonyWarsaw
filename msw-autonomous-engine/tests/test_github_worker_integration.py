@@ -47,8 +47,10 @@ def forbidden_child(*args):
 
 
 class FakeQueue:
-    def __init__(self, job):
+    def __init__(self, job, allowed_kinds=None, node_grants=None):
         self.job = job
+        self.allowed_kinds = {"github.verify_file"} if allowed_kinds is None else set(allowed_kinds)
+        self.node_grants = {"github.verify_file"} if node_grants is None else set(node_grants)
         self.result = None
         self.digest = None
         self.completions = 0
@@ -58,9 +60,16 @@ class FakeQueue:
         if action == "claim":
             if "github.verify_file" not in payload["capabilities"]:
                 raise AssertionError("verifier capability was not advertised")
+            # Mirrors the existing queue's intersection, not a production grant.
+            allowed = self.allowed_kinds & self.node_grants & set(payload["capabilities"][:20])
+            if self.job["kind"] not in allowed:
+                return {"state": "idle", "reason": "no_matching_capabilities"}
             return {"state": "claimed", "job": self.job, "lease_token": "lease-fixture"}
         if action == "complete":
             self.completions += 1
+            if (payload["job_id"] != self.job["id"] or payload["lease_token"] != "lease-fixture"
+                    or payload["payload_sha256"] != self.job["payload_sha256"]):
+                raise AssertionError("incorrect job identity or lease")
             raw = payload["result_json"].encode()
             digest = hashlib.sha256(raw).hexdigest()
             if digest != payload["result_sha256"]:
@@ -154,6 +163,16 @@ class GithubWorkerIntegrationTests(unittest.TestCase):
         os.environ.pop("MSW_GITHUB_VERIFY_ENABLED")
         with self.assertRaisesRegex(TransportError, "job_capability_mismatch"):
             worker.execute(job, "lease-fixture")
+
+    def test_unlisted_or_ungranted_kind_is_never_claimed(self):
+        for allowed, granted in [({"runtime.catalog"}, {"github.verify_file"}),
+                                 ({"github.verify_file"}, {"runtime.catalog"})]:
+            with self.subTest(allowed=allowed, granted=granted):
+                job = build_job()
+                server = FakeQueue(job, allowed_kinds=allowed, node_grants=granted)
+                worker = runner.Worker(server, Path(self.tmp.name), max_seconds=15, memory_mb=0)
+                self.assertEqual(worker.run_once(), {"state": "idle"})
+                self.assertEqual(server.completions, 0)
 
 
 if __name__ == "__main__":
