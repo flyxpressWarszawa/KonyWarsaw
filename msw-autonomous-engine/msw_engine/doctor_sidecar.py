@@ -65,6 +65,11 @@ def run(data_dir: Path, release: str) -> int:
             ComputeLane(data_dir).start(lambda: stop)
         except (OSError, ValueError) as error:
             print(json.dumps({'doctor_compute_lane': {'state': 'startup_blocked', 'code': type(error).__name__}}), flush=True)
+        try:
+            from .doctor_receipts import ReceiptDoctor
+            ReceiptDoctor(data_dir).start(lambda: stop)
+        except (OSError, ValueError, sqlite3.Error) as error:
+            print(json.dumps({'receipt_doctor': {'state': 'startup_blocked', 'code': type(error).__name__}}), flush=True)
         started, next_publish, shared = int(time.time()), 0, False
         print(json.dumps({'doctor_sidecar': {'state': 'started', 'release': release, 'pid': os.getpid()}}), flush=True)
         while not stop:

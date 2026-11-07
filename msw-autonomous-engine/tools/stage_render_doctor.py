@@ -87,7 +87,7 @@ def stage(source: Path, data_dir: Path, expected: str) -> Path:
         # Imports run without any service credentials or inherited configuration.
         env = {'PATH': os.defpath, 'PYTHONPATH': str(temporary),
                'PYTHONSAFEPATH': '1', 'PYTHONDONTWRITEBYTECODE': '1'}
-        code = ('import msw_engine.doctor_sidecar, msw_engine.doctor_compute_lane, msw_engine.render_doctor, '
+        code = ('import msw_engine.doctor_sidecar, msw_engine.doctor_compute_lane, msw_engine.doctor_receipts, msw_engine.render_doctor, '
                 'msw_engine.failover_doctor, msw_engine.render_deploy_recovery, '
                 'msw_engine.openai_direct')
         subprocess.run([sys.executable, '-c', code], cwd=temporary, env=env,
