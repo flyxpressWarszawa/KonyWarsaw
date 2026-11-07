@@ -21,6 +21,20 @@ udana kompilacja nie dowodzą wykonania zadania. Nowy workflow ma wyłącznie
 ręczne `workflow_dispatch`. Nie dodaje harmonogramu, nie zwalnia produkcyjnego
 HOLD i nie zmienia działania istniejących kolejek.
 
+## Powtarzalna kompilacja
+
+CI odtwarza lock oficjalnym kompilatorem `gh-aw` v1.0.1, którego pobrany plik
+sprawdza po rozmiarze i SHA-256. Kompilacja używa `--action-mode release`,
+`--action-tag 0627fdbe4beb5f3b71aa569f8d97150b87f2111a` i `--no-check-update`.
+Przypięcie tej samej akcji znajduje się w wejściowym cache kompilatora
+`.github/aw/actions-lock.json`. Dzięki temu odtworzenie nie zależy od obecności
+programu `gh` ani od dostępu do API podczas rozwiązywania tego przypięcia.
+
+Lock jest wyłącznie wynikiem kompilatora. Nie usuwa się z niego komentarzy ani
+nie edytuje go ręcznie; CI wymaga pełnej zgodności bajtów przez `git diff`.
+Rutynowe odtwarzanie korzysta z zapisanego cache bez
+`--force-refresh-action-pins`, które celowo wymusza ponowne rozwiązywanie.
+
 ## Wejście i zakres
 
 Wywołanie wskazuje trzy publiczne wartości, pochodzące z uprzednio
