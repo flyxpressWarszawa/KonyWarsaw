@@ -30,10 +30,11 @@ HOST_GATED_LANES = frozenset(('engine-v3', 'supreme'))
 
 class ComputeLane:
     def __init__(self, directory, *, client=None, clock=time.time, worker_factory=Worker,
-                 supported_kinds=None, lane='seo'):
+                 supported_kinds=None, lane='seo', integrity_guard=None):
         if lane not in LANE_KINDS:
             raise ValueError('unknown_compute_lane')
         self.lane = lane
+        self.integrity_guard = integrity_guard
         self.allowed_kinds = LANE_KINDS[lane]
         self.directory, self.clock = Path(directory), clock
         self.root = self.directory / 'msw-doctor-sidecar'
@@ -100,6 +101,8 @@ class ComputeLane:
     def step(self, stopping=lambda: False):
         if stopping(): return self.report('stopping')
         if self.pending.exists(): return self.finish_pending()
+        if self.lane in HOST_GATED_LANES and self.integrity_guard is not None and self.integrity_guard.blocked:
+            return self.report('deferred_integrity_blocked')
         if not self.kinds: return self.report('no_supported_compute_kinds')
         site, render = hosting_status(self.directory), render_status(self.directory)
         measurement = render.get('measurement') or {}
