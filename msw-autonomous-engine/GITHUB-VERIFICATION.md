@@ -46,4 +46,12 @@ Run the focused tests in the worker checkout:
 
 ```sh
 python -m unittest discover -s tests -p 'test_github_verify.py' -v
+python -m unittest discover -s tests -p 'test_github_worker_integration.py' -v
 ```
+
+The worker integration tests use the actual spawn-based child process, job
+payload digest, SQLite journal, and completion/readback code. GitHub HTTP and
+the central queue are simulated. They cover successful verification, a failed
+file digest, a changed payload, disabled capability, a mismatched server
+readback, and reuse of a previously recorded result. Passing them does not
+establish that a production queue accepts or authorizes this capability.
