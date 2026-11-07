@@ -80,6 +80,36 @@ class ReceiptTests(unittest.TestCase):
             self.assertEqual(worker.journal.pending(), [])
             self.assertEqual(worker.journal.lookup("job-one", "a" * 64)["state"], "acknowledged")
 
+    def test_missing_old_receipt_is_preserved_and_other_work_can_continue(self):
+        class Client:
+            def send(self, action, payload):
+                if action == "complete": raise TransportError("expired_lease", 409)
+                if action == "status": raise TransportError("server_rejected_request", 404)
+                if action == "claim": return {"state": "idle"}
+                raise AssertionError(action)
+        with tempfile.TemporaryDirectory() as d:
+            worker = Worker(Client(), Path(d))
+            original = worker.journal.save({"id": "job-one", "payload_sha256": "a" * 64}, "lease", {"ok": True})
+            self.assertEqual(worker.run_once(), {"state": "idle"})
+            saved = worker.journal.lookup("job-one", "a" * 64)
+            self.assertEqual(saved["state"], "pending_deferred")
+            self.assertEqual(saved["result_sha256"], original["result_sha256"])
+            self.assertEqual(saved["result_json"], original["result_json"])
+            self.assertEqual(worker.journal.pending(), [])
+            with worker.journal.connect() as db:
+                db.execute("UPDATE receipts SET updated_at=? WHERE job_id=?", (int(time.time()) - 3601, "job-one"))
+            self.assertEqual(worker.journal.pending()[0]["job_id"], "job-one")
+
+    def test_retryable_server_error_does_not_defer_or_discard_receipt(self):
+        class Client:
+            def send(self, action, payload):
+                raise TransportError("transport_unavailable", 503)
+        with tempfile.TemporaryDirectory() as d:
+            worker = Worker(Client(), Path(d))
+            worker.journal.save({"id": "job-one", "payload_sha256": "a" * 64}, "lease", {"ok": True})
+            with self.assertRaises(TransportError): worker.replay_receipts()
+            self.assertEqual(worker.journal.lookup("job-one", "a" * 64)["state"], "pending")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -54,7 +54,11 @@ class Journal:
 
     def pending(self) -> list[dict]:
         with self.connect() as db:
-            return [dict(row) for row in db.execute("SELECT * FROM receipts WHERE state='pending' ORDER BY updated_at LIMIT 8")]
+            # A temporarily missing receipt must not starve every other job.
+            # Preserve it and retry after one hour; never treat 404 as an ACK.
+            return [dict(row) for row in db.execute(
+                "SELECT * FROM receipts WHERE state='pending' OR (state='pending_deferred' AND updated_at<=?) ORDER BY updated_at LIMIT 8",
+                (int(time.time()) - 3600,))]
 
     def mark(self, job_id: str, state: str) -> None:
         with self.connect() as db:
@@ -94,6 +98,7 @@ class Worker:
         self.last_server_contact = 0
         self.last_job_state = "not_run"
         self.cron_state = "not_run"
+        self.doctor = None
 
     def acknowledge(self, receipt: dict) -> dict:
         fields = {key: receipt[key] for key in ("payload_sha256", "lease_token", "result_json", "result_sha256")}
@@ -127,7 +132,14 @@ class Worker:
                 if error.status == 409:
                     # A completion can be committed even if its HTTP response was
                     # lost. Verify the durable result before abandoning a receipt.
-                    readback = self.client.send("status", {"job_id": receipt["job_id"]})
+                    try:
+                        readback = self.client.send("status", {"job_id": receipt["job_id"]})
+                    except TransportError as status_error:
+                        if status_error.status != 404:
+                            raise
+                        self.journal.mark(receipt["job_id"], "pending_deferred")
+                        print(json.dumps({"receipt_recovery": {"state": "deferred_unverified", "reason": "status_not_found", "retry_seconds": 3600}}), flush=True)
+                        continue
                     self.last_server_contact = int(time.time())
                     if readback.get("state") in {"completed", "failed"} and readback.get("result_sha256") == receipt["result_sha256"]:
                         self.journal.mark(receipt["job_id"], "acknowledged")
@@ -135,6 +147,9 @@ class Worker:
                         count += 1
                     else:
                         self.journal.mark(receipt["job_id"], "stale_lease")
+                elif error.status == 404:
+                    self.journal.mark(receipt["job_id"], "pending_deferred")
+                    print(json.dumps({"receipt_recovery": {"state": "deferred_unverified", "reason": "endpoint_or_receipt_not_found", "retry_seconds": 3600}}), flush=True)
                 else:
                     raise
         return count
@@ -196,6 +211,8 @@ class Worker:
         self.replay_receipts()
         if self.stopping:
             raise WorkerDraining()
+        if self.doctor is not None and self.doctor.defer_claim():
+            return {"state": "doctor_deferred", "reason": "sustained_render_pressure"}
         response = self.client.send("claim", {"capabilities": list(handlers())})
         self.last_server_contact = int(time.time())
         if response.get("state") != "claimed":
@@ -220,6 +237,14 @@ class Worker:
         print(json.dumps({"worker_version": __version__, "state": "ready"}), flush=True)
         signal.signal(signal.SIGTERM, lambda *_: setattr(self, "stopping", True))
         signal.signal(signal.SIGINT, lambda *_: setattr(self, "stopping", True))
+        if not once and os.environ.get("MSW_RENDER_DOCTOR", "1") == "1":
+            from .render_doctor import RenderDoctor
+            try:
+                self.doctor = RenderDoctor(self.journal.data_dir)
+                self.doctor.start(lambda: self.stopping)
+            except (OSError, ValueError, sqlite3.Error) as error:
+                self.doctor = None
+                print(json.dumps({"render_doctor": {"state": "startup_blocked", "code": type(error).__name__}}), flush=True)
         # Catalogue scheduling shares this worker and its existing persistent disk.
         if (not once and os.environ.get("MSW_CATALOG_PUBLISHER", "1") == "1"
                 and getattr(self.client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"):
@@ -252,7 +277,9 @@ class Worker:
             try:
                 result = self.run_once()
                 print(json.dumps(result), flush=True)
-                pause = min(60, pause + 5) if result["state"] == "idle" else (30 if result["state"] == "failed" else 10)
+                pause = min(60, pause + 5) if result["state"] == "idle" else (30 if result["state"] in {"failed", "doctor_deferred"} else 10)
+                if self.doctor is not None and self.doctor.high_pressure():
+                    pause = max(pause, 30)
                 self.health(result["state"])
                 if fleet_thread is None and poke_cron_seconds > 0 and time.monotonic() - last_poke > poke_cron_seconds:
                     try:

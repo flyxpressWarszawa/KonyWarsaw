@@ -47,6 +47,11 @@ def status(directory: Path, *, include_report=False) -> dict:
         result["heartbeat_fresh"] = 0 <= time.time() - result["at"] < 300
         from .wordpress_agent import summary as wordpress_summary
         result["wordpress_tools"] = wordpress_summary(directory)
+        try:
+            from .render_doctor import status as doctor_status
+            result["render_doctor"] = doctor_status(directory)
+        except (OSError, ValueError, sqlite3.Error):
+            result["render_doctor"] = {"state": "memory_unavailable", "render_api_connected": False}
         history = directory / "owner-continuity" / "status.json"
         result["owner_continuity"] = json.loads(history.read_text()) if history.exists() else {"state": "not_observed", "full_chatgpt_account_history_access": False}
         if include_report:

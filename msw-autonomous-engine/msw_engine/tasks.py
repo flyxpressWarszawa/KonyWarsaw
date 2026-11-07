@@ -383,6 +383,14 @@ def runtime_catalog(payload: dict, data_dir: Path) -> dict:
             "autonomous_agent": agent_status(data_dir, include_report=payload.get("include_director_report", True) is True),
             "modules": [{key: item[key] for key in ("id", "version", "source_sha256") if key in item}
                         for item in status.get("modules", [])], "capabilities": list(handlers())}
+    try:
+        from .render_doctor import status as doctor_status
+        result["render_doctor"] = doctor_status(data_dir)
+        if "render_doctor_query" in payload:
+            from .render_doctor import search_cases
+            result["render_doctor"]["retrieved_cases"] = search_cases(data_dir, payload["render_doctor_query"])
+    except (OSError, ValueError, sqlite3.Error):
+        result["render_doctor"] = {"state": "memory_unavailable", "external_monitor": False, "render_api_connected": False}
     if "suite_snapshot" in payload:
         from .suite import analyze
         result["suite"] = analyze(payload["suite_snapshot"])
