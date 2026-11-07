@@ -45,11 +45,12 @@ class CgroupProbe:
 
 
 class RenderDoctor:
-    def __init__(self, directory, *, probe=None, clock=time.time):
+    def __init__(self, directory, *, probe=None, clock=time.time, monitor_only=False):
         self.directory = Path(directory)
         self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.path = self.directory / 'render-doctor.sqlite3'
         self.probe, self.clock = probe or CgroupProbe(), clock
+        self.monitor_only = monitor_only
         self.last = None
         self.critical_samples = self.recovery_samples = 0
         self.throttled = False
@@ -91,12 +92,13 @@ class RenderDoctor:
         was_high = (prior.get('cpu_percent') is not None and prior['cpu_percent'] > 70) or (prior.get('memory_percent') is not None and prior['memory_percent'] > 70)
         if high and not was_high:
             self.remember('pressure_alarm', measured)
-            self.remember('queue_slowed', measured)
+            if not self.monitor_only:
+                self.remember('queue_slowed', measured)
             print(json.dumps({'render_doctor': {'state': 'pressure_alarm', **measured}}), flush=True)
         critical = (cpu is not None and cpu >= 90) or (memory is not None and memory >= 90)
         self.critical_samples = self.critical_samples + 1 if critical else 0
         # Two independent samples avoid stopping the queue for one short spike.
-        if self.critical_samples >= 2 and not self.throttled:
+        if self.critical_samples >= 2 and not self.throttled and not self.monitor_only:
             self.throttled = True
             self.remember('queue_deferred', measured)
         # Unknown data cannot prove recovery or extend a stale throttle.
