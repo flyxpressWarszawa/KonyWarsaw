@@ -1,12 +1,12 @@
-"""Build and import probe for a replacement Render worker.
+"""Default isolated probe, with an explicit opt-in to a limited SEO worker.
 
-This deliberately does not create a Client or Worker, access storage, contact
-WordPress, claim queue jobs, or start any background scheduler. A separate,
-reviewed migration is needed before this process can replace the live worker.
+Standby does not contact WordPress or claim jobs. The opt-in auxiliary mode
+is not a full replacement for the existing central worker.
 """
 from __future__ import annotations
 
 import json
+import os
 import signal
 import threading
 import time
@@ -31,6 +31,11 @@ def emit(state: str) -> None:
 
 
 def main() -> int:
+    # The isolated probe remains the default until the explicitly scoped
+    # WordPress node and this service are both configured.
+    if os.environ.get("MSW_AUX_WORKER_ENABLED") == "1":
+        from .render_auxiliary import main as run_auxiliary
+        return run_auxiliary()
     stop = threading.Event()
     signal.signal(signal.SIGTERM, lambda *_: stop.set())
     signal.signal(signal.SIGINT, lambda *_: stop.set())
