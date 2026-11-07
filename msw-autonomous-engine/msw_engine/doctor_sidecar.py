@@ -89,6 +89,8 @@ def run(data_dir: Path, release: str) -> int:
             ComputeLane(data_dir).start(lambda: stop)
             if pack['state'] == 'installed_verified' and 'engine-v3' in pack['modules']:
                 ComputeLane(data_dir, lane='engine-v3').start(lambda: stop)
+            if pack['state'] == 'installed_verified' and 'supreme-server' in pack['modules']:
+                ComputeLane(data_dir, lane='supreme').start(lambda: stop)
         except (OSError, ValueError) as error:
             print(json.dumps({'doctor_compute_lane': {'state': 'startup_blocked', 'code': type(error).__name__}}), flush=True)
         try:

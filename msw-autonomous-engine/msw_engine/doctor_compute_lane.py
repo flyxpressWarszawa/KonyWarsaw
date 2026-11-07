@@ -1,8 +1,9 @@
 """Slow, leased Render execution of approved local compute jobs.
 
-The existing WordPress queue remains authoritative. One job at most per ten
-minutes is attempted. This lane never runs PHP callbacks, publishes content,
-or claims to measure hosting CPU. Uncertain acknowledgements are retained.
+The existing WordPress queue remains authoritative. Each lane attempts at most
+one job per ten minutes and never runs PHP callbacks or publishes content.
+Private-runtime lanes defer unless hosting resource measurements are fresh.
+Uncertain acknowledgements are retained.
 """
 from __future__ import annotations
 
@@ -22,15 +23,18 @@ from .tasks import handlers
 
 COMPUTE_KINDS = ('seo.analyze', 'research.rank', 'knowledge.ingest', 'knowledge.search')
 V3_KINDS = ('engine.v3.ingest',)
+SUPREME_KINDS = ('supreme.observe',)
+LANE_KINDS = {'seo': COMPUTE_KINDS, 'engine-v3': V3_KINDS, 'supreme': SUPREME_KINDS}
+HOST_GATED_LANES = frozenset(('engine-v3', 'supreme'))
 
 
 class ComputeLane:
     def __init__(self, directory, *, client=None, clock=time.time, worker_factory=Worker,
                  supported_kinds=None, lane='seo'):
-        if lane not in ('seo', 'engine-v3'):
+        if lane not in LANE_KINDS:
             raise ValueError('unknown_compute_lane')
         self.lane = lane
-        self.allowed_kinds = COMPUTE_KINDS if lane == 'seo' else V3_KINDS
+        self.allowed_kinds = LANE_KINDS[lane]
         self.directory, self.clock = Path(directory), clock
         self.root = self.directory / 'msw-doctor-sidecar'
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -104,7 +108,7 @@ class ComputeLane:
                 and measurement.get('fresh') is True and isinstance(cpu, (int, float))
                 and isinstance(memory, (int, float)) and cpu < 70 and memory < 70):
             return self.report('deferred_missing_health_or_render_pressure')
-        if self.lane == 'engine-v3':
+        if self.lane in HOST_GATED_LANES:
             from .account_health import read_account_health
             health = read_account_health(self.client, clock=self.clock)
             if health.get('state') != 'fresh':
@@ -131,7 +135,7 @@ class ComputeLane:
         self.pending.unlink()
         return self.report('completed' if ack.get('state') == 'completed' else 'job_failed_verified',
                            kind=job['kind'], server_ack_verified=ack.get('server_ack_verified') is True,
-                           hosting_cpu_measured=self.lane == 'engine-v3',
+                           hosting_cpu_measured=self.lane in HOST_GATED_LANES,
                            result_sha256=receipt['result_sha256'])
 
     def start(self, stopping):
@@ -140,8 +144,9 @@ class ComputeLane:
                 last = int(json.loads(self.status_path.read_text())['at'])
             except (OSError, ValueError, KeyError, TypeError):
                 self.report('scheduled')
-                # Spread the first additional v3 claim away from the existing lane.
-                last = int(self.clock()) - (540 if self.lane == 'engine-v3' else 0)
+                # Stagger new lanes so their first claims do not coincide.
+                offset = {'seo': 0, 'engine-v3': 540, 'supreme': 480}[self.lane]
+                last = int(self.clock()) - offset
             while not stopping():
                 elapsed = max(0, self.clock() - last)
                 deadline = time.monotonic() + max(0, 600 - elapsed)

@@ -137,6 +137,24 @@ class ComputeTests(unittest.TestCase):
         self.assertEqual(self.step()['state'], 'no_supported_compute_kinds')
         self.assertFalse(self.client.calls)
 
+    def test_supreme_lane_is_scoped_and_respects_host_pressure(self):
+        self.job['kind'] = 'supreme.observe'
+        self.lane = ComputeLane(self.root, client=self.client, worker_factory=Worker,
+                                supported_kinds=('supreme.observe',), clock=lambda: 1000, lane='supreme')
+        self.assertEqual(self.lane.pending.name, 'supreme-pending.json')
+        with patch('msw_engine.account_health.read_account_health', return_value={'state':'unavailable'}):
+            self.assertEqual(self.step()['state'], 'deferred_host_health_unavailable')
+        with patch('msw_engine.account_health.read_account_health', return_value={'state':'fresh','cpu_percent':20,'physical_memory_percent':70}):
+            self.assertEqual(self.step()['state'], 'deferred_host_pressure')
+        self.assertFalse(self.client.calls)
+        with patch('msw_engine.account_health.read_account_health', return_value={'state':'fresh','cpu_percent':30,'physical_memory_percent':20}):
+            result = self.step()
+        self.assertEqual(self.client.calls[0], ('claim', {'capabilities':['supreme.observe']}))
+        self.assertEqual(result['state'], 'completed')
+        self.assertTrue(result['server_ack_verified'])
+        self.assertTrue(result['hosting_cpu_measured'])
+        self.assertFalse((self.root / 'msw-doctor-sidecar' / 'engine-v3-pending.json').exists())
+
     def test_real_worker_ranks_and_reads_back_knowledge_without_php(self):
         class Queue:
             def __init__(self): self.jobs, self.result, self.sequence = [], None, 0

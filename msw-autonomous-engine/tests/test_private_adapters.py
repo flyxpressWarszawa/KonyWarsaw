@@ -46,6 +46,41 @@ class PrivateAdapterTests(unittest.TestCase):
         with self.assertRaises(TaskError):
             self.run_job("supreme.observe", {**payload, "inventory": {"installed": 10, "active": True, "inactive": 9}})
 
+    def test_supreme_priority_lane_runs_real_bounded_worker(self):
+        payload = {"origin": "https://mobilny-serwis-warszawa.pl", "provenance": "authenticated_wordpress_inventory",
+                   "inventory": {"installed": 10, "active": 8, "inactive": 2}}
+        raw = json.dumps(payload, separators=(',', ':'))
+        job = {'id':'isolated-supreme-test', 'kind':'supreme.observe', 'payload':raw,
+               'payload_sha256':hashlib.sha256(raw.encode()).hexdigest()}
+
+        class Queue:
+            def send(self, action, fields):
+                if action == 'claim':
+                    self.capabilities = fields['capabilities']
+                    return {'state':'claimed', 'job':job, 'lease_token':'test-lease'}
+                if action == 'complete':
+                    self.result = json.loads(fields['result_json'])
+                    self.digest = fields['result_sha256']
+                    return {'stored':True, 'result_sha256':self.digest}
+                if action == 'status':
+                    return {'state':'completed' if self.result['ok'] else 'failed', 'result_sha256':self.digest}
+                raise AssertionError(action)
+
+        queue = Queue()
+        lane = ComputeLane(self.directory, client=queue, worker_factory=Worker,
+                           supported_kinds=('supreme.observe',), lane='supreme')
+        with patch('msw_engine.doctor_compute_lane.hosting_status', return_value={'state':'reachable','sample_fresh':True}), \
+             patch('msw_engine.doctor_compute_lane.render_status', return_value={'measurement':{'fresh':True,'cpu_percent':1,'memory_percent':20}}), \
+             patch('msw_engine.account_health.read_account_health', return_value={'state':'fresh','cpu_percent':30,'physical_memory_percent':20}):
+            result = lane.step()
+        self.assertEqual(queue.capabilities, ['supreme.observe'])
+        self.assertTrue(queue.result['ok'], queue.result)
+        self.assertEqual(result['state'], 'completed')
+        self.assertTrue(result['server_ack_verified'])
+        self.assertTrue(queue.result['data']['durable_local_readback_verified'])
+        with sqlite3.connect(self.directory / 'supreme/msw-supreme-state.sqlite3') as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM memory').fetchone()[0], 1)
+
     def test_combo_original_receiver_deduplicates_and_rejects_changed_input(self):
         payload = {"schema": "msw.combo.analytics.v1", "request_id": "combo-" + "1" * 40,
                    "origin": "https://mobilny-serwis-warszawa.pl", "generated_utc": "2026-11-05T00:00:00Z",
