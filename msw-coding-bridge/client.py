@@ -312,7 +312,8 @@ class BridgeClient:
         support = SUPPORT[task["target"]]
         if claimed.get("execution_support") != support:
             raise BridgeError("invalid_execution_support", stage="exchange_claim")
-        self.receipt.update(task_id=task["id"], request_sha256=task["request_sha256"], execution_support=support)
+        self.receipt.update(task_id=task["id"], request_sha256=task["request_sha256"],
+                            file_sha256=hashlib.sha256(encoded).hexdigest(), execution_support=support)
         commit, task_path, created = self.store(task, encoded)
         self.receipt.update(state="stored_unacknowledged", commit_sha=commit, task_path=task_path, created=created,
                             task_url="https://github.com/" + REPOSITORY + "/blob/" + commit + "/" + task_path)
