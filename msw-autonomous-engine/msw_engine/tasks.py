@@ -440,6 +440,11 @@ def handlers() -> dict:
     result["runtime.catalog"] = runtime_catalog
     if os.environ.get('MSW_RUNTIME_MODE') == 'render-free':
         return {kind: result[kind] for kind in ('seo.analyze', 'research.rank')}
+    # Explicit opt-in only. Registering this read-only verifier does not grant
+    # the WordPress queue a capability or enable repository writes/deployments.
+    if os.environ.get("MSW_GITHUB_VERIFY_ENABLED") == "1":
+        from .github_verify import handle as github_verify
+        result["github.verify_file"] = github_verify
     from .runtime_pack import module_root
     if module_root("supreme-server") is not None:
         result["supreme.observe"] = supreme_observe
