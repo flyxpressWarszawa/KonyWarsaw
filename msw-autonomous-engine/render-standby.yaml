@@ -1,5 +1,5 @@
 # Auxiliary worker: production runtime is opt-in and remains capability-scoped.
-# Queue receipts remain ephemeral until persistent storage is explicitly attached.
+# The configured disk retains auxiliary receipts across deploys and restarts.
 services:
   - type: worker
     name: msw-central-engine-worker-standby
@@ -14,4 +14,7 @@ services:
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
-
+    disk:
+      name: disk
+      mountPath: /tmp/msw-aux-seo
+      sizeGB: 1
