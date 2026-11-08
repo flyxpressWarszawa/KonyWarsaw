@@ -58,12 +58,31 @@ def parse_request(raw):
         return d
     except (ValueError,TypeError,UnicodeError,RecursionError): raise Fault('request_schema') from None
 
+def parse_hf_request(raw):
+    if not isinstance(raw,bytes) or len(raw)>LIMIT: raise Fault('request_size',413)
+    def unique(pairs):
+        out={}
+        for key,value in pairs:
+            if key in out: raise ValueError('duplicate')
+            out[key]=value
+        return out
+    try:
+        data=json.loads(raw,object_pairs_hook=unique,parse_constant=lambda _: (_ for _ in ()).throw(ValueError()))
+        if not isinstance(data,dict) or set(data)!={'request_id','type','query','limit'}: raise ValueError()
+        if not isinstance(data['request_id'],str) or not re.fullmatch(r'[a-zA-Z0-9_-]{8,80}',data['request_id']): raise ValueError()
+        if data['type'] not in ('models','datasets','spaces'): raise ValueError()
+        if not isinstance(data['query'],str) or not data['query'].strip() or len(data['query'])>100: raise ValueError()
+        if type(data['limit']) is not int or not 1<=data['limit']<=5: raise ValueError()
+        return data
+    except (ValueError,TypeError,UnicodeError,RecursionError): raise Fault('request_schema') from None
+
 class OwnerAuth:
     def __init__(self, getter=None, clock=time.time):
         self.getter=getter or (lambda:fetch_json(KEY_URL)); self.clock=clock
         self.key=None; self.kid=None; self.until=0; self.fetch_after=0
         self.seen={}; self.lock=threading.Lock()
-    def authorize(self, raw, headers):
+    def authorize(self, raw, headers, path='/v1/generate'):
+        if path not in ('/v1/generate','/v1/hf/search'): raise Fault('signature_scope',401)
         ts=headers.get('X-MSW-Time',''); nonce=headers.get('X-MSW-Nonce',''); sig=headers.get('X-MSW-Signature',''); kid=headers.get('X-MSW-Key','')
         if not re.fullmatch(r'\d{10}',ts) or abs(self.clock()-int(ts))>90 or not re.fullmatch(r'[a-f0-9]{32}',nonce) or not re.fullmatch(r'[a-f0-9]{64}',kid) or not 300<=len(sig)<=700: raise Fault('signature_required',401)
         now=self.clock()
@@ -86,7 +105,7 @@ class OwnerAuth:
                     self.key,self.kid,self.until=key,real,now+300
                 except Exception: raise Fault('owner_key_unavailable',503) from None
             if self.kid!=kid: raise Fault('wrong_owner_key',401)
-            msg=('msw-owned-llm.v1\nPOST\n/v1/generate\n'+ts+'\n'+nonce+'\n'+sha(raw)).encode()
+            msg=('msw-owned-llm.v1\nPOST\n'+path+'\n'+ts+'\n'+nonce+'\n'+sha(raw)).encode()
             try: self.key.verify(base64.b64decode(sig,validate=True),msg,padding.PKCS1v15(),hashes.SHA256())
             except (ValueError,InvalidSignature): raise Fault('bad_signature',401) from None
             if len(self.seen)>=256: raise Fault('auth_capacity',429)
@@ -162,7 +181,7 @@ class Handler(BaseHTTPRequestHandler):
         else:self.reply(404,{'error':'not_found'})
     def do_POST(self):
         try:
-            if self.path!='/v1/generate':raise Fault('not_found',404)
+            if self.path not in ('/v1/generate','/v1/hf/search'):raise Fault('not_found',404)
             if self.headers.get('Transfer-Encoding') or self.headers.get('Content-Encoding','identity')!='identity':raise Fault('encoding_denied',415)
             if self.headers.get('Content-Type','').split(';')[0]!='application/json':raise Fault('content_type',415)
             sizes=self.headers.get_all('Content-Length',[])
@@ -171,8 +190,13 @@ class Handler(BaseHTTPRequestHandler):
             if not 1<=n<=LIMIT:raise Fault('request_size',413)
             raw=self.rfile.read(n)
             if len(raw)!=n:raise Fault('incomplete_body')
-            d=parse_request(raw);AUTH.authorize(raw,self.headers)
-            r=RUNTIME.generate(d['prompt']);r.update({'schema':'msw.owned-llm.result.v1','request_id':d['request_id'],'request_sha256':sha(raw),'wordPress_result_saved':False})
+            d=parse_request(raw) if self.path=='/v1/generate' else parse_hf_request(raw)
+            AUTH.authorize(raw,self.headers,self.path)
+            if self.path=='/v1/generate':
+                r=RUNTIME.generate(d['prompt']);r.update({'schema':'msw.owned-llm.result.v1','request_id':d['request_id'],'request_sha256':sha(raw),'wordPress_result_saved':False})
+            else:
+                r=RUNTIME.search_huggingface(d['type'],d['query'],d['limit'])
+                r.update({'schema':'msw.owned-llm.huggingface-search.v1','request_id':d['request_id'],'request_sha256':sha(raw),'actions_executed':False})
             self.reply(200,r)
         except Fault as e:self.reply(e.status,{'error':e.code})
         except Exception:self.reply(503,{'error':'generation_unavailable'})
