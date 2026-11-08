@@ -32,7 +32,7 @@ def env():
 class Tests(unittest.TestCase):
     def test_configuration_does_not_report_connected_without_probe(self):
         bridge=h.HuggingFaceBridge(env(),Opener({}))
-        self.assertEqual(bridge.status(),{"configured":True,"verified":False,"state":"not_checked"})
+        self.assertEqual(bridge.status(),{"configured":True,"verified":False,"state":"not_checked","last_checked_at":None})
         self.assertFalse(h.HuggingFaceBridge({},Opener({})).verify())
 
     def test_authenticated_probe_uses_fixed_url_and_no_secret_in_status(self):
@@ -40,6 +40,7 @@ class Tests(unittest.TestCase):
         bridge=h.HuggingFaceBridge(env(),opener)
         self.assertTrue(bridge.verify())
         self.assertEqual(bridge.status()["state"],"connected")
+        self.assertIsNotNone(bridge.status()["last_checked_at"])
         self.assertNotIn(SITE,json.dumps(bridge.status()))
         self.assertNotIn(KEY,json.dumps(bridge.status()))
         req,timeout=opener.requests[0]

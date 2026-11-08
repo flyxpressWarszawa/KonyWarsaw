@@ -17,12 +17,22 @@ class AutonomousRuntime(BaseRuntime):
         super().__init__(*args, **kwargs)
         self.code_proof = None
         self.triage_proof = None
+        self.polish_triage_proof = None
+        self.hf_search_proof = None
         self.hf_bridge = hf_bridge.HuggingFaceBridge()
 
     def _check_hf_bridge(self):
         verified = self.hf_bridge.verify()
         print(json.dumps({'event':'huggingface_bridge_check', 'verified':verified,
                           'state':self.hf_bridge.status()['state']}), flush=True)
+        if verified:
+            try:
+                result = self.hf_bridge.search('models','SmolLM2-135M-Instruct',3)
+                self.hf_search_proof = {'verified':True,'result_count':len(result['results'])}
+                print(json.dumps({'event':'huggingface_search_check', **self.hf_search_proof}), flush=True)
+            except hf_bridge.BridgeError:
+                self.hf_search_proof = {'verified':False}
+                print(json.dumps({'event':'huggingface_search_check','verified':False}), flush=True)
 
     def start(self):
         threading.Thread(target=self._check_hf_bridge, daemon=True).start()
@@ -51,6 +61,17 @@ class AutonomousRuntime(BaseRuntime):
         except Exception:
             self.triage_proof = {'error':'triage_self_test_failed','synthetic_test':True}
             print(json.dumps({'event':'lead_triage_self_test_failed'}), flush=True)
+        try:
+            with self.lock:
+                example = leadtriage.PREFIX + json.dumps({'description':'Awaria gniazdka elektrycznego.'},ensure_ascii=False)
+                p = leadtriage.generate(self, example)
+                self.polish_triage_proof = {'synthetic_test':True, 'observed_category':p['category'],
+                                            'expected_category':'electrical', 'matched':p['category']=='electrical',
+                                            'elapsed_ms':p['elapsed_ms'], 'boot_id':self.boot_id}
+            print(json.dumps({'event':'lead_triage_polish_self_test','proof':self.polish_triage_proof}), flush=True)
+        except Exception:
+            self.polish_triage_proof = {'error':'polish_triage_self_test_failed','synthetic_test':True}
+            print(json.dumps({'event':'lead_triage_polish_self_test_failed'}), flush=True)
 
     def _generate(self, prompt, maximum=64):
         if prompt.startswith(leadtriage.PREFIX):
@@ -115,7 +136,8 @@ class AutonomousRuntime(BaseRuntime):
             'advisory_catalog_origin':'human_authored_not_model_generated',
             'advisory_quality_gate':'exact_catalog_schema; selection_optimality_not_verified',
             'huggingface_bridge':self.hf_bridge.status(),
-            'lead_triage_available':True, 'lead_triage_self_test':self.triage_proof,
+            'huggingface_search_self_test':self.hf_search_proof,
+            'lead_triage_available':True, 'lead_triage_self_test':self.triage_proof, 'lead_triage_polish_self_test':self.polish_triage_proof,
             'lead_triage_quality':'not_validated_for_polish_business_use'})
         return d
 

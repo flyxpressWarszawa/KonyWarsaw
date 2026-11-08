@@ -3,6 +3,7 @@ import json
 import os
 import re
 import threading
+import time
 import urllib.error
 import urllib.request
 
@@ -26,6 +27,7 @@ class HuggingFaceBridge:
         self._opener = opener or urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
         self._lock = threading.Lock()
         self._status = "not_configured"
+        self._checked_at = None
         if self.configured:
             self._status = "not_checked"
 
@@ -71,11 +73,12 @@ class HuggingFaceBridge:
             verified = False
         with self._lock:
             self._status = "connected" if verified else ("unavailable" if self.configured else "not_configured")
+            self._checked_at = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         return verified
 
     def status(self):
         with self._lock:
-            return {"configured": self.configured, "verified": self._status == "connected", "state": self._status}
+            return {"configured": self.configured, "verified": self._status == "connected", "state": self._status, "last_checked_at": self._checked_at}
 
     def search(self, kind, query, limit=5):
         if kind not in {"models", "datasets", "spaces"} or not isinstance(query, str) or not query.strip() or len(query) > 100 or type(limit) is not int or not 1 <= limit <= 5:
