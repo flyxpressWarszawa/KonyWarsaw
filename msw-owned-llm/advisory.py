@@ -6,6 +6,8 @@ import json
 import time
 PREFIX = 'MSW is a technical service business. WordPress plugin facts: '
 SUFFIX = '. Suggest one low-risk check that could improve service reliability. The facts do not prove a failure. Output advice only; do not claim work was done.'
+PREFIX_PL = 'Odpowiedz tylko po polsku jednym krótkim zdaniem, precyzyjną terminologią serwisową. Jesteś asystentem technicznym MSW. Dane wtyczki WordPress: '
+SUFFIX_PL = '. Zaproponuj jedno bezpieczne sprawdzenie. Same dane nie dowodzą awarii. Nie twierdź, że coś wykonano.'
 FIELDS = {'name', 'version', 'active', 'registered_adapters', 'previous_transport_failures'}
 CATALOG = {
     'error_log_review': 'Read existing plugin-related error records; do not infer an error from missing logs.',
@@ -24,11 +26,15 @@ def unique(pairs):
         out[key] = value
     return out
 
+def accepts(prompt):
+    return isinstance(prompt, str) and (prompt.startswith(PREFIX) or prompt.startswith(PREFIX_PL))
+
 def facts(prompt):
-    if not isinstance(prompt, str) or not prompt.startswith(PREFIX):
+    if not accepts(prompt):
         raise ValueError('advisory_request')
-    d, end = json.JSONDecoder(object_pairs_hook=unique).raw_decode(prompt[len(PREFIX):])
-    if prompt[len(PREFIX) + end:] != SUFFIX or not isinstance(d, dict) or set(d) != FIELDS:
+    prefix, suffix = (PREFIX_PL, SUFFIX_PL) if prompt.startswith(PREFIX_PL) else (PREFIX, SUFFIX)
+    d, end = json.JSONDecoder(object_pairs_hook=unique).raw_decode(prompt[len(prefix):])
+    if prompt[len(prefix) + end:] != suffix or not isinstance(d, dict) or set(d) != FIELDS:
         raise ValueError('advisory_schema')
     if not isinstance(d['name'], str) or not 1 <= len(d['name']) <= 120 or not isinstance(d['version'], str) or len(d['version']) > 40 or d['active'] is not True:
         raise ValueError('advisory_metadata')

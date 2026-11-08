@@ -5,6 +5,15 @@ P=a.PREFIX+json.dumps(D)+a.SUFFIX
 GOOD='{"check_id":"error_log_review"}'
 class Tests(unittest.TestCase):
     def test_parse(self): self.assertEqual(a.facts(P),D)
+    def test_current_polish_wordpress_prompt_uses_same_validated_advisory(self):
+        prompt=a.PREFIX_PL+json.dumps(D,ensure_ascii=False,separators=(',',':'))+a.SUFFIX_PL
+        self.assertEqual(a.facts(prompt),D)
+        self.assertTrue(a.accepts(prompt))
+        class R:
+            def backend(self,path,payload):
+                return {'tokens':[1,2]} if path=='/tokenize' else {'content':GOOD,'tokens_predicted':12}
+        self.assertEqual(a.generate(R(),prompt)['text'],GOOD)
+        with self.assertRaises(ValueError): a.facts(prompt+' Extra instructions.')
     def test_task(self):
         self.assertIn('MSW AI V7',a.task(P)); self.assertIn('do not prove plugin faults',a.task(P))
     def test_catalog_entries(self):

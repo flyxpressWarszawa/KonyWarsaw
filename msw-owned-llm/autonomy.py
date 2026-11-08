@@ -82,7 +82,7 @@ class AutonomousRuntime(BaseRuntime):
             result.update({'runtime':'llama.cpp-b11979-local-cpu','model':gateway.MODEL,
                 'weight_sha256':gateway.MODEL_SHA,'training_performed':False,'actions_executed':False})
             return result
-        if not prompt.startswith(advisory.PREFIX):
+        if not advisory.accepts(prompt):
             return super()._generate(prompt, maximum)
         try:
             result = advisory.generate(self, prompt)
