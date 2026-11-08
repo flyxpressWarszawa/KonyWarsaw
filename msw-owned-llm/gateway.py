@@ -3,7 +3,7 @@ Only the fixed owner WordPress HTTPS origin may publish the RSA verification key
 No model downloads at request time, no cloud inference, no persistent user text.
 """
 from __future__ import annotations
-import base64, hashlib, json, os, re, secrets, signal, subprocess, threading, time
+import base64, hashlib, hmac, json, os, re, secrets, signal, subprocess, threading, time
 import urllib.error, urllib.request
 from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -11,6 +11,8 @@ from pathlib import Path
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
+import hf_bridge
+import leadtriage
 
 VERSION = '0.1.1'
 MODEL = 'SmolLM2-135M-Instruct-Q4_K_M'
@@ -75,6 +77,40 @@ def parse_hf_request(raw):
         if type(data['limit']) is not int or not 1<=data['limit']<=5: raise ValueError()
         return data
     except (ValueError,TypeError,UnicodeError,RecursionError): raise Fault('request_schema') from None
+
+def parse_lead_request(raw):
+    if not isinstance(raw,bytes) or len(raw)>LIMIT: raise Fault('request_size',413)
+    def unique(pairs):
+        out={}
+        for key,value in pairs:
+            if key in out: raise ValueError('duplicate')
+            out[key]=value
+        return out
+    try:
+        data=json.loads(raw,object_pairs_hook=unique,parse_constant=lambda _: (_ for _ in ()).throw(ValueError()))
+        if not isinstance(data,dict) or set(data)!={'request_id','description'}: raise ValueError()
+        if not isinstance(data['request_id'],str) or not re.fullmatch(r'[a-zA-Z0-9_-]{8,80}',data['request_id']): raise ValueError()
+        leadtriage.parse(leadtriage.PREFIX+json.dumps({'description':data['description']},ensure_ascii=False))
+        return data
+    except (ValueError,TypeError,UnicodeError,RecursionError): raise Fault('request_schema') from None
+
+class SiteAuth:
+    def __init__(self, key=None, clock=time.time):
+        self.key=os.environ.get(hf_bridge.BRIDGE_SECRET_ENV,'') if key is None else key
+        self.clock=clock; self.seen={}; self.lock=threading.Lock()
+    def authorize(self,raw,headers):
+        ts=headers.get('X-MSW-Time',''); nonce=headers.get('X-MSW-Nonce',''); sig=headers.get('X-MSW-Signature','')
+        if not re.fullmatch(r'[A-Za-z0-9_-]{40,128}',self.key): raise Fault('bridge_not_configured',503)
+        if not re.fullmatch(r'\d{10}',ts) or abs(self.clock()-int(ts))>60 or not re.fullmatch(r'[a-f0-9]{32}',nonce) or not re.fullmatch(r'[a-f0-9]{64}',sig): raise Fault('signature_required',401)
+        message=('msw-site-triage.v1\nPOST\n/v1/lead-triage\n'+ts+'\n'+nonce+'\n'+sha(raw)).encode()
+        expected=hmac.new(self.key.encode(),message,hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(expected,sig): raise Fault('bad_signature',401)
+        now=self.clock()
+        with self.lock:
+            self.seen={k:v for k,v in self.seen.items() if v>now}
+            if nonce in self.seen: raise Fault('replay_denied',409)
+            if len(self.seen)>=256: raise Fault('auth_capacity',429)
+            self.seen[nonce]=now+120
 
 class OwnerAuth:
     def __init__(self, getter=None, clock=time.time):
@@ -167,6 +203,7 @@ class ModelRuntime:
 
 RUNTIME=None
 AUTH=OwnerAuth()
+SITE_AUTH=SiteAuth()
 class Handler(BaseHTTPRequestHandler):
     protocol_version='HTTP/1.0'
     def log_message(self,*a):pass
@@ -181,7 +218,7 @@ class Handler(BaseHTTPRequestHandler):
         else:self.reply(404,{'error':'not_found'})
     def do_POST(self):
         try:
-            if self.path not in ('/v1/generate','/v1/hf/search'):raise Fault('not_found',404)
+            if self.path not in ('/v1/generate','/v1/hf/search','/v1/lead-triage'):raise Fault('not_found',404)
             if self.headers.get('Transfer-Encoding') or self.headers.get('Content-Encoding','identity')!='identity':raise Fault('encoding_denied',415)
             if self.headers.get('Content-Type','').split(';')[0]!='application/json':raise Fault('content_type',415)
             sizes=self.headers.get_all('Content-Length',[])
@@ -190,11 +227,16 @@ class Handler(BaseHTTPRequestHandler):
             if not 1<=n<=LIMIT:raise Fault('request_size',413)
             raw=self.rfile.read(n)
             if len(raw)!=n:raise Fault('incomplete_body')
-            d=parse_request(raw) if self.path=='/v1/generate' else parse_hf_request(raw)
-            AUTH.authorize(raw,self.headers,self.path)
+            if self.path=='/v1/lead-triage':
+                d=parse_lead_request(raw);SITE_AUTH.authorize(raw,self.headers)
+                prompt=leadtriage.PREFIX+json.dumps({'description':d['description']},ensure_ascii=False)
+                r=RUNTIME.generate(prompt);r.update({'schema':'msw.owned-llm.triage.v1','request_id':d['request_id'],'request_sha256':sha(raw),'wordPress_result_saved':False})
+            else:
+                d=parse_request(raw) if self.path=='/v1/generate' else parse_hf_request(raw)
+                AUTH.authorize(raw,self.headers,self.path)
             if self.path=='/v1/generate':
                 r=RUNTIME.generate(d['prompt']);r.update({'schema':'msw.owned-llm.result.v1','request_id':d['request_id'],'request_sha256':sha(raw),'wordPress_result_saved':False})
-            else:
+            elif self.path=='/v1/hf/search':
                 r=RUNTIME.search_huggingface(d['type'],d['query'],d['limit'])
                 r.update({'schema':'msw.owned-llm.huggingface-search.v1','request_id':d['request_id'],'request_sha256':sha(raw),'actions_executed':False})
             self.reply(200,r)
