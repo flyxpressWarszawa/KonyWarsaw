@@ -1,3 +1,4 @@
+import hashlib
 import json
 import io
 import math
@@ -46,8 +47,11 @@ class QueueClient:
         if action != "claim":
             raise AssertionError(action)
         self.claims += 1
-        return {"state": "claimed", "job": {"kind": "seo.analyze", "id": str(self.claims)},
-                "lease_token": "test-lease"}
+        jobs = [{"job": {"kind": "seo.analyze", "id": f"{self.claims}-{index}",
+                          "payload": "{}", "payload_sha256": hashlib.sha256(b"{}").hexdigest()},
+                 "lease_token": "test-lease", "lease_seconds": 900}
+                for index in range(data.get("batch_limit", 1))]
+        return {"state": "claimed_batch", "batch_protocol": "msw.seo.batch.v1", "jobs": jobs}
 
 
 class CompletionWorker(DummyWorker):
@@ -251,21 +255,24 @@ class OriginGuardTests(unittest.TestCase):
             step(self.client, self.worker)
         self.assertEqual(self.client.calls, [])
 
-    def test_cycle_does_not_claim_second_job_if_pressure_appears(self):
+    def test_next_cycle_does_not_admit_work_if_pressure_appears(self):
         client, worker = QueueClient(), CompletionWorker()
+        gate = SequenceGate("ready", "origin_pressure")
         with patch("msw_engine.render_auxiliary.emit"):
-            state = run_cycle(client, worker, SequenceGate("ready", "origin_pressure"), StopStub())
+            self.assertEqual(run_cycle(client, worker, gate, StopStub()), "completed")
+            state = run_cycle(client, worker, gate, StopStub())
         self.assertEqual(state, "origin_pressure")
         self.assertEqual(client.claims, 1)
-        self.assertEqual(worker.replayed, 1)
+        self.assertEqual(worker.replayed, 2)
 
-    def test_cycle_claims_no_more_than_two_jobs(self):
+    def test_cycle_uses_one_admission_for_at_most_four_jobs(self):
         client, worker = QueueClient(), CompletionWorker()
-        with patch("msw_engine.render_auxiliary.emit"):
-            state = run_cycle(client, worker, SequenceGate("ready", "ready"), StopStub())
+        with patch("msw_engine.render_auxiliary.emit") as emitted:
+            state = run_cycle(client, worker, SequenceGate("ready"), StopStub())
         self.assertEqual(state, "completed")
-        self.assertEqual(client.claims, 2)
+        self.assertEqual(client.claims, 1)
         self.assertEqual(worker.replayed, 1)
+        self.assertEqual(sum(call.args[0] == "completed" for call in emitted.call_args_list), 4)
 
 
 if __name__ == "__main__":

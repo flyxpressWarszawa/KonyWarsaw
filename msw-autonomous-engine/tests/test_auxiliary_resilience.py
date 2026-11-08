@@ -61,6 +61,10 @@ class QueueClient:
         old = ident is not None and int(ident.rsplit("-", 1)[1]) < 100
         if action == "claim":
             self.claims += 1
+            if "batch_limit" in payload:
+                return {"state": "claimed_batch", "batch_protocol": "msw.seo.batch.v1", "jobs": [
+                    {"job": job(100 + self.claims * 10 + index), "lease_token": "test-lease", "lease_seconds": 900}
+                    for index in range(2)]}
             return {"state": "claimed", "job": job(100 + self.claims), "lease_token": "test-lease"}
         if action == "complete":
             if old and self.old_error:
@@ -118,7 +122,7 @@ class AuxiliaryResilienceTests(unittest.TestCase):
         old_completes = [ident for action, ident in client.calls
                          if action == "complete" and int(ident.rsplit("-", 1)[1]) < 100]
         self.assertEqual(len(old_completes), 1)
-        self.assertEqual(client.claims, 2)
+        self.assertEqual(client.claims, 1)
         self.assertEqual(len(worker.journal.pending()), 7)
 
     def test_deferred_or_conflicted_old_receipt_consumes_the_single_replay_budget(self):
@@ -132,7 +136,7 @@ class AuxiliaryResilienceTests(unittest.TestCase):
                 old_completes = [ident for action, ident in client.calls
                                  if action == "complete" and int(ident.rsplit("-", 1)[1]) < 100]
                 self.assertEqual(len(old_completes), 1)
-                self.assertEqual(client.claims, 2)
+                self.assertEqual(client.claims, 1)
                 with worker.journal.connect() as db:
                     self.assertEqual(db.execute("SELECT COUNT(*) FROM receipts WHERE state='pending_deferred'").fetchone()[0], 1)
                     self.assertEqual(db.execute("SELECT COUNT(*) FROM receipts WHERE state='pending'").fetchone()[0], 7)

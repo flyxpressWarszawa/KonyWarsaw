@@ -8,6 +8,7 @@ recomputed when its server-side lease expires, with the same receipt contract.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import os
@@ -30,7 +31,7 @@ CAPABILITY = "seo.analyze"
 POLL_SECONDS = 300
 WARMUP_POLL_SECONDS = 60
 LOW_SAMPLE_RECHECK_SECONDS = 25
-MAX_JOBS_PER_CYCLE = 2
+MAX_JOBS_PER_CYCLE = 4
 MAX_RECEIPT_REPLAYS_PER_CYCLE = 1
 MAX_RETRY_SECONDS = 3600
 MAX_SERVER_WAIT_SECONDS = 7 * 24 * 60 * 60
@@ -295,16 +296,80 @@ def step(client: Client, worker: Worker, stopping=lambda: False, *, gate: Origin
             "result_sha256": receipt["result_sha256"]}
 
 
+def batch_entries(response: dict) -> list[dict]:
+    """Validate the entire bounded admission before executing any payload."""
+    if not isinstance(response, dict):
+        raise ProtocolError("claim_response")
+    state = response.get("state")
+    if state == "idle":
+        if response.get("jobs") or response.get("job"):
+            raise ProtocolError("idle_contains_jobs")
+        return []
+    if state == "claimed":
+        # Safe rolling upgrade/rollback: an old transport can return one job.
+        entries = [response]
+    elif state == "claimed_batch" and response.get("batch_protocol") == "msw.seo.batch.v1":
+        entries = response.get("jobs")
+    else:
+        raise ProtocolError("unexpected_claim")
+    if not isinstance(entries, list) or not 1 <= len(entries) <= MAX_JOBS_PER_CYCLE:
+        raise ProtocolError("batch_size")
+    seen = set()
+    for entry in entries:
+        if not isinstance(entry, dict):
+            raise ProtocolError("batch_entry")
+        job, lease = entry.get("job"), entry.get("lease_token")
+        if (not isinstance(job, dict) or job.get("kind") != CAPABILITY
+                or not isinstance(lease, str) or not 1 <= len(lease) <= 256):
+            raise ProtocolError("unexpected_claim")
+        if state == "claimed_batch" and (type(entry.get("lease_seconds")) is not int
+                                          or entry["lease_seconds"] != 900):
+            raise ProtocolError("batch_lease_window")
+        ident, payload = job.get("id"), job.get("payload")
+        if (not isinstance(ident, str) or not 1 <= len(ident) <= 128 or ident in seen
+                or not isinstance(payload, str) or len(payload.encode()) > 262144
+                or hashlib.sha256(payload.encode()).hexdigest() != job.get("payload_sha256")):
+            raise ProtocolError("batch_job_integrity")
+        seen.add(ident)
+    return entries
+
+
 def run_cycle(client: Client, worker: Worker, gate: OriginPressureGate, stop) -> str:
-    """Replay one old receipt, then run at most two independently guarded jobs."""
-    state = "origin_unknown"
-    for index in range(MAX_JOBS_PER_CYCLE):
-        result = step(client, worker, stop.is_set, gate=gate, replay_pending=index == 0)
-        state = result.pop("state")
-        emit(state, **result)
-        if state != "completed" or index + 1 >= MAX_JOBS_PER_CYCLE or stop.wait(3):
-            break
-    return state
+    """Admit at most four SEO jobs with one guarded, signed queue request."""
+    if stop.is_set():
+        raise WorkerDraining()
+    worker.replay_receipts(limit=MAX_RECEIPT_REPLAYS_PER_CYCLE)
+    if stop.is_set():
+        raise WorkerDraining()
+    health = gate.check(client)
+    if health.get("state") != "ready":
+        state = health.pop("state", "origin_unknown")
+        emit(state, **health)
+        return state
+    if stop.is_set():
+        raise WorkerDraining()
+    response = client.send("claim", {"capabilities": [CAPABILITY], "batch_limit": MAX_JOBS_PER_CYCLE})
+    entries = batch_entries(response)
+    if not entries:
+        emit("idle")
+        return "idle"
+    emit("batch_admitted", jobs=len(entries), protocol=response.get("batch_protocol", "legacy_single"))
+    failed = 0
+    for index, entry in enumerate(entries):
+        if stop.is_set():
+            raise WorkerDraining()
+        receipt = worker.execute(entry["job"], entry["lease_token"])
+        if stop.is_set():
+            raise WorkerDraining()
+        ack = worker.acknowledge(receipt)
+        failed += ack["state"] != "completed"
+        emit(ack["state"], job_id=ack["job_id"], server_ack_verified=ack["server_ack_verified"],
+             result_sha256=receipt["result_sha256"], batch_index=index + 1, batch_size=len(entries))
+        if index + 1 < len(entries) and stop.wait(3):
+            raise WorkerDraining()
+    emit("batch_finished", admitted=len(entries), completed=len(entries) - failed, failed=failed,
+         claim_requests=1)
+    return "failed" if failed else "completed"
 
 
 def main() -> int:
@@ -330,7 +395,8 @@ def main() -> int:
     emit("started", capability=CAPABILITY, min_poll_seconds=POLL_SECONDS,
          startup_delay_seconds=startup_delay, low_sample_recheck_seconds=LOW_SAMPLE_RECHECK_SECONDS,
          scheduler_enabled=False, backoff_storage="MSW_DATA_DIR",
-         max_receipt_replays_per_cycle=MAX_RECEIPT_REPLAYS_PER_CYCLE)
+         max_receipt_replays_per_cycle=MAX_RECEIPT_REPLAYS_PER_CYCLE,
+         max_jobs_per_cycle=MAX_JOBS_PER_CYCLE, batch_protocol="msw.seo.batch.v1")
     # On restart/deploy, wait before contacting the already stressed origin.
     # A previously committed Retry-After can require a longer quiet start.
     if stop.wait(startup_delay):

@@ -177,7 +177,7 @@ class AuxiliaryTest(unittest.TestCase):
              patch.object(render_auxiliary.signal, "signal"), \
              patch.object(render_auxiliary, "RetryAwareClient"), patch.object(render_auxiliary, "Worker"), \
              patch.object(render_auxiliary, "emit"), \
-             patch.object(render_auxiliary, "step", side_effect=TransportError("server_rejected_request", 503)) as run:
+             patch.object(render_auxiliary, "run_cycle", side_effect=TransportError("server_rejected_request", 503)) as run:
             self.assertEqual(render_auxiliary.main(), 0)
         self.assertEqual(event.waits, [300, 300])
         self.assertEqual(run.call_count, 1)
@@ -193,7 +193,7 @@ class AuxiliaryTest(unittest.TestCase):
         with patch.object(render_auxiliary.threading, "Event", return_value=AlreadyStopped()), \
              patch.object(render_auxiliary.signal, "signal"), \
              patch.object(render_auxiliary, "RetryAwareClient"), patch.object(render_auxiliary, "Worker"), \
-             patch.object(render_auxiliary, "emit"), patch.object(render_auxiliary, "step") as run:
+             patch.object(render_auxiliary, "emit"), patch.object(render_auxiliary, "run_cycle") as run:
             self.assertEqual(render_auxiliary.main(), 0)
         run.assert_not_called()
 
@@ -219,7 +219,7 @@ class AuxiliaryTest(unittest.TestCase):
              patch.object(render_auxiliary.signal, "signal"), \
              patch.object(render_auxiliary, "RetryAwareClient"), patch.object(render_auxiliary, "Worker"), \
              patch.object(render_auxiliary, "emit"), \
-             patch.object(render_auxiliary, "step", side_effect=TransportError("rejected", 401)) as run:
+             patch.object(render_auxiliary, "run_cycle", side_effect=TransportError("rejected", 401)) as run:
             self.assertEqual(render_auxiliary.main(), 0)
         self.assertEqual(event.waits, [300, None])
         self.assertEqual(run.call_count, 1)
