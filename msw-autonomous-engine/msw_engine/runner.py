@@ -52,13 +52,15 @@ class Journal:
             db.execute("INSERT INTO receipts VALUES(?,?,?,?,?,?,?) ON CONFLICT(job_id) DO UPDATE SET lease_token=excluded.lease_token,result_json=excluded.result_json,result_sha256=excluded.result_sha256,state='pending',updated_at=excluded.updated_at", values)
         return self.lookup(job["id"], job["payload_sha256"])
 
-    def pending(self) -> list[dict]:
+    def pending(self, *, limit: int = 8) -> list[dict]:
+        if type(limit) is not int or not 1 <= limit <= 8:
+            raise ValueError("receipt_replay_limit")
         with self.connect() as db:
             # A temporarily missing receipt must not starve every other job.
             # Preserve it and retry after one hour; never treat 404 as an ACK.
             return [dict(row) for row in db.execute(
-                "SELECT * FROM receipts WHERE state='pending' OR (state='pending_deferred' AND updated_at<=?) ORDER BY updated_at LIMIT 8",
-                (int(time.time()) - 3600,))]
+                "SELECT * FROM receipts WHERE state='pending' OR (state='pending_deferred' AND updated_at<=?) ORDER BY updated_at LIMIT ?",
+                (int(time.time()) - 3600, limit))]
 
     def mark(self, job_id: str, state: str) -> None:
         with self.connect() as db:
@@ -121,9 +123,9 @@ class Worker:
                 print(json.dumps({"autonomous_agent": {"state": "native_ledger_unavailable"}}), flush=True)
         return {"job_id": receipt["job_id"], "state": readback["state"], "server_ack_verified": True}
 
-    def replay_receipts(self) -> int:
+    def replay_receipts(self, *, limit: int = 8) -> int:
         count = 0
-        for receipt in self.journal.pending():
+        for receipt in self.journal.pending(limit=limit):
             try:
                 self.acknowledge(receipt)
                 count += 1
@@ -301,6 +303,7 @@ class Worker:
             while not self.stopping and time.monotonic() < deadline:
                 time.sleep(min(1, max(0, deadline - time.monotonic())))
         return 0
+
 
 
 

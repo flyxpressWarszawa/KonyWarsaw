@@ -42,7 +42,8 @@ class AuxiliaryTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
-        self.env = patch.dict(os.environ, {"MSW_RUNTIME_MODE": "render-free", "MSW_AUTONOMOUS_AGENT": "0"})
+        self.env = patch.dict(os.environ, {"MSW_RUNTIME_MODE": "render-free", "MSW_AUTONOMOUS_AGENT": "0",
+                                         "MSW_DATA_DIR": self.tmp.name})
         self.env.start()
         self.addCleanup(self.env.stop)
         self.gate = type("TestReadyGate", (), {"check": lambda self, client: {"state": "ready"}})()
@@ -226,3 +227,4 @@ class AuxiliaryTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

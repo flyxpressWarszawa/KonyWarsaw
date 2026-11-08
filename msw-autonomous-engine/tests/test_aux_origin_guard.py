@@ -23,7 +23,9 @@ class DummyWorker:
     def __init__(self):
         self.replayed = 0
 
-    def replay_receipts(self):
+    def replay_receipts(self, *, limit=8):
+        if limit != 1:
+            raise AssertionError("auxiliary receipt budget")
         self.replayed += 1
 
 
@@ -255,7 +257,7 @@ class OriginGuardTests(unittest.TestCase):
             state = run_cycle(client, worker, SequenceGate("ready", "origin_pressure"), StopStub())
         self.assertEqual(state, "origin_pressure")
         self.assertEqual(client.claims, 1)
-        self.assertEqual(worker.replayed, 2)
+        self.assertEqual(worker.replayed, 1)
 
     def test_cycle_claims_no_more_than_two_jobs(self):
         client, worker = QueueClient(), CompletionWorker()
@@ -263,8 +265,10 @@ class OriginGuardTests(unittest.TestCase):
             state = run_cycle(client, worker, SequenceGate("ready", "ready"), StopStub())
         self.assertEqual(state, "completed")
         self.assertEqual(client.claims, 2)
+        self.assertEqual(worker.replayed, 1)
 
 
 if __name__ == "__main__":
     unittest.main()
+
 
