@@ -27,6 +27,7 @@ from .runner import Worker, WorkerDraining
 CAPABILITY = "seo.analyze"
 POLL_SECONDS = 300
 WARMUP_POLL_SECONDS = 60
+LOW_SAMPLE_RECHECK_SECONDS = 25
 MAX_JOBS_PER_CYCLE = 2
 MAX_RETRY_SECONDS = 3600
 MAX_SERVER_WAIT_SECONDS = 7 * 24 * 60 * 60
@@ -112,6 +113,13 @@ def retry_delay(failures: int, retry_after: int = 0) -> int:
     return max(retry_after, min(MAX_RETRY_SECONDS, POLL_SECONDS * 2 ** min(max(failures - 1, 0), 4)))
 
 
+def next_poll_delay(state: str, low_samples: int) -> int:
+    """Recheck one low sample before its 90-second freshness window expires."""
+    if state == "origin_warmup":
+        return LOW_SAMPLE_RECHECK_SECONDS if low_samples == 1 else WARMUP_POLL_SECONDS
+    return POLL_SECONDS
+
+
 def read_origin_health(client: Client) -> dict:
     """Read only the existing signed, account-scoped Doctor telemetry."""
     raw = encode({"schema": "msw.render.account-health.v1"})
@@ -157,7 +165,9 @@ class OriginPressureGate:
             value = {}
         at, cpu, ram = value.get("measured_at"), value.get("cpu_percent"), value.get("physical_memory_percent")
         now = int(self.clock())
-        if self.last_at is not None and now - self.last_at > 90:
+        previous_sample_age = None if self.last_at is None else now - self.last_at
+        sample_window_reset = previous_sample_age is not None and previous_sample_age > 90
+        if sample_window_reset:
             self.open, self.low_samples, self.last_at = False, 0, None
         valid = (value.get("schema") == "msw.render.account-health.v1" and value.get("state") == "fresh"
                  and type(at) is int and 0 <= now - at <= 90
@@ -175,7 +185,10 @@ class OriginPressureGate:
             elif at != self.last_at:
                 self.low_samples, self.last_at = self.low_samples + 1, at
             if self.low_samples < 2:
-                return {"state": "origin_warmup", "low_samples": self.low_samples}
+                return {"state": "origin_warmup", "low_samples": self.low_samples,
+                        "sample_age_seconds": now - at,
+                        "previous_sample_age_seconds": previous_sample_age,
+                        "sample_window_reset": sample_window_reset}
             self.open = True
         self.last_at = at
         return {"state": "ready"}
@@ -239,7 +252,8 @@ def main() -> int:
         stop.wait()
         return 0
     emit("started", capability=CAPABILITY, min_poll_seconds=POLL_SECONDS,
-         startup_delay_seconds=POLL_SECONDS, scheduler_enabled=False, durable_storage=False)
+         startup_delay_seconds=POLL_SECONDS, low_sample_recheck_seconds=LOW_SAMPLE_RECHECK_SECONDS,
+         scheduler_enabled=False, durable_storage=False)
     # On restart/deploy, wait before contacting the already stressed origin.
     # This is a quiet-start safeguard, not durable shared backoff state.
     if stop.wait(POLL_SECONDS):
@@ -251,7 +265,7 @@ def main() -> int:
         try:
             state = run_cycle(client, worker, gate, stop)
             failures = 0
-            delay = WARMUP_POLL_SECONDS if state == "origin_warmup" else POLL_SECONDS
+            delay = next_poll_delay(state, gate.low_samples)
         except WorkerDraining:
             break
         except ProtocolError as error:
@@ -277,3 +291,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

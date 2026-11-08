@@ -8,7 +8,7 @@ from unittest.mock import patch
 from urllib.error import HTTPError
 
 from msw_engine.client import TransportError
-from msw_engine.render_auxiliary import OriginPressureGate, read_origin_health, run_cycle, step
+from msw_engine.render_auxiliary import OriginPressureGate, next_poll_delay, read_origin_health, run_cycle, step
 
 
 NOW = 10000
@@ -153,6 +153,51 @@ class OriginGuardTests(unittest.TestCase):
         current[0] = sample(clock[0])
         self.assertEqual(gate.check(self.client)["state"], "ready")
 
+    def test_recheck_preserves_freshness_with_minute_sample_updates(self):
+        # A fresh but 50-second-old first sample expires before a 60-second
+        # recheck, even though the next producer sample is itself fresh.
+        clock = [NOW]
+        current = [sample(NOW - 50)]
+        gate = OriginPressureGate(reader=lambda _: current[0], clock=lambda: clock[0])
+        first = gate.check(self.client)
+        self.assertEqual(first["low_samples"], 1)
+        self.assertEqual(first["sample_age_seconds"], 50)
+        self.assertEqual(next_poll_delay(first["state"], gate.low_samples), 25)
+        clock[0] += 25
+        current[0] = sample(NOW + 10)
+        self.assertEqual(gate.check(self.client)["state"], "ready")
+
+        # Under the original 60-second interval the same valid sequence
+        # resets the previous sample and the worker still cannot claim.
+        clock[0], current[0] = NOW, sample(NOW - 50)
+        old_gate = OriginPressureGate(reader=lambda _: current[0], clock=lambda: clock[0])
+        old_gate.check(self.client)
+        clock[0] += 60
+        current[0] = sample(NOW + 10)
+        delayed = old_gate.check(self.client)
+        self.assertEqual(delayed["state"], "origin_warmup")
+        self.assertTrue(delayed["sample_window_reset"])
+        self.assertEqual(delayed["previous_sample_age_seconds"], 110)
+
+    def test_faster_recheck_never_counts_the_same_sample_twice(self):
+        clock = [NOW]
+        current = [sample(NOW - 20)]
+        gate = OriginPressureGate(reader=lambda _: current[0], clock=lambda: clock[0])
+        self.assertEqual(gate.check(self.client)["low_samples"], 1)
+        clock[0] += 25
+        self.assertEqual(gate.check(self.client)["low_samples"], 1)
+        self.assertFalse(gate.open)
+        clock[0] += 25
+        current[0] = sample(clock[0], cpu=70)
+        self.assertEqual(gate.check(self.client)["state"], "origin_pressure")
+        self.assertFalse(gate.open)
+
+    def test_faster_recheck_only_follows_one_low_sample(self):
+        self.assertEqual(next_poll_delay("origin_warmup", 1), 25)
+        self.assertEqual(next_poll_delay("origin_warmup", 0), 60)
+        for state in ("origin_pressure", "origin_unknown", "idle", "completed"):
+            self.assertEqual(next_poll_delay(state, 1), 300)
+
     def test_503_retry_after_is_not_shortened(self):
         headers = Message()
         headers["Retry-After"] = "1800"
@@ -222,3 +267,4 @@ class OriginGuardTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
