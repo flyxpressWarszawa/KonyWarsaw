@@ -2,8 +2,9 @@
 
 Only deterministic seo.analyze jobs are claimed. No scheduler, publication,
 AI call, satellite operation, or private knowledge job is started here. The
-local journal is ephemeral; an interrupted SEO calculation may be recomputed
-when its server-side lease expires. It must not be used for other job kinds.
+journal and retry deadline use MSW_DATA_DIR; restart persistence requires that
+directory to be on a persistent volume. An interrupted SEO calculation may be
+recomputed when its server-side lease expires, with the same receipt contract.
 """
 from __future__ import annotations
 
@@ -13,6 +14,7 @@ import os
 from pathlib import Path
 import signal
 import sqlite3
+import tempfile
 import threading
 import time
 from datetime import timezone
@@ -29,12 +31,81 @@ POLL_SECONDS = 300
 WARMUP_POLL_SECONDS = 60
 LOW_SAMPLE_RECHECK_SECONDS = 25
 MAX_JOBS_PER_CYCLE = 2
+MAX_RECEIPT_REPLAYS_PER_CYCLE = 1
 MAX_RETRY_SECONDS = 3600
 MAX_SERVER_WAIT_SECONDS = 7 * 24 * 60 * 60
 
 
 class ProtocolError(Exception):
     """An unexpected queue response must stop this consumer's requests."""
+
+
+class AuxiliaryBackoff:
+    """Persist the auxiliary retry deadline without altering shared transport state.
+
+    Only timing metadata is stored. Corrupt or unwritable state stops this
+    consumer; it never falls back to an immediate request after a restart.
+    This is a checkpoint for the existing single-instance worker, not a lock
+    or a shared scheduler for several nodes.
+    """
+
+    def __init__(self, directory: Path, *, clock=None):
+        self.path = directory / "auxiliary-backoff.json"
+        self.clock = clock or time.time
+
+    def _load(self) -> tuple[int, int]:
+        if self.path.is_symlink():
+            raise ValueError("backoff_state_symlink")
+        try:
+            with self.path.open("rb") as stream:
+                raw = stream.read(1025)
+        except FileNotFoundError:
+            return 0, 0
+        def unique_fields(pairs):
+            value = {}
+            for key, item in pairs:
+                if key in value:
+                    raise ValueError("backoff_duplicate_field")
+                value[key] = item
+            return value
+        value = json.loads(raw, object_pairs_hook=unique_fields) if len(raw) <= 1024 else None
+        if (not isinstance(value, dict) or set(value) != {"version", "failures", "not_before"}
+                or type(value["version"]) is not int or value["version"] != 1
+                or type(value["failures"]) is not int or not 0 <= value["failures"] <= 5
+                or type(value["not_before"]) is not int or not 0 <= value["not_before"] <= 2 ** 53):
+            raise ValueError("backoff_state_invalid")
+        remaining = max(0, math.ceil(value["not_before"] - self.clock()))
+        if remaining > MAX_SERVER_WAIT_SECONDS + 1:
+            raise ValueError("backoff_deadline_invalid")
+        return value["failures"], value["not_before"]
+
+    def read(self) -> tuple[int, int]:
+        failures, deadline = self._load()
+        return failures, max(0, math.ceil(deadline - self.clock()))
+
+    def save(self, failures: int, delay: int) -> None:
+        if (type(failures) is not int or failures < 0 or type(delay) is not int
+                or not 0 <= delay <= MAX_SERVER_WAIT_SECONDS):
+            raise ValueError("backoff_state_invalid")
+        _, previous_deadline = self._load()
+        # Never shorten an already committed server wait, including on restart.
+        value = {"version": 1, "failures": min(5, failures),
+                 "not_before": max(previous_deadline, math.ceil(self.clock() + delay))}
+        descriptor, temporary = tempfile.mkstemp(prefix=".aux-backoff-", dir=self.path.parent)
+        try:
+            with os.fdopen(descriptor, "wb") as stream:
+                stream.write(encode(value))
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(temporary, self.path)
+            directory_fd = os.open(self.path.parent, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                os.fsync(directory_fd)
+            finally:
+                os.close(directory_fd)
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
 
 
 def parse_retry_after(value, now=None):
@@ -194,10 +265,12 @@ class OriginPressureGate:
         return {"state": "ready"}
 
 
-def step(client: Client, worker: Worker, stopping=lambda: False, *, gate: OriginPressureGate) -> dict:
+def step(client: Client, worker: Worker, stopping=lambda: False, *, gate: OriginPressureGate,
+         replay_pending: bool = True) -> dict:
     if stopping():
         raise WorkerDraining()
-    worker.replay_receipts()
+    if replay_pending:
+        worker.replay_receipts(limit=MAX_RECEIPT_REPLAYS_PER_CYCLE)
     if stopping():
         raise WorkerDraining()
     health = gate.check(client)
@@ -223,10 +296,10 @@ def step(client: Client, worker: Worker, stopping=lambda: False, *, gate: Origin
 
 
 def run_cycle(client: Client, worker: Worker, gate: OriginPressureGate, stop) -> str:
-    """Run at most two independently guarded, already registered SEO jobs."""
+    """Replay one old receipt, then run at most two independently guarded jobs."""
     state = "origin_unknown"
     for index in range(MAX_JOBS_PER_CYCLE):
-        result = step(client, worker, stop.is_set, gate=gate)
+        result = step(client, worker, stop.is_set, gate=gate, replay_pending=index == 0)
         state = result.pop("state")
         emit(state, **result)
         if state != "completed" or index + 1 >= MAX_JOBS_PER_CYCLE or stop.wait(3):
@@ -247,19 +320,22 @@ def main() -> int:
         client = RetryAwareClient(os.environ.get("MSW_WP_URL", ""), os.environ.get("MSW_TRANSPORT_URL", ""),
                                   os.environ.get("MSW_NODE", ""), os.environ.get("MSW_SECRET", ""))
         worker = Worker(client, directory, max_seconds=30, memory_mb=256, cancel_check=stop.is_set)
+        backoff = AuxiliaryBackoff(directory)
+        failures, remaining = backoff.read()
+        startup_delay = max(POLL_SECONDS, remaining)
     except (ValueError, OSError, sqlite3.Error) as error:
         emit("configuration_required", error_class=type(error).__name__, queue_consumption=False)
         stop.wait()
         return 0
     emit("started", capability=CAPABILITY, min_poll_seconds=POLL_SECONDS,
-         startup_delay_seconds=POLL_SECONDS, low_sample_recheck_seconds=LOW_SAMPLE_RECHECK_SECONDS,
-         scheduler_enabled=False, durable_storage=False)
+         startup_delay_seconds=startup_delay, low_sample_recheck_seconds=LOW_SAMPLE_RECHECK_SECONDS,
+         scheduler_enabled=False, backoff_storage="MSW_DATA_DIR",
+         max_receipt_replays_per_cycle=MAX_RECEIPT_REPLAYS_PER_CYCLE)
     # On restart/deploy, wait before contacting the already stressed origin.
-    # This is a quiet-start safeguard, not durable shared backoff state.
-    if stop.wait(POLL_SECONDS):
+    # A previously committed Retry-After can require a longer quiet start.
+    if stop.wait(startup_delay):
         emit("stopped")
         return 0
-    failures = 0
     gate = OriginPressureGate()
     while not stop.is_set():
         try:
@@ -284,6 +360,12 @@ def main() -> int:
             failures += 1
             delay = retry_delay(failures)
             emit("worker_backoff", error_class=type(error).__name__, retry_seconds=delay)
+        try:
+            backoff.save(failures, delay)
+        except (OSError, ValueError) as error:
+            emit("backoff_storage_blocked", error_class=type(error).__name__, queue_consumption=False)
+            stop.wait()
+            break
         stop.wait(delay)
     emit("stopped")
     return 0
@@ -291,4 +373,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
 
