@@ -14,6 +14,8 @@ services:
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
+      - key: MSW_DATA_DIR
+        value: /tmp/msw-aux-seo/worker
     disk:
       name: disk
       mountPath: /tmp/msw-aux-seo
