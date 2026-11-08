@@ -54,7 +54,11 @@ class Journal:
 
     def pending(self) -> list[dict]:
         with self.connect() as db:
-            return [dict(row) for row in db.execute("SELECT * FROM receipts WHERE state='pending' ORDER BY updated_at LIMIT 8")]
+            # A temporarily missing receipt must not starve every other job.
+            # Preserve it and retry after one hour; never treat 404 as an ACK.
+            return [dict(row) for row in db.execute(
+                "SELECT * FROM receipts WHERE state='pending' OR (state='pending_deferred' AND updated_at<=?) ORDER BY updated_at LIMIT 8",
+                (int(time.time()) - 3600,))]
 
     def mark(self, job_id: str, state: str) -> None:
         with self.connect() as db:
@@ -127,7 +131,14 @@ class Worker:
                 if error.status == 409:
                     # A completion can be committed even if its HTTP response was
                     # lost. Verify the durable result before abandoning a receipt.
-                    readback = self.client.send("status", {"job_id": receipt["job_id"]})
+                    try:
+                        readback = self.client.send("status", {"job_id": receipt["job_id"]})
+                    except TransportError as status_error:
+                        if status_error.status != 404:
+                            raise
+                        self.journal.mark(receipt["job_id"], "pending_deferred")
+                        print(json.dumps({"receipt_recovery": {"state": "deferred_unverified", "reason": "status_not_found", "retry_seconds": 3600}}), flush=True)
+                        continue
                     self.last_server_contact = int(time.time())
                     if readback.get("state") in {"completed", "failed"} and readback.get("result_sha256") == receipt["result_sha256"]:
                         self.journal.mark(receipt["job_id"], "acknowledged")
@@ -135,6 +146,9 @@ class Worker:
                         count += 1
                     else:
                         self.journal.mark(receipt["job_id"], "stale_lease")
+                elif error.status == 404:
+                    self.journal.mark(receipt["job_id"], "pending_deferred")
+                    print(json.dumps({"receipt_recovery": {"state": "deferred_unverified", "reason": "endpoint_or_receipt_not_found", "retry_seconds": 3600}}), flush=True)
                 else:
                     raise
         return count
