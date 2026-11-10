@@ -19,6 +19,8 @@ from .client import NoRedirect, encode, signed_headers
 
 
 def configured() -> bool:
+    if os.environ.get("MSW_PAID_AI_TRANSPORT") == "direct_aliyun":
+        return bool(os.environ.get("MSW_ALIYUN_API_KEY")) and bool(os.environ.get("MSW_ALIYUN_MODEL"))
     return (os.environ.get("MSW_LLM_PROVIDER") == "wordpress"
             and bool(os.environ.get("MSW_LLM_MODEL")))
 
@@ -91,6 +93,9 @@ def _finish_request(saved: dict, directory: Path) -> dict:
     if saved.get("transport") == "direct_openai":
         from .openai_direct import generate as direct_generate
         answer = direct_generate(values, directory)
+    elif saved.get("transport") == "direct_aliyun":
+        from .aliyun_direct import generate as aliyun_generate
+        answer = aliyun_generate(values, directory)
     elif saved.get("transport") == "native_runtime":
         from .runtime_bridge import generate as native_generate
         answer = native_generate(values, allow_fallback=True)
@@ -213,6 +218,8 @@ def generate(payload: dict, directory: Path) -> dict:
     transport = os.environ.get("MSW_PAID_AI_TRANSPORT")
     if transport == "direct_openai":
         saved["transport"] = "direct_openai"
+    elif transport == "direct_aliyun":
+        saved["transport"] = "direct_aliyun"
     elif transport == "native_runtime":
         saved["transport"] = "native_runtime"
     with tempfile.NamedTemporaryFile(mode="w", dir=cache_dir, delete=False) as handle:
