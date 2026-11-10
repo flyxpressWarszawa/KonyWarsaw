@@ -1,0 +1,12 @@
+# MSW — Alibaba Cloud Token Plan / Codex CLI (interactive coding only)
+# Copy these settings to ~/.codex/config.toml on the machine actually running Codex.
+# Do not use this profile for msw_engine/aliyun_direct.py or unattended API jobs.
+# Keep the secret in the Codex process environment. Never commit it.
+model_provider = "MSW_Aliyun_Token_Plan"
+model = "qwen3.8-max"
+
+[model_providers.MSW_Aliyun_Token_Plan]
+name = "Alibaba Cloud Token Plan — Singapore"
+base_url = "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"
+env_key = "MSW_ALIYUN_TOKEN_PLAN_API_KEY"
+wire_api = "responses"
