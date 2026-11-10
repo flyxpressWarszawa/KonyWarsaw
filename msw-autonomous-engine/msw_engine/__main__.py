@@ -81,6 +81,23 @@ def main() -> int:
             if factory_process is not None:
                 print(json.dumps({"combo_factory": {"state": "process_started", "inference_verified": False}}), flush=True)
 
+        # One narrowly scoped Alibaba credential test, opt-in only.
+        # Run without delaying the main signed WordPress queue or leaking secret values.
+        if not args.once and os.environ.get("MSW_ALIYUN_PROBE") == "1":
+            import threading
+
+            def aliyun_probe_task():
+                try:
+                    from .aliyun_probe import check
+                    outcome = check(directory)
+                except Exception as error:
+                    outcome = {"schema": "msw.aliyun.probe.v1", "state": "unavailable",
+                               "error_class": type(error).__name__}
+                print(json.dumps({"aliyun_probe": outcome}, separators=(",", ":")), flush=True)
+
+            threading.Thread(target=aliyun_probe_task, name="msw-aliyun-probe",
+                             daemon=True).start()
+
         startup_event("worker_loop_started")
         return worker.loop(once=args.once, poke_cron_seconds=max(0, int(os.environ.get("MSW_WP_CRON_INTERVAL", "300"))))
     except (ValueError, OSError) as error:
