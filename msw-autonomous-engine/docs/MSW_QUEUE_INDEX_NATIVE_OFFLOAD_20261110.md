@@ -57,3 +57,16 @@ Skrypt **nie ma możliwości łączenia się z DB, uruchamiania SQL ani wykonywa
 - https://mariadb.com/docs/server/server-usage/storage-engines/innodb/innodb-online-ddl/innodb-online-ddl-operations-with-the-nocopy-alter-algorithm
 
 **W żadnym kroku tworzenia tego pakietu nie wykonano mutacji produkcyjnej bazy, nie aktywowano natywnych callbacków ani nie zmieniono kolejki.**
+
+## Dodatkowy audyt źródeł natywnych — 2026-11-10
+- Centralny `MSW_Module_Autonomy` 3.1.1 ma 219 delegowanych grup callbacków i 301 zarejestrowanych modułów w bieżącym odczycie.
+- Natywne `module.execute` nie zakończyły nowego zadania od 2026-11-08T00:00:18Z; backlog wzrósł do 12 223 pending (ostatni odczyt, dynamiczny).
+- Odczyt `/msw-federation/v1/autonomy/manifest` zwrócił **257/262** zgodnych bieżących źródeł.
+- Pięć plików ma inne SHA-256 niż zapisany hash po migracji: `msw-ai-direct-control/msw-ai-direct-control.php`, `msw-domain-agent/msw-domain-agent.php`, `msw-fotoatlas-portal/msw-fotoatlas-portal.php`, `msw-hunter-products/msw-hunter-products.php`, `msw-portal-combo/msw-portal-combo.php`.
+- Pliki są nadal aktywne. Część różnic wiąże się z nowszą wersją wtyczki (np. COMBO 108.1.5, Domain Agent 1.1.0); część zachowała numer wersji mimo zmiany zawartości.
+- Niezgodność manifestu nie jest sama w sobie dowodem zagrożenia ani nie oznacza, że każda operacja tych modułów jest blokowana. `trustedPin()` ma dodatkowe zweryfikowane wyjątki. Starsze zadania mogą jednak zwrócić `source_changed`, jeśli żaden jawny wyjątek nie pasuje.
+- **Nie nadpisywać** historycznych hashy, nie akceptować automatycznie źródeł i nie ponawiać masowo `module.execute`. Najpierw podpisane porównanie pochodzenia każdej aktualizacji, jej zakresu i zatwierdzonej historii release.
+- `MSW Unified Pressure Repair Once` ma już zweryfikowane potwierdzenie `file_readback_verified` dla obecnego `RemoteBridge.php`. Nie aktywować tej jednorazowej poprawki ponownie.
+- Bieżący alarm centrali obejmował 100% CPU i 100% RAM; brak zweryfikowanego backupu i testu restore wciąż oznacza **NO-GO dla produkcyjnego ALTER TABLE**.
+
+Plan: naprawić etap HTTP 404 z PR #15 na bazie zatwierdzonego, oznaczonego logu; potem oddzielnie zbadać pięć podpisów źródłowych i jedną kontrolowaną, autoryzowaną realizację. Nie wykonywać żadnych działań natywnych bez lease, CAS, HMAC i source-native ACK.
