@@ -37,3 +37,10 @@ Uwaga: ta poprawka nie usuwa HTTP 404 i nie zmniejsza CPU sama z siebie.
 - Użyto atrapy `protected_open` i wyłącznie mockowanych odpowiedzi. **Nie wykonano testów na całym repozytorium ani CI GitHub Actions.**
 - Potwierdzono brak zmian parametrów lease, ACK i retry w różnicy plików `client.py` i `runner.py`.
 - Dalsza blokada: brak informacji o etapie rzeczywistego 404 przed wdrożeniem PR, dlatego brak pozwolenia na masowe ponowienia `module.execute`.
+
+## Potwierdzenie CI w pełnym repozytorium — 10.11.2026
+- Workflow GitHub Actions `msw-render-404-diagnostic-tests.yml` dla gałęzi PR #15: https://github.com/flyxpressWarszawa/KonyWarsaw/actions/runs/42845268078.
+- Stan: **completed / success**. Test `python3 -m py_compile` oraz `python3 -m unittest discover -s tests -p 'test_transport_404_action_diagnostics.py' -v` wykonane na pełnym checkout repozytorium.
+- Wynik: **6 testów / 6 zaliczonych**, potwierdzony w logu job `isolated-unit-tests`.
+- Pozostaje brak testu integracyjnego na żywym Render. Samo CI nie ustala, czy HTTP 404 powstaje przy `claim`, `status`, `heartbeat` czy `complete`.
+- Żaden test CI nie wykonał żądania do produkcyjnego serwera, nie zmienił lease, ACK, PHP WordPressa ani bazy.
