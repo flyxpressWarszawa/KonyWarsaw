@@ -20,12 +20,14 @@ Nie jest nowym silnikiem MSW, nie uruchamia agenta w tle i nie zastępuje
 2. Zainstaluj Codex CLI z oficjalnych źródeł (Node.js 18+ i `@openai/codex`)
    na własnym komputerze albo na przeznaczonym do tego autoryzowanym środowisku
    interaktywnych narzędzi programistycznych.
-3. W głównym `~/.codex/config.toml` pozostaw dotychczasowy model GPT-6 Astra
-   i wtyczki. Dodaj tylko blok `[model_providers.MSW_Aliyun_Token_Plan]`
-   z konfiguracji w repozytorium. Dla Codex CLI 0.134+ profil `aliyun`
-   jest w **osobnym** pliku `~/.codex/aliyun.config.toml`, a nie
-   `[profiles.aliyun]` w pliku głównym. Skrypt Connect-MSW-Qwen.ps1
-   utworzy ten profil, jeśli go brakuje, z wysiłkiem `medium`.
+3. Nie zmieniaj dotychczasowego `~/.codex/config.toml`, modelu GPT-6 Astra
+   ani wtyczek. Dla Codex CLI 0.134+ nazwana konfiguracja `aliyun`
+   znajduje się w **osobnym** pliku `~/.codex/aliyun.config.toml`.
+   Poprawiony `Connect-MSW-Qwen.ps1` zapisuje w tym oddzielnym profilu
+   `qwen3.8-max`, `model_reasoning_effort="medium"` oraz **bezkluczowy**
+   blok `[model_providers.MSW_Aliyun_Token_Plan]`, jeśli go brakuje.
+   Istniejący profil jest zachowywany, a przed dopisaniem bloku tworzona
+   jest kopia. Głównego `config.toml` skrypt nie modyfikuje.
 4. Ustaw prywatny sekret **w środowisku procesu Codex**, pod nazwą
    `MSW_ALIYUN_TOKEN_PLAN_API_KEY`. Nie ustawiaj go jako `OPENAI_API_KEY` w
    istniejącym serwisie MSW — ten identyfikator może być już używany.
