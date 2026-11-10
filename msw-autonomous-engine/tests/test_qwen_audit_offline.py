@@ -48,7 +48,9 @@ class FakePipeEnd:
 
     def poll(self, timeout=None):
         self.polls += 1
-        return self.polls > 1
+        # A still-running child has no result ready at the failed heartbeat.
+        # The separate salvage test supplies a completed result during error.
+        return self.polls > 2
 
     def recv_bytes(self, limit=None):
         return b'{"ok":true,"data":{"offline":true}}'
@@ -135,8 +137,7 @@ class QwenOfflineHeartbeatAudit(unittest.TestCase):
 
 
 class QwenOfflineRecoveryAudit(unittest.TestCase):
-    @unittest.expectedFailure
-    def test_desired_client_preserves_origin_cooldown_retry_after(self):
+    def test_client_preserves_origin_cooldown_retry_after(self):
         client = Client(
             "https://example.org",
             "https://example.org/transport.php",
