@@ -130,12 +130,17 @@ def install(data_dir: Path, environ=None) -> dict:
             raw = restore_archive(data_dir, digest)
             source = "verified_private_disk"
         root, manifest = unpack(raw, digest, data_dir)
+        archived = not count
         if count:
-            # Do not remove any Render chunk until this exact archive has a
-            # private 0600, SHA-256-verified, persistent-disk readback.
-            persist_archive(data_dir, raw, digest)
+            # A disk-backup problem MUST NOT disable the already verified live
+            # env-based pack. It blocks env cleanup, not useful existing work.
+            try:
+                persist_archive(data_dir, raw, digest)
+                archived = True
+            except (PrivateArchiveError, OSError):
+                archived = False
         value.update(state="installed_verified", pack_sha256=digest, modules=manifest["modules"],
-                     source=source, archive_readback_verified=True)
+                     source=source, archive_readback_verified=archived)
         os.environ["MSW_RUNTIME_PACK_ROOT"] = str(root)
     except (PackError, OSError, ValueError) as error:
         value.update(state="blocked", error=str(error) if isinstance(error, (PackError, PrivateArchiveError)) else "private_pack_configuration")
