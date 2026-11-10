@@ -41,11 +41,18 @@ def install(data_dir: Path, environ=None) -> dict:
         for required in ['model.py', 'checkpoint/checkpoint-manifest.json', 'checkpoint/train-corpus.txt', 'checkpoint/validation-corpus.txt']:
             if 'msw-own-ai/' + required not in manifest['files']:
                 raise PackError('own_model_required_file')
+        archived = not count
         if count:
-            persist_archive(data_dir, raw, digest)
+            # Existing env-loaded owner model stays available if disk copying
+            # fails. The false proof forbids removing the source env chunks.
+            try:
+                persist_archive(data_dir, raw, digest)
+                archived = True
+            except (PrivateArchiveError, OSError):
+                archived = False
         os.environ['MSW_OWN_MODEL_ROOT'] = str(module)
         return {'state': 'installed_verified', 'pack_sha256': digest, 'research_only': True,
-                'source': source, 'archive_readback_verified': True,
+                'source': source, 'archive_readback_verified': archived,
                 'business_decision_authorized': False, 'public_source_uploaded': False}
     except (ValueError, OSError, PackError, PrivateArchiveError):
         return {'state': 'blocked', 'error': 'own_model_pack_invalid', 'research_only': True}
