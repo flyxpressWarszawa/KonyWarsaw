@@ -42,9 +42,12 @@ jobs:
               $script -notmatch "model_reasoning_effort" -or
               $script -notmatch "--depth" -or
               $script -notmatch "--sparse" -or
-              $script -notmatch "aliyun.config.toml") {
+              $script -notmatch "aliyun.config.toml" -or
+              $script -notmatch "model_providers.MSW_Aliyun_Token_Plan" -or
+              $script -notmatch "AppendAllText") {
             throw "Missing required local bridge contract"
           }
+          if ($script -match "Missing keyless Alibaba provider in main config.toml") { throw "Obsolete hardcoded config blocker" }
           if ($script -match "sk-sp-[A-Za-z0-9_-]{8}" -or
               $script -match "o1_[A-Za-z0-9_-]{8}" -or
               $guide -match "sk-sp-[A-Za-z0-9_-]{8}") {
