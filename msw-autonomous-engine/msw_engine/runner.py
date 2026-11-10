@@ -168,6 +168,11 @@ class Worker:
         if cached:
             result = json.loads(cached["result_json"])
             return self.journal.save(job, lease, result)
+        # A prior unreceipted billable attempt must never silently repeat on a
+        # new lease, a timeout, a process restart or concurrent priority lane.
+        from .paid_attempt_guard import PAID_CAPABILITIES, PaidAttemptGuard
+        if job["kind"] in PAID_CAPABILITIES:
+            PaidAttemptGuard(self.journal.data_dir).reserve(job, payload)
         context = multiprocessing.get_context("spawn")
         parent, child = context.Pipe(duplex=False)
         process = context.Process(target=child_task, args=(child, job["kind"], payload, str(self.journal.data_dir), self.max_seconds, self.memory_mb))
@@ -189,7 +194,19 @@ class Worker:
                     result = {"ok": False, "error": "task_time_budget"}
                     break
                 if now - heartbeat_at >= 60:
-                    self.client.send("heartbeat", {"job_id": job["id"], "lease_token": lease, "capabilities": list(handlers())})
+                    try:
+                        self.client.send("heartbeat", {"job_id": job["id"], "lease_token": lease, "capabilities": list(handlers())})
+                    except TransportError:
+                        # The child may already have delivered its result while
+                        # heartbeat was blocked on a 503/timeout. Save that
+                        # result under the *original* lease, never synthesize
+                        # a renewed lease or start another paid request.
+                        if parent.poll():
+                            result = json.loads(parent.recv_bytes(524289))
+                            break
+                        # Unknown lease: stop the child. A paid attempt stays
+                        # in the durable guard as unverified until reconciled.
+                        raise
                     self.last_server_contact = int(time.time())
                     heartbeat_at = now
             if result is None:
