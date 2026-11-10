@@ -30,3 +30,10 @@ Status: DRAFT / przegląd kodu; bez wdrożenia, bez migracji bazy.
 4. Zapisz pierwsze rzeczywiste zdarzenie oznaczone action, następnie napraw konkretny etap w nowym PR.
 
 Uwaga: ta poprawka nie usuwa HTTP 404 i nie zmniejsza CPU sama z siebie.
+
+## Wynik lokalnych testów izolowanych — 10.11.2026
+- Własny offline harness z dokładnym kodem `Client.send` pobranym z gałęzi PR i wyodrębnioną ścieżką `Worker.loop` przeszedł `6/6` testów (`python -m unittest discover`).
+- Zasymulowano HTTP 404 na czterech etapach, HTTP 401, błąd sieci, odfiltrowanie nieznanej etykiety i zachowanie poprzedniego formatu logu przy HTTP 503.
+- Użyto atrapy `protected_open` i wyłącznie mockowanych odpowiedzi. **Nie wykonano testów na całym repozytorium ani CI GitHub Actions.**
+- Potwierdzono brak zmian parametrów lease, ACK i retry w różnicy plików `client.py` i `runner.py`.
+- Dalsza blokada: brak informacji o etapie rzeczywistego 404 przed wdrożeniem PR, dlatego brak pozwolenia na masowe ponowienia `module.execute`.
