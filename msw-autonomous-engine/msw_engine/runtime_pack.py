@@ -18,6 +18,8 @@ import stat
 import tempfile
 import zipfile
 
+from .pack_disk import PrivateArchiveError, persist_archive, restore_archive
+
 MAX_ENCODED = 1_000_000
 MAX_EXPANDED = 32 * 1024 * 1024
 MANIFEST = "msw-runtime-pack.json"
@@ -110,23 +112,33 @@ def install(data_dir: Path, environ=None) -> dict:
     value = {"schema": "msw.runtime-status.v1", "modules": [], "state": "not_configured"}
     try:
         count = int(environ.get("MSW_RUNTIME_PACK_CHUNKS", "0"))
-        if not count:
-            return value
-        if not 1 <= count <= 32:
-            raise PackError("private_pack_chunk_limit")
-        encoded = "".join(environ.get(f"MSW_RUNTIME_PACK_{i:02d}", "") for i in range(count))
-        if not encoded or len(encoded) > MAX_ENCODED:
-            raise PackError("private_pack_encoded_limit")
-        try:
-            raw = base64.b64decode(encoded, validate=True)
-        except (ValueError, binascii.Error) as error:
-            raise PackError("private_pack_encoding") from error
         digest = environ.get("MSW_RUNTIME_PACK_SHA256", "")
+        if not count and not digest:
+            return value
+        if not 0 <= count <= 32:
+            raise PackError("private_pack_chunk_limit")
+        if count:
+            encoded = "".join(environ.get(f"MSW_RUNTIME_PACK_{i:02d}", "") for i in range(count))
+            if not encoded or len(encoded) > MAX_ENCODED:
+                raise PackError("private_pack_encoded_limit")
+            try:
+                raw = base64.b64decode(encoded, validate=True)
+            except (ValueError, binascii.Error) as error:
+                raise PackError("private_pack_encoding") from error
+            source = "environment_migrated_to_disk"
+        else:
+            raw = restore_archive(data_dir, digest)
+            source = "verified_private_disk"
         root, manifest = unpack(raw, digest, data_dir)
-        value.update(state="installed_verified", pack_sha256=digest, modules=manifest["modules"])
+        if count:
+            # Do not remove any Render chunk until this exact archive has a
+            # private 0600, SHA-256-verified, persistent-disk readback.
+            persist_archive(data_dir, raw, digest)
+        value.update(state="installed_verified", pack_sha256=digest, modules=manifest["modules"],
+                     source=source, archive_readback_verified=True)
         os.environ["MSW_RUNTIME_PACK_ROOT"] = str(root)
     except (PackError, OSError, ValueError) as error:
-        value.update(state="blocked", error=str(error) if isinstance(error, PackError) else "private_pack_configuration")
+        value.update(state="blocked", error=str(error) if isinstance(error, (PackError, PrivateArchiveError)) else "private_pack_configuration")
     finally:
         temporary = data_dir / ".runtime-status.tmp"
         temporary.write_text(json.dumps(value, ensure_ascii=False, separators=(",", ":")))
