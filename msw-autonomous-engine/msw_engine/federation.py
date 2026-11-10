@@ -96,6 +96,12 @@ def _finish_request(saved: dict, directory: Path) -> dict:
     elif saved.get("transport") == "direct_aliyun":
         from .aliyun_direct import generate as aliyun_generate
         answer = aliyun_generate(values, directory)
+    elif saved.get("transport") == "direct_aliyun_stream":
+        from .aliyun_protocols import generate as aliyun_generate
+        answer = aliyun_generate(values, directory, protocol="chat_stream")
+    elif saved.get("transport") == "direct_aliyun_responses":
+        from .aliyun_protocols import generate as aliyun_generate
+        answer = aliyun_generate(values, directory, protocol="responses")
     elif saved.get("transport") == "native_runtime":
         from .runtime_bridge import generate as native_generate
         answer = native_generate(values, allow_fallback=True)
@@ -219,7 +225,13 @@ def generate(payload: dict, directory: Path) -> dict:
     if transport == "direct_openai":
         saved["transport"] = "direct_openai"
     elif transport == "direct_aliyun":
-        saved["transport"] = "direct_aliyun"
+        # Freeze the selected protocol into the durable request before any paid call.
+        protocol = os.environ.get("MSW_ALIYUN_PROTOCOL", "chat")
+        modes = {"chat": "direct_aliyun", "chat_stream": "direct_aliyun_stream",
+                 "responses": "direct_aliyun_responses"}
+        if protocol not in modes:
+            raise TaskError("aliyun_protocol_invalid")
+        saved["transport"] = modes[protocol]
     elif transport == "native_runtime":
         saved["transport"] = "native_runtime"
     with tempfile.NamedTemporaryFile(mode="w", dir=cache_dir, delete=False) as handle:

@@ -28,6 +28,7 @@ jobs:
           PYTHONPATH: msw-autonomous-engine
         run: |
           python -m unittest discover -s msw-autonomous-engine/tests -p test_aliyun_direct.py -v
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_aliyun_protocols.py -v
           python -m unittest discover -s msw-autonomous-engine/tests -p test_aliyun_probe.py -v
           python -m unittest discover -s msw-autonomous-engine/tests -p test_federation.py -v
           python -m unittest discover -s msw-autonomous-engine/tests -p test_federation_resume.py -v
