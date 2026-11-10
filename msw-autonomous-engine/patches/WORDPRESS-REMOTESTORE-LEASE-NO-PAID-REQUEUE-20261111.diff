@@ -1,6 +1,6 @@
 --- a/wp-content/plugins/msw-unified-engine/includes/RemoteStore.php
 +++ b/wp-content/plugins/msw-unified-engine/includes/RemoteStore.php
-@@ -148,10 +148,13 @@
+@@ -149,6 +149,7 @@
          }
          $table = self::table();
 -        // Pure compute may safely be recomputed. Interrupted training requires its own receipt.
@@ -11,7 +11,7 @@
 +        $wpdb->query($wpdb->prepare("UPDATE {$table} SET state='uncertain',updated_at=%d WHERE state='running' AND kind IN ('legacy.llm80.train','llm.generate') AND lease_until<%d", time(), time()));
 +        $wpdb->query($wpdb->prepare("UPDATE {$table} SET state='pending',node='',lease_hash='',updated_at=%d WHERE state='running' AND kind NOT IN ('legacy.llm80.train','llm.generate') AND attempts<4 AND lease_until<%d", time(), time()));
          $wpdb->query($wpdb->prepare("UPDATE {$table} SET state='failed',updated_at=%d WHERE state='running' AND attempts>=4 AND lease_until<%d", time(), time()));
-@@ -208,10 +211,12 @@
+@@ -209,6 +210,7 @@
          }
          $table = self::table();
          // The same lease recovery as claim(), once for the complete batch.
