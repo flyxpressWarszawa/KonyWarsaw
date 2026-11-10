@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - msw/qwen-audit-offline-contracts-20261110
+      - msw/heartbeat-lease-failclosed-20261111
   pull_request:
     branches:
       - msw/engine-runtime-20261104
+      - msw/qwen-audit-offline-contracts-20261110
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,4 +27,8 @@ jobs:
           PYTHONPATH: msw-autonomous-engine
         run: |
           python -m unittest discover -s msw-autonomous-engine/tests -p test_qwen_audit_offline.py -v
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_paid_attempt_safety.py -v
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_recovery.py -v
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_priority_lane.py -v
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_shutdown.py -v
           python -m unittest discover -s msw-autonomous-engine/tests -p test_suite.py -v
