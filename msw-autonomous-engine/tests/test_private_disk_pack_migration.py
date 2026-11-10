@@ -148,6 +148,34 @@ class DiskPackMigration(unittest.TestCase):
             with self.assertRaises(ValueError):
                 seed_business(self.dir)
 
+    def test_cache_failure_does_not_disable_valid_live_env_pack(self):
+        raw, sha = zip_pack({"example/code.py": b"stable"},
+                            module_id="example", module_root_name="example")
+        with patch("msw_engine.runtime_pack.persist_archive",
+                   side_effect=PrivateArchiveError("simulated_io_failure")):
+            with patch.dict(os.environ, {}, clear=False):
+                result = install_runtime(self.dir, env_chunks("MSW_RUNTIME_PACK", raw, sha))
+                self.assertEqual(result["state"], "installed_verified")
+                self.assertFalse(result["archive_readback_verified"])
+                self.assertIsNotNone(module_root("example"))
+
+    def test_model_cache_failure_does_not_disable_valid_live_model(self):
+        files = {
+            "msw-own-ai/model.py": b"MODEL = True",
+            "msw-own-ai/checkpoint/checkpoint-manifest.json": b"{}",
+            "msw-own-ai/checkpoint/train-corpus.txt": b"synthetic",
+            "msw-own-ai/checkpoint/validation-corpus.txt": b"synthetic",
+        }
+        raw, sha = zip_pack(files, module_id="msw-own-ai",
+                            module_root_name="msw-own-ai")
+        with patch("msw_engine.own_model.persist_archive",
+                   side_effect=PrivateArchiveError("simulated_io_failure")):
+            with patch.dict(os.environ, {}, clear=False):
+                result = install_model(self.dir, env_chunks("MSW_OWN_MODEL_PACK", raw, sha))
+                self.assertEqual(result["state"], "installed_verified")
+                self.assertFalse(result["archive_readback_verified"])
+                self.assertEqual(result["pack_sha256"], sha)
+
     def test_disk_does_not_allow_caller_chosen_path(self):
         with self.assertRaises(PrivateArchiveError):
             restore_archive(self.dir, "../" + "x"*61)
