@@ -143,10 +143,17 @@ class DiskPackMigration(unittest.TestCase):
                 self.assertEqual(restored["source"], "verified_private_disk")
                 self.assertEqual(restored["records"], 1)
 
-    def test_business_missing_disk_with_sha_fails_closed(self):
+    def test_business_missing_disk_with_sha_fails_closed_without_agent_crash(self):
         with patch.dict(os.environ, {"MSW_BUSINESS_KNOWLEDGE_SHA256": "e"*64}, clear=True):
-            with self.assertRaises(ValueError):
-                seed_business(self.dir)
+            result = seed_business(self.dir)
+            self.assertEqual(result["state"], "blocked")
+            self.assertEqual(result["error"], "business_knowledge_disk_missing")
+
+    def test_business_malformed_disk_pin_preserves_core_agent_startup(self):
+        with patch.dict(os.environ, {"MSW_BUSINESS_KNOWLEDGE_SHA256": "not-a-sha"}, clear=True):
+            result = seed_business(self.dir)
+            self.assertEqual(result["state"], "blocked")
+            self.assertEqual(result["error"], "business_knowledge_pin_invalid")
 
     def test_cache_failure_does_not_disable_valid_live_env_pack(self):
         raw, sha = zip_pack({"example/code.py": b"stable"},
