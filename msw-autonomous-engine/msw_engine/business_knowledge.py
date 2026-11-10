@@ -14,6 +14,8 @@ def seed(directory):
     if not 0 <= count <= 20:
         raise ValueError('business_knowledge_chunks')
     if not re.fullmatch(r'[a-f0-9]{64}', digest):
+        if not count:
+            return {'state': 'blocked', 'error': 'business_knowledge_pin_invalid'}
         raise ValueError('business_knowledge_digest')
     root = Path(directory) / 'owner-continuity'
     if root.is_symlink():
@@ -24,10 +26,15 @@ def seed(directory):
         source = 'environment_migrated_to_disk'
     else:
         if path.is_symlink() or not path.is_file() or path.stat().st_size > 1000000 or path.stat().st_mode & 0o077:
-            raise ValueError('business_knowledge_disk_missing')
-        raw = path.read_text(encoding='utf-8')
+            return {'state': 'blocked', 'error': 'business_knowledge_disk_missing'}
+        try:
+            raw = path.read_text(encoding='utf-8')
+        except (OSError, UnicodeError):
+            return {'state': 'blocked', 'error': 'business_knowledge_disk_unreadable'}
         source = 'verified_private_disk'
     if len(raw.encode()) > 1000000 or hashlib.sha256(raw.encode()).hexdigest() != digest:
+        if not count:
+            return {'state': 'blocked', 'error': 'business_knowledge_digest'}
         raise ValueError('business_knowledge_digest')
     data = json.loads(raw)
     if (not isinstance(data, dict) or data.get('schema') != 'msw.business-knowledge.v1'
