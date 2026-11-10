@@ -1,0 +1,53 @@
+name: MSW interactive Qwen Codex launcher verification
+on:
+  push:
+    branches:
+      - msw/qwen-codex-repo-bridge-20261110
+    paths:
+      - msw-autonomous-engine/AGENTS.md
+      - msw-autonomous-engine/integrations/token-plan-codex/**
+      - .github/workflows/msw-qwen-codex-local-ci.yml
+  pull_request:
+    branches:
+      - msw/engine-runtime-20261104
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate-windows-bridge:
+    runs-on: windows-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse PowerShell and verify keyless interactive contract
+        shell: pwsh
+        run: |
+          $p = "msw-autonomous-engine/integrations/token-plan-codex/Connect-MSW-Qwen.ps1"
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path $p).Path, [ref]$tokens, [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -ne 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+          $script = Get-Content $p -Raw
+          $guide = Get-Content msw-autonomous-engine/AGENTS.md -Raw
+          if ($script -notmatch "codex --profile aliyun" -or
+              $script -notmatch "workspace-write" -or
+              $script -notmatch "ask-for-approval on-request" -or
+              $script -notmatch "msw/engine-runtime-20261104" -or
+              $script -notmatch "MSW_ALIYUN_TOKEN_PLAN_API_KEY") {
+            throw "Missing required local bridge contract"
+          }
+          if ($script -match "sk-sp-[A-Za-z0-9_-]{8}" -or
+              $script -match "o1_[A-Za-z0-9_-]{8}" -or
+              $guide -match "sk-sp-[A-Za-z0-9_-]{8}") {
+            throw "Unexpected embedded credential"
+          }
+          if ($script -match "Invoke-Expression" -or
+              $script -match "(?m)^\s*.*MSW_PAID_AI_TRANSPORT\s*=") {
+            throw "Prohibited interactive bridge behavior"
+          }
+          Write-Host "PASS: PowerShell syntax, authorized repo, no credentials or unattended backend wiring"
