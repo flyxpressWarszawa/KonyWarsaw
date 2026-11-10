@@ -91,3 +91,75 @@ class TestTransport404ActionDiagnostics(TestCase):
         self.assertNotIn("transport_action", event)
         self.assertNotIn("transport_404_ambiguous", event)
         self.assertEqual(event["http_status"], 503)
+
+
+class TestReceipt404Classification(TestCase):
+    """Distinguish recovered old receipts from a fresh claim/ACK transport error."""
+
+    @staticmethod
+    def fake_receipt():
+        return {
+            "job_id": "10000000-0000-0000-0000-000000000001",
+            "payload_sha256": "a" * 64,
+            "lease_token": "b" * 64,
+            "result_json": '{"ok":true,"data":{}}',
+            "result_sha256": "c" * 64,
+        }
+
+    def make_worker(self):
+        from unittest.mock import Mock
+        worker = Worker.__new__(Worker)
+        worker.stopping = False
+        worker.journal = Mock()
+        worker.journal.pending.return_value = [self.fake_receipt()]
+        worker.client = Mock()
+        worker.last_server_contact = 0
+        worker.last_job_state = "not_run"
+        return worker
+
+    def test_old_receipt_complete_404_is_deferred_not_executed_again(self):
+        from unittest.mock import call
+        worker = self.make_worker()
+        worker.client.send.side_effect = TransportError("server_rejected_request", 404)
+        self.assertEqual(worker.replay_receipts(), 0)
+        worker.journal.mark.assert_called_once_with(self.fake_receipt()["job_id"], "pending_deferred")
+        self.assertEqual(worker.client.send.call_count, 1)
+        self.assertEqual(worker.client.send.call_args.args[0], "complete")
+        self.assertEqual(worker.last_job_state, "not_run")
+
+    def test_old_receipt_conflict_then_missing_status_is_deferred(self):
+        worker = self.make_worker()
+        worker.client.send.side_effect = [
+            TransportError("server_rejected_request", 409),
+            TransportError("server_rejected_request", 404),
+        ]
+        self.assertEqual(worker.replay_receipts(), 0)
+        worker.journal.mark.assert_called_once_with(self.fake_receipt()["job_id"], "pending_deferred")
+        self.assertEqual([c.args[0] for c in worker.client.send.call_args_list],
+                         ["complete", "status"])
+
+    def test_new_claim_404_propagates_to_bounded_retry(self):
+        worker = self.make_worker()
+        worker.journal.pending.return_value = []
+        worker.client.send.side_effect = TransportError("server_rejected_request", 404)
+        with self.assertRaises(TransportError) as caught:
+            worker.run_once()
+        self.assertEqual(caught.exception.status, 404)
+        self.assertEqual(worker.client.send.call_args.args[0], "claim")
+        worker.journal.mark.assert_not_called()
+
+    def test_newly_claimed_result_404_remains_uncertain_without_ack(self):
+        worker = self.make_worker()
+        worker.journal.pending.return_value = []
+        receipt = self.fake_receipt()
+        worker.execute = lambda job, lease: receipt
+        worker.client.send.side_effect = [
+            {"state": "claimed", "job": {"id": receipt["job_id"]}, "lease_token": "b" * 64},
+            TransportError("server_rejected_request", 404),
+        ]
+        with self.assertRaises(TransportError) as caught:
+            worker.run_once()
+        self.assertEqual(caught.exception.status, 404)
+        self.assertEqual([c.args[0] for c in worker.client.send.call_args_list],
+                         ["claim", "complete"])
+        worker.journal.mark.assert_not_called()
