@@ -1,0 +1,42 @@
+name: MSW Render private disk pack migration - isolated tests
+
+on:
+  push:
+    branches:
+      - msw/render-packs-to-private-disk-20261110
+    paths:
+      - msw-autonomous-engine/msw_engine/pack_disk.py
+      - msw-autonomous-engine/msw_engine/runtime_pack.py
+      - msw-autonomous-engine/msw_engine/own_model.py
+      - msw-autonomous-engine/msw_engine/business_knowledge.py
+      - msw-autonomous-engine/tests/test_private_disk_pack_migration.py
+      - .github/workflows/msw-render-private-disk-packs-tests.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: msw-private-pack-test-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  synthetic-offline-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python runtime
+        run: python3 --version
+      - name: Compile changed modules and tests
+        working-directory: msw-autonomous-engine
+        run: python3 -m py_compile msw_engine/pack_disk.py msw_engine/runtime_pack.py msw_engine/own_model.py msw_engine/business_knowledge.py tests/test_private_disk_pack_migration.py
+      - name: Verify migration, disk readback, and hostile-file rejection
+        working-directory: msw-autonomous-engine
+        run: python3 -m unittest discover -s tests -p 'test_private_disk_pack_migration.py' -v
+      - name: Check original runtime pack and own-model contracts
+        working-directory: msw-autonomous-engine
+        run: |
+          python3 -m unittest discover -s tests -p 'test_runtime_pack.py' -v
+          python3 -m unittest discover -s tests -p 'test_own_model.py' -v
