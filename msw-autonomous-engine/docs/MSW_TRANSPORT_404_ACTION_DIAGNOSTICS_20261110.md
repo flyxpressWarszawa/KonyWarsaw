@@ -44,3 +44,13 @@ Uwaga: ta poprawka nie usuwa HTTP 404 i nie zmniejsza CPU sama z siebie.
 - Wynik: **6 testów / 6 zaliczonych**, potwierdzony w logu job `isolated-unit-tests`.
 - Pozostaje brak testu integracyjnego na żywym Render. Samo CI nie ustala, czy HTTP 404 powstaje przy `claim`, `status`, `heartbeat` czy `complete`.
 - Żaden test CI nie wykonał żądania do produkcyjnego serwera, nie zmienił lease, ACK, PHP WordPressa ani bazy.
+
+## Dodatkowa weryfikacja obsługi ACK i 404
+- GitHub Actions uruchomił rozszerzony zestaw testów na pełnym checkout repozytorium: https://github.com/flyxpressWarszawa/KonyWarsaw/actions/runs/42852732455
+- Wynik: **10/10 PASS**, `py_compile` PASS, job `isolated-unit-tests` succeeded.
+- Test starego receipt: HTTP 404 przy `complete` oznacza odroczenie lokalnego potwierdzenia (`pending_deferred`), bez ponowienia wykonania.
+- Test konfliktu: 409 przy `complete` + 404 przy `status` również zachowuje odroczenie; brak ACK pozostaje brakującym dowodem.
+- Test świeżego `claim`: 404 dociera do kontrolowanej obsługi błędu transportu i nie staje się ACK.
+- Test nowo zatwierdzanego zadania: 404 po przyjęciu lease pozostaje niepotwierdzone, bez lokalnego oznaczenia ACK.
+- Testy wykorzystują mockowany transport, bez żadnego dostępu do WordPressa czy próby wykonania zadań.
+- Na produkcji przed wdrożeniem nadal nie wiadomo, czy rzeczywisty 404 pochodzi z `claim`, `status`, `complete`, czy `heartbeat`. Poprawka pozostaje w DRAFT.
