@@ -1,0 +1,29 @@
+name: MSW Alibaba Cloud Model Studio adapter checks
+on:
+  push:
+    branches:
+      - msw/aliyun-modelstudio-20261110
+    paths:
+      - msw-autonomous-engine/**
+      - .github/workflows/msw-aliyun-modelstudio-ci.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile adapter and federation
+        run: python -m compileall -q msw-autonomous-engine/msw_engine
+      - name: Run Alibaba adapter and existing federation regression checks
+        env:
+          PYTHONPATH: msw-autonomous-engine
+        run: |
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_aliyun_direct.py -v
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_federation.py -v
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_federation_resume.py -v
