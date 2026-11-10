@@ -34,19 +34,21 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     throw "Git for Windows is missing. Install with: winget install --id Git.Git -e --source winget (or https://git-scm.com/install/windows). Open a NEW PowerShell window and rerun the script."
 }
 
+# Keep original Codex desktop/GPT config untouched.
+# Codex >=0.134 reads named profile ~/.codex/aliyun.config.toml.
+# Provider is self-contained in that profile, not required in main config.toml.
 $configPath = Join-Path $HOME ".codex\config.toml"
 if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) {
-    throw "Missing $configPath. Configure the existing aliyun profile first."
-}
-$config = Get-Content -LiteralPath $configPath -Raw
-# Codex 0.134+ reads a separate ~/.codex/aliyun.config.toml, not [profiles.aliyun].
-# Keep the owner's existing gpt-6-astra config.toml untouched.
-if ($config -notmatch '(?m)^\s*\[model_providers\.MSW_Aliyun_Token_Plan\]\s*$' -or
-    $config -notmatch 'token-plan\.ap-southeast-1\.maas\.aliyuncs\.com' -or
-    $config -notmatch 'MSW_ALIYUN_TOKEN_PLAN_API_KEY') {
-    throw "Missing keyless Alibaba provider in main config.toml. Preserve the existing GPT profile."
+    throw "Original Codex config.toml is missing. Stop instead of replacing the GPT profile."
 }
 $profilePath = Join-Path $HOME ".codex\aliyun.config.toml"
+$providerSection = @'
+[model_providers.MSW_Aliyun_Token_Plan]
+name = "Alibaba Cloud Token Plan - Singapore"
+base_url = "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"
+env_key = "MSW_ALIYUN_TOKEN_PLAN_API_KEY"
+wire_api = "responses"
+'@
 if (-not (Test-Path -LiteralPath $profilePath)) {
     $profileText = @'
 model = "qwen3.8-max"
@@ -55,13 +57,28 @@ model_reasoning_effort = "medium"
 [mcp_servers.node_repl]
 enabled = false
 '@
+    $profileText = $profileText.TrimEnd() + "`r`n`r`n" + $providerSection.TrimEnd() + "`r`n"
     [System.IO.File]::WriteAllText($profilePath, $profileText,
         (New-Object System.Text.UTF8Encoding($false)))
-    Write-Host "[OK] Separate medium-usage aliyun profile created. GPT-6 Astra remains unchanged." -ForegroundColor Green
+    Write-Host "[OK] Created separate keyless Qwen medium profile. GPT defaults not changed." -ForegroundColor Green
 } else {
     $existing = Get-Content -LiteralPath $profilePath -Raw
-    if ($existing -notmatch 'qwen3\.8-max' -or $existing -notmatch 'MSW_Aliyun_Token_Plan') {
-        throw "The existing aliyun.config.toml has different model/provider values. No overwrite performed."
+    if ($existing -notmatch '(?m)^\s*model\s*=\s*"qwen3\.8-max"\s*$' -or
+        $existing -notmatch '(?m)^\s*model_provider\s*=\s*"MSW_Aliyun_Token_Plan"\s*$') {
+        throw "Existing aliyun.config.toml uses another model or provider. Do not overwrite it."
+    }
+    if ($existing -notmatch '(?m)^\s*\[model_providers\.MSW_Aliyun_Token_Plan\]\s*$') {
+        $backup = $profilePath + ".backup-" + (Get-Date -Format "yyyyMMddHHmmss")
+        Copy-Item -LiteralPath $profilePath -Destination $backup -ErrorAction Stop
+        [System.IO.File]::AppendAllText($profilePath,
+            ("`r`n" + $providerSection.TrimEnd() + "`r`n"),
+            (New-Object System.Text.UTF8Encoding($false)))
+        Write-Host "[OK] Added provider to separate Qwen profile (backup saved)." -ForegroundColor Green
+    } else {
+        if ($existing -notmatch 'token-plan\.ap-southeast-1\.maas\.aliyuncs\.com/compatible-mode/v1' -or
+            $existing -notmatch 'MSW_ALIYUN_TOKEN_PLAN_API_KEY') {
+            throw "Existing Qwen profile has a different endpoint/key name. Review locally; no changes made."
+        }
     }
 }
 
