@@ -284,7 +284,12 @@ class Worker:
                 self.health("draining")
                 return 0
             except TransportError as error:
-                print(json.dumps({"state": "connection_retry", "code": error.code, "http_status": error.status}), flush=True)
+                event = {"state": "connection_retry", "code": error.code, "http_status": error.status}
+                if error.status == 404:
+                    action = getattr(error, "action", None)
+                    event["transport_action"] = action if action in {"claim", "heartbeat", "complete", "status"} else "unknown"
+                    event["transport_404_ambiguous"] = True
+                print(json.dumps(event), flush=True)
                 self.health("connection_retry")
                 pause = max(error.retry_after, min(300, max(30, pause * 2)))
                 if once:
