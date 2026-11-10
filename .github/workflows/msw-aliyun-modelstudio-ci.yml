@@ -6,6 +6,9 @@ on:
     paths:
       - msw-autonomous-engine/**
       - .github/workflows/msw-aliyun-modelstudio-ci.yml
+  pull_request:
+    branches:
+      - msw/engine-runtime-20261104
   workflow_dispatch:
 permissions:
   contents: read
