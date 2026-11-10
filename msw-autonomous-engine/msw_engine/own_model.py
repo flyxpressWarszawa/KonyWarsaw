@@ -8,6 +8,8 @@ import os
 from pathlib import Path
 import re
 
+from .pack_disk import PrivateArchiveError, persist_archive, restore_archive
+
 
 def install(data_dir: Path, environ=None) -> dict:
     from .runtime_pack import PackError, unpack
@@ -17,26 +19,35 @@ def install(data_dir: Path, environ=None) -> dict:
         count = int(env.get('MSW_OWN_MODEL_PACK_CHUNKS', '0'))
     except (TypeError, ValueError):
         return {'state': 'blocked', 'error': 'own_model_pack_invalid', 'research_only': True}
-    if not count:
+    digest = env.get('MSW_OWN_MODEL_PACK_SHA256', '')
+    if not count and not digest:
         return {'state': 'not_configured', 'research_only': True}
     try:
-        if not 1 <= count <= 32:
+        if not 0 <= count <= 32:
             raise PackError('own_model_pack_chunk_limit')
-        encoded = ''.join(env.get(f'MSW_OWN_MODEL_PACK_{i:02d}', '') for i in range(count))
-        if len(encoded) > 2_000_000:
-            raise PackError('own_model_pack_size')
-        raw = base64.b64decode(encoded, validate=True)
-        root, manifest = unpack(raw, env.get('MSW_OWN_MODEL_PACK_SHA256', ''), data_dir)
+        if count:
+            encoded = ''.join(env.get(f'MSW_OWN_MODEL_PACK_{i:02d}', '') for i in range(count))
+            if not encoded or len(encoded) > 2_000_000:
+                raise PackError('own_model_pack_size')
+            raw = base64.b64decode(encoded, validate=True)
+            source = 'environment_migrated_to_disk'
+        else:
+            raw = restore_archive(data_dir, digest)
+            source = 'verified_private_disk'
+        root, manifest = unpack(raw, digest, data_dir)
         if [m['id'] for m in manifest['modules']] != ['msw-own-ai']:
             raise PackError('own_model_module_required')
         module = root / 'msw-own-ai'
         for required in ['model.py', 'checkpoint/checkpoint-manifest.json', 'checkpoint/train-corpus.txt', 'checkpoint/validation-corpus.txt']:
             if 'msw-own-ai/' + required not in manifest['files']:
                 raise PackError('own_model_required_file')
+        if count:
+            persist_archive(data_dir, raw, digest)
         os.environ['MSW_OWN_MODEL_ROOT'] = str(module)
-        return {'state': 'installed_verified', 'pack_sha256': env['MSW_OWN_MODEL_PACK_SHA256'], 'research_only': True,
+        return {'state': 'installed_verified', 'pack_sha256': digest, 'research_only': True,
+                'source': source, 'archive_readback_verified': True,
                 'business_decision_authorized': False, 'public_source_uploaded': False}
-    except (ValueError, OSError, PackError):
+    except (ValueError, OSError, PackError, PrivateArchiveError):
         return {'state': 'blocked', 'error': 'own_model_pack_invalid', 'research_only': True}
 
 
