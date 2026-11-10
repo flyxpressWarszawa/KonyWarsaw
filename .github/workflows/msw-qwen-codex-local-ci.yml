@@ -38,7 +38,11 @@ jobs:
               $script -notmatch "workspace-write" -or
               $script -notmatch "ask-for-approval on-request" -or
               $script -notmatch "msw/engine-runtime-20261104" -or
-              $script -notmatch "MSW_ALIYUN_TOKEN_PLAN_API_KEY") {
+              $script -notmatch "MSW_ALIYUN_TOKEN_PLAN_API_KEY" -or
+              $script -notmatch "model_reasoning_effort" -or
+              $script -notmatch "--depth" -or
+              $script -notmatch "--sparse" -or
+              $script -notmatch "aliyun.config.toml") {
             throw "Missing required local bridge contract"
           }
           if ($script -match "sk-sp-[A-Za-z0-9_-]{8}" -or
