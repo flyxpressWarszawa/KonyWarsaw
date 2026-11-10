@@ -45,23 +45,30 @@ def check(directory: Path, *, inference=None) -> dict:
     if not re.fullmatch(r"[A-Za-z0-9_.-]{2,100}", model):
         return {**result, "state": "model_missing_or_invalid", "key_present": True,
                 "model_present": False, "authenticated": False}
+    protocol = os.environ.get("MSW_ALIYUN_PROBE_PROTOCOL", "chat")
+    if protocol not in ("chat", "chat_stream", "responses"):
+        return {**result, "state": "probe_protocol_invalid", "authenticated": False}
     nonce = os.environ.get("MSW_ALIYUN_PROBE_RUN_ID", "20261110")
     if not re.fullmatch(r"[A-Za-z0-9_.:-]{4,64}", nonce):
         return {**result, "state": "probe_id_invalid", "authenticated": False}
     request_id = "msw-aliyun-smoke-v1-" + hashlib.sha256(
-        (model + "\x00" + key + "\x00" + nonce).encode("utf-8")
+        (model + "\x00" + key + "\x00" + nonce + "\x00" + protocol).encode("utf-8")
     ).hexdigest()[:32]
     previous = _cached_state(directory, request_id)
     try:
         if inference is None:
-            from .aliyun_direct import generate
-            inference = generate
+            if protocol == "chat":
+                from .aliyun_direct import generate
+                inference = generate
+            else:
+                from .aliyun_protocols import generate
+                inference = lambda data, path: generate(data, path, protocol=protocol)
         answer = inference({"text": PROMPT, "request_id": request_id, "max_tokens": 128}, directory)
     except TaskError as error:
         code = str(error)
         if not re.fullmatch(r"[A-Za-z0-9_.:-]{1,140}", code):
             code = "sanitized_provider_failure"
-        return {**result, "state": "failed", "model": model, "key_present": True,
+        return {**result, "state": "failed", "model": model, "protocol": protocol, "key_present": True,
                 "authenticated": False, "error_code": code,
                 "requires_review": True, "response_replayed": previous is not None}
     except (OSError, ValueError, sqlite3.Error) as error:
@@ -71,7 +78,7 @@ def check(directory: Path, *, inference=None) -> dict:
             or answer.get("api_text_verified") is not True or not answer.get("answer_sha256")):
         return {**result, "state": "unverified_response", "model": model,
                 "key_present": True, "authenticated": False}
-    return {**result, "state": "verified", "model": model, "key_present": True,
+    return {**result, "state": "verified", "model": model, "protocol": protocol, "key_present": True,
             "authenticated": True, "api_text_verified": True,
             "answer_sha256": answer["answer_sha256"],
             "fresh_api_call": previous is None, "response_replayed": previous == "completed"}
