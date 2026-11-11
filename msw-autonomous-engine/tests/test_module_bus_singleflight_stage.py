@@ -48,7 +48,7 @@ namespace {
             $s=$GLOBALS['state'];
             if (!empty($GLOBALS['option_race']))$s['last_queued']['job_id']='bbbbbbbb-cccc-dddd-eeee-ffffffffffff';
             $callback($s);
-            $GLOBALS['state']=$s;
+            if (empty($GLOBALS['lost_save']))$GLOBALS['state']=$s;
             return true;
         }
         public static function enqueue() {
@@ -75,11 +75,16 @@ SUFFIX = r'''
     $scenario=$argv[1]??'pending';
     if($scenario==='running')$wpdb->row['state']='running';
     if($scenario==='failed')$wpdb->row['state']='failed';
+    if($scenario==='completed')$wpdb->row['state']='completed';
+    if($scenario==='uncertain')$wpdb->row['state']='uncertain';
+    if($scenario==='missing_row')$wpdb->row=null;
     if($scenario==='digest_mismatch')$wpdb->row['payload_sha256']=str_repeat('0',64);
     if($scenario==='foreign_kind')$wpdb->row['kind']='llm.generate';
     if($scenario==='new_fingerprint')$GLOBALS['state']['last_queued']['catalog_sha256']=str_repeat('b',64);
     if($scenario==='lock_busy')$GLOBALS['fail_lock']=true;
     if($scenario==='option_race')$GLOBALS['option_race']=true;
+    if($scenario==='lost_save')$GLOBALS['lost_save']=true;
+    if($scenario==='bad_prior_job_id')$GLOBALS['state']['last_queued']['job_id']='not-a-valid-id';
     $result=MSW_Federation_Module_Bus::enqueue();
     echo json_encode(['result'=>$result,'new_jobs'=>\MSW\UnifiedEngine\RemoteStore::$created,
         'sql_reads'=>$wpdb->reads,'last_checked'=>$GLOBALS['state']['last_checked'],
@@ -145,12 +150,17 @@ class MSWModuleBusSingleflightStageTests(unittest.TestCase):
         cases = {
             "pending": (0, True),
             "running": (0, True),
-            "failed": (1, False),
-            "digest_mismatch": (1, False),
-            "foreign_kind": (1, False),
+            "failed": (0, False),
+            "completed": (0, False),
+            "uncertain": (0, False),
+            "missing_row": (0, False),
+            "digest_mismatch": (0, False),
+            "foreign_kind": (0, False),
             "new_fingerprint": (1, False),
             "lock_busy": (0, False),
             "option_race": (0, False),
+            "lost_save": (0, False),
+            "bad_prior_job_id": (0, False),
         }
         for scenario, (new_jobs, reused) in cases.items():
             with self.subTest(scenario=scenario):
@@ -164,8 +174,20 @@ class MSWModuleBusSingleflightStageTests(unittest.TestCase):
                     self.assertFalse(data["result"]["completed"])
                     self.assertGreater(data["last_checked"], 1)
                     self.assertEqual(len(data["pending_receipts"]), 1)
-                if scenario in {"lock_busy", "option_race"}:
-                    self.assertEqual(data["result"]["error"], "singleflight_state_uncertain")
+                failure_modes = {
+                    "failed": "singleflight_terminal_review",
+                    "completed": "singleflight_terminal_review",
+                    "uncertain": "singleflight_terminal_review",
+                    "missing_row": "singleflight_existing_job_unverified",
+                    "digest_mismatch": "singleflight_existing_job_unverified",
+                    "foreign_kind": "singleflight_existing_job_unverified",
+                    "lock_busy": "singleflight_state_uncertain",
+                    "option_race": "singleflight_state_uncertain",
+                    "lost_save": "singleflight_readback_unverified",
+                    "bad_prior_job_id": "singleflight_job_id_unverified",
+                }
+                if scenario in failure_modes:
+                    self.assertEqual(data["result"]["error"], failure_modes[scenario])
                     self.assertFalse(data["result"].get("queued", False))
         self.assertEqual(result["production_changed"], False)
 
