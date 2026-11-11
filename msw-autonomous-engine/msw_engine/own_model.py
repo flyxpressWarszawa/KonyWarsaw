@@ -193,7 +193,7 @@ def handle(payload: dict, data_dir: Path) -> dict:
         result.update(training_performed=True, weights_modified=new_digest != digest, checkpoint_sha256=new_digest,
                       parent_sha256=digest, training_steps=reopened.step, steps_this_job=steps,
                       validation_byte_nll_before=before, validation_byte_nll_after=after,
-                      validation_scope='96 consecutive bytes from authored synthetic validation corpus; not a business benchmark',
+                      validation_scope=('96 encoded bytes from a disjoint owner-reviewed approved RAG holdout; not a business benchmark' if action == 'train_approved' else '96 consecutive bytes from authored synthetic validation corpus; not a business benchmark'),
                       checkpoint_readback_verified=True, promoted_to_research_current=promoted,
                       business_quality_improvement_proven=False)
         if action == 'train_approved':
