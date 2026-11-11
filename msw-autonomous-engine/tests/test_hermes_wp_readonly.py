@@ -1,9 +1,16 @@
 import io
 import json
+import hashlib
+import hmac
+import os
 import unittest
+from contextlib import redirect_stdout
+from unittest.mock import patch
 from urllib.error import HTTPError, URLError
 
-from msw_engine.hermes_wp_readonly import inspect_wordpress_hermes, _strict_status
+from msw_engine.hermes_wp_readonly import inspect_wordpress_hermes, _strict_status, main
+
+from msw_engine.client import signed_headers
 
 SITE = 'https://mobilny-serwis-warszawa.pl'
 NODE = 'readonly-node'
@@ -119,6 +126,65 @@ class HermesWordPressReadonlyTest(unittest.TestCase):
     def test_parser_rejects_spoofed_status(self):
         self.assertTrue(_strict_status(GOOD))
         self.assertFalse(_strict_status({'schema': GOOD['schema'], 'dependencies': GOOD['dependencies']}))
+
+
+    def test_status_hmac_matches_existing_php_remote_store_contract(self):
+        # RemoteStore.php: HMAC-SHA256 over POST, action, node, stamp, nonce,
+        # and lowercase SHA-256 of the exact original request body.
+        body = b'{}'
+        stamp, nonce = '1794425819', 'a' * 32
+        header = signed_headers('status', NODE, SECRET, body, timestamp=stamp, nonce=nonce)
+        canonical = '\n'.join(['POST', 'status', NODE, stamp, nonce, hashlib.sha256(body).hexdigest()])
+        expected = hmac.new(SECRET.encode(), canonical.encode(), hashlib.sha256).hexdigest()
+        self.assertEqual(header['X-MSWUE-Signature'], expected)
+        self.assertEqual(header['X-MSWUE-Nonce'], nonce)
+        self.assertEqual(header['X-MSWUE-Action'], 'status')
+
+    def test_cli_disabled_is_zero_io(self):
+        output = io.StringIO()
+        with patch.dict(os.environ, {'MSW_HERMES_WP_STATUS_ONCE': '0'}, clear=True), \
+                patch('msw_engine.hermes_wp_readonly.inspect_wordpress_hermes') as remote, \
+                redirect_stdout(output):
+            exit_code = main()
+        self.assertEqual(exit_code, 2)
+        remote.assert_not_called()
+        self.assertEqual(json.loads(output.getvalue())['code'], 'explicit_opt_in_required')
+
+    def test_cli_invalid_origin_is_local_hold_without_network(self):
+        output = io.StringIO()
+        env = {'MSW_HERMES_WP_STATUS_ONCE': '1', 'MSW_WP_URL': 'http://invalid.example',
+               'MSW_NODE': NODE, 'MSW_SECRET': SECRET}
+        with patch.dict(os.environ, env, clear=True), \
+                patch('msw_engine.hermes_wp_readonly.build_opener') as opener, \
+                redirect_stdout(output):
+            exit_code = main()
+        self.assertEqual(exit_code, 2)
+        opener.assert_not_called()
+        payload = json.loads(output.getvalue())
+        self.assertEqual(payload['state'], 'HOLD')
+        self.assertEqual(payload['code'], 'invalid_local_configuration')
+        self.assertNotIn(SECRET, output.getvalue())
+
+    def test_cli_opted_in_sanitized_result_not_production_authority(self):
+        env = {'MSW_HERMES_WP_STATUS_ONCE': '1', 'MSW_WP_URL': SITE,
+               'MSW_NODE': NODE, 'MSW_SECRET': SECRET}
+        for state, exit_code in [('OBSERVED_ONLY', 0), ('HOLD', 2)]:
+            output = io.StringIO()
+            data = {
+                'schema': 'msw.hermes.wordpress.readonly.v1',
+                'state': state, 'code': 'fixture', 'production_execution_authorized': False,
+                'hermes_control_channel_verified': False, 'signed_stop_hold_epoch_verified': False
+            }
+            with self.subTest(state=state), patch.dict(os.environ, env, clear=True), \
+                    patch('msw_engine.hermes_wp_readonly.inspect_wordpress_hermes', return_value=data) as remote, \
+                    redirect_stdout(output):
+                actual_exit = main()
+            self.assertEqual(actual_exit, exit_code)
+            remote.assert_called_once_with(SITE, NODE, SECRET)
+            printed = output.getvalue()
+            self.assertEqual(json.loads(printed)['state'], state)
+            self.assertNotIn(SECRET, printed)
+            self.assertFalse(json.loads(printed)['production_execution_authorized'])
 
 
 if __name__ == '__main__':
