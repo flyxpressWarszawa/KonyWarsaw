@@ -21,3 +21,19 @@ A signed training request selects 1–8 training IDs and **different** 1–8 val
 ## Outstanding production gates
 
 This change deliberately ships as a reviewed source branch / PR, **not** a production deployment. Real live training still requires evidence of the exact private pack and tensor checkpoint available to the worker, operational backup and rollback, valid signed training capability, current CPU/RAM headroom, approved public training examples, a clean CI run and a verified queue ACK. The known oversized Render environment variable pack issue must be addressed without copying secrets to GitHub. Neither OpenAI nor Alibaba Qwen model weights are locally editable through these handlers; provider-specific fine-tuning eligibility and credentials would have to be established separately.
+
+## Read-only readiness in the existing runtime catalogue
+
+The existing signed `runtime.catalog` result now includes `own_model_research`.
+It reports `not_configured`, `model_manifest_unavailable`,
+`waiting_for_pinned_checkpoint`, `checkpoint_integrity_unverified`, or
+`verified_research_checkpoint`, with SHA-256 verification against the
+existing persistent disk and bounded on-disk training receipt checks.
+An installed source pack alone does not prove an initial checkpoint is present.
+`model_weight_training_verified` requires a matching saved candidate
+checkpoint and well-formed prior training receipt. This evidence does not imply
+the model answers technical questions correctly or any real-world actions ran.
+
+Use the existing WordPress signed job system to request `runtime.catalog`;
+never print model weights, private training examples, secret environment values,
+or raw receipts in public dashboards. This diagnostic does not start training.
