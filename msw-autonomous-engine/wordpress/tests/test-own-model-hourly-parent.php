@@ -79,6 +79,7 @@ namespace {
             'msw_bdir_own_model_v24'=>[
                 'parts'=>[['id'=>'part-0','payload_sha256'=>'P0']],
                 'status'=>['id'=>'historical-status','payload_sha256'=>'S0'],
+                'generate'=>['id'=>'historical-generate','payload_sha256'=>'G0'],
                 'training'=>['id'=>'last-rejected-training','payload_sha256'=>'T0'],
                 'training_slot'=>'yesterday',
             ],
@@ -88,6 +89,7 @@ namespace {
             'action'=>'status','checkpoint_sha256'=>str_repeat('a',64),
             'training_performed'=>false,
         ]);
+        reply('historical-generate','G0',['action'=>'generate','text'=>'research-only']);
         reply('last-rejected-training','T0',[
             'action'=>'train','training_performed'=>true,'promoted_to_research_current'=>false,
             'checkpoint_sha256'=>str_repeat('c',64),
