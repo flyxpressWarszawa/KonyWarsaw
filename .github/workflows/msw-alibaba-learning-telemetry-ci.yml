@@ -1,0 +1,40 @@
+name: MSW read-only Alibaba quota and learning telemetry
+on:
+  push:
+    branches:
+      - msw/telemetry-learning-alibaba-readonly-20261111
+  pull_request:
+    branches:
+      - msw/engine-runtime-20261104
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Offline tests (no Alibaba login, no paid inference)
+        env:
+          PYTHONPATH: msw-autonomous-engine
+        run: |
+          python -m compileall -q msw-autonomous-engine/telemetry
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_learning_quota_observer.py -v
+      - name: Assert observer cannot be triggered by production worker
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path("msw-autonomous-engine/telemetry/learning_quota_observer.py").read_text()
+          forbidden = [
+            "chat.completions.create", "responses.create", "llm.generate(",
+            "MSW_PAID_AI_TRANSPORT=", "write_file(", "INSERT INTO",
+            "subprocess.Popen", "shell=True", "sk-sp-", "o1_"
+          ]
+          assert not any(s in source for s in forbidden), "Forbidden observer behavior"
+          assert '"bl", "usage", "token-plan", "--output", "json"' in source
+          print("PASS: read-only data normalization, no credentials, no inference")
+          PY
