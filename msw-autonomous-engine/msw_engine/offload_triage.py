@@ -70,6 +70,10 @@ def triage(rows: object) -> dict:
             "state": state, "kind": kind, "count": count,
             "category": category,
             "pure_candidate": kind in PURE_CANDIDATES,
+            # The native WP Atlas has different source rules (500 words / 90 title characters).
+            # Pure compute eligibility NEVER authorizes replacing its PHP auditor.
+            "atlas_equivalent_verified": False,
+            "atlas_cutover_allowed": False,
             "on_render_verified": False,
             "effect_completed_verified": False,
         })
@@ -90,6 +94,7 @@ def triage(rows: object) -> dict:
         "backup_and_restore_verified": False,
         "authenticated_result_ack_verified": False,
         "permission_to_deploy": False,
+        "atlas_cutover_allowed": False,
         "production_offload_completed": False,
         "actions_executed": 0,
         "note": "Queue states and worker presence never establish an offloaded business effect.",
@@ -112,6 +117,7 @@ def main() -> int:
             "state": "HOLD",
             "code": "unverified_or_invalid_snapshot",
             "permission_to_deploy": False,
+            "atlas_cutover_allowed": False,
             "actions_executed": 0,
         }, sort_keys=True))
         return 2
