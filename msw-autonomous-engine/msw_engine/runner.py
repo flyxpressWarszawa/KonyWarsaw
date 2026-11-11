@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import closing
 import hashlib
 import json
 import multiprocessing
@@ -44,25 +45,45 @@ class Journal:
         if len(raw.encode()) > 524288:
             raw = encode({"ok": False, "error": "result_limit"}).decode()
         digest = hashlib.sha256(raw.encode()).hexdigest()
-        values = (job["id"], job["payload_sha256"], lease, raw, digest, "pending", int(time.time()))
-        with self.connect() as db:
-            old = db.execute("SELECT payload_sha256 FROM receipts WHERE job_id=?", (job["id"],)).fetchone()
+        values = (job["id"], job["payload_sha256"], lease, raw, digest, "ready_to_complete", int(time.time()))
+        with closing(self.connect()) as db, db:
+            db.execute("BEGIN IMMEDIATE")
+            old = db.execute("SELECT payload_sha256,result_sha256 FROM receipts WHERE job_id=?", (job["id"],)).fetchone()
             if old and old["payload_sha256"] != job["payload_sha256"]:
                 raise TransportError("journal_payload_conflict")
-            db.execute("INSERT INTO receipts VALUES(?,?,?,?,?,?,?) ON CONFLICT(job_id) DO UPDATE SET lease_token=excluded.lease_token,result_json=excluded.result_json,result_sha256=excluded.result_sha256,state='pending',updated_at=excluded.updated_at", values)
-        return self.lookup(job["id"], job["payload_sha256"])
+            if old and old["result_sha256"] != digest:
+                raise TransportError("journal_result_conflict")
+            db.execute(
+                "INSERT INTO receipts VALUES(?,?,?,?,?,?,?) ON CONFLICT(job_id) DO UPDATE SET "
+                "lease_token=excluded.lease_token,updated_at=excluded.updated_at WHERE receipts.state='ready_to_complete'",
+                values,
+            )
+            return dict(db.execute("SELECT * FROM receipts WHERE job_id=?", (job["id"],)).fetchone())
+
+    def reserve_completion(self, receipt: dict) -> bool:
+        """Commit the send intent before the request, once across all worker lanes."""
+        with closing(self.connect()) as db, db:
+            return db.execute(
+                "UPDATE receipts SET state='completion_attempted',updated_at=? WHERE job_id=? AND payload_sha256=? "
+                "AND result_sha256=? AND lease_token=? AND state='ready_to_complete'",
+                (int(time.time()), receipt["job_id"], receipt["payload_sha256"], receipt["result_sha256"], receipt["lease_token"]),
+            ).rowcount == 1
 
     def pending(self) -> list[dict]:
-        with self.connect() as db:
-            # A temporarily missing receipt must not starve every other job.
-            # Preserve it and retry after one hour; never treat 404 as an ACK.
+        with closing(self.connect()) as db:
+            # Existing pending rows can predate an attempted send. Recover them by status only.
             return [dict(row) for row in db.execute(
-                "SELECT * FROM receipts WHERE state='pending' OR (state='pending_deferred' AND updated_at<=?) ORDER BY updated_at LIMIT 8",
+                "SELECT * FROM receipts WHERE state IN ('ready_to_complete','completion_attempted','pending') "
+                "OR (state IN ('readback_deferred','pending_deferred') AND updated_at<=?) ORDER BY updated_at LIMIT 8",
                 (int(time.time()) - 3600,))]
 
-    def mark(self, job_id: str, state: str) -> None:
-        with self.connect() as db:
-            db.execute("UPDATE receipts SET state=?,updated_at=? WHERE job_id=?", (state, int(time.time()), job_id))
+    def mark(self, receipt: dict, state: str) -> None:
+        with closing(self.connect()) as db, db:
+            db.execute(
+                "UPDATE receipts SET state=?,updated_at=? WHERE job_id=? AND payload_sha256=? AND result_sha256=? "
+                "AND state<>'acknowledged' AND (state<>'ready_to_complete' OR ?='acknowledged')",
+                (state, int(time.time()), receipt["job_id"], receipt["payload_sha256"], receipt["result_sha256"], state),
+            )
 
 
 def child_task(connection, kind: str, payload: dict, directory: str, max_seconds: int, memory_mb: int):
@@ -104,16 +125,34 @@ class Worker:
             raise WorkerDraining()
 
     def acknowledge(self, receipt: dict) -> dict:
-        fields = {key: receipt[key] for key in ("payload_sha256", "lease_token", "result_json", "result_sha256")}
-        fields["job_id"] = receipt["job_id"]
         self.check_draining()
-        acknowledgement = self.client.send("complete", fields)
-        readback = self.client.send("status", {"job_id": receipt["job_id"]})
-        digest = receipt["result_sha256"]
-        if acknowledgement.get("stored") is not True or acknowledgement.get("result_sha256") != digest or readback.get("result_sha256") != digest or readback.get("state") not in {"completed", "failed"}:
-            raise TransportError("result_readback_mismatch")
-        self.journal.mark(receipt["job_id"], "acknowledged")
+        if self.journal.reserve_completion(receipt):
+            fields = {key: receipt[key] for key in ("job_id", "payload_sha256", "lease_token", "result_json", "result_sha256")}
+            self.check_draining()
+            try:
+                acknowledgement = self.client.send("complete", fields)
+            except TransportError as error:
+                if error.status != 409:
+                    raise
+            else:
+                if acknowledgement.get("stored") is not True or acknowledgement.get("result_sha256") != receipt["result_sha256"]:
+                    raise TransportError("completion_response_mismatch")
+
+        try:
+            readback = self.client.send("status", {"job_id": receipt["job_id"]})
+        except TransportError as error:
+            if error.status != 404:
+                raise
+            return self.defer_confirmation(receipt, "status_not_found")
         self.last_server_contact = int(time.time())
+        if readback.get("state") not in {"completed", "failed"}:
+            return self.defer_confirmation(receipt, "status_not_terminal")
+        if (readback.get("id") != receipt["job_id"]
+                or readback.get("payload_sha256") != receipt["payload_sha256"]
+                or readback.get("result_sha256") != receipt["result_sha256"]):
+            return self.defer_confirmation(receipt, "result_readback_mismatch")
+
+        self.journal.mark(receipt, "acknowledged")
         self.last_job_state = readback["state"]
         if (getattr(self.client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"
                 and os.environ.get("MSW_AUTONOMOUS_AGENT", "1") == "1"):
@@ -126,36 +165,17 @@ class Worker:
                 print(json.dumps({"autonomous_agent": {"state": "native_ledger_unavailable"}}), flush=True)
         return {"job_id": receipt["job_id"], "state": readback["state"], "server_ack_verified": True}
 
+    def defer_confirmation(self, receipt: dict, reason: str) -> dict:
+        self.journal.mark(receipt, "readback_deferred")
+        self.last_job_state = "ack_pending"
+        print(json.dumps({"receipt_recovery": {"state": "deferred_unverified", "reason": reason, "retry_seconds": 3600}}), flush=True)
+        return {"job_id": receipt["job_id"], "state": "ack_pending", "server_ack_verified": False}
+
     def replay_receipts(self) -> int:
         count = 0
         for receipt in self.journal.pending():
-            try:
-                self.acknowledge(receipt)
+            if self.acknowledge(receipt)["server_ack_verified"]:
                 count += 1
-            except TransportError as error:
-                if error.status == 409:
-                    # A completion can be committed even if its HTTP response was
-                    # lost. Verify the durable result before abandoning a receipt.
-                    try:
-                        readback = self.client.send("status", {"job_id": receipt["job_id"]})
-                    except TransportError as status_error:
-                        if status_error.status != 404:
-                            raise
-                        self.journal.mark(receipt["job_id"], "pending_deferred")
-                        print(json.dumps({"receipt_recovery": {"state": "deferred_unverified", "reason": "status_not_found", "retry_seconds": 3600}}), flush=True)
-                        continue
-                    self.last_server_contact = int(time.time())
-                    if readback.get("state") in {"completed", "failed"} and readback.get("result_sha256") == receipt["result_sha256"]:
-                        self.journal.mark(receipt["job_id"], "acknowledged")
-                        self.last_job_state = readback["state"]
-                        count += 1
-                    else:
-                        self.journal.mark(receipt["job_id"], "stale_lease")
-                elif error.status == 404:
-                    self.journal.mark(receipt["job_id"], "pending_deferred")
-                    print(json.dumps({"receipt_recovery": {"state": "deferred_unverified", "reason": "endpoint_or_receipt_not_found", "retry_seconds": 3600}}), flush=True)
-                else:
-                    raise
         return count
 
     def execute(self, job: dict, lease: str) -> dict:

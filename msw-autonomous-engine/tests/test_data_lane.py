@@ -21,7 +21,8 @@ class DataLaneTest(unittest.TestCase):
                     self.digest = payload["result_sha256"]
                     self.result = json.loads(payload["result_json"])
                     return {"stored": True, "result_sha256": self.digest}
-                return {"state": "completed", "result_sha256": self.digest}
+                return {"id": "lane-test", "state": "completed", "result_sha256": self.digest,
+                        "payload_sha256": hashlib.sha256(raw.encode()).hexdigest()}
         c = Client()
         with tempfile.TemporaryDirectory() as folder:
             result = consume_data(c, Path(folder))
