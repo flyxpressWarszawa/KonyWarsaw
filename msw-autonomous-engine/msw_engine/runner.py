@@ -99,9 +99,14 @@ class Worker:
         self.last_job_state = "not_run"
         self.cron_state = "not_run"
 
+    def check_draining(self) -> None:
+        if self.stopping or (self.cancel_check is not None and self.cancel_check()):
+            raise WorkerDraining()
+
     def acknowledge(self, receipt: dict) -> dict:
         fields = {key: receipt[key] for key in ("payload_sha256", "lease_token", "result_json", "result_sha256")}
         fields["job_id"] = receipt["job_id"]
+        self.check_draining()
         acknowledgement = self.client.send("complete", fields)
         readback = self.client.send("status", {"job_id": receipt["job_id"]})
         digest = receipt["result_sha256"]
@@ -154,6 +159,7 @@ class Worker:
         return count
 
     def execute(self, job: dict, lease: str) -> dict:
+        self.check_draining()
         raw = job.get("payload", "")
         if not isinstance(raw, str) or len(raw.encode()) > 262144 or hashlib.sha256(raw.encode()).hexdigest() != job.get("payload_sha256"):
             raise TransportError("job_payload_hash_mismatch")
@@ -170,9 +176,15 @@ class Worker:
             return self.journal.save(job, lease, result)
         context = multiprocessing.get_context("spawn")
         parent, child = context.Pipe(duplex=False)
-        process = context.Process(target=child_task, args=(child, job["kind"], payload, str(self.journal.data_dir), self.max_seconds, self.memory_mb))
-        process.start()
-        child.close()
+        try:
+            process = context.Process(target=child_task, args=(child, job["kind"], payload, str(self.journal.data_dir), self.max_seconds, self.memory_mb))
+            self.check_draining()
+            process.start()
+        except BaseException:
+            parent.close()
+            raise
+        finally:
+            child.close()
         started = time.monotonic()
         heartbeat_at = started
         result = None
@@ -182,8 +194,7 @@ class Worker:
                     result = json.loads(parent.recv_bytes(524289))
                     break
                 now = time.monotonic()
-                if self.stopping or (self.cancel_check is not None and self.cancel_check()):
-                    raise WorkerDraining()
+                self.check_draining()
                 if now - started > self.max_seconds:
                     process.terminate()
                     result = {"ok": False, "error": "task_time_budget"}
@@ -193,8 +204,10 @@ class Worker:
                     self.last_server_contact = int(time.time())
                     heartbeat_at = now
             if result is None:
+                self.check_draining()
                 result = {"ok": False, "error": "task_process_ended"}
         except EOFError:
+            self.check_draining()
             result = {"ok": False, "error": "task_process_ended"}
         finally:
             parent.close()
@@ -207,11 +220,13 @@ class Worker:
         return self.journal.save(job, lease, result)
 
     def run_once(self) -> dict:
+        self.check_draining()
         self.replay_receipts()
-        if self.stopping:
-            raise WorkerDraining()
-        response = self.client.send("claim", {"capabilities": list(handlers())})
+        capabilities = list(handlers())
+        self.check_draining()
+        response = self.client.send("claim", {"capabilities": capabilities})
         self.last_server_contact = int(time.time())
+        self.check_draining()
         if response.get("state") != "claimed":
             return {"state": "idle"}
         job = response.get("job")
@@ -273,6 +288,7 @@ class Worker:
                 pause = min(60, pause + 5) if result["state"] == "idle" else (30 if result["state"] == "failed" else 10)
                 self.health(result["state"])
                 if fleet_thread is None and poke_cron_seconds > 0 and time.monotonic() - last_poke > poke_cron_seconds:
+                    self.check_draining()
                     try:
                         self.client.poke_cron()
                         self.cron_state = "requested"

@@ -4,6 +4,7 @@ from pathlib import Path
 import sqlite3
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from msw_engine import business_hunter as hunter
 from msw_engine.tasks import dispatch
@@ -61,3 +62,23 @@ class BusinessHunterTests(unittest.TestCase):
         self.assertEqual(state["report_count"], 0)
         self.assertTrue(state["independent_readback_verified"])
         self.assertFalse(state["publication_or_payment_performed"])
+
+    def test_checkpoint_closes_sqlite_on_success_and_invalid_record(self):
+        directory = self.directory / "business-hunter"
+        for invalid in (False, True):
+            with self.subTest(invalid=invalid):
+                db = hunter.database(directory)
+                try:
+                    if invalid:
+                        db.execute("INSERT INTO reports VALUES (1,'source','body','incorrect-digest')")
+                        db.commit()
+                    with patch.object(hunter, "database", return_value=db):
+                        if invalid:
+                            with self.assertRaisesRegex(ValueError, "hunter_checkpoint_source_digest_mismatch"):
+                                hunter.checkpoint(self.directory)
+                        else:
+                            hunter.checkpoint(self.directory)
+                    with self.assertRaisesRegex(sqlite3.ProgrammingError, "closed database"):
+                        db.execute("SELECT 1")
+                finally:
+                    db.close()

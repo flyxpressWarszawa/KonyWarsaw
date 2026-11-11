@@ -1,6 +1,7 @@
 """Private, durable research handoffs on the existing signed MSW worker queue."""
 from __future__ import annotations
 
+from contextlib import closing
 import hashlib
 import json
 from pathlib import Path
@@ -27,7 +28,7 @@ def database(directory: Path) -> sqlite3.Connection:
 
 def checkpoint(data_dir: Path) -> dict:
     directory = data_dir / "business-hunter"
-    with database(directory) as db:
+    with closing(database(directory)) as db, db:
         rows = db.execute("SELECT source_id,source_sha256,evidence_sha256,evidence_json FROM reports ORDER BY source_id,source_sha256").fetchall()
         if any(hashlib.sha256(row[3].encode()).hexdigest() != row[2] for row in rows):
             raise ValueError("hunter_checkpoint_source_digest_mismatch")
