@@ -74,3 +74,43 @@ Odczyt `wp cron event list --format=json` pokazał 271 zdarzeń, z czego 232 pas
 | Queue age, ACK i effect readback | Z tego samego `job_id`, `request_id` i hash | 1 efekt lub jawny HOLD; zero duplikatów, utraconych efektów lub fałszywych applied |
 
 **Metryki liczbowe to kryteria proponowane, nie aktualne pomiary ani zatwierdzone SLA.** Jeśli brak realnego licznika CPU na właściwym serwerze, wyniki porównania = `NOT_MEASURED` i nie wolno deklarować ulgi dla WordPressa. Nie obniżać bezpieczeństwa ani nie zmieniać planu Render w celu osiągnięcia progu.
+
+## HERMES-OFFLOAD-03 — bounded acceptance evidence, 11 Nov 2026
+
+**No production move was authorized or made.** This is a single-pilot `seo.analyze` review. No new job, POST, paid inference, cron, instance, external callback, or replay was issued.
+
+### Passive WordPress E2E readback of a PREEXISTING completed job
+
+An admin-authorized WP-CLI **SELECT-only** query against `ovse_mswue_remote_jobs` found one earlier `seo.analyze` job (9 Nov 2026 10:24:20 UTC) under the recorded node `msw-render-auxseo-20261107-2032`. We checked the exact job's fields without returning any text, title, URL or client data:
+
+- `kind=seo.analyze`; `state=completed`; `applied=1`; `result.ok=true`.
+- In the *existing WordPress row*, SQL SHA2 over saved raw `payload` equals `payload_sha256` and over raw `result` equals `result_sha256`. Both independently read back as true.
+- The existing linked WordPress post is `publish`, not password-protected, and its **current** title/content/status revision digest still matches the queued `revision_digest`.
+- Exactly **one** existing postmeta entry `_mswue_seo_analysis_v1` contains the matching preexisting job UUID and `result_sha256` (read-only comparison, no output of private metadata). This is stronger than merely `state=completed`.
+- Rollup of **1,587** previously completed `seo.analyze` rows: `applied=1` for 1,458 and `applied=2` (source stale) for 129; `applied=0` for 0. This is an historical WordPress store snapshot, not proof of exactly-once execution across all jobs.
+
+**Interpretation:** one historical `WordPress queue -> recorded external worker result -> native WordPress postmeta` path has durable hashes and effect readback. It **does not** prove active Render service ID/commit SHA, current node grant, global STOP/HOLD signer+epoch, real Hermes authority, duplicate-proof callback under a lost ACK, or a NEW production E2E test. The last point belongs to the separate callback/recovery owner.
+
+### Active worker/grant boundary
+
+- WordPress `/msw-unified-engine/v1/remote/status` reported signed worker contacts: central `msw-render-central-1` and auxiliary `msw-render-auxseo-20261107-2032`, with observed `seo.analyze` in the latter's capabilities at **2026-11-11T20:43:03Z**. This establishes reported scope and recent contact at WordPress, not current source equality or independent Render process identity.
+- The only visible Render workspace is named `Robot`. The Render connector requires explicit owner confirmation before selecting any workspace. Do **not** infer that `Robot` is the production target or start/deploy a worker there. **Target Render service/commit/disk/current grant: NOT_VERIFIED.**
+- `msw-cpanel/doctor-status` returned `site_recovery_verified=false`. No successful independent WordPress+MariaDB+Render persistent-disk backup/restore test was available. **Backup/rollback gate: HOLD.**
+
+### Native Atlas is NOT equivalent — source-backed negative check
+
+The installed WordPress `msw-ai-seo-atlas/msw-ai-seo-atlas.php::check_post()` has `short_content` at **<500** words, `editorial_800` at <800, `title_long` at **>90** characters (with a different tokenizer). In contrast, `msw_engine/tasks.py::seo_analyze()` emits `short_body` at **<300** words, `long_title` at **>75** characters, with different parsing and no native editorial score. One synthetic case with 400 words and 80 title characters produces Python `long_title` and NO `short_body`, while the WordPress Atlas source would flag short content but not overlong title. This is intentionally NOT a 1:1 substitution. PR #30 added explicit `atlas_cutover_allowed=false` and `atlas_equivalent_verified=false` fields, plus tests. **Never disable or reconfigure native Atlas** on the strength of this pilot. Only true compute preparation, not a business/SEO-rule migration, is in scope.
+
+### CPU baseline and release stop
+
+- Read-only cPanel `ResourceUsage/get_usages` on the WordPress host at **2026-11-11 20:59:13 UTC** reported CPU **90/100**, 30/65 processes, 6/50 entry processes, RAM 649,912,320/2,147,483,648 bytes.
+- The account pressure guard at **20:59:03 UTC** reported `pressure=true`, CPU **78%**, RAM **25.24%**; in its preceding seven samples CPU varied between 35 and 100%. These are BEFORE measurements only. **AFTER: NOT_MEASURED**.
+- CPU pressure exceeds the existing MSW 70% alarm. Production pilot MUST NOT start under this pressure, even if a source-only test passes.
+- E2E new job may run only with verified Render identity/grant+STOP epoch, independently *restored* backup, isolated rollback, and a stable low-pressure window. Use one already-authorized zero-paid SEO job or isolated fixture; after dispatch require same id, payload hash, lease, receipt hash and native postmeta readback. No reissue on uncertain ACK. Capture WP normalized CPU, RPM, PHP load, 503/504 and Render CPU/disk before and after.
+- On preflight failure / clock drift / missing backup / stale source / pressure >=70%: no `claim`, no `complete`, no `applyResults`, no Atlas switch; evidence-only HOLD.
+
+### Test/CI status
+
+- Earlier source-only `offload_triage.py` snapshot: **7/7 PASS** in GitHub Actions run `43094438902` (SHA `61ba44d...`).
+- Later expanded suite targets **12 offline tests** including a real pure-Python `seo_analyze` on large synthetic input, no PHP gateway, and a negative Atlas compatibility assertion; GitHub Actions latest run must be checked against the **exact branch HEAD** before claiming PASS. All old and new tests use no paid API.
+- Current code changes are confined to PR #30; no production WP files, Render service settings or node grants changed. The separate Work callback track remains untouched.
