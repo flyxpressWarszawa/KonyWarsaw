@@ -6,6 +6,7 @@ or grants Hermes execution authority. Importing it does not make a request.
 from __future__ import annotations
 
 import json
+import os
 import re
 import ssl
 from urllib.error import HTTPError, URLError
@@ -83,3 +84,32 @@ def inspect_wordpress_hermes(site_url: str, node: str, secret: str, *, opener=No
     if not _strict_status(data):
         return _result('HOLD', 'contract_mismatch')
     return _result('OBSERVED_ONLY', 'readonly_wordpress_dependencies')
+
+def main() -> int:
+    """One-shot operator inspection. Disabled by default; no autonomous polling.
+
+    Running a signed status request will update the existing WordPress anti-replay
+    nonce ledger. This does not grant job, callback, or provider permissions.
+    No secrets, request headers, or server response bodies are printed.
+    """
+    if os.environ.get('MSW_HERMES_WP_STATUS_ONCE') != '1':
+        print(json.dumps(_result('HOLD', 'explicit_opt_in_required'), sort_keys=True))
+        return 2
+
+    try:
+        result = inspect_wordpress_hermes(
+            os.environ.get('MSW_WP_URL', ''),
+            os.environ.get('MSW_NODE', ''),
+            os.environ.get('MSW_SECRET', ''),
+        )
+    except ValueError:
+        result = _result('HOLD', 'invalid_local_configuration')
+    except Exception:
+        result = _result('HOLD', 'inspection_unavailable')
+
+    print(json.dumps(result, sort_keys=True))
+    return 0 if result['state'] == 'OBSERVED_ONLY' else 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
