@@ -19,7 +19,7 @@ jobs:
         run: |
           python3 --version
           php --version
-      - name: Run synthetic staging, fail-closed, PHP lint, eight scenarios and rollback
+      - name: Run synthetic staging, fail-closed, PHP lint, thirteen scenarios and rollback
         working-directory: msw-autonomous-engine
         env:
           PYTHONDONTWRITEBYTECODE: '1'
