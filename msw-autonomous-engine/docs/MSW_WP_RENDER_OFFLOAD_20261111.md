@@ -43,3 +43,34 @@ Odczyt `wp cron event list --format=json` pokazał 271 zdarzeń, z czego 232 pas
 **OFFLOAD NOT VERIFIED:** brak potwierdzonego uprawnienia do docelowego workspace Render; brak zakończonej weryfikacji signer/epoch STOP; brak backup/restore PASS; brak źródłowego testu E2E aktywnego workera i wyników; brak migracji efektowych pluginów. Nie usuwać ani nie wyłączać 271 cronów w ciemno.
 
 **Punkt odbioru:** 0 migracji produkcyjnych, 0 zmian WP/Render, 0 nowego crona i 0 wywołań modeli. Na tym etapie wykonano diagnostykę i przygotowano instrumentację odczytową.
+
+## Wybrany pilot źródłowy: `seo.analyze` — czysty Python, bez powrotu obliczeń do PHP
+
+- **Konkretny kod:** `msw_engine/tasks.py::seo_analyze` liczy słowa, częstości terminów, H1–H3, obrazy ALT, odnośniki lokalne/zewnętrzne na danych już dostarczonych w `payload`; ograniczenia: `content <= 100000`, `html <= 140000`. W tej funkcji nie ma HTTP, wpdb, wywołań PHP ani dostawcy modelu.
+- **Zdolność wykonawcza:** `BASE_HANDLERS['seo.analyze']` oraz `handlers()` udostępniają tę rodzinę Python workerowi; także w ograniczonym `MSW_RUNTIME_MODE=render-free`. **Obecność w repo nie potwierdza aktywacji na docelowej instancji.**
+- **WordPress pozostaje właścicielem trwałego efektu:** `RemoteBridge::published` tworzy autoryzowany snapshot publicznego wpisu i kolejkuje `seo.analyze`; `RemoteBridge::applyResults` przyjmuje zgodny hash wyniku, sprawdza `post_status=publish` i aktualny `revision_digest`, zapisuje `_mswue_seo_analysis_v1` (małe postmeta), a następnie aktualizuje `applied`. Nie przenosić obliczeń do `applyResults`; jednocześnie realny hook `mswue_remote_result` należy do oddzielnego toru callback, więc **nie zmieniać go tutaj**.
+- **Dotychczasowy wynik:** `seo.analyze` ma 0 zadań oczekujących w zaobserwowanym momencie. Zatem nawet idealny pilot tej rodziny **nie obniży aktualnego CPU**, jeśli nie istnieje stary równoległy lokalny analizator do wyłączenia. Na etapie przygotowania nie wolno deklarować redukcji.
+- **Nowe dowody offline:** `tests/test_seo_render_pure_compute.py`: syntetyczne duże HTML/tekst, deterministyczność, lokalny dispatcher, brak call `msw_engine.federation.gateway`, brak zapisu do katalogu, limit rozmiaru i brak fallback do sieci/PHP. Zintegrowane z oddzielnym CI; żadne rzeczywiste wpisy klientów nie są odczytywane.
+
+### Warunek E2E — zanim wyłączymy choć jeden stary hook
+
+1. Udokumentować właściwy Render workspace + `service_id` i działający deploy SHA, aktywny HMAC node grant `seo.analyze`, trwały dysk oraz podpisany globalny STOP/HOLD/epoch. Bez tych dowodów produkcja = HOLD.
+2. Backup WordPress (pliki i MariaDB) oraz Worker (konfiguracja/dysk, journal) z niezależnym odtworzeniem i zweryfikowanym rollbackiem. Wydajny monitoring CPU musi działać **przed** testem.
+3. Zidentyfikować **konkretny istniejący, publiczny, zatwierdzony** rekord SEO (lub syntetyczny rekord wyłącznie na stagingu) i stabilny identyfikator żądania; nie publikować nowego posta tylko do testu bez osobnego zezwolenia. Sprawdzić `post_id`, `revision_digest`, `payload_sha256`, typ i kompletność danych.
+4. Na kontrolowanym *stagingu* lub po bramkach produkcyjnych: jeden `claim` `seo.analyze` na uprawnionym Render, heartbeat, wykonanie w Python bez `gateway`, trwały local receipt, `complete`, status/readback z identycznym `result_sha256` i tożsamością request/lease.
+5. Niezależny readback docelowego `_mswue_seo_analysis_v1` w WordPress: zgodność `job_id` i `result_sha256`, `applied=1`; dla zmienionego wpisu `applied=2` i zero wycieku przestarzałej analizy. Nie opierać się wyłącznie na HTTP 200.
+6. Wymuszony test awarii tylko na izolowanej kopii: powtórzony ACK, równoczesny claim, utrata odpowiedzi po zapisie efektu, rollback — bez ponownego obliczenia lub podwójnego zapisu; scenariusze callback/recovery realizuje ich osobny właściciel. STOP w dowolnym momencie ⇒ brak kolejnego efektu.
+
+### Pomiar CPU przed/po — kryteria akceptacji
+
+Źródło **musi pochodzić z tego samego hostingu WordPress/cPanel i tej samej usługi Render**. WPVibe `worker_ms`, `network_ms`, `wp_php_ms` i HTTP status *nie są* pomiarem CPU. Zewnętrzne aktywności SEO/FotoAtlas/Hunter, zmiany traffic/cache i kilka workerów naraz zniekształcają wynik.
+
+| Miernik | Przed i po | Bezpieczny warunek |
+|---|---|---|
+| WP CPU (% ograniczenia konta/serwera) | Co 60 s, co najmniej 15 min w porównywalnych oknach | Proponowane >=20% mniej CPU **na 1000 podobnych requestów** lub na 1 analogiczne zadanie, dopiero po weryfikacji źródła i obciążenia |
+| PHP worker count i RAM/OPcache | Ten sam sampler/okno | Nie wzrastają, brak OOM |
+| 5xx / TTFB p95 i request rate | Te same hosty, cache state i ruch | Brak wzrostu 503/504; p95 TTFB nie gorszy >10% (proponowany próg) |
+| Render CPU/RAM, czas na zadanie, koszt | Ten sam worker i typ `seo.analyze` | Brak przeciążenia i nowej płatnej usługi/wywołania; koszt dodatkowy zero |
+| Queue age, ACK i effect readback | Z tego samego `job_id`, `request_id` i hash | 1 efekt lub jawny HOLD; zero duplikatów, utraconych efektów lub fałszywych applied |
+
+**Metryki liczbowe to kryteria proponowane, nie aktualne pomiary ani zatwierdzone SLA.** Jeśli brak realnego licznika CPU na właściwym serwerze, wyniki porównania = `NOT_MEASURED` i nie wolno deklarować ulgi dla WordPressa. Nie obniżać bezpieczeństwa ani nie zmieniać planu Render w celu osiągnięcia progu.
