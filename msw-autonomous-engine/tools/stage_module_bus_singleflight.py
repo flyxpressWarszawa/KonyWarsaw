@@ -23,31 +23,43 @@ ORIGINAL = r"""        $all=self::catalog();$slot=gmdate('YmdH');$key='module-bu
 
 REPLACEMENT = r"""        $all=self::catalog();
         // MSW_MODULE_BUS_SINGLEFLIGHT_20261111
-        // Reuse the one already queued identical snapshot; do NOT issue another job.
-        // Only applies to the same fresh digest and to a still pending/running job.
+        // A previously admitted snapshot must be authoritatively reconciled.
+        // Do not create a second job for the SAME topology if the prior job
+        // is pending/running, terminal, uncertain, absent or identity-conflicted.
         $prior=(array)($s['last_queued']??[]);
-        if (($prior['catalog_sha256']??null)===$all['catalog_sha256']
-            && is_string($prior['job_id']??null)
-            && preg_match('/^[a-f0-9-]{36}$/D',$prior['job_id'])===1) {
+        if (($prior['catalog_sha256']??null)===$all['catalog_sha256']) {
+            if (!is_string($prior['job_id']??null)
+                || preg_match('/^[a-f0-9-]{36}$/D',$prior['job_id'])!==1)
+                return self::error('singleflight_job_id_unverified',503);
             global $wpdb;
             $table=\MSW\UnifiedEngine\RemoteStore::table();
             $existing=$wpdb->get_row($wpdb->prepare("SELECT kind,state,payload_sha256 FROM {$table} WHERE id=%s",$prior['job_id']),ARRAY_A);
             $raw=self::json(['module_bus'=>['operation'=>'sync','catalog_sha256'=>$all['catalog_sha256']]]);
-            if (is_array($existing) && ($existing['kind']??null)==='runtime.catalog'
-                && in_array($existing['state']??null,['pending','running'],true)
-                && hash_equals(hash('sha256',$raw),(string)($existing['payload_sha256']??''))) {
-                $reused=false;
-                $saved=self::mutate(static function(&$next)use($prior,$all,&$reused){
-                    if (($next['last_queued']['job_id']??null)!==$prior['job_id']
-                        || ($next['last_queued']['catalog_sha256']??null)!==$all['catalog_sha256'])return;
-                    $next['last_checked']=time();
-                    if (($next['last_sync']['job_id']??null)!==$prior['job_id'])
-                        $next['pending_receipts'][$prior['job_id']]=['kind'=>'runtime.catalog'];
-                    $reused=true;
-                });
-                if (!$saved || !$reused)return self::error('singleflight_state_uncertain',503);
-                return $prior+['queued'=>true,'completed'=>false,'reused_pending'=>true];
-            }
+            if (!is_array($existing) || ($existing['kind']??null)!=='runtime.catalog'
+                || !hash_equals(hash('sha256',$raw),(string)($existing['payload_sha256']??'')))
+                return self::error('singleflight_existing_job_unverified',503);
+            if (!in_array($existing['state']??null,['pending','running'],true))
+                return self::error('singleflight_terminal_review',409);
+            $reused=false;$checkedAt=time();
+            $saved=self::mutate(static function(&$next)use($prior,$all,$checkedAt,&$reused){
+                if (($next['last_queued']['job_id']??null)!==$prior['job_id']
+                    || ($next['last_queued']['catalog_sha256']??null)!==$all['catalog_sha256'])return;
+                $next['last_checked']=$checkedAt;
+                if (($next['last_sync']['job_id']??null)!==$prior['job_id'])
+                    $next['pending_receipts'][$prior['job_id']]=['kind'=>'runtime.catalog'];
+                $reused=true;
+            });
+            if (!$saved || !$reused)return self::error('singleflight_state_uncertain',503);
+            // WordPress update_option can fail even after the advisory lock succeeds.
+            // Read back the exact identity, receipt and timestamp before ACK.
+            $read=self::state();
+            if (($read['last_queued']['job_id']??null)!==$prior['job_id']
+                || ($read['last_queued']['catalog_sha256']??null)!==$all['catalog_sha256']
+                || (int)($read['last_checked']??0)<$checkedAt
+                || (($read['last_sync']['job_id']??null)!==$prior['job_id']
+                    && ($read['pending_receipts'][$prior['job_id']]['kind']??null)!=='runtime.catalog'))
+                return self::error('singleflight_readback_unverified',503);
+            return $prior+['queued'=>true,'completed'=>false,'reused_pending'=>true,'checked_at'=>gmdate('c',$checkedAt)];
         }
         $slot=gmdate('YmdH');$key='module-bus-sync-v1-'.$all['catalog_sha256'].'-'.$slot;
         $job=\MSW\UnifiedEngine\RemoteStore::enqueue('runtime.catalog',['module_bus'=>['operation'=>'sync','catalog_sha256'=>$all['catalog_sha256']]],$key);"""
