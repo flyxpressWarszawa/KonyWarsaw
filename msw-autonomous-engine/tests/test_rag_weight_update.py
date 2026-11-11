@@ -165,7 +165,7 @@ class DualMemoryApprovedWeightTests(unittest.TestCase):
         with patch.dict('os.environ', {
             'MSW_OWN_MODEL_BENCHMARK_APPROVED': '1',
             'MSW_OWN_MODEL_BENCHMARK_SHA256': self.digest,
-        }), patch.object(FakeModel, 'generate', return_value='Raport do diagnostyki wymaga sprawdzenia źródła oraz pomiarów.'):
+        }), patch.object(FakeModel, 'generate', create=True, return_value='Raport do diagnostyki wymaga sprawdzenia źródła oraz pomiarów.'):
             result = own_model.handle(job, self.data)
             self.assertEqual(result['action'], 'benchmark')
             self.assertFalse(result['training_performed'])
