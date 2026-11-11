@@ -281,16 +281,19 @@ def main():
             nonlocal stopping
             stopping=True
         signal.signal(signal.SIGTERM,stop);signal.signal(signal.SIGINT,stop)
-        while not stopping:
+        from .lifecycle import drain_requested
+        drain_directory = Path(os.environ.get('MSW_DATA_DIR', str(directory)))
+        while not stopping and not drain_requested(drain_directory):
             try:
                 command=lane.poll()
                 if command['state'] not in {'idle','busy'}:print(canonical({'combo_factory_command':command}),flush=True)
+                if stopping or drain_requested(drain_directory):break
                 result=factory.tick()
                 if result['state'] not in {'idle','busy'}:print(canonical({'combo_factory':result}),flush=True)
             except (LinkError, OSError, sqlite3.Error, ValueError):
                 print(canonical({'combo_factory_command':{'state':'link_unavailable','executed':False}}),flush=True)
             for _ in range(60):
-                if stopping:break
+                if stopping or drain_requested(drain_directory):break
                 time.sleep(1)
 
 if __name__=='__main__':main()

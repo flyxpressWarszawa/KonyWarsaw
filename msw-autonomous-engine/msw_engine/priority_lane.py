@@ -26,7 +26,7 @@ class PriorityLane:
         self.worker = worker_factory(client, directory, max_seconds=300, memory_mb=768)
         self.path = directory / "editorial-ai-lane.json"
 
-    def step(self, stopping=lambda: False) -> dict:
+    def step(self, stopping=lambda: False, cancel_check=None) -> dict:
         if stopping():
             return {"state": "draining"}
         # The main worker recovers all pending receipts from the shared durable
@@ -40,7 +40,7 @@ class PriorityLane:
         if job.get("kind") not in self.CAPABILITIES:
             # Do not execute a capability the server was not asked to lease.
             raise TransportError("priority_lane_capability_mismatch")
-        self.worker.cancel_check = stopping
+        self.worker.cancel_check = stopping if cancel_check is None else cancel_check
         result = self.worker.acknowledge(self.worker.execute(job, lease))
         status = {"schema": "msw.editorial-ai-lane.v1", "at": int(self.clock()),
                   "capabilities": list(self.CAPABILITIES), **result,
@@ -51,12 +51,12 @@ class PriorityLane:
         temporary.replace(self.path)
         return status
 
-    def start(self, stopping) -> threading.Thread:
+    def start(self, stopping, cancel_check=None) -> threading.Thread:
         def run():
             delay = 10
             while not stopping():
                 try:
-                    status = self.step(stopping)
+                    status = self.step(stopping, cancel_check)
                     print(json.dumps({"editorial_ai_lane": status}), flush=True)
                     delay = 15 if status["state"] == "idle" else 5
                 except Exception as error:

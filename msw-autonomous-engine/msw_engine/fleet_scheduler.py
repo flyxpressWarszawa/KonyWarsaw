@@ -78,10 +78,10 @@ def pump(client) -> dict:
     return {key: result[key] for key in ("state", "at", "version", "steps") if key in result}
 
 
-def consume_data(client, data_dir: Path, stopping=lambda: False) -> dict:
+def consume_data(client, data_dir: Path, stopping=lambda: False, admission_stopped=None) -> dict:
     from .runner import Worker
     allowed = ["knowledge.ingest", "combo.analytics"]
-    if stopping():
+    if stopping() or (admission_stopped is not None and admission_stopped()):
         return {"state": "draining"}
     response = client.send("claim", {"capabilities": allowed})
     if response.get("state") != "claimed":

@@ -321,7 +321,8 @@ class BusinessBridge:
                     delay = min(900, delay * 2)
                 if result.get('inbound_observed') or result.get('state') == 'retry':
                     print(json.dumps({'business_customer_lane': result}), flush=True)
-        threading.Thread(target=customers, name='msw-business-customers', daemon=True).start()
+        customer_thread = threading.Thread(target=customers, name='msw-business-customers', daemon=True)
+        customer_thread.start()
         def run():
             delay = 0
             while not stopping():
@@ -337,7 +338,7 @@ class BusinessBridge:
                 print(json.dumps({'business_bridge': result}), flush=True)
         thread = threading.Thread(target=run, name='msw-business-bridge', daemon=True)
         thread.start()
-        return thread
+        return [thread, customer_thread]
 
 
 def status(directory):

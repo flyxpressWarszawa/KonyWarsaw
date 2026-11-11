@@ -13,6 +13,7 @@ import time
 from .client import Client, TransportError, encode
 from .tasks import TaskError, dispatch, handlers
 from . import __version__
+from .lifecycle import drain_requested, finish_threads, write_status
 
 
 class WorkerDraining(RuntimeError):
@@ -119,6 +120,15 @@ class Worker:
         self.last_server_contact = 0
         self.last_job_state = "not_run"
         self.cron_state = "not_run"
+        self.background_threads = []
+
+    def admission_stopped(self):
+        return self.stopping or drain_requested(self.journal.data_dir)
+
+    def check_admission(self):
+        self.check_draining()
+        if drain_requested(self.journal.data_dir):
+            raise WorkerDraining()
 
     def check_draining(self) -> None:
         if self.stopping or (self.cancel_check is not None and self.cancel_check()):
@@ -240,10 +250,10 @@ class Worker:
         return self.journal.save(job, lease, result)
 
     def run_once(self) -> dict:
-        self.check_draining()
+        self.check_admission()
         self.replay_receipts()
         capabilities = list(handlers())
-        self.check_draining()
+        self.check_admission()
         response = self.client.send("claim", {"capabilities": capabilities})
         self.last_server_contact = int(time.time())
         self.check_draining()
@@ -265,50 +275,76 @@ class Worker:
         temporary.replace(target)
 
     def loop(self, *, once: bool = False, poke_cron_seconds: int = 300) -> int:
+        try:
+            return self._loop(once=once, poke_cron_seconds=poke_cron_seconds)
+        finally:
+            # All long-lived lanes must finish their admitted step and durable writes.
+            self._closing = True
+            remaining = finish_threads(self.background_threads, self.journal.data_dir,
+                                       lambda: self.stopping or not drain_requested(self.journal.data_dir))
+            write_status(self.journal.data_dir, 'incomplete' if remaining else 'drained',
+                         remaining_threads=remaining, hard_stop=self.stopping)
+            if remaining:
+                return 3
+            # Keep a drained service alive so Render cannot restart old code before cutover.
+            while not self.stopping and drain_requested(self.journal.data_dir):
+                time.sleep(0.2)
+
+    def lane_stopping(self):
+        return self.admission_stopped() or getattr(self, '_closing', False)
+
+    def track(self, threads):
+        self.background_threads.extend(threads if isinstance(threads, list) else [threads])
+        return threads
+
+    def _loop(self, *, once: bool = False, poke_cron_seconds: int = 300) -> int:
         pause, last_poke = 15, 0.0
         print(json.dumps({"worker_version": __version__, "state": "ready"}), flush=True)
         signal.signal(signal.SIGTERM, lambda *_: setattr(self, "stopping", True))
         signal.signal(signal.SIGINT, lambda *_: setattr(self, "stopping", True))
+        if self.admission_stopped():
+            return 0
+        write_status(self.journal.data_dir, 'running', remaining_threads=[])
         # Catalogue scheduling shares this worker and its existing persistent disk.
         if (not once and os.environ.get("MSW_BUSINESS_BRIDGE", "0") == "1"
                 and getattr(self.client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"):
             from .business_bridge import BusinessBridge
-            BusinessBridge(self.client, self.journal.data_dir).start(lambda: self.stopping)
+            self.track(BusinessBridge(self.client, self.journal.data_dir).start(self.lane_stopping))
         if (not once and os.environ.get("MSW_CATALOG_PUBLISHER", "1") == "1"
                 and getattr(self.client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"):
             from .catalog_publisher import CatalogPublisher
-            CatalogPublisher(self.client, self.journal.data_dir).start(lambda: self.stopping)
+            self.track(CatalogPublisher(self.client, self.journal.data_dir).start(self.lane_stopping))
         # Keep cron independent of long model calls, queue errors and idle backoff.
         fleet_thread = None
         if not once and poke_cron_seconds > 0:
             from .fleet_scheduler import FleetScheduler, pump, consume_data
-            fleet_thread = FleetScheduler(self.client.wordpress_url, self.journal.data_dir,
+            fleet_thread = self.track(FleetScheduler(self.client.wordpress_url, self.journal.data_dir,
                                          maintain=lambda: pump(self.client),
-                                         consume=lambda: consume_data(self.client, self.journal.data_dir, lambda: self.stopping)).start(lambda: self.stopping)
+                                         consume=lambda: consume_data(self.client, self.journal.data_dir, lambda: self.stopping, self.lane_stopping)).start(self.lane_stopping))
         # AI generation must not wait behind thousands of native callbacks.
         # This consumes the SAME server queue with an explicit capability filter.
         if not once and "llm.generate" in handlers():
             from .priority_lane import PriorityLane
-            PriorityLane(self.client, self.journal.data_dir).start(lambda: self.stopping)
+            self.track(PriorityLane(self.client, self.journal.data_dir).start(self.lane_stopping, lambda: self.stopping))
         if not once and os.environ.get("MSW_FOTOATLAS_ENABLED") == "1":
             from .fotoatlas_render_bridge import AtlasClient, FotoAtlas
-            FotoAtlas(AtlasClient(self.client), self.journal.data_dir).start(lambda: self.stopping)
+            self.track(FotoAtlas(AtlasClient(self.client), self.journal.data_dir).start(self.lane_stopping))
         if (not once and os.environ.get("MSW_AUTONOMOUS_AGENT", "1") == "1"
                 and getattr(self.client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"
                 and os.environ.get("MSW_LLM_PROVIDER") == "wordpress"):
             from .autonomous_agent import AutonomousAgent
             try:
-                AutonomousAgent(self.journal.data_dir).start(lambda: self.stopping)
+                self.track(AutonomousAgent(self.journal.data_dir).start(self.lane_stopping))
             except (OSError, ValueError, sqlite3.Error) as error:
                 print(json.dumps({"autonomous_agent": {"state": "startup_blocked", "code": type(error).__name__}}), flush=True)
-        while not self.stopping:
+        while not self.admission_stopped():
             try:
                 result = self.run_once()
                 print(json.dumps(result), flush=True)
                 pause = min(60, pause + 5) if result["state"] == "idle" else (30 if result["state"] == "failed" else 10)
                 self.health(result["state"])
                 if fleet_thread is None and poke_cron_seconds > 0 and time.monotonic() - last_poke > poke_cron_seconds:
-                    self.check_draining()
+                    self.check_admission()
                     try:
                         self.client.poke_cron()
                         self.cron_state = "requested"
@@ -334,7 +370,7 @@ class Worker:
             if once:
                 return 0
             deadline = time.monotonic() + pause
-            while not self.stopping and time.monotonic() < deadline:
+            while not self.admission_stopped() and time.monotonic() < deadline:
                 time.sleep(min(1, max(0, deadline - time.monotonic())))
         return 0
 

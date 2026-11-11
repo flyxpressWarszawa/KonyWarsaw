@@ -43,6 +43,8 @@ def main() -> int:
             return 0 if time.time() - data["at"] < 600 and time.time() - data["last_server_contact"] < 900 else 1
         except (OSError, ValueError, KeyError, TypeError):
             return 1
+    from .lifecycle import wait_before_start
+    wait_before_start(directory)
     os.umask(0o077)
     factory_process = None
     try:
@@ -79,6 +81,8 @@ def main() -> int:
             from .combo_factory import start as start_combo_factory
             factory_process = optional_startup("combo_factory", lambda: start_combo_factory(Path(os.environ.get("MSW_COMBO_DATA_DIR", str(directory)))))
             if factory_process is not None:
+                from .lifecycle import ChildProcess
+                worker.track(ChildProcess(factory_process))
                 print(json.dumps({"combo_factory": {"state": "process_started", "inference_verified": False}}), flush=True)
 
         # One narrowly scoped Alibaba credential test, opt-in only.
@@ -95,8 +99,9 @@ def main() -> int:
                                "error_class": type(error).__name__}
                 print(json.dumps({"aliyun_probe": outcome}, separators=(",", ":")), flush=True)
 
-            threading.Thread(target=aliyun_probe_task, name="msw-aliyun-probe",
-                             daemon=True).start()
+            probe_thread = threading.Thread(target=aliyun_probe_task, name="msw-aliyun-probe", daemon=True)
+            probe_thread.start()
+            worker.track(probe_thread)
 
         startup_event("worker_loop_started")
         return worker.loop(once=args.once, poke_cron_seconds=max(0, int(os.environ.get("MSW_WP_CRON_INTERVAL", "300"))))
