@@ -291,6 +291,15 @@ def research_status(data_dir: Path) -> dict:
                         and outcome.get("weights_modified") is True
                         and outcome.get("checkpoint_readback_verified") is True
                         and outcome.get("action") in {"train", "train_approved"}):
+                        trained_digest = outcome.get("checkpoint_sha256")
+                        if not isinstance(trained_digest, str) or re.fullmatch(r"[a-f0-9]{64}", trained_digest) is None:
+                            continue
+                        trained_path = checkpoints / (trained_digest + ".npz")
+                        if (trained_path.is_symlink() or not trained_path.is_file()
+                            or not 0 < trained_path.stat().st_size <= 256 * 1024 * 1024):
+                            continue
+                        if hashlib.sha256(trained_path.read_bytes()).hexdigest() != trained_digest:
+                            continue
                         count += 1
                 except (OSError, ValueError, TypeError, AttributeError):
                     continue
