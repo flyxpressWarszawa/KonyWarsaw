@@ -65,3 +65,27 @@ GitHub Premium/Actions is used for no-secret isolated worker regression tests.
 It does not establish access to the private Render persistent disk or authorize
 production deployment. The private Hugging Face repositories currently contain
 no verified source dataset or trained tensor artifacts.
+
+## Independent technical smoke benchmark (explicit, research-only)
+
+The new action **benchmark** works through the SAME signed llm.generate job
+queue and pinned private DualMemory checkpoint. It never trains or publishes.
+It is denied before loading weights unless the existing worker has BOTH the
+out-of-band keys MSW_OWN_MODEL_BENCHMARK_APPROVED=1 and
+MSW_OWN_MODEL_BENCHMARK_SHA256 matching the exact 64-character parent_sha256
+specified in the signed owner-authorized request. Do not enable this automatically.
+
+A granted benchmark calls the locally installed owner model on six fixed,
+assistant-authored Polish technical holdout prompts (PoE, Modbus, WordPress
+cron, SPA pump, gate automation, TIG stainless steel). The result contains
+per-case keyword/safety smoke scores and SHA-256 digests, but **never** raw
+generated text. Caller cannot supply/change case content. Each response is
+bounded to 64 generated tokens; no OpenAI/Alibaba provider API is involved.
+Run once against an independently pinned baseline and once against a candidate,
+then compare the scores and retain the original signed ACK/readback. A score
+difference only measures this static benchmark; it is not an expert-reviewed
+measure of technician competence or field repair safety. Product quality
+remains NOT_VERIFIED until broader owner-reviewed evaluation.
+
+No actual private checkpoint benchmark or RAG weight update was executed by
+the GitHub test run: the private model/weights remain inaccessible to hosted CI.
