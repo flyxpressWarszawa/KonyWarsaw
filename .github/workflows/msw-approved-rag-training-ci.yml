@@ -58,3 +58,19 @@ jobs:
       - name: Full existing worker contracts with no live credentials
         working-directory: msw-autonomous-engine
         run: python -m unittest discover -s tests -v
+
+  php-own-model-hourly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check PHP CLI availability
+        run: php -v
+      - name: Lint byte-pinned central scheduler candidate
+        run: |
+          php -l msw-autonomous-engine/wordpress/msw-central-engine/includes/class-msw-ce-own-model.php
+          php -l msw-autonomous-engine/wordpress/tests/test-own-model-hourly-parent.php
+      - name: Verify stale parent, uncertain receipt and no duplicate hourly jobs
+        run: php msw-autonomous-engine/wordpress/tests/test-own-model-hourly-parent.php
