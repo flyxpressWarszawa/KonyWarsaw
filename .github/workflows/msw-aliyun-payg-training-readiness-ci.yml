@@ -1,0 +1,44 @@
+name: MSW Alibaba PayGo guard and offline SFT preparation
+on:
+  push:
+    branches:
+      - msw/alibaba-payg-training-readiness-20261111
+  pull_request:
+    branches:
+      - msw/engine-runtime-20261104
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile without credentials
+        run: python -m compileall -q msw-autonomous-engine/msw_engine msw-autonomous-engine/telemetry
+      - name: Existing protocol and new billing guard tests
+        env:
+          PYTHONPATH: msw-autonomous-engine
+        run: |
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_aliyun_direct.py -v
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_aliyun_protocols.py -v
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_aliyun_probe.py -v
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_aliyun_billing_guard.py -v
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_qwen_sft_staging.py -v
+          python -m unittest discover -s msw-autonomous-engine/tests -p test_federation.py -v
+      - name: Production remains unchanged and no training requests
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root=Path("msw-autonomous-engine")
+          staging=(root/"telemetry/prepare_qwen_sft_offline.py").read_text()
+          bad=["client.files.create","fine_tuning.jobs.create",
+               "client.responses.create","requests.post(","subprocess.run("]
+          assert all(value not in staging for value in bad)
+          assert not (root/"telemetry/prepare_qwen_sft_offline.py").is_symlink()
+          print("PASS: offline only, no paid inference or training jobs")
+          PY
