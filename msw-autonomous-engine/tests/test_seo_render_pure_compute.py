@@ -80,6 +80,19 @@ class SeoRenderPureCompute(unittest.TestCase):
         with tempfile.TemporaryDirectory() as path:
             result = seo_analyze(sample(repeat=3), Path(path))
         self.assertIn("not a search ranking", result["measurement"])
+        # Source-backed native WP Atlas != Render seo.analyze:
+        # Python issues short_body at <300 words and long_title at >75 chars.
+        # WP Atlas issues short_content at <500 and title_long at >90 chars.
+        case = {"title": "A" * 80, "content": "spawanie " * 400,
+                "html": "<h2>Przykład</h2>", "url": "https://mobilny-serwis-warszawa.pl/synthetic"}
+        with tempfile.TemporaryDirectory() as path:
+            divergent = seo_analyze(case, Path(path))
+        codes = {item["code"] for item in divergent["suggestions"]}
+        self.assertEqual(divergent["word_count"], 400)
+        self.assertIn("long_title", codes)
+        self.assertNotIn("short_body", codes)
+        # The native Atlas would instead flag short_content and not title_long.
+        # This pilot MUST NOT disable or replace the live Atlas rules.
         self.assertNotIn("applied", result)
         self.assertNotIn("provider", result)
         self.assertNotIn("customer", result)
