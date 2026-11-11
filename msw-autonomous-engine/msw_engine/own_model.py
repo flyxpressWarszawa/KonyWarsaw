@@ -215,3 +215,98 @@ def handle(payload: dict, data_dir: Path) -> dict:
 
 def available_handlers() -> dict:
     return {'llm.generate': handle} if os.environ.get('MSW_OWN_MODEL_ROOT') and importlib.util.find_spec('numpy') else {}
+
+
+def research_status(data_dir: Path) -> dict:
+    """Read-only research checkpoint evidence for the existing runtime catalog.
+
+    Never import checkpoint Python, read model tensors into a model, inspect customer
+    data or print source text. Every reported checkpoint must hash-match disk bytes.
+    """
+    result = {
+        "state": "not_configured",
+        "research_only": True,
+        "training_started_by_status": False,
+        "model_weight_training_verified": False,
+        "checkpoint_readback_verified": False,
+        "training_receipts_verified": 0,
+    }
+    root_path = os.environ.get("MSW_OWN_MODEL_ROOT", "")
+    if not root_path:
+        return result
+    root = Path(root_path)
+    descriptor_path = root / "checkpoint" / "checkpoint-manifest.json"
+    if descriptor_path.is_symlink() or not descriptor_path.is_file():
+        return dict(result, state="model_manifest_unavailable")
+    try:
+        descriptor = json.loads(descriptor_path.read_text())
+        digest = descriptor.get("sha256")
+        if not isinstance(digest, str) or not re.fullmatch(r"[a-f0-9]{64}", digest):
+            raise ValueError("invalid_manifest_digest")
+        checkpoints = data_dir / "own-model" / "checkpoints"
+        base = checkpoints / (digest + ".npz")
+        if base.is_symlink() or not base.is_file():
+            return dict(result, state="waiting_for_pinned_checkpoint", model_pack_present=True)
+        if not 0 < base.stat().st_size <= 256 * 1024 * 1024:
+            raise ValueError("checkpoint_size_invalid")
+        if hashlib.sha256(base.read_bytes()).hexdigest() != digest:
+            raise ValueError("checkpoint_digest_mismatch")
+
+        active_file = data_dir / "own-model" / "active.json"
+        active_digest = digest
+        active_steps = descriptor.get("training_steps")
+        if active_file.is_symlink():
+            raise ValueError("active_metadata_symlink")
+        if active_file.is_file():
+            active_data = json.loads(active_file.read_text())
+            active_digest = active_data.get("sha256")
+            active_steps = active_data.get("training_steps")
+            if not isinstance(active_digest, str) or not re.fullmatch(r"[a-f0-9]{64}", active_digest):
+                raise ValueError("active_digest_invalid")
+            if type(active_steps) is not int or active_steps < 0:
+                raise ValueError("active_steps_invalid")
+            active_path = checkpoints / (active_digest + ".npz")
+            if active_path.is_symlink() or not active_path.is_file() or not 0 < active_path.stat().st_size <= 256 * 1024 * 1024:
+                raise ValueError("active_checkpoint_missing")
+            if hashlib.sha256(active_path.read_bytes()).hexdigest() != active_digest:
+                raise ValueError("active_checkpoint_digest_mismatch")
+
+        # Count only same-format, immutable, matching on-disk receipts. Never
+        # claim business improvements or training from the initial baseline.
+        receipts_dir = data_dir / "own-model" / "receipts"
+        count = 0
+        if receipts_dir.is_symlink():
+            raise ValueError("receipts_path_symlink")
+        if receipts_dir.is_dir():
+            for file in sorted(receipts_dir.glob("*.json"))[:500]:
+                if file.is_symlink() or file.stat().st_size > 16384:
+                    continue
+                try:
+                    receipt = json.loads(file.read_text())
+                    outcome = receipt.get("result", {})
+                    if (isinstance(receipt.get("payload_sha256"), str)
+                        and re.fullmatch(r"[a-f0-9]{64}", receipt["payload_sha256"])
+                        and outcome.get("provider_ref") == "MSW-DualMemory-byte-v1"
+                        and outcome.get("training_performed") is True
+                        and outcome.get("weights_modified") is True
+                        and outcome.get("checkpoint_readback_verified") is True
+                        and outcome.get("action") in {"train", "train_approved"}):
+                        count += 1
+                except (OSError, ValueError, TypeError, AttributeError):
+                    continue
+        result.update(
+            state="verified_research_checkpoint",
+            model_pack_present=True,
+            checkpoint_sha256=active_digest,
+            baseline_sha256=digest,
+            training_steps=active_steps if type(active_steps) is int and active_steps >= 0 else None,
+            checkpoint_readback_verified=True,
+            training_receipts_verified=count,
+            # The presence of receipts is evidence of a saved update, not of
+            # evaluation quality or the provenance of an external model.
+            model_weight_training_verified=count > 0,
+            business_quality_improvement_proven=False,
+        )
+        return result
+    except (OSError, ValueError, TypeError, AttributeError, json.JSONDecodeError):
+        return dict(result, state="checkpoint_integrity_unverified", model_pack_present=True)
