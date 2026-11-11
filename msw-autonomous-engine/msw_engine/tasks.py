@@ -385,8 +385,9 @@ def runtime_catalog(payload: dict, data_dir: Path) -> dict:
             "autonomous_agent": agent_status(data_dir, include_report=payload.get("include_director_report", True) is True),
             "modules": [{key: item[key] for key in ("id", "version", "source_sha256") if key in item}
                         for item in status.get("modules", [])], "capabilities": list(handlers())}
-    from .own_model import research_status
-    result["own_model_research"] = research_status(data_dir)
+    if payload.get("include_own_model_research") is True:
+        from .own_model import research_status
+        result["own_model_research"] = research_status(data_dir)
     if "suite_snapshot" in payload:
         from .suite import analyze
         result["suite"] = analyze(payload["suite_snapshot"])
