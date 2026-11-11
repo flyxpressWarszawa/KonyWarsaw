@@ -83,8 +83,12 @@ class DualMemoryApprovedWeightTests(unittest.TestCase):
         job = self.task('train_approved', 'msw-train-100',
                         parent_sha256=self.digest, dataset_sha256=view['dataset_sha256'],
                         steps=2, **self.ids)
-        first = own_model.handle(job, self.data)
-        self.assertEqual(first, own_model.handle(job, self.data))
+        grant = {'MSW_OWN_MODEL_TRAIN_APPROVED': '1',
+                 'MSW_OWN_MODEL_TRAIN_DATASET_SHA256': view['dataset_sha256'],
+                 'MSW_OWN_MODEL_TRAIN_PARENT_SHA256': self.digest}
+        with patch.dict('os.environ', grant):
+            first = own_model.handle(job, self.data)
+            self.assertEqual(first, own_model.handle(job, self.data))
         self.assertEqual(first['training_steps'], 5)
         self.assertTrue(first['training_performed'])
         self.assertTrue(first['weights_modified'])
@@ -100,8 +104,32 @@ class DualMemoryApprovedWeightTests(unittest.TestCase):
     def test_wrong_snapshot_fails_before_any_gradient_update(self):
         job = self.task('train_approved', 'msw-bad-snapshot-100', parent_sha256=self.digest,
                         dataset_sha256='0'*64, steps=2, **self.ids)
-        with self.assertRaisesRegex(ValueError, 'dataset_digest_mismatch'):
-            own_model.handle(job, self.data)
+        with patch.dict('os.environ', {'MSW_OWN_MODEL_TRAIN_APPROVED': '1',
+                                        'MSW_OWN_MODEL_TRAIN_DATASET_SHA256': '0'*64,
+                                        'MSW_OWN_MODEL_TRAIN_PARENT_SHA256': self.digest}):
+            with self.assertRaisesRegex(ValueError, 'dataset_digest_mismatch'):
+                own_model.handle(job, self.data)
+        self.assertFalse(list((self.data / 'own-model' / 'receipts').glob('*.json')))
+
+    def test_training_requires_out_of_band_owner_grant(self):
+        view = own_model.handle(self.task('training_data_status', 'msw-read-only-101', **self.ids), self.data)
+        job = self.task('train_approved', 'msw-no-training-grant-101',
+                        parent_sha256=self.digest, dataset_sha256=view['dataset_sha256'],
+                        steps=2, **self.ids)
+        with patch.dict('os.environ', {
+            'MSW_OWN_MODEL_TRAIN_APPROVED': '0',
+            'MSW_OWN_MODEL_TRAIN_DATASET_SHA256': view['dataset_sha256'],
+            'MSW_OWN_MODEL_TRAIN_PARENT_SHA256': self.digest
+        }):
+            with self.assertRaisesRegex(ValueError, 'out_of_band_grant_missing'):
+                own_model.handle(job, self.data)
+        with patch.dict('os.environ', {
+            'MSW_OWN_MODEL_TRAIN_APPROVED': '1',
+            'MSW_OWN_MODEL_TRAIN_DATASET_SHA256': view['dataset_sha256'],
+            'MSW_OWN_MODEL_TRAIN_PARENT_SHA256': 'f'*64
+        }):
+            with self.assertRaisesRegex(ValueError, 'out_of_band_grant_missing'):
+                own_model.handle(job, self.data)
         self.assertFalse(list((self.data / 'own-model' / 'receipts').glob('*.json')))
 
     def test_unauthorized_snapshot_request_is_blocked(self):
