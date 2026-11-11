@@ -64,7 +64,7 @@ def handle(payload: dict, data_dir: Path) -> dict:
     if payload.get('schema') != 'msw.own-model.job.v1' or payload.get('owner_authorized') is not True:
         raise ValueError('own_model_authorization_required')
     action = payload.get('action')
-    if action not in {'checkpoint_part', 'status', 'generate', 'train', 'training_data_status', 'train_approved'} or set(payload) - {'schema', 'owner_authorized', 'action', 'request_id', 'prompt', 'max_new_tokens', 'parent_sha256', 'steps', 'part', 'data_b64', 'train_ids', 'validation_ids', 'dataset_sha256'}:
+    if action not in {'checkpoint_part', 'status', 'generate', 'train', 'training_data_status', 'train_approved', 'benchmark'} or set(payload) - {'schema', 'owner_authorized', 'action', 'request_id', 'prompt', 'max_new_tokens', 'parent_sha256', 'steps', 'part', 'data_b64', 'train_ids', 'validation_ids', 'dataset_sha256'}:
         raise ValueError('own_model_operation_invalid')
     request = payload.get('request_id', '')
     if not isinstance(request, str) or not re.fullmatch(r'[A-Za-z0-9_.:-]{8,120}', request):
@@ -77,6 +77,12 @@ def handle(payload: dict, data_dir: Path) -> dict:
                 'validation_records': selected['validation_records'], 'source_bytes': selected['source_bytes'],
                 'training_performed': False, 'weights_modified': False, 'model_pack_required_for_training': True,
                 'research_only': True}
+    if action == 'benchmark':
+        pinned = os.environ.get('MSW_OWN_MODEL_BENCHMARK_SHA256', '')
+        if (os.environ.get('MSW_OWN_MODEL_BENCHMARK_APPROVED') != '1'
+            or payload.get('parent_sha256') != pinned
+            or not re.fullmatch(r'[a-f0-9]{64}', pinned)):
+            raise ValueError('own_model_benchmark_out_of_band_grant_missing')
     root, code = module()
     directory = data_dir / 'own-model'
     checkpoints = directory / 'checkpoints'
@@ -146,7 +152,11 @@ def handle(payload: dict, data_dir: Path) -> dict:
               'parameters': model.parameter_count, 'checkpoint_sha256': digest, 'training_steps': model.step,
               'research_only': True, 'business_decision_authorized': False, 'external_model_weights_used': False,
               'training_performed': False, 'weights_modified': False, 'persistent_disk': True}
-    if action == 'generate':
+    if action == 'benchmark':
+        from .technical_benchmark import evaluate_model
+        result['technical_benchmark'] = evaluate_model(model)
+        result['output_quality_verified'] = False
+    elif action == 'generate':
         prompt = payload.get('prompt', '')
         if not isinstance(prompt, str) or len(prompt.encode()) > 2000:
             raise ValueError('own_model_prompt_limit')
