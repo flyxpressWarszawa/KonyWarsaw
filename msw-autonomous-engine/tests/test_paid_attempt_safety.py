@@ -177,6 +177,31 @@ class PaidAttemptSafetyTests(unittest.TestCase):
         self.assertEqual(results.count("reserved"), 1)
         self.assertEqual(results.count("paid_attempt_outcome_unverified"), 5)
 
+    def test_concurrent_new_database_schema_and_reservations_are_bounded(self):
+        # Reproduce the intermittent SQLite locked failure from CI. Every
+        # round starts with a new DB; no live processes or paid inference.
+        for round_number in range(16):
+            with tempfile.TemporaryDirectory() as folder:
+                directory = Path(folder)
+                job, payload = job_for(
+                    job_id="paid-job-stress-%04d" % round_number,
+                    request_id="idempotency-stress-%04d" % round_number
+                )
+                barrier = threading.Barrier(8)
+
+                def claim(_):
+                    barrier.wait(timeout=10)
+                    try:
+                        PaidAttemptGuard(directory).reserve(job, payload)
+                        return "reserved"
+                    except TransportError as error:
+                        return error.code
+
+                with ThreadPoolExecutor(max_workers=8) as pool:
+                    states = list(pool.map(claim, range(8)))
+                self.assertEqual(states.count("reserved"), 1)
+                self.assertEqual(states.count("paid_attempt_outcome_unverified"), 7)
+
     def test_http_opener_is_shared_within_thread_not_between_threads(self):
         client = Client("https://example.org", "https://example.org/transport.php",
                         "unit-node", "X" * 40)
