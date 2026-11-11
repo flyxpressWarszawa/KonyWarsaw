@@ -73,9 +73,8 @@ class ResearchEvidenceTests(unittest.TestCase):
 
     def test_symlink_forbidden(self):
         (self.cp / (self.digest + '.npz')).symlink_to(self.private / 'checkpoint' / 'checkpoint-manifest.json')
-        self.assertEqual(research_status(self.data)['state'], 'waiting_for_pinned_checkpoint'
-                         if not (self.cp / (self.digest + '.npz')).is_file()
-                         else 'checkpoint_integrity_unverified')
+        self.assertEqual(research_status(self.data)['state'], 'waiting_for_pinned_checkpoint')
+        self.assertFalse(research_status(self.data)['checkpoint_readback_verified'])
 
 
 if __name__ == '__main__':
