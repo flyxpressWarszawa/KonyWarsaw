@@ -11,34 +11,39 @@ import os
 from pathlib import Path
 import re
 import sqlite3
+import threading
 import time
 
 from .client import TransportError
 
 
 PAID_CAPABILITIES = frozenset({"llm.generate"})
+# Serialize local schema creation; SQLite busy_timeout handles separate processes.
+_SCHEMA_LOCK = threading.Lock()
 
 
 class PaidAttemptGuard:
     def __init__(self, directory: Path):
         self.path = directory / "paid-attempt-guards.sqlite3"
         directory.mkdir(parents=True, exist_ok=True, mode=0o700)
-        db = self.connect()
-        try:
-            db.execute(
-                "CREATE TABLE IF NOT EXISTS attempts ("
-                "request_hash TEXT PRIMARY KEY, payload_sha256 TEXT NOT NULL, "
-                "job_hash TEXT NOT NULL, state TEXT NOT NULL, started_at INTEGER NOT NULL)"
-            )
-            db.commit()
-        finally:
-            db.close()
+        with _SCHEMA_LOCK:
+            db = self.connect()
+            try:
+                db.execute(
+                    "CREATE TABLE IF NOT EXISTS attempts ("
+                    "request_hash TEXT PRIMARY KEY, payload_sha256 TEXT NOT NULL, "
+                    "job_hash TEXT NOT NULL, state TEXT NOT NULL, started_at INTEGER NOT NULL)"
+                )
+                db.commit()
+            finally:
+                db.close()
         os.chmod(self.path, 0o600)
 
     def connect(self):
         db = sqlite3.connect(self.path, timeout=15)
         db.execute("PRAGMA busy_timeout=15000")
-        db.execute("PRAGMA journal_mode=WAL")
+        # Never attempt WAL journal-mode transitions on every concurrent open.
+        # BEGIN IMMEDIATE and a busy timeout provide an atomic, bounded guard.
         return db
 
     def reserve(self, job: dict, payload: dict) -> None:
