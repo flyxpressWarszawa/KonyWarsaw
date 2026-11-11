@@ -1,0 +1,42 @@
+name: MSW DualMemory approved RAG training acceptance
+
+on:
+  push:
+    branches:
+      - msw/rag-approved-dualmemory-training-20261111
+    paths:
+      - msw-autonomous-engine/**
+      - .github/workflows/msw-approved-rag-training-ci.yml
+  pull_request:
+    branches:
+      - msw/engine-runtime-20261104
+    paths:
+      - msw-autonomous-engine/**
+      - .github/workflows/msw-approved-rag-training-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  training-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned worker dependencies
+        run: python -m pip install --disable-pip-version-check -r msw-autonomous-engine/requirements.txt
+      - name: Validate syntax
+        run: python -m compileall -q msw-autonomous-engine/msw_engine msw-autonomous-engine/tests
+      - name: Verify approved RAG selection, research weight updates, and existing model contracts
+        working-directory: msw-autonomous-engine
+        run: |
+          python -m unittest discover -s tests -p 'test_rag_training.py' -v
+          python -m unittest discover -s tests -p 'test_rag_weight_update.py' -v
+          python -m unittest discover -s tests -p 'test_own_model.py' -v
+          python -m unittest discover -s tests -p 'test_owner_corpus.py' -v
