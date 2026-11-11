@@ -10,7 +10,7 @@ import signal
 import sqlite3
 import time
 
-from .client import Client, TransportError, encode
+from .client import Client, TransportError, TransportNotSent, encode
 from .tasks import TaskError, dispatch, handlers
 from . import __version__
 from .lifecycle import drain_requested, finish_threads, write_status
@@ -78,6 +78,15 @@ class Journal:
                 "OR (state IN ('readback_deferred','pending_deferred') AND updated_at<=?) ORDER BY updated_at LIMIT 8",
                 (int(time.time()) - 3600,))]
 
+    def release_unsent(self, receipt: dict) -> None:
+        """Only the reserving caller may release a proven local pre-send refusal."""
+        with closing(self.connect()) as db, db:
+            db.execute(
+                "UPDATE receipts SET state='ready_to_complete',updated_at=? WHERE job_id=? AND payload_sha256=? "
+                "AND result_sha256=? AND lease_token=? AND state IN ('completion_attempted','readback_deferred')",
+                (int(time.time()), receipt['job_id'], receipt['payload_sha256'], receipt['result_sha256'], receipt['lease_token']),
+            )
+
     def mark(self, receipt: dict, state: str) -> None:
         with closing(self.connect()) as db, db:
             db.execute(
@@ -138,9 +147,12 @@ class Worker:
         self.check_draining()
         if self.journal.reserve_completion(receipt):
             fields = {key: receipt[key] for key in ("job_id", "payload_sha256", "lease_token", "result_json", "result_sha256")}
-            self.check_draining()
             try:
+                self.check_draining()
                 acknowledgement = self.client.send("complete", fields)
+            except (TransportNotSent, WorkerDraining):
+                self.journal.release_unsent(receipt)
+                raise
             except TransportError as error:
                 if error.status != 409:
                     raise
@@ -285,7 +297,7 @@ class Worker:
             write_status(self.journal.data_dir, 'incomplete' if remaining else 'drained',
                          remaining_threads=remaining, hard_stop=self.stopping)
             if remaining:
-                return 3
+                raise SystemExit(3)
             # Keep a drained service alive so Render cannot restart old code before cutover.
             while not self.stopping and drain_requested(self.journal.data_dir):
                 time.sleep(0.2)

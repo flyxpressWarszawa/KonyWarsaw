@@ -1,7 +1,7 @@
 """Outbound-only, signed WordPress transport. No WordPress administrator password."""
 from __future__ import annotations
 
-from .recovery import protected_open
+from .recovery import protected_open, OriginPaused
 
 import hashlib
 import hmac
@@ -19,6 +19,10 @@ class TransportError(RuntimeError):
         self.code, self.status = code, status
         self.retry_after = max(0, min(900, retry_after))
         super().__init__(code)
+
+
+class TransportNotSent(TransportError):
+    """The local circuit refused admission before opening the HTTP connection."""
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -68,6 +72,8 @@ class Client:
                 if not isinstance(result, dict) or "error" in result:
                     raise TransportError("invalid_response")
                 return result
+        except OriginPaused as error:
+            raise TransportNotSent("transport_paused_before_send", retry_after=error.retry_after) from None
         except HTTPError as error:
             # Do not print server HTML, request data or credentials.
             retry = error.headers.get("Retry-After", "") if error.headers else ""
