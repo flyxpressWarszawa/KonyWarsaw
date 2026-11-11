@@ -57,9 +57,12 @@ class ResearchEvidenceTests(unittest.TestCase):
 
     def test_receipt_must_be_pinned_and_valid_shape(self):
         (self.cp / (self.digest + '.npz')).write_bytes(self.baseline)
+        trained = b'new-trained-tensor-synthetic'
+        trained_digest = hashlib.sha256(trained).hexdigest()
+        (self.cp / (trained_digest + '.npz')).write_bytes(trained)
         receipts = self.data / 'own-model' / 'receipts'
         receipts.mkdir()
-        result = dict(provider_ref='MSW-DualMemory-byte-v1',
+        result = dict(checkpoint_sha256=trained_digest, provider_ref='MSW-DualMemory-byte-v1',
                       action='train_approved', training_performed=True,
                       weights_modified=True, checkpoint_readback_verified=True)
         (receipts / 'valid.json').write_text(json.dumps({'payload_sha256': 'a'*64, 'result': result}))
