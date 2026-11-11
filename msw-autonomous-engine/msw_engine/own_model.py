@@ -150,6 +150,16 @@ def handle(payload: dict, data_dir: Path) -> dict:
     elif action in {'train', 'train_approved'}:
         if 'parent_sha256' not in payload:
             raise ValueError('own_model_explicit_parent_required')
+        if action == 'train_approved':
+            # An inference-capable signed queue is NOT by itself a grant to
+            # update weights. The owner pins one reviewed dataset AND parent
+            # checkpoint out of band before this research-only operation.
+            if (os.environ.get('MSW_OWN_MODEL_TRAIN_APPROVED') != '1'
+                or os.environ.get('MSW_OWN_MODEL_TRAIN_DATASET_SHA256') != payload.get('dataset_sha256')
+                or os.environ.get('MSW_OWN_MODEL_TRAIN_PARENT_SHA256') != payload.get('parent_sha256')
+                or not re.fullmatch(r'[a-f0-9]{64}', os.environ.get('MSW_OWN_MODEL_TRAIN_DATASET_SHA256', ''))
+                or not re.fullmatch(r'[a-f0-9]{64}', os.environ.get('MSW_OWN_MODEL_TRAIN_PARENT_SHA256', ''))):
+                raise ValueError('own_model_training_out_of_band_grant_missing')
         import numpy as np
         if action == 'train_approved':
             from .rag_training import snapshot
