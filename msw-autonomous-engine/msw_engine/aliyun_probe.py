@@ -42,6 +42,10 @@ def check(directory: Path, *, inference=None) -> dict:
     if not key:
         return {**result, "state": "missing_scoped_api_key", "key_present": False,
                 "model_present": bool(model), "authenticated": False}
+    from .aliyun_billing_guard import personal_plan_key
+    if personal_plan_key(key):
+        return {**result, "state": "wrong_billing_mode", "key_present": True,
+                "authenticated": False, "requires_review": True}
     if not re.fullmatch(r"[A-Za-z0-9_.-]{2,100}", model):
         return {**result, "state": "model_missing_or_invalid", "key_present": True,
                 "model_present": False, "authenticated": False}

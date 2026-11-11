@@ -449,9 +449,10 @@ def handlers() -> dict:
     if os.environ.get('MSW_WP_URL') and os.environ.get('MSW_NODE') and len(os.environ.get('MSW_SECRET', '')) >= 32:
         result['module.execute'] = native_execute
     from .own_model import available_handlers as own_handlers
+    from .federation import configured
     if (os.environ.get("MSW_LLM_MODEL") or own_handlers()
             or (os.environ.get("MSW_PAID_AI_TRANSPORT") == "direct_aliyun"
-                and os.environ.get("MSW_ALIYUN_MODEL") and os.environ.get("MSW_ALIYUN_API_KEY"))):
+                and os.environ.get("MSW_ALIYUN_MODEL") and configured())):
         result["llm.generate"] = llm_dispatch
     if os.environ.get("MSW_DISCOVERY_CORPUS"):
         result["legacy.discovery.topics"] = legacy_discovery

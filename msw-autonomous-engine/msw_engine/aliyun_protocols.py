@@ -114,6 +114,9 @@ def generate(values: dict, directory: Path, *, protocol: str) -> dict:
     key = os.environ.get("MSW_ALIYUN_API_KEY", "").strip()
     if not key:
         raise TaskError("msw_brain_uncertain:aliyun_key_missing")
+    from .aliyun_billing_guard import personal_plan_key
+    if personal_plan_key(key):
+        raise TaskError("aliyun_token_plan_not_for_background_api")
     model = os.environ.get("MSW_ALIYUN_MODEL", "").strip()
     if not re.fullmatch(r"[A-Za-z0-9_.-]{2,100}", model):
         raise TaskError("aliyun_direct_model_invalid")

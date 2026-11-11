@@ -71,6 +71,9 @@ def generate(values: dict, directory: Path) -> dict:
     key = os.environ.get("MSW_ALIYUN_API_KEY", "").strip()
     if not key:
         raise TaskError("msw_brain_uncertain:aliyun_key_missing")
+    from .aliyun_billing_guard import personal_plan_key
+    if personal_plan_key(key):
+        raise TaskError("aliyun_token_plan_not_for_background_api")
     text = values.get("text")
     request_id = values.get("request_id")
     max_tokens = values.get("max_tokens", 2000)
