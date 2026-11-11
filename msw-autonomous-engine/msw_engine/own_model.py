@@ -133,6 +133,10 @@ def handle(payload: dict, data_dir: Path) -> dict:
     digest = payload.get('parent_sha256', reference['sha256'])
     if not isinstance(digest, str) or not re.fullmatch(r'[a-f0-9]{64}', digest):
         raise ValueError('own_model_parent_invalid')
+    if action == 'train_approved' and digest != reference['sha256']:
+        # Signed hourly tasks must not waste CPU retraining the baseline after
+        # a better current research checkpoint was accepted. No side effects.
+        raise ValueError('own_model_training_stale_parent')
     path = checkpoints / (digest + '.npz')
     if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
         raise ValueError('own_model_parent_digest')
