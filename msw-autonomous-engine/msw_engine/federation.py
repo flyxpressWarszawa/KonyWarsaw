@@ -20,7 +20,9 @@ from .client import NoRedirect, encode, signed_headers
 
 def configured() -> bool:
     if os.environ.get("MSW_PAID_AI_TRANSPORT") == "direct_aliyun":
-        return bool(os.environ.get("MSW_ALIYUN_API_KEY")) and bool(os.environ.get("MSW_ALIYUN_MODEL"))
+        from .aliyun_billing_guard import personal_plan_key
+        key = os.environ.get("MSW_ALIYUN_API_KEY", "")
+        return bool(key) and not personal_plan_key(key) and bool(os.environ.get("MSW_ALIYUN_MODEL"))
     return (os.environ.get("MSW_LLM_PROVIDER") == "wordpress"
             and bool(os.environ.get("MSW_LLM_MODEL")))
 
