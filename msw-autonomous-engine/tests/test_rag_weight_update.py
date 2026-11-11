@@ -153,6 +153,27 @@ class DualMemoryApprovedWeightTests(unittest.TestCase):
             # An identical previously completed request must still be idempotent.
             self.assertEqual(own_model.handle(job, self.data), first)
 
+    def test_benchmark_requires_separate_pinned_checkpoint_grant(self):
+        job = self.task('benchmark', 'msw-research-benchmark-01', parent_sha256=self.digest)
+        with patch.dict('os.environ', {
+            'MSW_OWN_MODEL_BENCHMARK_APPROVED': '0',
+            'MSW_OWN_MODEL_BENCHMARK_SHA256': self.digest,
+        }):
+            with self.assertRaisesRegex(ValueError, 'benchmark_out_of_band_grant_missing'):
+                own_model.handle(job, self.data)
+        self.mock.assert_not_called()
+        with patch.dict('os.environ', {
+            'MSW_OWN_MODEL_BENCHMARK_APPROVED': '1',
+            'MSW_OWN_MODEL_BENCHMARK_SHA256': self.digest,
+        }), patch.object(FakeModel, 'generate', return_value='Raport do diagnostyki wymaga sprawdzenia źródła oraz pomiarów.'):
+            result = own_model.handle(job, self.data)
+            self.assertEqual(result['action'], 'benchmark')
+            self.assertFalse(result['training_performed'])
+            self.assertFalse(result['weights_modified'])
+            self.assertEqual(result['technical_benchmark']['total'], 6)
+            self.assertFalse(result['technical_benchmark']['field_quality_verified'])
+            self.assertEqual(own_model.handle(job, self.data), result)
+
     def test_unauthorized_snapshot_request_is_blocked(self):
         job = self.task('training_data_status', 'msw-no-authorize', **self.ids)
         job['owner_authorized'] = False
