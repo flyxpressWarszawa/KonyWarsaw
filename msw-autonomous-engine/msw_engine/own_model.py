@@ -64,11 +64,19 @@ def handle(payload: dict, data_dir: Path) -> dict:
     if payload.get('schema') != 'msw.own-model.job.v1' or payload.get('owner_authorized') is not True:
         raise ValueError('own_model_authorization_required')
     action = payload.get('action')
-    if action not in {'checkpoint_part', 'status', 'generate', 'train'} or set(payload) - {'schema', 'owner_authorized', 'action', 'request_id', 'prompt', 'max_new_tokens', 'parent_sha256', 'steps', 'part', 'data_b64'}:
+    if action not in {'checkpoint_part', 'status', 'generate', 'train', 'training_data_status', 'train_approved'} or set(payload) - {'schema', 'owner_authorized', 'action', 'request_id', 'prompt', 'max_new_tokens', 'parent_sha256', 'steps', 'part', 'data_b64', 'train_ids', 'validation_ids', 'dataset_sha256'}:
         raise ValueError('own_model_operation_invalid')
     request = payload.get('request_id', '')
     if not isinstance(request, str) or not re.fullmatch(r'[A-Za-z0-9_.:-]{8,120}', request):
         raise ValueError('own_model_request_invalid')
+    if action == 'training_data_status':
+        from .rag_training import snapshot
+        selected = snapshot(data_dir, payload.get('train_ids'), payload.get('validation_ids'))
+        return {'schema': 'msw.dualmemory.approved-rag-snapshot.v1', 'state': 'approved_snapshot_ready',
+                'dataset_sha256': selected['sha256'], 'train_records': selected['train_records'],
+                'validation_records': selected['validation_records'], 'source_bytes': selected['source_bytes'],
+                'training_performed': False, 'weights_modified': False, 'model_pack_required_for_training': True,
+                'research_only': True}
     root, code = module()
     directory = data_dir / 'own-model'
     checkpoints = directory / 'checkpoints'
@@ -139,13 +147,26 @@ def handle(payload: dict, data_dir: Path) -> dict:
             raise ValueError('own_model_prompt_limit')
         result['text'] = model.generate(prompt, max_new_tokens=max(1, min(256, int(payload.get('max_new_tokens', 96)))), seed=19)
         result['output_quality_verified'] = False
-    elif action == 'train':
+    elif action in {'train', 'train_approved'}:
         if 'parent_sha256' not in payload:
             raise ValueError('own_model_explicit_parent_required')
         import numpy as np
-        steps = max(1, min(64, int(payload.get('steps', 32))))
-        train = code.encode((root / 'checkpoint/train-corpus.txt').read_text())
-        validation = code.encode((root / 'checkpoint/validation-corpus.txt').read_text())
+        if action == 'train_approved':
+            from .rag_training import snapshot
+            selected = snapshot(data_dir, payload.get('train_ids'), payload.get('validation_ids'))
+            if payload.get('dataset_sha256') != selected['sha256']:
+                raise ValueError('training_dataset_digest_mismatch')
+            steps = max(1, min(8, int(payload.get('steps', 4))))
+            train = code.encode(selected['train_text'])
+            validation = code.encode(selected['validation_text'])
+            training_data_sha256 = selected['sha256']
+        else:
+            steps = max(1, min(64, int(payload.get('steps', 32))))
+            train = code.encode((root / 'checkpoint/train-corpus.txt').read_text())
+            validation = code.encode((root / 'checkpoint/validation-corpus.txt').read_text())
+            training_data_sha256 = hashlib.sha256((root / 'checkpoint/train-corpus.txt').read_bytes()).hexdigest()
+        if len(train) < 130 or len(validation) < 97:
+            raise ValueError('training_encoded_data_too_short')
         vx, vy = validation[:96].reshape(1, -1), validation[1:97].reshape(1, -1)
         before = float(model.loss(vx, vy))
         rng = np.random.default_rng(int(fingerprint[:12], 16))
@@ -156,9 +177,11 @@ def handle(payload: dict, data_dir: Path) -> dict:
             y = np.stack([train[o+1:o+65] for o in offsets])
             model.train_batch(x, y)
         after = float(model.loss(vx, vy))
+        if not np.isfinite(before) or not np.isfinite(after):
+            raise ValueError('training_validation_nonfinite')
         candidate = directory / ('candidate-' + fingerprint + '.npz')
         model.save(candidate, metadata={'request_id': request, 'parent_sha256': digest, 'research_only': True,
-                                       'training_data_sha256': hashlib.sha256((root / 'checkpoint/train-corpus.txt').read_bytes()).hexdigest()})
+                                       'training_data_sha256': training_data_sha256})
         new_digest = hashlib.sha256(candidate.read_bytes()).hexdigest()
         target = checkpoints / (new_digest + '.npz')
         candidate.replace(target)
@@ -173,6 +196,11 @@ def handle(payload: dict, data_dir: Path) -> dict:
                       validation_scope='96 consecutive bytes from authored synthetic validation corpus; not a business benchmark',
                       checkpoint_readback_verified=True, promoted_to_research_current=promoted,
                       business_quality_improvement_proven=False)
+        if action == 'train_approved':
+            result.update(training_corpus='approved_rag', dataset_sha256=selected['sha256'],
+                          training_records=selected['train_records'],
+                          validation_records=selected['validation_records'],
+                          auto_training_enabled=False)
         if promoted:
             atomic_json(active, {'sha256': new_digest, 'training_steps': reopened.step, 'research_only': True})
             if json.loads(active.read_text()).get('sha256') != new_digest:
