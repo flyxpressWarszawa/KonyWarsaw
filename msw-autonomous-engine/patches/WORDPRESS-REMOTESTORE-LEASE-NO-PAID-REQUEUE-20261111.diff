@@ -1,0 +1,23 @@
+--- a/wp-content/plugins/msw-unified-engine/includes/RemoteStore.php
++++ b/wp-content/plugins/msw-unified-engine/includes/RemoteStore.php
+@@ -149,6 +149,7 @@
+         }
+         $table = self::table();
+-        // Pure compute may safely be recomputed. Interrupted training requires its own receipt.
+-        $wpdb->query($wpdb->prepare("UPDATE {$table} SET state='uncertain',updated_at=%d WHERE state='running' AND kind='legacy.llm80.train' AND lease_until<%d", time(), time()));
+-        $wpdb->query($wpdb->prepare("UPDATE {$table} SET state='pending',node='',lease_hash='',updated_at=%d WHERE state='running' AND kind<>'legacy.llm80.train' AND attempts<4 AND lease_until<%d", time(), time()));
++        // Paid AI, like training, must never be reclaimed and rerun automatically
++        // after an expired lease. Resolve uncertain jobs using signed evidence.
++        $wpdb->query($wpdb->prepare("UPDATE {$table} SET state='uncertain',updated_at=%d WHERE state='running' AND kind IN ('legacy.llm80.train','llm.generate') AND lease_until<%d", time(), time()));
++        $wpdb->query($wpdb->prepare("UPDATE {$table} SET state='pending',node='',lease_hash='',updated_at=%d WHERE state='running' AND kind NOT IN ('legacy.llm80.train','llm.generate') AND attempts<4 AND lease_until<%d", time(), time()));
+         $wpdb->query($wpdb->prepare("UPDATE {$table} SET state='failed',updated_at=%d WHERE state='running' AND attempts>=4 AND lease_until<%d", time(), time()));
+@@ -209,6 +210,7 @@
+         }
+         $table = self::table();
+         // The same lease recovery as claim(), once for the complete batch.
+-        $wpdb->query($wpdb->prepare("UPDATE {$table} SET state='uncertain',updated_at=%d WHERE state='running' AND kind='legacy.llm80.train' AND lease_until<%d", time(), time()));
+-        $wpdb->query($wpdb->prepare("UPDATE {$table} SET state='pending',node='',lease_hash='',updated_at=%d WHERE state='running' AND kind<>'legacy.llm80.train' AND attempts<4 AND lease_until<%d", time(), time()));
++        // In particular, a secondary SEO batch must not unlock a paid AI job.
++        $wpdb->query($wpdb->prepare("UPDATE {$table} SET state='uncertain',updated_at=%d WHERE state='running' AND kind IN ('legacy.llm80.train','llm.generate') AND lease_until<%d", time(), time()));
++        $wpdb->query($wpdb->prepare("UPDATE {$table} SET state='pending',node='',lease_hash='',updated_at=%d WHERE state='running' AND kind NOT IN ('legacy.llm80.train','llm.generate') AND attempts<4 AND lease_until<%d", time(), time()));
+         $wpdb->query($wpdb->prepare("UPDATE {$table} SET state='failed',updated_at=%d WHERE state='running' AND attempts>=4 AND lease_until<%d", time(), time()));

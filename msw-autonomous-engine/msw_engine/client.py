@@ -1,13 +1,14 @@
 """Outbound-only, signed WordPress transport. No WordPress administrator password."""
 from __future__ import annotations
 
-from .recovery import protected_open
+from .recovery import protected_open, OriginPaused
 
 import hashlib
 import hmac
 import json
 import secrets
 import ssl
+import threading
 import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
@@ -52,7 +53,22 @@ class Client:
             raise ValueError("A registered node and its scoped secret are required")
         self.wordpress_url = wordpress_url.rstrip("/")
         self.url, self.node, self.secret = transport_url, node, secret
-        self.opener = build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context()))
+        # Independent handler state per thread: main worker, priority lane and
+        # fleet scheduler share credentials but not a mutable OpenerDirector.
+        self._openers = threading.local()
+        self._openers.value = self._build_opener()
+
+    @staticmethod
+    def _build_opener():
+        return build_opener(NoRedirect(), HTTPSHandler(context=ssl.create_default_context()))
+
+    @property
+    def opener(self):
+        value = getattr(self._openers, "value", None)
+        if value is None:
+            value = self._build_opener()
+            self._openers.value = value
+        return value
 
     def send(self, action: str, payload: dict) -> dict:
         if action not in {"claim", "heartbeat", "complete", "status"}:
@@ -73,6 +89,9 @@ class Client:
             retry = error.headers.get("Retry-After", "") if error.headers else ""
             seconds = int(retry) if retry.isdigit() and len(retry) < 8 else 0
             raise TransportError("server_rejected_request", error.code, seconds) from None
+        except OriginPaused as error:
+            # Respect the existing durable per-origin cooldown across lanes.
+            raise TransportError("origin_recovery_backoff", retry_after=error.retry_after) from None
         except (URLError, TimeoutError, OSError, json.JSONDecodeError):
             raise TransportError("transport_unavailable") from None
 
@@ -81,6 +100,8 @@ class Client:
         try:
             with protected_open(self.opener, request, timeout=45) as response:
                 response.read(1024)
+        except OriginPaused as error:
+            raise TransportError("wordpress_cron_cooldown", retry_after=error.retry_after) from None
         except (HTTPError, URLError, TimeoutError, OSError):
             raise TransportError("wordpress_cron_unavailable") from None
 
