@@ -1,0 +1,100 @@
+name: MSW coding bridge
+
+on:
+  schedule:
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Probe the connection or deliver one admitted public task
+        type: choice
+        options: [deliver, probe]
+        default: deliver
+  push:
+    branches: [main]
+    paths: ['msw-coding-bridge/**', '.github/workflows/msw-coding-bridge.yml']
+  pull_request:
+    branches: [main]
+    paths: ['msw-coding-bridge/**', '.github/workflows/msw-coding-bridge.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: msw-coding-bridge-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out the exact revision without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Verify the transport contracts offline
+        run: python -m unittest discover -s msw-coding-bridge/tests/python -v
+      - name: Verify the WordPress admission and OIDC contracts offline
+        run: php -n msw-coding-bridge/tests/php/run.php
+      - name: Set up Node for the public coding manifest
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+      - name: Verify the public manifest and existing Technical Core contracts
+        run: node --test msw-ai-technical-core/tests/*.test.mjs
+      - name: Prepare the reviewed package without installing it
+        run: python msw-coding-bridge/package.py --output-dir "$RUNNER_TEMP/msw-coding-package"
+      - name: Retain the reviewed package and checksums
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: msw-coding-bridge-package-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/msw-coding-package/
+          if-no-files-found: error
+          retention-days: 14
+
+  ingress:
+    needs: test
+    if: >-
+      vars.MSW_CODING_BRIDGE_ENABLED == 'true' &&
+      github.repository == 'flyxpressWarszawa/KonyWarsaw' &&
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Check out the trusted main revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Exchange OIDC and deliver at most one task
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          MSW_BRIDGE_OPERATION: ${{ inputs.operation || 'deliver' }}
+          MSW_BRIDGE_RECEIPT_PATH: ${{ runner.temp }}/msw-coding-bridge-receipt.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$MSW_BRIDGE_OPERATION" in
+            probe|deliver) python msw-coding-bridge/client.py "$MSW_BRIDGE_OPERATION" ;;
+            *) exit 2 ;;
+          esac
+      - name: Retain the public delivery receipt
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: msw-coding-bridge-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/msw-coding-bridge-receipt.json
+          if-no-files-found: ignore
+          retention-days: 14
