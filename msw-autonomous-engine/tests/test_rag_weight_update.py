@@ -59,7 +59,7 @@ class DualMemoryApprovedWeightTests(unittest.TestCase):
         (base_dir / (self.digest + '.npz')).write_bytes(base.read_bytes())
         (self.root / 'checkpoint' / 'checkpoint-manifest.json').write_text(json.dumps({'sha256': self.digest}))
         self.mock = patch.object(own_model, 'module', return_value=(self.root, FakeCode))
-        self.mock.start()
+        self.module_spy = self.mock.start()
         self.addCleanup(self.mock.stop)
         self.ids = {'train_ids': ['msw:training'], 'validation_ids': ['msw:holdout']}
         rows = [
@@ -161,7 +161,7 @@ class DualMemoryApprovedWeightTests(unittest.TestCase):
         }):
             with self.assertRaisesRegex(ValueError, 'benchmark_out_of_band_grant_missing'):
                 own_model.handle(job, self.data)
-        self.mock.assert_not_called()
+        self.module_spy.assert_not_called()
         with patch.dict('os.environ', {
             'MSW_OWN_MODEL_BENCHMARK_APPROVED': '1',
             'MSW_OWN_MODEL_BENCHMARK_SHA256': self.digest,
