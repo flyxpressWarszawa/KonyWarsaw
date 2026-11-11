@@ -32,6 +32,9 @@ class OffloadTriageTests(unittest.TestCase):
         self.assertEqual(result["pending_pure_candidates"], 10)
         by_kind = {e["kind"]: e for e in result["entries"]}
         self.assertTrue(by_kind["seo.analyze"]["pure_candidate"])
+        self.assertFalse(by_kind["seo.analyze"]["atlas_equivalent_verified"])
+        self.assertFalse(by_kind["seo.analyze"]["atlas_cutover_allowed"])
+        self.assertFalse(result["atlas_cutover_allowed"])
         self.assertFalse(by_kind["research.rank"]["pure_candidate"])
         self.assertFalse(result["existing_worker_source_hash_verified"])
 
@@ -81,6 +84,7 @@ class OffloadTriageTests(unittest.TestCase):
         self.assertEqual(value["actions_executed"], 0)
         self.assertEqual(value["pending_pure_candidates"], 5)
         self.assertFalse(value["permission_to_deploy"])
+        self.assertFalse(value["atlas_cutover_allowed"])
         self.assertFalse(value["authenticated_result_ack_verified"])
 
 
