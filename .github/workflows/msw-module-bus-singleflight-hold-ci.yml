@@ -1,0 +1,43 @@
+name: MSW module bus — source-only singleflight and rollback gate
+on:
+  push:
+    branches:
+      - msw/module-bus-singleflight-hold-20261111
+    paths:
+      - 'msw-autonomous-engine/tools/stage_module_bus_singleflight.py'
+      - 'msw-autonomous-engine/tests/test_module_bus_singleflight_stage.py'
+      - '.github/workflows/msw-module-bus-singleflight-hold-ci.yml'
+permissions:
+  contents: read
+jobs:
+  source-only-guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Python and PHP are available
+        run: |
+          python3 --version
+          php --version
+      - name: Run synthetic staging, fail-closed, PHP lint, thirteen scenarios and rollback
+        working-directory: msw-autonomous-engine
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          MSW_SECRET: ''
+          OPENAI_API_KEY: ''
+          MSW_WP_URL: ''
+        run: |
+          python3 - <<'PY'
+          import socket
+          import unittest
+          def deny_network(*_args, **_kwargs):
+              raise AssertionError('Network access forbidden in source-only module bus tests')
+          socket.socket.connect = deny_network
+          socket.socket.connect_ex = deny_network
+          socket.create_connection = deny_network
+          suite = unittest.defaultTestLoader.discover('tests', pattern='test_module_bus_singleflight_stage.py')
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          if result.testsRun != 5 or not result.wasSuccessful():
+              raise SystemExit(f'Expected five passing tests, received {result.testsRun}')
+          print('MSW_MODULE_BUS_SINGLEFLIGHT: OFFLINE_PASS_5, production remains HOLD')
+          PY
