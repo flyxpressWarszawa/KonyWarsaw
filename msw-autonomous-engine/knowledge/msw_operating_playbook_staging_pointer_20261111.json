@@ -1,0 +1,20 @@
+{
+  "schema": "msw.knowledge.pointer.v1",
+  "version": "2026-11-11.1",
+  "classification": "metadata_only",
+  "source": "private WordPress staging option",
+  "option": "msw_hermes_operating_playbook_staging_20261111_v1",
+  "source_artifact": "MSW-HERMES-OPERATING-PLAYBOOK-STAGING-20261111.json",
+  "source_file_sha256": "c0bcda0f6b254ebb44ba39eb062b8b4e87a4b0ce4b661c185f002a642828e437",
+  "rule_count": 18,
+  "related_business_records_option": "msw_business_owner_knowledge_allinone_staging_20261111_v1",
+  "related_business_records_count": 379,
+  "related_business_records_source_sha256": "4d404c1fd529ec556d60142c96e58fa8680009ef1df921f42da30e260ed44e22",
+  "related_bridge_manifest": "msw_hermes_business_bridge_source_only_20261111.json",
+  "release_state": "PRODUCTION_HOLD",
+  "delivery_state": "branch_metadata_only",
+  "runtime_readback_verified": false,
+  "engine_ack_verified": false,
+  "model_weight_training": false,
+  "notes": "No private text, credentials, customer data, or ChatGPT transcript in this public repository. A future scoped authenticated adapter must fetch, verify, persist and independently read back content before claiming delivery."
+}
