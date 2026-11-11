@@ -52,3 +52,21 @@ GitHub Actions [run #43108202114](https://github.com/flyxpressWarszawa/KonyWarsa
 6. Track old `module_bus_catalog_changed` jobs by ID but **do not replay ambiguous old jobs or change their states blindly**. Report factual error counts and a future safe policy for obsolete catalog snapshots.
 
 **Current owner-approved task does not bypass the missing STOP/restore safety gates. Production modifications performed in this unit: ZERO.**
+
+
+## 5. Hardened no-reissue stage — 2026-11-11 22:52 UTC
+
+On the same **stage-only branch** the proposed singleflight admission is now stricter:
+
+- For an identical last queued catalog SHA, the previously reported UUID must resolve to an existing **exact** `runtime.catalog` row and matching encoded `payload_sha256`. If the ID is malformed, the row is missing, the kind or digest differs, or the row is `completed`/`failed`/`uncertain`, **return HOLD / typed error without creating a second job**.
+- Only a still `pending`/`running` identical row can be reused. When an existing WordPress state advisory lock succeeds, independently read back the exact option `last_queued`, `last_checked` and `pending_receipts` binding. A failed `update_option` must NOT report success even if the lock returned true.
+- If a genuinely different catalog SHA is observed, the original `RemoteStore::enqueue` path is unchanged. A mismatch is not silently reinterpreted as a different job.
+- Offline CI on **exact commit `bab37fc5335172ef6a07c1f5610bce52828e7eb7`**, [run #43115376006](https://github.com/flyxpressWarszawa/KonyWarsaw/actions/runs/43115376006): **5/5 tests PASS**, covering **13 synthetic PHP scenarios**, source SHA guard, PHP syntax lint, backup of isolated fixture, independent file readback and staging rollback. The scenario matrix includes terminal states, corrupted digest, missing row, changed catalog, lock race, failed state write and malformed job ID.
+
+### Fresh live readback, NO-GO
+
+On **2026-11-11 22:53 UTC**, WordPress `class-msw-module-bus.php` lines 203–212 STILL contain the old hourly enqueue code and no `MSW_MODULE_BUS_SINGLEFLIGHT_20261111` marker. Live production therefore remains **unchanged**.
+
+The WordPress queue still had **5 pending `runtime.catalog` sync jobs with the same catalog SHA and 5 different job_key values**; no queued record was deleted, retried or mutated. Native resource guard at `2026-11-11T22:53:04Z` reported CPU **100%** and `pressure=true`. Doctor recovery/availability state `site_recovery_verified=false` at last check, independent full restore unproved. No global signed STOP/HOLD epoch acceptance was obtained. A read-only hosting bridge advertises file read/write access but did not return a verifiable SHA256 of the exact production target; **do not guess it**.
+
+**Interpretation:** the real repeated-queue problem is proven and the narrow no-duplicate candidate is strengthened and tested. This did **not** correct the production queue or decrease live CPU. There is **no production deployment authorization** until the preflight gates above pass.
