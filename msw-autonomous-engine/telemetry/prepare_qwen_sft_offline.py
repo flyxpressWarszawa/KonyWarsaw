@@ -69,22 +69,26 @@ def prepare(raw):
 
 
 def _private_output_dir(folder):
-    folder = Path(folder).expanduser().resolve()
-    if ".git" in folder.parts or folder.name.lower() in {"public_html", "uploads"}:
+    candidate = Path(folder).expanduser()
+    if candidate.is_symlink():
+        raise ValueError("symlink_output")
+    folder = candidate.resolve()
+    repo_root = Path(__file__).resolve().parents[2]
+    if (folder.is_relative_to(repo_root) or ".git" in folder.parts
+            or folder.name.lower() in {"public_html", "uploads"}):
         raise ValueError("unsafe_output_directory")
     folder.mkdir(mode=0o700, parents=True, exist_ok=True)
-    if folder.is_symlink():
-        raise ValueError("symlink_output")
     os.chmod(folder, 0o700)
     return folder
 
 
 def write_private(train, validation, folder):
     target = _private_output_dir(folder)
-    for name, entries in (("msw-sft-train.jsonl", train), ("msw-sft-validation.jsonl", validation)):
+    entries_to_write = (("msw-sft-train.jsonl", train), ("msw-sft-validation.jsonl", validation))
+    if any((target / name).exists() or (target / name).is_symlink() for name, _ in entries_to_write):
+        raise ValueError("output_exists")
+    for name, entries in entries_to_write:
         path = target / name
-        if path.exists() or path.is_symlink():
-            raise ValueError("output_exists")
         with path.open("x", encoding="utf-8") as stream:
             os.chmod(path, 0o600)
             for item in entries:
