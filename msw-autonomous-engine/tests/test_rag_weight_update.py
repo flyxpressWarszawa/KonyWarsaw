@@ -132,6 +132,23 @@ class DualMemoryApprovedWeightTests(unittest.TestCase):
                 own_model.handle(job, self.data)
         self.assertFalse(list((self.data / 'own-model' / 'receipts').glob('*.json')))
 
+    def test_stale_parent_does_not_start_redundant_gradient_job(self):
+        view = own_model.handle(self.task('training_data_status', 'msw-view-stale-100', **self.ids), self.data)
+        job = self.task('train_approved', 'msw-training-promote-100',
+                        parent_sha256=self.digest, dataset_sha256=view['dataset_sha256'],
+                        steps=2, **self.ids)
+        grant = {'MSW_OWN_MODEL_TRAIN_APPROVED': '1',
+                 'MSW_OWN_MODEL_TRAIN_DATASET_SHA256': view['dataset_sha256'],
+                 'MSW_OWN_MODEL_TRAIN_PARENT_SHA256': self.digest}
+        with patch.dict('os.environ', grant):
+            first = own_model.handle(job, self.data)
+            self.assertTrue(first['promoted_to_research_current'])
+            self.assertNotEqual(first['checkpoint_sha256'], self.digest)
+            with self.assertRaisesRegex(ValueError, 'own_model_training_stale_parent'):
+                own_model.handle(dict(job, request_id='msw-duplicate-from-baseline-101'), self.data)
+            # An identical previously completed request must still be idempotent.
+            self.assertEqual(own_model.handle(job, self.data), first)
+
     def test_unauthorized_snapshot_request_is_blocked(self):
         job = self.task('training_data_status', 'msw-no-authorize', **self.ids)
         job['owner_authorized'] = False
