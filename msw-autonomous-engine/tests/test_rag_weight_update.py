@@ -146,6 +146,10 @@ class DualMemoryApprovedWeightTests(unittest.TestCase):
             self.assertNotEqual(first['checkpoint_sha256'], self.digest)
             with self.assertRaisesRegex(ValueError, 'own_model_training_stale_parent'):
                 own_model.handle(dict(job, request_id='msw-duplicate-from-baseline-101'), self.data)
+            # The historic synthetic hourly action must fail the same way.
+            with self.assertRaisesRegex(ValueError, 'own_model_training_stale_parent'):
+                own_model.handle(self.task('train', 'msw-old-hourly-parent-102',
+                                           parent_sha256=self.digest, steps=2), self.data)
             # An identical previously completed request must still be idempotent.
             self.assertEqual(own_model.handle(job, self.data), first)
 
