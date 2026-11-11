@@ -1,0 +1,35 @@
+name: MSW Render 404 diagnostic safety tests
+
+on:
+  push:
+    branches:
+      - msw/transport-404-action-probe-20261110
+    paths:
+      - msw-autonomous-engine/msw_engine/client.py
+      - msw-autonomous-engine/msw_engine/runner.py
+      - msw-autonomous-engine/tests/test_transport_404_action_diagnostics.py
+      - .github/workflows/msw-render-404-diagnostic-tests.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: msw-render-404-diag-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  isolated-unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python version
+        run: python3 --version
+      - name: Compile changed modules
+        working-directory: msw-autonomous-engine
+        run: python3 -m py_compile msw_engine/client.py msw_engine/runner.py tests/test_transport_404_action_diagnostics.py
+      - name: Test mock-only transport error branches
+        working-directory: msw-autonomous-engine
+        run: python3 -m unittest discover -s tests -p 'test_transport_404_action_diagnostics.py' -v

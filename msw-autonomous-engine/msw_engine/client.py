@@ -72,7 +72,10 @@ class Client:
             # Do not print server HTML, request data or credentials.
             retry = error.headers.get("Retry-After", "") if error.headers else ""
             seconds = int(retry) if retry.isdigit() and len(retry) < 8 else 0
-            raise TransportError("server_rejected_request", error.code, seconds) from None
+            failure = TransportError("server_rejected_request", error.code, seconds)
+            # Fixed allowlisted action only. Never attach request body, headers or URL.
+            failure.action = action
+            raise failure from None
         except (URLError, TimeoutError, OSError, json.JSONDecodeError):
             raise TransportError("transport_unavailable") from None
 
