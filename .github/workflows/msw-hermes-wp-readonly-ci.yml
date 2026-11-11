@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Check out source only
         uses: actions/checkout@v4
-      - name: Run six offline contract tests with socket egress blocked
+      - name: Run ten offline contract tests with socket egress blocked
         working-directory: msw-autonomous-engine
         env:
           PYTHONDONTWRITEBYTECODE: '1'
@@ -48,9 +48,9 @@ jobs:
               'tests', pattern='test_hermes_wp_readonly.py'
           )
           result = unittest.TextTestRunner(verbosity=2).run(suite)
-          if result.testsRun != 6:
-              raise SystemExit(f'Expected 6 tests, observed {result.testsRun}')
+          if result.testsRun != 10:
+              raise SystemExit(f'Expected 10 tests, observed {result.testsRun}')
           if not result.wasSuccessful():
               raise SystemExit(1)
-          print('MSW_HERMES_WP_READONLY: OFFLINE_PASS_6, production remains HOLD')
+          print('MSW_HERMES_WP_READONLY: OFFLINE_PASS_10, production remains HOLD')
           PY
