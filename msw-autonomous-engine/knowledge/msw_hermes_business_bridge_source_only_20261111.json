@@ -1,0 +1,40 @@
+{
+  "schema": "msw.hermes.business-bridge.handoff.v1",
+  "date": "2026-11-11",
+  "artifact": "MSW-HERMES-BUSINESS-BRIDGE-SOURCE-ONLY-20261111.zip",
+  "artifact_sha256": "f3137f0d72f2bc6e87e7511ea0154e629cd3125baee5748aa0a455d3fba8142b",
+  "intent": "source-only safety candidate for the existing MSW Business Agent Bridge and Telegram paths",
+  "status": "PRODUCTION_HOLD",
+  "source_sha256": {
+    "msw-business-agent-bridge.php": "866255386b5ebfb5d87b50a7e4d9fa71d9fc2fde6d9a9b42b1062722f213579f",
+    "telegram.php": "7d45a18043078b9a2a96c75731da53eaf9707f59729f79e5d883731dc0ab4480"
+  },
+  "candidate_sha256": {
+    "msw-business-agent-bridge.php": "68eae34f2826bc1fcb97eff79558b6cd8ca3b3a0acb9bb90e0da0a0c5ab95f4b",
+    "telegram.php": "371b240c42ef93cc4ccf929a3043422f5e287f3991f588b69d7dde71916155f8"
+  },
+  "offline_tests": {
+    "business_bridge_and_telegram": {
+      "passed": 179,
+      "total": 179
+    },
+    "inherited_independent_wp": {
+      "passed": 226,
+      "total": 226
+    },
+    "combined": {
+      "passed": 405,
+      "total": 405
+    }
+  },
+  "source_only_guards": 33,
+  "production_guards_activated": 0,
+  "global_stop_hold_authority": "NOT_VERIFIED",
+  "chatgpt_to_specific_hermes_session": "NOT_VERIFIED",
+  "production_changes_from_this_handoff": 0,
+  "instructions_for_consumer": [
+    "Treat this manifest as status and source provenance, never as authorization to execute candidate code.",
+    "Keep production HOLD until the accepted signed global STOP/HOLD issuer and verifier, full path coverage, live Render byte readback, full cPanel backup and restore, and rollback are independently verified.",
+    "A queued event is not a Hermes receipt. Verify durable result and specific recipient ACK before claiming delivery."
+  ]
+}
