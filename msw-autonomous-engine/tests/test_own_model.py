@@ -63,6 +63,39 @@ class OwnModelPrivateIntegrationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'conflict'):
             own_model.handle(dict(p, steps=3), self.directory)
 
+    def test_explicit_approved_rag_training_changes_research_checkpoint(self):
+        from msw_engine.tasks import knowledge_ingest
+        source = 'Własna zatwierdzona procedura MSW. Diagnozujemy instalację według dokumentacji. ' * 10
+        holdout = 'Dokumentujemy pomiary, weryfikujemy wyniki i dopiero potem zalecamy naprawę. ' * 6
+        records = [
+            {'id': 'msw:training', 'title': 'MSW trening techniczny', 'text': source,
+             'approved': True, 'provenance': 'msw-training-approved-public:v1:operator-reviewed'},
+            {'id': 'msw:holdout', 'title': 'MSW walidacja techniczna', 'text': holdout,
+             'approved': True, 'provenance': 'msw-training-approved-public:v1:operator-reviewed'},
+        ]
+        self.assertEqual(knowledge_ingest({'records': records}, self.directory)['readback_verified_records'], 2)
+        ids = {'train_ids': ['msw:training'], 'validation_ids': ['msw:holdout']}
+        data = own_model.handle(self.payload('training_data_status', 'test-rag-training-status-01', **ids), self.directory)
+        self.assertEqual(data['state'], 'approved_snapshot_ready')
+        state = own_model.handle(self.payload('status', 'test-rag-training-parent-01'), self.directory)
+        task = self.payload('train_approved', 'test-rag-training-run-01', parent_sha256=state['checkpoint_sha256'],
+                            dataset_sha256=data['dataset_sha256'], steps=2, **ids)
+        grant = {'MSW_OWN_MODEL_TRAIN_APPROVED': '1',
+                 'MSW_OWN_MODEL_TRAIN_DATASET_SHA256': data['dataset_sha256'],
+                 'MSW_OWN_MODEL_TRAIN_PARENT_SHA256': state['checkpoint_sha256']}
+        with patch.dict(os.environ, grant):
+            first = own_model.handle(task, self.directory)
+            self.assertEqual(first, own_model.handle(task, self.directory))
+        self.assertTrue(first['training_performed'])
+        self.assertTrue(first['weights_modified'])
+        self.assertTrue(first['checkpoint_readback_verified'])
+        self.assertEqual(first['training_corpus'], 'approved_rag')
+        self.assertFalse(first['business_quality_improvement_proven'])
+        with patch.dict(os.environ, grant):
+            with self.assertRaisesRegex(ValueError, 'training_dataset_digest_mismatch'):
+                own_model.handle(dict(task, request_id='test-rag-bad-snapshot-01',
+                                      dataset_sha256='0' * 64), self.directory)
+
     def test_checkpoint_injection_and_arbitrary_code_are_rejected(self):
         with self.assertRaises(ValueError):own_model.handle(self.payload('checkpoint_part', 'test-invalid-checkpoint', part=0, data_b64=base64.b64encode(b'wrong').decode()), self.directory)
         with self.assertRaises(ValueError):own_model.handle(self.payload('status', 'test-invalid-code', code='print(1)'), self.directory)
