@@ -89,6 +89,21 @@ function msw_hcb_domains(string $host, string $user, string $token): array {
     if (!is_string($main) || !preg_match('/^[a-z0-9.-]+$/D',$main)) throw new RuntimeException('identity_unverified');
     return ['main_domain'=>$main];
 }
+function msw_hcb_import_permission(WP_REST_Request $request): bool|WP_Error {
+    if (current_user_can('manage_options')) return true;
+    $secret=get_option('msw_hcb_import_key');
+    $time=$request->get_header('x-msw-import-time'); $nonce=$request->get_header('x-msw-import-nonce'); $sig=$request->get_header('x-msw-import-signature');
+    if (!is_string($secret) || !preg_match('/^[a-f0-9]{64}$/D',$secret)
+        || !preg_match('/^[0-9]{10}$/D',(string)$time) || abs(time()-(int)$time)>60
+        || !preg_match('/^[a-f0-9-]{36}$/D',(string)$nonce)
+        || !preg_match('/^[a-f0-9]{64}$/D',(string)$sig)
+        || !hash_equals(hash_hmac('sha256',$time."\n".$nonce."\n".$request->get_body(),$secret),$sig)) {
+        return new WP_Error('broker_import_auth_failed','Signed owner request required.',['status'=>403]);
+    }
+    if (!add_option('msw_hcb_import_nonce_'.hash('sha256',$nonce),(string)time(),'','no'))
+        return new WP_Error('broker_import_replay','Request already used.',['status'=>403]);
+    return true;
+}
 function msw_hcb_import(WP_REST_Request $request): WP_REST_Response|WP_Error {
     try {
         if (strlen($request->get_body())>8192 || get_transient('msw_hcb_import_rate')) throw new RuntimeException('import_rate_limited');
@@ -113,6 +128,7 @@ function msw_hcb_import(WP_REST_Request $request): WP_REST_Response|WP_Error {
         $prior=msw_hcb_read('vault');
         if ($prior && ($prior['accounts']??null)!==$records) throw new RuntimeException('vault_already_initialized');
         msw_hcb_write('vault',['schema'=>'msw.hermes.cpanel.vault.v1','accounts'=>$records,'machine_secret'=>msw_hcb_seal($serviceKey,$aes),'imported_at'=>gmdate('c')]);
+        delete_option('msw_hcb_import_key');
         return new WP_REST_Response(['imported'=>true,'verified_accounts'=>array_keys($records),'checked_at'=>gmdate('c')],200);
     } catch (Throwable $e) { return new WP_Error('broker_import_rejected',$e->getMessage(),['status'=>403]); }
 }
@@ -157,7 +173,7 @@ function msw_hcb_status(WP_REST_Request $request): WP_REST_Response|WP_Error {
 }
 add_action('rest_api_init',static function():void {
     register_rest_route('msw-hermes-cpanel/v1','/key',['methods'=>'GET','permission_callback'=>'__return_true','callback'=>static function(){try{return new WP_REST_Response(['schema'=>'msw.hermes.cpanel.key.v1','public_key'=>msw_hcb_keys()['public']],200);}catch(Throwable $e){return new WP_Error('key_unavailable','Key unavailable.',['status'=>503]);}}]);
-    register_rest_route('msw-hermes-cpanel/v1','/import',['methods'=>'POST','permission_callback'=>static function(): bool { return current_user_can('manage_options'); },'callback'=>'msw_hcb_import']);
+    register_rest_route('msw-hermes-cpanel/v1','/import',['methods'=>'POST','permission_callback'=>'msw_hcb_import_permission','callback'=>'msw_hcb_import']);
     register_rest_route('msw-hermes-cpanel/v1','/status',['methods'=>'POST','permission_callback'=>'msw_hcb_machine_permission','callback'=>'msw_hcb_status']);
     register_rest_route('msw-hermes-cpanel/v1','/receipt',['methods'=>'POST','permission_callback'=>'msw_hcb_machine_permission','callback'=>static function(){return new WP_REST_Response(msw_hcb_read('receipt'),200);}]);
 });
