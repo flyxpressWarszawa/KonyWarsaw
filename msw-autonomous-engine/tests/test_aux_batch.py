@@ -47,7 +47,7 @@ class Client:
     wordpress_url = "https://example.test"
 
     def __init__(self, response=None):
-        self.response = batch() if response is None else response
+        self.response = {"state": "claimed", **entry(0)} if response is None else response
         self.calls, self.results = [], {}
         self.after_status = None
         self.fail_status_once = None
@@ -81,21 +81,35 @@ class AuxiliaryBatchTests(unittest.TestCase):
         env.start()
         self.addCleanup(env.stop)
 
-    def test_four_real_seo_executions_use_one_claim_and_independent_verified_receipts(self):
+    def test_one_real_seo_execution_uses_one_claim_and_verified_receipt(self):
         client, gate = Client(), Gate()
         worker = Worker(client, self.directory, max_seconds=30, memory_mb=256)
         with patch.object(auxiliary, "emit"):
             self.assertEqual(auxiliary.run_cycle(client, worker, gate, Stop()), "completed")
         self.assertEqual(gate.calls, 1)
         claims = [p for a, p in client.calls if a == "claim"]
-        self.assertEqual(claims, [{"capabilities": ["seo.analyze"], "batch_limit": 4}])
-        self.assertEqual([a for a, _ in client.calls].count("complete"), 4)
-        self.assertEqual([a for a, _ in client.calls].count("status"), 4)
+        self.assertEqual(claims, [{"capabilities": ["seo.analyze", "research.rank"]}])
+        self.assertEqual([a for a, _ in client.calls].count("complete"), 1)
+        self.assertEqual([a for a, _ in client.calls].count("status"), 1)
         for receipt in client.results.values():
             result = json.loads(receipt["result_json"])
             self.assertTrue(result["ok"])
             self.assertEqual(result["data"]["word_count"], 3)
         self.assertEqual(worker.journal.pending(), [])
+
+    def test_research_rank_executes_on_production_cycle_with_verified_receipt(self):
+        item = entry(7)
+        raw = json.dumps({"ideas": [{"id": "service", "demand": 80, "competition": 20,
+                                      "margin": 70, "delivery_effort": 30,
+                                      "sources": ["https://example.test/evidence"]}]})
+        item["job"].update(kind="research.rank", payload=raw,
+                           payload_sha256=hashlib.sha256(raw.encode()).hexdigest())
+        client = Client({"state": "claimed", **item})
+        with patch.object(auxiliary, "emit"):
+            self.assertEqual(auxiliary.run_cycle(client, Worker(client, self.directory), Gate(), Stop()), "completed")
+        result = json.loads(next(iter(client.results.values()))["result_json"])
+        self.assertEqual(result["data"]["ideas"][0]["id"], "service")
+        self.assertEqual(result["data"]["ideas"][0]["score"], 76.0)
 
     def test_every_entry_is_validated_before_any_execution(self):
         corruptions = []
@@ -116,6 +130,14 @@ class AuxiliaryBatchTests(unittest.TestCase):
                 self.assertEqual([a for a, _ in client.calls], ["claim"])
                 self.assertEqual(worker.journal.pending(), [])
 
+    def test_mixed_batch_is_rejected_before_any_execution_under_one_job_budget(self):
+        value = batch(2)
+        value["jobs"][1]["job"]["kind"] = "research.rank"
+        client = Client(value)
+        with patch.object(auxiliary, "emit"), self.assertRaises(auxiliary.ProtocolError):
+            auxiliary.run_cycle(client, Worker(client, self.directory), Gate(), Stop())
+        self.assertEqual([a for a, _ in client.calls], ["claim"])
+
     def test_legacy_transport_completes_one_job_without_extra_claims(self):
         response = {"state": "claimed", **entry(1)}
         client = Client(response)
@@ -130,28 +152,28 @@ class AuxiliaryBatchTests(unittest.TestCase):
                 self.assertEqual(auxiliary.run_cycle(client, Worker(client, self.directory), Gate(state), Stop()), state)
             self.assertEqual(client.calls, [])
 
-    def test_stop_after_first_receipt_never_executes_remaining_leased_jobs(self):
+    def test_stop_after_receipt_does_not_claim_again(self):
         client, stop = Client(), Stop()
         client.after_status = lambda _: setattr(stop, "stopped", True)
-        with patch.object(auxiliary, "emit"), self.assertRaises(WorkerDraining):
-            auxiliary.run_cycle(client, Worker(client, self.directory), Gate(), stop)
+        with patch.object(auxiliary, "emit"):
+            self.assertEqual(auxiliary.run_cycle(client, Worker(client, self.directory), Gate(), stop), "completed")
         self.assertEqual(len(client.results), 1)
         self.assertEqual([a for a, _ in client.calls], ["claim", "complete", "status"])
 
-    def test_lost_second_ack_is_replayed_with_identical_digest_before_next_claim(self):
+    def test_lost_ack_is_replayed_with_identical_digest_before_next_claim(self):
         client = Client()
-        client.fail_status_once = entry(1)["job"]["id"]
+        client.fail_status_once = entry(0)["job"]["id"]
         worker = Worker(client, self.directory)
         with patch.object(auxiliary, "emit"), self.assertRaises(TransportError):
             auxiliary.run_cycle(client, worker, Gate(), Stop())
-        self.assertEqual(len(client.results), 2)
+        self.assertEqual(len(client.results), 1)
         self.assertEqual(len(worker.journal.pending()), 1)
-        before = client.results[entry(1)["job"]["id"]]["result_sha256"]
+        before = client.results[entry(0)["job"]["id"]]["result_sha256"]
         client.calls.clear()
         with patch.object(auxiliary, "emit"):
             self.assertEqual(auxiliary.run_cycle(client, worker, Gate(), Stop()), "idle")
         self.assertEqual([a for a, _ in client.calls], ["complete", "status", "claim"])
-        self.assertEqual(client.results[entry(1)["job"]["id"]]["result_sha256"], before)
+        self.assertEqual(client.results[entry(0)["job"]["id"]]["result_sha256"], before)
         self.assertEqual(worker.journal.pending(), [])
 
 
