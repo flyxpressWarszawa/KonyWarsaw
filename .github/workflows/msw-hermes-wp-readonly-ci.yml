@@ -1,0 +1,56 @@
+name: MSW Hermes ↔ WordPress status adapter — offline gate
+
+on:
+  push:
+    branches:
+      - msw/hermes-wp-readonly-20261111-02
+    paths:
+      - 'msw-autonomous-engine/msw_engine/hermes_wp_readonly.py'
+      - 'msw-autonomous-engine/tests/test_hermes_wp_readonly.py'
+      - '.github/workflows/msw-hermes-wp-readonly-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: msw-hermes-wp-readonly-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  isolated-contract-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out source only
+        uses: actions/checkout@v4
+      - name: Run ten offline contract tests with socket egress blocked
+        working-directory: msw-autonomous-engine
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          MSW_WP_URL: ''
+          MSW_NODE: ''
+          MSW_SECRET: ''
+          OPENAI_API_KEY: ''
+        run: |
+          python3 - <<'PY'
+          import socket
+          import sys
+          import unittest
+
+          def forbidden_network(*_args, **_kwargs):
+              raise AssertionError('Network access forbidden in Hermes WordPress offline tests')
+
+          socket.create_connection = forbidden_network
+          socket.socket.connect = forbidden_network
+          socket.socket.connect_ex = forbidden_network
+
+          suite = unittest.defaultTestLoader.discover(
+              'tests', pattern='test_hermes_wp_readonly.py'
+          )
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          if result.testsRun != 10:
+              raise SystemExit(f'Expected 10 tests, observed {result.testsRun}')
+          if not result.wasSuccessful():
+              raise SystemExit(1)
+          print('MSW_HERMES_WP_READONLY: OFFLINE_PASS_10, production remains HOLD')
+          PY
