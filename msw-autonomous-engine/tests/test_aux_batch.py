@@ -10,6 +10,7 @@ from unittest.mock import patch
 from msw_engine import render_auxiliary as auxiliary
 from msw_engine.client import TransportError
 from msw_engine.runner import Worker, WorkerDraining
+from msw_engine.tasks import seo_analyze
 
 
 def entry(index):
@@ -47,7 +48,8 @@ class Client:
     wordpress_url = "https://example.test"
 
     def __init__(self, response=None):
-        self.response = {"state": "claimed", **entry(0)} if response is None else response
+        self.responses = response if isinstance(response, list) else [
+            {"state": "claimed", **entry(0)} if response is None else response]
         self.calls, self.results = [], {}
         self.after_status = None
         self.fail_status_once = None
@@ -55,8 +57,7 @@ class Client:
     def send(self, action, payload):
         self.calls.append((action, payload))
         if action == "claim":
-            response, self.response = self.response, {"state": "idle"}
-            return response
+            return self.responses.pop(0) if self.responses else {"state": "idle"}
         ident = payload["job_id"]
         if action == "complete":
             self.results[ident] = dict(payload)
@@ -81,6 +82,16 @@ class AuxiliaryBatchTests(unittest.TestCase):
         env.start()
         self.addCleanup(env.stop)
 
+    def test_content_structure_is_bounded_and_deterministic(self):
+        sample = {"title": "Usługa", "content": "Spawanie aluminium " * 210,
+                  "html": "<h1>Usługa</h1><h3>Opis</h3><p>Tekst</p><ul><li>Punkt</li></ul>"}
+        result = seo_analyze(sample, self.directory)["content_structure"]
+        self.assertEqual(result["heading_order_jumps"], 1)
+        self.assertEqual(result["paragraphs"], 1)
+        self.assertEqual(result["list_items"], 1)
+        self.assertEqual(result["estimated_read_minutes"], 3)
+        self.assertEqual(result["unique_terms"], 2)
+
     def test_one_real_seo_execution_uses_one_claim_and_verified_receipt(self):
         client, gate = Client(), Gate()
         worker = Worker(client, self.directory, max_seconds=30, memory_mb=256)
@@ -88,7 +99,7 @@ class AuxiliaryBatchTests(unittest.TestCase):
             self.assertEqual(auxiliary.run_cycle(client, worker, gate, Stop()), "completed")
         self.assertEqual(gate.calls, 1)
         claims = [p for a, p in client.calls if a == "claim"]
-        self.assertEqual(claims, [{"capabilities": ["seo.analyze", "research.rank"]}])
+        self.assertEqual(claims, [{"capabilities": ["seo.analyze"], "batch_limit": 4}])
         self.assertEqual([a for a, _ in client.calls].count("complete"), 1)
         self.assertEqual([a for a, _ in client.calls].count("status"), 1)
         for receipt in client.results.values():
@@ -106,10 +117,31 @@ class AuxiliaryBatchTests(unittest.TestCase):
                            payload_sha256=hashlib.sha256(raw.encode()).hexdigest())
         client = Client({"state": "claimed", **item})
         with patch.object(auxiliary, "emit"):
-            self.assertEqual(auxiliary.run_cycle(client, Worker(client, self.directory), Gate(), Stop()), "completed")
+            self.assertEqual(auxiliary.run_cycle(client, Worker(client, self.directory), Gate("pressure_offload"), Stop()), "completed")
         result = json.loads(next(iter(client.results.values()))["result_json"])
         self.assertEqual(result["data"]["ideas"][0]["id"], "service")
         self.assertEqual(result["data"]["ideas"][0]["score"], 76.0)
+
+    def test_healthy_batch_processes_four_with_verified_receipts(self):
+        client = Client(batch())
+        with patch.object(auxiliary, "emit"):
+            self.assertEqual(auxiliary.run_cycle(client, Worker(client, self.directory), Gate(), Stop()), "completed")
+        self.assertEqual([a for a, _ in client.calls].count("claim"), 1)
+        self.assertEqual([a for a, _ in client.calls].count("complete"), 4)
+        self.assertEqual([a for a, _ in client.calls].count("status"), 4)
+
+    def test_healthy_idle_seo_falls_back_to_ranking(self):
+        ranked = entry(9)
+        raw = json.dumps({"ideas": []})
+        ranked["job"].update(kind="research.rank", payload=raw,
+                             payload_sha256=hashlib.sha256(raw.encode()).hexdigest())
+        client = Client([{"state": "idle", "batch_protocol": "msw.seo.batch.v1"},
+                         {"state": "claimed", **ranked}])
+        with patch.object(auxiliary, "emit"):
+            self.assertEqual(auxiliary.run_cycle(client, Worker(client, self.directory), Gate(), Stop()), "completed")
+        self.assertEqual([p for a, p in client.calls if a == "claim"],
+                         [{"capabilities": ["seo.analyze"], "batch_limit": 4},
+                          {"capabilities": ["seo.analyze", "research.rank"]}])
 
     def test_every_entry_is_validated_before_any_execution(self):
         corruptions = []
@@ -172,7 +204,7 @@ class AuxiliaryBatchTests(unittest.TestCase):
         client.calls.clear()
         with patch.object(auxiliary, "emit"):
             self.assertEqual(auxiliary.run_cycle(client, worker, Gate(), Stop()), "idle")
-        self.assertEqual([a for a, _ in client.calls], ["complete", "status", "claim"])
+        self.assertEqual([a for a, _ in client.calls], ["complete", "status", "claim", "claim"])
         self.assertEqual(client.results[entry(0)["job"]["id"]]["result_sha256"], before)
         self.assertEqual(worker.journal.pending(), [])
 
