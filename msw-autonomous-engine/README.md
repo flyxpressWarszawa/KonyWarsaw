@@ -20,6 +20,17 @@ The worker validates signed HTTPS traffic, maintains a private persistent result
 
 ## Render configuration
 
+The auxiliary Render node can consume `seo.analyze` and `research.rank` with
+`MSW_RUNTIME_MODE=render-free` and `MSW_AUTONOMOUS_AGENT=0`. Register only these
+two kinds on its existing WordPress queue identity. It uses the signed queue
+and a persistent `MSW_DATA_DIR` for receipts and any business ranking evidence.
+One legacy single claim is made per five-minute cycle. A fresh account CPU
+reading of at least 70% permits one remote computation while physical memory
+is below 70%; stale telemetry or memory pressure blocks new claims. A completed
+job requires a verified server acknowledgement. This does not migrate native
+WordPress callbacks, database work, page rendering, payment flows or shared
+knowledge corpora.
+
 `render.yaml` is a deployment proposal for one background worker in Frankfurt, 2 CPU / 4 GB RAM, with a 10 GB persistent disk. Compute and storage are billed separately from a workspace subscription. Committing the proposal does not create or purchase a service. Confirm the current quote before applying it.
 
 Set the root directory to `msw-autonomous-engine`, build command to `python -m pip install -r requirements.txt && python -m compileall -q msw_engine`, and start command to `python -m msw_engine`. Place the worker in Production of the existing MSW project. The worker has no inbound port or public domain.

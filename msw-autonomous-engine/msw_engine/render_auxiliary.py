@@ -1,6 +1,6 @@
-"""Low-rate SEO queue consumer for an independently registered WP node.
+"""Low-rate SEO and evidence-ranking consumer for a scoped WP node.
 
-Only deterministic seo.analyze jobs are claimed. No scheduler, publication,
+Only deterministic seo.analyze and research.rank jobs are claimed. No scheduler, publication,
 AI call, satellite operation, or private knowledge job is started here. The
 journal and retry deadline use MSW_DATA_DIR; restart persistence requires that
 directory to be on a persistent volume. An interrupted SEO calculation may be
@@ -28,6 +28,7 @@ from .recovery import OriginPaused, protected_open
 from .runner import Worker, WorkerDraining
 
 CAPABILITY = "seo.analyze"
+CAPABILITIES = ("seo.analyze", "research.rank")
 POLL_SECONDS = 300
 WARMUP_POLL_SECONDS = 60
 LOW_SAMPLE_RECHECK_SECONDS = 25
@@ -250,6 +251,11 @@ class OriginPressureGate:
             return {"state": "origin_unknown"}
         if cpu >= 70 or ram >= 70:
             self.open, self.low_samples, self.last_at = False, 0, at
+            # A fresh CPU-only pressure reading permits one remote computation.
+            # The signed queue still costs one claim and its receipt requests.
+            if cpu >= 70 and ram < 70:
+                return {"state": "pressure_offload", "cpu_percent": cpu,
+                        "physical_memory_percent": ram}
             return {"state": "origin_pressure", "cpu_percent": cpu, "physical_memory_percent": ram}
         if not self.open:
             if cpu >= 60 or ram >= 60:
@@ -275,17 +281,17 @@ def step(client: Client, worker: Worker, stopping=lambda: False, *, gate: Origin
     if stopping():
         raise WorkerDraining()
     health = gate.check(client)
-    if health.get("state") != "ready":
+    if health.get("state") not in ("ready", "pressure_offload"):
         return health
-    # Never send a different capability even if the node is misconfigured.
-    response = client.send("claim", {"capabilities": [CAPABILITY]})
+    # Never request a capability outside this narrow, local-only allowlist.
+    response = client.send("claim", {"capabilities": list(CAPABILITIES)})
     if not isinstance(response, dict):
         raise ProtocolError("claim_response")
     if response.get("state") == "idle":
         return {"state": "idle"}
     job, lease = response.get("job"), response.get("lease_token")
     if (response.get("state") != "claimed" or not isinstance(job, dict)
-            or job.get("kind") != CAPABILITY or not isinstance(lease, str) or not lease):
+            or job.get("kind") not in CAPABILITIES or not isinstance(lease, str) or not lease):
         raise ProtocolError("unexpected_claim")
     receipt = worker.execute(job, lease)
     if stopping():
@@ -296,7 +302,7 @@ def step(client: Client, worker: Worker, stopping=lambda: False, *, gate: Origin
             "result_sha256": receipt["result_sha256"]}
 
 
-def batch_entries(response: dict) -> list[dict]:
+def batch_entries(response: dict, *, limit: int = MAX_JOBS_PER_CYCLE) -> list[dict]:
     """Validate the entire bounded admission before executing any payload."""
     if not isinstance(response, dict):
         raise ProtocolError("claim_response")
@@ -312,14 +318,14 @@ def batch_entries(response: dict) -> list[dict]:
         entries = response.get("jobs")
     else:
         raise ProtocolError("unexpected_claim")
-    if not isinstance(entries, list) or not 1 <= len(entries) <= MAX_JOBS_PER_CYCLE:
+    if not isinstance(entries, list) or not 1 <= len(entries) <= limit:
         raise ProtocolError("batch_size")
     seen = set()
     for entry in entries:
         if not isinstance(entry, dict):
             raise ProtocolError("batch_entry")
         job, lease = entry.get("job"), entry.get("lease_token")
-        if (not isinstance(job, dict) or job.get("kind") != CAPABILITY
+        if (not isinstance(job, dict) or job.get("kind") not in CAPABILITIES
                 or not isinstance(lease, str) or not 1 <= len(lease) <= 256):
             raise ProtocolError("unexpected_claim")
         if state == "claimed_batch" and (type(entry.get("lease_seconds")) is not int
@@ -335,21 +341,23 @@ def batch_entries(response: dict) -> list[dict]:
 
 
 def run_cycle(client: Client, worker: Worker, gate: OriginPressureGate, stop) -> str:
-    """Admit at most four SEO jobs with one guarded, signed queue request."""
+    """Admit one SEO or ranking job with one guarded, signed queue request."""
     if stop.is_set():
         raise WorkerDraining()
     worker.replay_receipts(limit=MAX_RECEIPT_REPLAYS_PER_CYCLE)
     if stop.is_set():
         raise WorkerDraining()
     health = gate.check(client)
-    if health.get("state") != "ready":
+    if health.get("state") not in ("ready", "pressure_offload"):
         state = health.pop("state", "origin_unknown")
         emit(state, **health)
         return state
     if stop.is_set():
         raise WorkerDraining()
-    response = client.send("claim", {"capabilities": [CAPABILITY], "batch_limit": MAX_JOBS_PER_CYCLE})
-    entries = batch_entries(response)
+    # A legacy single claim supports both kinds without assuming the SEO-only
+    # batch extension accepts mixed capabilities. It also bounds origin traffic.
+    response = client.send("claim", {"capabilities": list(CAPABILITIES)})
+    entries = batch_entries(response, limit=1)
     if not entries:
         emit("idle")
         return "idle"
@@ -392,11 +400,11 @@ def main() -> int:
         emit("configuration_required", error_class=type(error).__name__, queue_consumption=False)
         stop.wait()
         return 0
-    emit("started", capability=CAPABILITY, min_poll_seconds=POLL_SECONDS,
+    emit("started", capabilities=list(CAPABILITIES), min_poll_seconds=POLL_SECONDS,
          startup_delay_seconds=startup_delay, low_sample_recheck_seconds=LOW_SAMPLE_RECHECK_SECONDS,
          scheduler_enabled=False, backoff_storage="MSW_DATA_DIR",
          max_receipt_replays_per_cycle=MAX_RECEIPT_REPLAYS_PER_CYCLE,
-         max_jobs_per_cycle=MAX_JOBS_PER_CYCLE, batch_protocol="msw.seo.batch.v1")
+         max_jobs_per_cycle=1, admission_protocol="legacy_single")
     # On restart/deploy, wait before contacting the already stressed origin.
     # A previously committed Retry-After can require a longer quiet start.
     if stop.wait(startup_delay):
