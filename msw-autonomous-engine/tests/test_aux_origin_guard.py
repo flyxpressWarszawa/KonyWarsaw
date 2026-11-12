@@ -273,14 +273,14 @@ class OriginGuardTests(unittest.TestCase):
         self.assertEqual(client.claims, 1)
         self.assertEqual(worker.replayed, 2)
 
-    def test_cycle_uses_one_admission_for_at_most_one_job(self):
+    def test_healthy_cycle_uses_one_admission_for_at_most_four_jobs(self):
         client, worker = QueueClient(), CompletionWorker()
         with patch("msw_engine.render_auxiliary.emit") as emitted:
             state = run_cycle(client, worker, SequenceGate("ready"), StopStub())
         self.assertEqual(state, "completed")
         self.assertEqual(client.claims, 1)
         self.assertEqual(worker.replayed, 1)
-        self.assertEqual(sum(call.args[0] == "completed" for call in emitted.call_args_list), 1)
+        self.assertEqual(sum(call.args[0] == "completed" for call in emitted.call_args_list), 4)
 
 
 if __name__ == "__main__":

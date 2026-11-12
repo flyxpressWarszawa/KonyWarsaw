@@ -27,11 +27,17 @@ class PageParser(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.headings, self.images, self.links = Counter(), [], []
+        self.heading_levels, self.paragraphs, self.list_items = [], 0, 0
 
     def handle_starttag(self, tag, attributes):
         attrs = dict(attributes)
         if tag in {"h1", "h2", "h3"}:
             self.headings[tag] += 1
+            self.heading_levels.append(int(tag[1]))
+        elif tag == "p":
+            self.paragraphs += 1
+        elif tag == "li":
+            self.list_items += 1
         elif tag == "img":
             self.images.append(bool((attrs.get("alt") or "").strip()))
         elif tag == "a" and attrs.get("href"):
@@ -57,10 +63,17 @@ def seo_analyze(payload: dict, _: Path) -> dict:
         suggestions.append({"code": "no_h2", "priority": "review", "note": "Rozważ śródtytuły opisujące konkretne pytania klientów."})
     if parser.images and not all(parser.images):
         suggestions.append({"code": "image_alt_missing", "priority": "fix", "count": parser.images.count(False)})
+    heading_jumps = sum(right > left + 1 for left, right in zip(parser.heading_levels, parser.heading_levels[1:]))
+    content_structure = {"paragraphs": parser.paragraphs, "list_items": parser.list_items,
+                         "heading_order_jumps": heading_jumps,
+                         "estimated_read_minutes": math.ceil(len(words) / 200) if words else 0,
+                         "unique_terms": len(set(words)),
+                         "method": "Deterministic public-content structure; reading time is an estimate."}
     return {"word_count": len(words), "title_characters": len(title), "headings": dict(parser.headings),
             "images": len(parser.images), "images_with_alt": sum(parser.images), "internal_links": internal,
             "external_links": len(parser.links) - internal, "terms": [{"term": key, "count": value} for key, value in counts.most_common(20)],
-            "suggestions": suggestions, "measurement": "Static content observations; not a search ranking or traffic prediction."}
+            "suggestions": suggestions, "content_structure": content_structure,
+            "measurement": "Static content observations; not a search ranking or traffic prediction."}
 
 
 OWNER_CORPUS = "owner_packages_20261105"
