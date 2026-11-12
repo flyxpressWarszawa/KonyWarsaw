@@ -157,7 +157,7 @@ function msw_hcb_status(WP_REST_Request $request): WP_REST_Response|WP_Error {
 }
 add_action('rest_api_init',static function():void {
     register_rest_route('msw-hermes-cpanel/v1','/key',['methods'=>'GET','permission_callback'=>'__return_true','callback'=>static function(){try{return new WP_REST_Response(['schema'=>'msw.hermes.cpanel.key.v1','public_key'=>msw_hcb_keys()['public']],200);}catch(Throwable $e){return new WP_Error('key_unavailable','Key unavailable.',['status'=>503]);}}]);
-    register_rest_route('msw-hermes-cpanel/v1','/import',['methods'=>'POST','permission_callback'=>'__return_true','callback'=>'msw_hcb_import']);
+    register_rest_route('msw-hermes-cpanel/v1','/import',['methods'=>'POST','permission_callback'=>static function(): bool { return current_user_can('manage_options'); },'callback'=>'msw_hcb_import']);
     register_rest_route('msw-hermes-cpanel/v1','/status',['methods'=>'POST','permission_callback'=>'msw_hcb_machine_permission','callback'=>'msw_hcb_status']);
     register_rest_route('msw-hermes-cpanel/v1','/receipt',['methods'=>'POST','permission_callback'=>'msw_hcb_machine_permission','callback'=>static function(){return new WP_REST_Response(msw_hcb_read('receipt'),200);}]);
 });
