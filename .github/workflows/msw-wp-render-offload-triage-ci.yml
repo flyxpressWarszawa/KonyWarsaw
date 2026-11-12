@@ -1,0 +1,47 @@
+name: MSW WP→Render offload safety classification
+on:
+  push:
+    branches: [msw/wp-render-offload-gate-20261111]
+    paths:
+      - 'msw-autonomous-engine/msw_engine/offload_triage.py'
+      - 'msw-autonomous-engine/tests/test_offload_triage.py'
+      - 'msw-autonomous-engine/tests/test_seo_render_pure_compute.py'
+      - 'msw-autonomous-engine/docs/MSW_WP_RENDER_OFFLOAD_20261111.md'
+      - '.github/workflows/msw-wp-render-offload-triage-ci.yml'
+permissions:
+  contents: read
+concurrency:
+  group: msw-wp-render-offload-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  offline-triage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test offline classification with outbound network blocked
+        working-directory: msw-autonomous-engine
+        env:
+          OPENAI_API_KEY: ''
+          MSW_SECRET: ''
+          MSW_WP_URL: ''
+          MSW_TRANSPORT_URL: ''
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python3 - <<'PY'
+          import socket
+          import unittest
+          def forbidden_network(*args, **kwargs):
+              raise AssertionError('No network or paid provider calls allowed in offload tests')
+          socket.socket.connect = forbidden_network
+          socket.socket.connect_ex = forbidden_network
+          socket.create_connection = forbidden_network
+          suite = unittest.TestSuite([
+              unittest.defaultTestLoader.discover('tests', pattern='test_offload_triage.py'),
+              unittest.defaultTestLoader.discover('tests', pattern='test_seo_render_pure_compute.py'),
+          ])
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          if result.testsRun != 12 or not result.wasSuccessful():
+              raise SystemExit(f'Offload safety gate failed: {result.testsRun} tests')
+          print('MSW_WP_RENDER_OFFLOAD: OFFLINE_PASS_12, production offload HOLD')
+          PY
