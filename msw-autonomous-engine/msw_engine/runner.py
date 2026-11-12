@@ -349,6 +349,14 @@ class Worker:
                 self.track(AutonomousAgent(self.journal.data_dir).start(self.lane_stopping))
             except (OSError, ValueError, sqlite3.Error) as error:
                 print(json.dumps({"autonomous_agent": {"state": "startup_blocked", "code": type(error).__name__}}), flush=True)
+        if (not once and os.environ.get('MSW_HERMES_CPANEL_ENABLED') == '1'
+                and self.client.wordpress_url == 'https://mobilny-serwis-warszawa.pl'):
+            from .hermes_cpanel import CpanelMonitor
+            try:
+                self.track(CpanelMonitor(self.journal.data_dir,
+                           os.environ.get('MSW_HERMES_CPANEL_KEY','')).start(self.lane_stopping))
+            except (OSError, ValueError) as error:
+                print(json.dumps({'hermes_cpanel': {'state': 'startup_blocked', 'code': type(error).__name__}}), flush=True)
         while not self.admission_stopped():
             try:
                 result = self.run_once()
