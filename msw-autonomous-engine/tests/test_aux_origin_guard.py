@@ -92,8 +92,8 @@ class OriginGuardTests(unittest.TestCase):
         self.assertEqual(self.gate.check(self.client)["state"], "ready")
         self.assertEqual(self.gate.check(self.client)["state"], "ready")
 
-    def test_pressure_never_claims_and_replays_old_receipts(self):
-        self.current = sample(NOW, cpu=70)
+    def test_memory_pressure_never_claims_and_replays_old_receipts(self):
+        self.current = sample(NOW, cpu=70, ram=70)
         result = step(self.client, self.worker, gate=self.gate)
         self.assertEqual(result["state"], "origin_pressure")
         self.assertEqual(self.worker.replayed, 1)
@@ -103,10 +103,18 @@ class OriginGuardTests(unittest.TestCase):
         self.gate.check(self.client)
         self.current = sample(NOW)
         self.assertEqual(self.gate.check(self.client)["state"], "ready")
-        for cpu, ram in [(70, 10), (10, 70)]:
+        for cpu, ram, state in [(70, 10, "pressure_offload"), (10, 70, "origin_pressure")]:
             self.current = sample(NOW, cpu=cpu, ram=ram)
-            self.assertEqual(self.gate.check(self.client)["state"], "origin_pressure")
+            self.assertEqual(self.gate.check(self.client)["state"], state)
             self.assertFalse(self.gate.open)
+
+    def test_fresh_cpu_pressure_claims_only_one_job(self):
+        self.current = sample(NOW, cpu=100, ram=57)
+        client, worker = QueueClient(), CompletionWorker()
+        with patch("msw_engine.render_auxiliary.emit"):
+            self.assertEqual(run_cycle(client, worker, self.gate, StopStub()), "completed")
+        self.assertEqual(client.claims, 1)
+        self.assertEqual(worker.replayed, 1)
 
     def test_stale_future_nan_bool_and_bad_schema_fail_closed(self):
         invalid = [sample(NOW - 91), sample(NOW + 1), sample(NOW, cpu=math.nan),
@@ -195,13 +203,13 @@ class OriginGuardTests(unittest.TestCase):
         self.assertFalse(gate.open)
         clock[0] += 25
         current[0] = sample(clock[0], cpu=70)
-        self.assertEqual(gate.check(self.client)["state"], "origin_pressure")
+        self.assertEqual(gate.check(self.client)["state"], "pressure_offload")
         self.assertFalse(gate.open)
 
     def test_faster_recheck_only_follows_one_low_sample(self):
         self.assertEqual(next_poll_delay("origin_warmup", 1), 25)
         self.assertEqual(next_poll_delay("origin_warmup", 0), 60)
-        for state in ("origin_pressure", "origin_unknown", "idle", "completed"):
+        for state in ("origin_pressure", "pressure_offload", "origin_unknown", "idle", "completed"):
             self.assertEqual(next_poll_delay(state, 1), 300)
 
     def test_503_retry_after_is_not_shortened(self):
@@ -265,14 +273,14 @@ class OriginGuardTests(unittest.TestCase):
         self.assertEqual(client.claims, 1)
         self.assertEqual(worker.replayed, 2)
 
-    def test_cycle_uses_one_admission_for_at_most_four_jobs(self):
+    def test_cycle_uses_one_admission_for_at_most_one_job(self):
         client, worker = QueueClient(), CompletionWorker()
         with patch("msw_engine.render_auxiliary.emit") as emitted:
             state = run_cycle(client, worker, SequenceGate("ready"), StopStub())
         self.assertEqual(state, "completed")
         self.assertEqual(client.claims, 1)
         self.assertEqual(worker.replayed, 1)
-        self.assertEqual(sum(call.args[0] == "completed" for call in emitted.call_args_list), 4)
+        self.assertEqual(sum(call.args[0] == "completed" for call in emitted.call_args_list), 1)
 
 
 if __name__ == "__main__":
