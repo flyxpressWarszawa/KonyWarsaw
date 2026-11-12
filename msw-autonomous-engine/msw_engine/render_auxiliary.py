@@ -328,6 +328,8 @@ def batch_entries(response: dict, *, limit: int = MAX_JOBS_PER_CYCLE) -> list[di
         if (not isinstance(job, dict) or job.get("kind") not in CAPABILITIES
                 or not isinstance(lease, str) or not 1 <= len(lease) <= 256):
             raise ProtocolError("unexpected_claim")
+        if state == "claimed_batch" and job["kind"] != CAPABILITY:
+            raise ProtocolError("batch_scope")
         if state == "claimed_batch" and (type(entry.get("lease_seconds")) is not int
                                           or entry["lease_seconds"] != 900):
             raise ProtocolError("batch_lease_window")
@@ -341,7 +343,11 @@ def batch_entries(response: dict, *, limit: int = MAX_JOBS_PER_CYCLE) -> list[di
 
 
 def run_cycle(client: Client, worker: Worker, gate: OriginPressureGate, stop) -> str:
-    """Admit one SEO or ranking job with one guarded, signed queue request."""
+    """Admit a bounded SEO batch only when the origin is healthy.
+
+    Under CPU pressure, preserve the one-claim budget. If a healthy origin has
+    no SEO work, use one legacy mixed claim so ranking still makes progress.
+    """
     if stop.is_set():
         raise WorkerDraining()
     worker.replay_receipts(limit=MAX_RECEIPT_REPLAYS_PER_CYCLE)
@@ -354,10 +360,19 @@ def run_cycle(client: Client, worker: Worker, gate: OriginPressureGate, stop) ->
         return state
     if stop.is_set():
         raise WorkerDraining()
-    # A legacy single claim supports both kinds without assuming the SEO-only
-    # batch extension accepts mixed capabilities. It also bounds origin traffic.
-    response = client.send("claim", {"capabilities": list(CAPABILITIES)})
-    entries = batch_entries(response, limit=1)
+    claim_requests = 1
+    if health["state"] == "ready":
+        response = client.send("claim", {"capabilities": [CAPABILITY], "batch_limit": MAX_JOBS_PER_CYCLE})
+        entries = batch_entries(response)
+        if not entries:
+            if stop.is_set():
+                raise WorkerDraining()
+            response = client.send("claim", {"capabilities": list(CAPABILITIES)})
+            claim_requests = 2
+            entries = batch_entries(response, limit=1)
+    else:
+        response = client.send("claim", {"capabilities": list(CAPABILITIES)})
+        entries = batch_entries(response, limit=1)
     if not entries:
         emit("idle")
         return "idle"
@@ -376,7 +391,7 @@ def run_cycle(client: Client, worker: Worker, gate: OriginPressureGate, stop) ->
         if index + 1 < len(entries) and stop.wait(3):
             raise WorkerDraining()
     emit("batch_finished", admitted=len(entries), completed=len(entries) - failed, failed=failed,
-         claim_requests=1)
+         claim_requests=claim_requests)
     return "failed" if failed else "completed"
 
 
@@ -404,7 +419,7 @@ def main() -> int:
          startup_delay_seconds=startup_delay, low_sample_recheck_seconds=LOW_SAMPLE_RECHECK_SECONDS,
          scheduler_enabled=False, backoff_storage="MSW_DATA_DIR",
          max_receipt_replays_per_cycle=MAX_RECEIPT_REPLAYS_PER_CYCLE,
-         max_jobs_per_cycle=1, admission_protocol="legacy_single")
+         max_jobs_per_cycle=MAX_JOBS_PER_CYCLE, admission_protocol="seo_batch_then_legacy_fallback")
     # On restart/deploy, wait before contacting the already stressed origin.
     # A previously committed Retry-After can require a longer quiet start.
     if stop.wait(startup_delay):
