@@ -451,8 +451,18 @@ def supreme_observe(payload: dict, data_dir: Path) -> dict:
 def handlers() -> dict:
     result = dict(BASE_HANDLERS)
     result["runtime.catalog"] = runtime_catalog
-    if os.environ.get('MSW_RUNTIME_MODE') == 'render-free':
-        return {kind: result[kind] for kind in ('seo.analyze', 'research.rank')}
+    runtime_mode = os.environ.get("MSW_RUNTIME_MODE")
+    if runtime_mode in {"render-free", "render-combo-analytics"}:
+        allowed = {kind: result[kind] for kind in ("seo.analyze", "research.rank")}
+        if (runtime_mode == "render-combo-analytics"
+                and os.environ.get("MSW_AUX_COMBO_ANALYTICS") == "1"):
+            from .runtime_pack import module_root
+            if module_root("combo-python") is not None and importlib.util.find_spec("fastapi"):
+                from .private_adapters import available_handlers
+                combo_handler = available_handlers().get("combo.analytics")
+                if combo_handler is not None:
+                    allowed["combo.analytics"] = combo_handler
+        return allowed
     from .runtime_pack import module_root
     if module_root("supreme-server") is not None:
         result["supreme.observe"] = supreme_observe

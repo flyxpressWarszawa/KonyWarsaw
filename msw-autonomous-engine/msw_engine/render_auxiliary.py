@@ -272,8 +272,19 @@ class OriginPressureGate:
         return {"state": "ready"}
 
 
+def active_capabilities() -> tuple[str, ...]:
+    """Expose COMBO analytics only when its explicit flag and private adapter exist."""
+    if os.environ.get("MSW_AUX_COMBO_ANALYTICS") != "1":
+        return CAPABILITIES
+    from .tasks import handlers
+    if "combo.analytics" not in handlers():
+        return CAPABILITIES
+    return (*CAPABILITIES, "combo.analytics")
+
+
 def step(client: Client, worker: Worker, stopping=lambda: False, *, gate: OriginPressureGate,
          replay_pending: bool = True) -> dict:
+    allowed = active_capabilities()
     if stopping():
         raise WorkerDraining()
     if replay_pending:
@@ -284,14 +295,14 @@ def step(client: Client, worker: Worker, stopping=lambda: False, *, gate: Origin
     if health.get("state") not in ("ready", "pressure_offload"):
         return health
     # Never request a capability outside this narrow, local-only allowlist.
-    response = client.send("claim", {"capabilities": list(CAPABILITIES)})
+    response = client.send("claim", {"capabilities": list(allowed)})
     if not isinstance(response, dict):
         raise ProtocolError("claim_response")
     if response.get("state") == "idle":
         return {"state": "idle"}
     job, lease = response.get("job"), response.get("lease_token")
     if (response.get("state") != "claimed" or not isinstance(job, dict)
-            or job.get("kind") not in CAPABILITIES or not isinstance(lease, str) or not lease):
+            or job.get("kind") not in allowed or not isinstance(lease, str) or not lease):
         raise ProtocolError("unexpected_claim")
     receipt = worker.execute(job, lease)
     if stopping():
@@ -302,8 +313,10 @@ def step(client: Client, worker: Worker, stopping=lambda: False, *, gate: Origin
             "result_sha256": receipt["result_sha256"]}
 
 
-def batch_entries(response: dict, *, limit: int = MAX_JOBS_PER_CYCLE) -> list[dict]:
+def batch_entries(response: dict, *, limit: int = MAX_JOBS_PER_CYCLE,
+                  allowed: tuple[str, ...] | None = None) -> list[dict]:
     """Validate the entire bounded admission before executing any payload."""
+    allowed = active_capabilities() if allowed is None else allowed
     if not isinstance(response, dict):
         raise ProtocolError("claim_response")
     state = response.get("state")
@@ -325,7 +338,7 @@ def batch_entries(response: dict, *, limit: int = MAX_JOBS_PER_CYCLE) -> list[di
         if not isinstance(entry, dict):
             raise ProtocolError("batch_entry")
         job, lease = entry.get("job"), entry.get("lease_token")
-        if (not isinstance(job, dict) or job.get("kind") not in CAPABILITIES
+        if (not isinstance(job, dict) or job.get("kind") not in allowed
                 or not isinstance(lease, str) or not 1 <= len(lease) <= 256):
             raise ProtocolError("unexpected_claim")
         if state == "claimed_batch" and job["kind"] != CAPABILITY:
@@ -348,6 +361,7 @@ def run_cycle(client: Client, worker: Worker, gate: OriginPressureGate, stop) ->
     Under CPU pressure, preserve the one-claim budget. If a healthy origin has
     no SEO work, use one legacy mixed claim so ranking still makes progress.
     """
+    allowed = active_capabilities()
     if stop.is_set():
         raise WorkerDraining()
     worker.replay_receipts(limit=MAX_RECEIPT_REPLAYS_PER_CYCLE)
@@ -363,16 +377,16 @@ def run_cycle(client: Client, worker: Worker, gate: OriginPressureGate, stop) ->
     claim_requests = 1
     if health["state"] == "ready":
         response = client.send("claim", {"capabilities": [CAPABILITY], "batch_limit": MAX_JOBS_PER_CYCLE})
-        entries = batch_entries(response)
+        entries = batch_entries(response, allowed=allowed)
         if not entries:
             if stop.is_set():
                 raise WorkerDraining()
-            response = client.send("claim", {"capabilities": list(CAPABILITIES)})
+            response = client.send("claim", {"capabilities": list(allowed)})
             claim_requests = 2
-            entries = batch_entries(response, limit=1)
+            entries = batch_entries(response, limit=1, allowed=allowed)
     else:
-        response = client.send("claim", {"capabilities": list(CAPABILITIES)})
-        entries = batch_entries(response, limit=1)
+        response = client.send("claim", {"capabilities": list(allowed)})
+        entries = batch_entries(response, limit=1, allowed=allowed)
     if not entries:
         emit("idle")
         return "idle"
@@ -399,8 +413,12 @@ def main() -> int:
     stop = threading.Event()
     signal.signal(signal.SIGTERM, lambda *_: stop.set())
     signal.signal(signal.SIGINT, lambda *_: stop.set())
-    # Restrict both handler discovery and auxiliary receipt hooks.
-    os.environ["MSW_RUNTIME_MODE"] = "render-free"
+    # Keep the auxiliary on its narrow handler set. COMBO analytics needs
+    # both an explicit opt-in and the verified private adapter pack.
+    combo_analytics_opted_in = os.environ.get("MSW_AUX_COMBO_ANALYTICS") == "1"
+    os.environ["MSW_RUNTIME_MODE"] = (
+        "render-combo-analytics" if combo_analytics_opted_in else "render-free"
+    )
     os.environ["MSW_AUTONOMOUS_AGENT"] = "0"
     directory = Path(os.environ.get("MSW_DATA_DIR", "/tmp/msw-aux-seo"))
     os.environ["MSW_DATA_DIR"] = str(directory)
@@ -415,7 +433,9 @@ def main() -> int:
         emit("configuration_required", error_class=type(error).__name__, queue_consumption=False)
         stop.wait()
         return 0
-    emit("started", capabilities=list(CAPABILITIES), min_poll_seconds=POLL_SECONDS,
+    emit("started", capabilities=list(active_capabilities()),
+         combo_analytics_enabled="combo.analytics" in active_capabilities(),
+         min_poll_seconds=POLL_SECONDS,
          startup_delay_seconds=startup_delay, low_sample_recheck_seconds=LOW_SAMPLE_RECHECK_SECONDS,
          scheduler_enabled=False, backoff_storage="MSW_DATA_DIR",
          max_receipt_replays_per_cycle=MAX_RECEIPT_REPLAYS_PER_CYCLE,
