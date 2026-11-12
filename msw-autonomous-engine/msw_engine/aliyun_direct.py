@@ -19,6 +19,28 @@ import ssl
 from .client import NoRedirect
 
 
+QUEUE_SCHEMA = "msw.aliyun.job.v1"
+
+
+def queue_configured() -> bool:
+    key = os.environ.get("MSW_ALIYUN_API_KEY", "").strip()
+    model = os.environ.get("MSW_ALIYUN_MODEL", "").strip()
+    return bool(key and not key.startswith("sk-sp-") and re.fullmatch(r"[A-Za-z0-9_.-]{2,100}", model))
+
+
+def queue_generate(payload: dict, directory: Path) -> dict:
+    from .tasks import TaskError
+
+    if set(payload) - {"schema", "prompt", "request_id", "max_tokens"}:
+        raise TaskError("aliyun_queue_argument_unknown")
+    if not queue_configured():
+        raise TaskError("aliyun_queue_model_studio_not_configured")
+
+    answer = generate({"text": payload.get("prompt"), "request_id": payload.get("request_id"),
+                       "max_tokens": payload.get("max_tokens", 512)}, directory)
+    return {"schema": "msw.aliyun.result.v1", **answer}
+
+
 def _digest(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 

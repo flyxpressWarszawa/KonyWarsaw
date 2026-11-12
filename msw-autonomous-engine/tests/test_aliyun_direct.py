@@ -9,8 +9,8 @@ from pathlib import Path
 from unittest.mock import patch
 from urllib.error import URLError
 
-from msw_engine.aliyun_direct import generate
-from msw_engine.tasks import TaskError
+from msw_engine.aliyun_direct import QUEUE_SCHEMA, generate
+from msw_engine.tasks import TaskError, dispatch
 
 BASE = "https://ws-8ll117pdwwgx97h2.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1"
 ENV = {"MSW_ALIYUN_API_KEY": "unit-test-secret", "MSW_ALIYUN_MODEL": "test-model"}
@@ -31,6 +31,7 @@ class FakeOpener:
         assert body["model"] == ENV["MSW_ALIYUN_MODEL"]
         assert body["messages"][0]["role"] == "user"
         assert "store" not in body
+        self.last_body = body
         if self.error:
             raise self.error
         return io.BytesIO(self.raw)
@@ -66,6 +67,40 @@ class AliyunDirectTest(unittest.TestCase):
         with sqlite3.connect(self.root / "aliyun-direct" / "requests.sqlite3") as db:
             row = db.execute("SELECT state,text FROM requests").fetchone()
         self.assertEqual(row, ("completed", "Test OK"))
+
+    def test_explicit_queue_job_uses_only_the_requested_prompt(self):
+        opener = FakeOpener(b'{"choices":[{"finish_reason":"stop","message":{"content":"OK"}}]}')
+        job = {"schema": QUEUE_SCHEMA, "prompt": PROMPT["text"], "request_id": PROMPT["request_id"]}
+        with patch.dict(os.environ, {**ENV, "MSW_PAID_AI_TRANSPORT": "direct_openai"}), \
+                patch("msw_engine.aliyun_direct.build_opener", return_value=opener), \
+                patch("msw_engine.openai_direct.generate") as openai:
+            result = dispatch("llm.generate", job, self.root)
+            self.assertEqual(result, dispatch("llm.generate", job, self.root))
+        openai.assert_not_called()
+        self.assertEqual(opener.calls, 1)
+        self.assertEqual(opener.last_body["messages"], [{"role": "user", "content": PROMPT["text"]}])
+        self.assertEqual(result["schema"], "msw.aliyun.result.v1")
+        self.assertTrue(result["api_text_verified"])
+
+    def test_ordinary_generation_keeps_its_existing_provider(self):
+        with patch.dict(os.environ, {**ENV, "MSW_LLM_PROVIDER": "wordpress", "MSW_LLM_MODEL": "test-gpt",
+                                     "MSW_PAID_AI_TRANSPORT": "direct_openai"}), \
+                patch("msw_engine.aliyun_direct.generate") as aliyun, \
+                patch("msw_engine.openai_direct.generate", return_value={"text": "OK", "model": "test-gpt"}) as openai:
+            dispatch("llm.generate", {"prompt": "Test", "use_knowledge": False, "collaborate": False}, self.root)
+        aliyun.assert_not_called()
+        openai.assert_called_once()
+
+    def test_queue_rejects_plan_key_and_unapproved_context(self):
+        job = {"schema": QUEUE_SCHEMA, "prompt": PROMPT["text"], "request_id": PROMPT["request_id"]}
+        with patch.dict(os.environ, {**ENV, "MSW_LLM_MODEL": "test-gpt"}), \
+                patch("msw_engine.aliyun_direct.generate") as generate_aliyun:
+            with self.assertRaisesRegex(TaskError, "queue_argument_unknown"):
+                dispatch("llm.generate", {**job, "use_knowledge": True}, self.root)
+            with patch.dict(os.environ, {"MSW_ALIYUN_API_KEY": "sk-sp-test"}):
+                with self.assertRaisesRegex(TaskError, "queue_model_studio_not_configured"):
+                    dispatch("llm.generate", job, self.root)
+        generate_aliyun.assert_not_called()
 
     def test_conflict_cannot_reuse_same_request_id(self):
         opener = FakeOpener(json.dumps({"choices": [{"finish_reason": "stop", "message": {"content": "OK"}}]}).encode())
