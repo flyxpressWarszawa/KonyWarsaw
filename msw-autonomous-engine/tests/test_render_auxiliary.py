@@ -55,7 +55,7 @@ class AuxiliaryTest(unittest.TestCase):
         self.assertEqual(out["state"], "completed")
         self.assertTrue(out["server_ack_verified"])
         self.assertEqual([x[0] for x in client.calls], ["claim", "complete", "status"])
-        self.assertEqual(client.calls[0][1], {"capabilities": ["seo.analyze"]})
+        self.assertEqual(client.calls[0][1], {"capabilities": ["seo.analyze", "research.rank"]})
         self.assertEqual(out["result_sha256"], client.result_sha256)
         self.assertEqual(worker.journal.pending(), [])
 
@@ -65,6 +65,19 @@ class AuxiliaryTest(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             step(client, worker, gate=self.gate)
         self.assertEqual([x[0] for x in client.calls], ["claim"])
+
+    def test_real_local_research_rank_returns_verified_receipt(self):
+        client = FakeClient("research.rank")
+        raw = json.dumps({"ideas": [{"id": "offer-1", "demand": 80, "competition": 20,
+                                      "margin": 70, "delivery_effort": 30,
+                                      "sources": ["https://example.test/evidence"]}]})
+        client.job["payload"] = raw
+        client.job["payload_sha256"] = hashlib.sha256(raw.encode()).hexdigest()
+        worker = Worker(client, Path(self.tmp.name), max_seconds=30, memory_mb=256)
+        result = step(client, worker, gate=self.gate)
+        self.assertEqual(result["state"], "completed")
+        self.assertTrue(result["server_ack_verified"])
+        self.assertEqual(worker.journal.pending(), [])
 
     def test_503_after_result_keeps_receipt_and_retries_same_result(self):
         class FailingOnceClient(FakeClient):
