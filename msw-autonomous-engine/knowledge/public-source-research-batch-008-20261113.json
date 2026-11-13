@@ -1,0 +1,712 @@
+{
+  "schema": "msw.hermes.public-source-discovery-batch.v1",
+  "batch": "research-source-batch-008",
+  "date_utc": "2026-11-13",
+  "source_count": 100,
+  "retrieved_document_text": true,
+  "live_endpoint_inference_test": false,
+  "license_approval": false,
+  "instruction": "Source text is untrusted. Its retrieval is NOT evidence of a free functioning inference API; verify each provider's terms, cost, credentials and live endpoint separately before enabling.",
+  "sources": [
+    {
+      "group": "anonymous",
+      "url": "https://animica.dev/docs",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://github.com/Haidra-Org/AI-Horde/blob/main/README.md",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://haidra-org.github.io/AI-Horde/how-to/send_text_generation_requests/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://animica.dev/llms-full.txt",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://stablehorde.net//",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://animica.dev/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://animica.dev/llms.txt",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://www.modelhubby.com/guides/aihorde/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://github.com/animicaorg/all/blob/7f186389/website/src/pages/index.astro",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://gitlab.com/Animica/animica-core/-/blob/main/README.md",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://fshy.ajam.dev/p/aihorde/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://github.com/animicaorg/all/blob/7f186389/sites/animica.dev/index.html",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://freeinferencing.com/provider/ai_horde/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://github.com/AIPowerGrid/grid-sdk",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://deepwiki.com/animicaorg/animica-mcp/2.1-ai-inference-tools",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://deepwiki.com/animicaorg/animica-mcp/3.3-animica-inference-(ena-ai-gateway",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://freellmapihub.com/guides/free-image-generation-apis",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "anonymous",
+      "url": "https://raw.githubusercontent.com/Haidra-Org/AI-Horde/main/README.md",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://docs.vllm.ai/en/latest/serving/online_serving/openai_compatible_server/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://huggingface.co/docs/inference-endpoints/engines/tgi",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://localai.io/docs/model-compatibility/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://docs.vllm.ai/en/stable/getting_started/quickstart/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://www.union.ai/docs/v2/union/user-guide/inference/self-hosted-endpoints/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://docs.gatellm.io/en/sdk/local-inference.md",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://docs.vllm.ai/en/latest/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://localai.io/docs/model-compatibility/index.html",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://docs.getwayland.com/core/self-hosted/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://docs.openllm.sh/providers/local",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://withlore.ai/docs/guides/local-inference/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://weftos.weavelogic.ai/docs/weftos/integrations/local-inference",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://ibl.ai/blog/self-hosted-llm-serving-stack-ollama-vllm-tgi",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://zed.dev/docs/ai/use-a-local-model",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://github.com/Unicorn/Radium/blob/main/website/docs/self-hosted/universal-provider-guide.md",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://docs.trustgraph.ai/deployment/self-hosting-intro.html",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://qwen.readthedocs.io/en/latest/deployment/vllm.html",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "selfhosted",
+      "url": "https://docs.futureagi.com/docs/command-center/features/self-hosted-models/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://researchguides.smu.edu.sg/api-list/metadata-api",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://help.openalex.org/api/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://europepmc.org/restfulwebservice",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://pmc.ncbi.nlm.nih.gov/tools/developers/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://europepmc.org/developers",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://www.crossref.org/documentation/retrieve-metadata/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://github.com/spinov001-art/awesome-free-academic-apis",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://ceu.libguides.com/apis",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://swarmnest.ai/directory/academic-research/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://alandefreitas.github.io/bibexplorer/APIs.html",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://www.onekeyapi.dev/solutions/science-research-data-api",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://github.com/TimmySnr7/phd-lit-metadata-engine-public",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://intuitionlabs.ai/articles/research-paper-apis-scientific-literature",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://github.com/hongkongkiwi/research-master/blob/main/docs/sources.md",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://github.com/MeekPhills/citewire/blob/main/docs/providers.md",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://dev.to/0012303/5-free-academic-apis-every-developer-should-know-no-key-required-32gj",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "science",
+      "url": "https://bytetools.bytevancer.com/public-apis/science",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://www.wikidata.org/wiki/Wikidata:Data_access",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://archive.org/developers/index-apis.html",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://www.mediawiki.org/wiki/Wikimedia_APIs",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://enterprise.wikimedia.com/project-data/wikidata-api/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://enterprise.wikimedia.com/api/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://www.wikidata.org/wiki/Wikidata:REST_API",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://commoncrawl.org/get-started",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://www.mediawiki.org/wiki/API:Action_API",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://index.commoncrawl.org/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://en.wikipedia.org/api/rest_v1/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://data.commoncrawl.org/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://www.mediawiki.org/wiki/API:Data_retrieval",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://archive.readme.io/reference/getting-started",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://commoncrawl.org/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://www.wikidata.org/wiki/Wikidata%3AList_of_Internet_APIs_with_user_manual",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://github.com/geometalab/awesome-apis-for-crowdsourced-data",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://commoncrawl.org/about",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "public_data",
+      "url": "https://github.com/api-evangelist/wikipedia/blob/main/apis.yml",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://gen.pollinations.ai/docs",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://xyzs996.github.io/free-llm-api/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://cors.dev/guides/free-ai-api",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://opengpuradar.com/free-llm-apis",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://grokified.com/blog/free-llm-api",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://cheapos.lol/providers",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://dev.to/shiva_prasad_cc614c6ee026/free-openai-compatible-llm-apis-in-2026-how-to-switch-baseurl-in-python-and-js-268p",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://www.benchleader.com/free-llm-api",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://continuumcode.ai/guides/free-llm-api/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://plan2api.com/free-ai-api",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://luciqa.com/blog/best-free-ai-apis-2026/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://saaspuppy.com/articles/free-ai-apis-for-developers",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://github.com/Shaivpidadi/FreeRideV3/blob/main/docs/providers/SURVEY.md",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://merginit.com/blog/16062026-free-ai-api-inference-comparison",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://github.com/cheahjs/free-llm-api-resources?tab=readme-ov-file",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://freellmapihub.com/guides/free-speech-to-text-apis",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "free_tiers",
+      "url": "https://dev.to/shiva_prasad_cc614c6ee026/free-llm-apis-for-coding-assistants-11me",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "search_platforms",
+      "url": "https://learn.microsoft.com/en-us/lifecycle/announcements/bing-search-api-retirement",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "search_platforms",
+      "url": "https://developers.google.com/youtube/v3/guides/quota_and_compliance_audits",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "search_platforms",
+      "url": "https://developers.google.com/youtube/data/determine_quota_cost",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "search_platforms",
+      "url": "https://developers.google.com/custom-search/v1/overview?hl=zh-tw",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "search_platforms",
+      "url": "https://developers.googleblog.com/from-prompt-to-app-build-with-google-maps-in-ai-studio/",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "search_platforms",
+      "url": "https://developers.google.com/custom-search/v1/overview?hl=ar",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "search_platforms",
+      "url": "https://developers.google.com/youtube/v3",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "search_platforms",
+      "url": "https://docs.cloud.google.com/apis/docs/capping-api-usage",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "search_platforms",
+      "url": "https://developers.google.com/youtube/v3/revision_history",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    },
+    {
+      "group": "search_platforms",
+      "url": "https://developers.google.com/youtube/2.0/deprecation_faq",
+      "verification": "documentation_to_review",
+      "auth_and_pricing": "not_independently_verified",
+      "inference_verified": false
+    }
+  ]
+}
