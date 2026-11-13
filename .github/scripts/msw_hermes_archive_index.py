@@ -68,12 +68,14 @@ def build(root: Path) -> dict:
     if not base.is_dir() or base.is_symlink():
         raise ValueError("knowledge_directory_missing_or_symlink")
     filepaths = sorted([p.relative_to(root) for p in base.iterdir()
-                        if p.is_file() and p.suffix in {".json", ".md"} and p.name != OUTPUT.name])
+                        if p.is_file() and p.suffix in {".json", ".md", ".jsonl"} and p.name != OUTPUT.name])
     codepaths = [Path(p) for p in (
         "msw-autonomous-engine/msw_engine/free_fallback_policy.py",
         "msw-autonomous-engine/tests/test_free_fallback_policy.py",
         "msw-autonomous-engine/wordpress/release_candidates/CapabilityTelemetry.php",
         "msw-autonomous-engine/wordpress/release_candidates/tests/capability_telemetry_test.php",
+        "msw-autonomous-engine/tools/msw_hermes_github_pull.py",
+        "msw-autonomous-engine/tests/test_msw_hermes_github_pull.py",
     ) if (root / p).is_file()]
     filepaths.extend(codepaths)
     if len(filepaths) > MAX_ENTRIES:
