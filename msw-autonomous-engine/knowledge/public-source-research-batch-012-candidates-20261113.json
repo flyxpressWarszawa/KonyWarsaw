@@ -1,0 +1,489 @@
+{
+  "schema": "msw.hermes.research-source-candidates.v1",
+  "batch_number": 12,
+  "source_count": 120,
+  "fetch_status": "NOT_YET_FETCHED",
+  "discovered_date_utc": "2026-11-13",
+  "sources": [
+    {
+      "group": "gsc_api",
+      "url": "https://developers.google.cn/webmaster-tools/v1/how-tos/search_analytics"
+    },
+    {
+      "group": "ga4_analytics",
+      "url": "https://developers.google.com/analytics/devguides/reporting/data/v1/quotas"
+    },
+    {
+      "group": "google_ads",
+      "url": "https://developers.google.com/google-ads/api/docs/oauth/overview"
+    },
+    {
+      "group": "bing_indexnow",
+      "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi?view=bing-webmaster-dotnet"
+    },
+    {
+      "group": "meta_insights",
+      "url": "https://developers.facebook.com/docs/development/create-an-app"
+    },
+    {
+      "group": "youtube_metrics",
+      "url": "https://developers.google.com/youtube/reporting"
+    },
+    {
+      "group": "crawl_seo",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/mobile/mobile-sites-mobile-first-indexing"
+    },
+    {
+      "group": "free_text_ai",
+      "url": "https://stablehorde.net/api/"
+    },
+    {
+      "group": "open_search_data",
+      "url": "https://github.com/edgi-govdata-archiving/wayback/issues/205"
+    },
+    {
+      "group": "local_runtime",
+      "url": "https://localai.io/docs/basics/getting_started/"
+    },
+    {
+      "group": "gsc_api",
+      "url": "https://support.google.com/webmasters/answer/17011259?hl=en"
+    },
+    {
+      "group": "ga4_analytics",
+      "url": "https://developers.google.com/analytics/blog/2023/data-api-quota-management"
+    },
+    {
+      "group": "google_ads",
+      "url": "https://developers.google.com/google-ads/api/docs/keyword-planning/overview"
+    },
+    {
+      "group": "bing_indexnow",
+      "url": "https://learn.microsoft.com/en-us/bingwebmaster/getting-access"
+    },
+    {
+      "group": "meta_insights",
+      "url": "https://developers.facebook.com/docs/graph-api/overview/access-levels/"
+    },
+    {
+      "group": "youtube_metrics",
+      "url": "https://developers.google.com/youtube/analytics/content_owner_reports"
+    },
+    {
+      "group": "crawl_seo",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls"
+    },
+    {
+      "group": "free_text_ai",
+      "url": "https://haidra-org.github.io/AI-Horde/haidra-assets/docs/definitions/"
+    },
+    {
+      "group": "open_search_data",
+      "url": "https://github.com/science-as-data/openalex/blob/main/api/api-reference.md"
+    },
+    {
+      "group": "local_runtime",
+      "url": "https://localai.io/docs/overview/"
+    },
+    {
+      "group": "gsc_api",
+      "url": "https://developers.google.com/webmaster-tools/v1/urlInspection.index/UrlInspectionResult"
+    },
+    {
+      "group": "ga4_analytics",
+      "url": "https://developers.google.com/analytics/devguides/reporting/data/v1/quickstart-client-libraries"
+    },
+    {
+      "group": "google_ads",
+      "url": "https://developers.google.com/google-ads/api/docs/get-started/make-first-call"
+    },
+    {
+      "group": "bing_indexnow",
+      "url": "https://learn.microsoft.com/en-us/bingwebmaster/api-protocols"
+    },
+    {
+      "group": "meta_insights",
+      "url": "https://developers.facebook.com/docs/development/release/access-verification/"
+    },
+    {
+      "group": "youtube_metrics",
+      "url": "https://developers.google.com/youtube/data/reference/rest"
+    },
+    {
+      "group": "crawl_seo",
+      "url": "https://developers.google.com/search/docs/fundamentals/seo-starter-guide"
+    },
+    {
+      "group": "free_text_ai",
+      "url": "https://haidra-org.github.io/AI-Horde/reference/chat_requests/"
+    },
+    {
+      "group": "open_search_data",
+      "url": "https://ub-unibe-ch.github.io/ds-pytools/tdm-ai/en.html"
+    },
+    {
+      "group": "local_runtime",
+      "url": "https://localai.io/docs/faq/"
+    },
+    {
+      "group": "gsc_api",
+      "url": "https://developers.google.com/search/blog/2022/10/performance-data-deep-dive"
+    },
+    {
+      "group": "ga4_analytics",
+      "url": "https://developers.google.com/analytics/devguides/reporting/data/v1/errors"
+    },
+    {
+      "group": "google_ads",
+      "url": "https://developers.google.com/google-ads/api/samples"
+    },
+    {
+      "group": "bing_indexnow",
+      "url": "https://www2.bing.com/webmasters/help/URL-Submission-62f2860b"
+    },
+    {
+      "group": "meta_insights",
+      "url": "https://developers.facebook.com/docs/graph-api/reference/page/"
+    },
+    {
+      "group": "youtube_metrics",
+      "url": "https://developers.google.com/youtube/analytics/sample-requests"
+    },
+    {
+      "group": "crawl_seo",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/canonicalization"
+    },
+    {
+      "group": "free_text_ai",
+      "url": "https://aihorde.net/details/models/text/"
+    },
+    {
+      "group": "open_search_data",
+      "url": "https://www.crossref.org/blog/announcing-changes-to-rest-api-rate-limits/"
+    },
+    {
+      "group": "local_runtime",
+      "url": "https://github.com/mudler/LocalAI/releases/tag/v4.2.0"
+    },
+    {
+      "group": "gsc_api",
+      "url": "https://support.google.com/webmasters/answer/12919192?hl=en"
+    },
+    {
+      "group": "ga4_analytics",
+      "url": "https://developers.google.com/analytics/devguides/reporting/data/v1/rest/v1alpha/PropertyQuota"
+    },
+    {
+      "group": "google_ads",
+      "url": "https://developers.google.cn/google-ads/api/docs/reporting/example"
+    },
+    {
+      "group": "bing_indexnow",
+      "url": "https://learn.microsoft.com/en-us/bingwebmaster/getting-started"
+    },
+    {
+      "group": "meta_insights",
+      "url": "https://www.postman.com/meta/instagram/folder/23987686-f659d7d1-d74c-44e4-9192-9b1e8694c511"
+    },
+    {
+      "group": "youtube_metrics",
+      "url": "https://developers.google.cn/youtube/data/revision_history?hl=zh-tw"
+    },
+    {
+      "group": "crawl_seo",
+      "url": "https://developers.google.cn/search/docs/crawling-indexing/sitemaps/build-sitemap"
+    },
+    {
+      "group": "free_text_ai",
+      "url": "https://horde-sdk.readthedocs.io/en/stable/reference/api/horde_sdk/ai_horde_api/endpoints/"
+    },
+    {
+      "group": "open_search_data",
+      "url": "https://github.com/rpatrik96/bibtexupdater/blob/main/docs/LANDSCAPE.md"
+    },
+    {
+      "group": "local_runtime",
+      "url": "https://docs.docker.com/ai/model-runner"
+    },
+    {
+      "group": "gsc_api",
+      "url": "https://googleapis.github.io/google-api-python-client/docs/dyn/searchconsole_v1.searchanalytics.html"
+    },
+    {
+      "group": "ga4_analytics",
+      "url": "https://developers.google.com/analytics/devguides/reporting/data/v1/rest"
+    },
+    {
+      "group": "google_ads",
+      "url": "https://developers.google.com/google-ads/api/rest/examples"
+    },
+    {
+      "group": "bing_indexnow",
+      "url": "https://blogs.bing.com/webmaster/2019/11/Accessing-Bing-webmaster-tools-api-using-cURL/"
+    },
+    {
+      "group": "meta_insights",
+      "url": "https://bollardai.com/resources/metagraph"
+    },
+    {
+      "group": "youtube_metrics",
+      "url": "https://developers.google.com/youtube/reporting/v1/reports/content_owner_reports"
+    },
+    {
+      "group": "crawl_seo",
+      "url": "https://developers.google.cn/search/docs/fundamentals/get-started"
+    },
+    {
+      "group": "free_text_ai",
+      "url": "https://haidra-org.github.io/AI-Horde/reference/"
+    },
+    {
+      "group": "open_search_data",
+      "url": "https://wiki.openstreetmap.org/wiki/Sophox"
+    },
+    {
+      "group": "local_runtime",
+      "url": "https://github.com/mudler/LocalAI/blob/master/README.md"
+    },
+    {
+      "group": "gsc_api",
+      "url": "https://support.google.com/webmasters/answer/96568?hl=en"
+    },
+    {
+      "group": "ga4_analytics",
+      "url": "https://developers.google.com/analytics/devguides/reporting/metadata/v3/devguide"
+    },
+    {
+      "group": "google_ads",
+      "url": "https://developers.google.com/google-ads/api/docs/reporting/uireports"
+    },
+    {
+      "group": "bing_indexnow",
+      "url": "https://gscmagic.com/blog/bing-webmaster-tools-api-data"
+    },
+    {
+      "group": "meta_insights",
+      "url": "https://developers.facebook.com/documentation/instagram-platform/webhooks"
+    },
+    {
+      "group": "youtube_metrics",
+      "url": "https://developers.google.com/youtube/v3/code_samples/python_appengine"
+    },
+    {
+      "group": "crawl_seo",
+      "url": "https://developers.google.com/search/help/office-hours/2023/august"
+    },
+    {
+      "group": "free_text_ai",
+      "url": "https://horde-sdk.readthedocs.io/en/stable/how-to/generate-text/"
+    },
+    {
+      "group": "open_search_data",
+      "url": "https://raw.githubusercontent.com/api-evangelist/overpass-api/refs/heads/main/apis.yml"
+    },
+    {
+      "group": "local_runtime",
+      "url": "https://llamay.com/docs/"
+    },
+    {
+      "group": "gsc_api",
+      "url": "https://support.google.com/webmasters/answer/12917174?hl=en"
+    },
+    {
+      "group": "ga4_analytics",
+      "url": "https://developers.google.com/analytics/devguides/reporting/data/v1/advanced?hl=ko"
+    },
+    {
+      "group": "google_ads",
+      "url": "https://developers.google.com/google-ads/api/docs/oauth/multi-user-authentication"
+    },
+    {
+      "group": "bing_indexnow",
+      "url": "https://blogs.bing.com/webmaster/2021/5/Easy-set-up-guide-for-Bing%E2%80%99s-Content-Submission-API-(Beta)/"
+    },
+    {
+      "group": "meta_insights",
+      "url": "https://developers.facebook.com/documentation/instagram-platform/instagram-api-with-facebook-login/creator-marketplace"
+    },
+    {
+      "group": "youtube_metrics",
+      "url": "https://developers.google.com/youtube/apis"
+    },
+    {
+      "group": "crawl_seo",
+      "url": "https://developers.google.com/search/docs/fundamentals/how-search-works"
+    },
+    {
+      "group": "free_text_ai",
+      "url": "https://github.com/Haidra-org/AI-Horde"
+    },
+    {
+      "group": "open_search_data",
+      "url": "https://moltchat-agent-commons.onrender.com/wiki/Free_APIs_without_keys.md"
+    },
+    {
+      "group": "local_runtime",
+      "url": "https://github.com/av/harbor/blob/main/docs/2.-Services.md"
+    },
+    {
+      "group": "gsc_api",
+      "url": "https://keylogs.io/blog/google-search-console-api"
+    },
+    {
+      "group": "ga4_analytics",
+      "url": "https://docs.cloud.google.com/nodejs/docs/reference/data/latest"
+    },
+    {
+      "group": "google_ads",
+      "url": "https://developers.google.com/google-ads/api/fields/v22/overview"
+    },
+    {
+      "group": "bing_indexnow",
+      "url": "https://semoptimiser.com/docs/getting-started/connecting-bing-webmaster-tools"
+    },
+    {
+      "group": "meta_insights",
+      "url": "https://developers.facebook.com/documentation/business-messaging/messenger-platform/overview"
+    },
+    {
+      "group": "youtube_metrics",
+      "url": "https://outlierkit.com/resources/youtube-api-quota/"
+    },
+    {
+      "group": "crawl_seo",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/url-structure"
+    },
+    {
+      "group": "free_text_ai",
+      "url": "https://horde-model-reference.readthedocs.io/en/latest/reference/http_api/v2_endpoints/"
+    },
+    {
+      "group": "open_search_data",
+      "url": "https://support.crossref.org/hc/en-us/articles/215750203-Researcher-FAQ"
+    },
+    {
+      "group": "local_runtime",
+      "url": "https://d-central.tech/local-ai-runtime-comparison/"
+    },
+    {
+      "group": "gsc_api",
+      "url": "https://searchconsole.ai/knowledge-base/api-quota-reference"
+    },
+    {
+      "group": "ga4_analytics",
+      "url": "https://docs.cloud.google.com/data-studio/connect-to-google-analytics"
+    },
+    {
+      "group": "google_ads",
+      "url": "https://developers.google.com/google-ads/api/docs/query/cookbook"
+    },
+    {
+      "group": "bing_indexnow",
+      "url": "https://www.broworks.net/resources/bing-webmaster-tools-api-automate-webflow-url-indexing"
+    },
+    {
+      "group": "meta_insights",
+      "url": "https://developers.facebook.com/docs/graph-api/reference/adaccount/insights/"
+    },
+    {
+      "group": "youtube_metrics",
+      "url": "https://casrai.org/guides/youtube-data-api"
+    },
+    {
+      "group": "crawl_seo",
+      "url": "https://developers.google.com/crawling/docs/myths-about-crawling"
+    },
+    {
+      "group": "free_text_ai",
+      "url": "https://aihorde.net/profile/"
+    },
+    {
+      "group": "open_search_data",
+      "url": "https://github.com/derekurban/forage/blob/507dcb28d7b2db033829e009ce633abb7cb1acaa/deep_research_free_tier_apis.md"
+    },
+    {
+      "group": "local_runtime",
+      "url": "https://quox.ai/docs/plugins/local-inference"
+    },
+    {
+      "group": "gsc_api",
+      "url": "https://cdn.jsdelivr.net/npm/@googleapis/searchconsole@6.0.1/v1.ts"
+    },
+    {
+      "group": "ga4_analytics",
+      "url": "https://cdn.jsdelivr.net/npm/googleapis@149.0.0/build/src/apis/analyticsdata/v1beta.d.ts"
+    },
+    {
+      "group": "google_ads",
+      "url": "https://developers.google.com/google-ads/api/docs/get-started/common-errors"
+    },
+    {
+      "group": "bing_indexnow",
+      "url": "https://dev.wix.com/docs/api-reference/business-management/seo/bing-webmaster-tools/introduction"
+    },
+    {
+      "group": "meta_insights",
+      "url": "https://developers.facebook.com/docs/graph-api/changelog/version3.3/"
+    },
+    {
+      "group": "youtube_metrics",
+      "url": "https://jdwit.github.io/ytstudio-cli/api-quota/"
+    },
+    {
+      "group": "crawl_seo",
+      "url": "https://support.google.com/webmasters/answer/10351509?hl=en"
+    },
+    {
+      "group": "free_text_ai",
+      "url": "https://horde-sdk.readthedocs.io/en/latest/reference/api/horde_sdk/"
+    },
+    {
+      "group": "open_search_data",
+      "url": "https://doi.org/10.26660/rrbsi.2022.19.1.03"
+    },
+    {
+      "group": "local_runtime",
+      "url": "https://github.com/tdi/awesome-private-ai"
+    },
+    {
+      "group": "gsc_api",
+      "url": "https://www.gscmcpserver.com/blog/google-search-console-api-guide"
+    },
+    {
+      "group": "ga4_analytics",
+      "url": "https://github.com/zapier/connectors/blob/main/apps/google-analytics/references/google-analytics-api-gotchas.md"
+    },
+    {
+      "group": "google_ads",
+      "url": "https://developers.google.com/google-ads/api/docs/get-started/introduction?hl=zh-cn"
+    },
+    {
+      "group": "bing_indexnow",
+      "url": "https://seohandbook.co.uk/technical-seo/bing-webmaster-tools/"
+    },
+    {
+      "group": "meta_insights",
+      "url": "https://www.tryadeli.com/blog/instagram-api-get-posts"
+    },
+    {
+      "group": "youtube_metrics",
+      "url": "https://growati.com/blogs/youtube-api-quota-guide"
+    },
+    {
+      "group": "crawl_seo",
+      "url": "https://developers.google.com/search/docs/crawling-indexing/canonicalization-troubleshooting"
+    },
+    {
+      "group": "free_text_ai",
+      "url": "https://aihorde.net/details/users/"
+    },
+    {
+      "group": "open_search_data",
+      "url": "https://raw.githubusercontent.com/K-Dense-AI/scientific-agent-skills/HEAD/skills/citation-management/references/api_contracts.md"
+    },
+    {
+      "group": "local_runtime",
+      "url": "https://github.com/tdi/awesome-private-ai/blob/main/README.md"
+    }
+  ]
+}
