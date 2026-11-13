@@ -138,7 +138,7 @@
     }
   ],
   "ack_contract": {
-    "github_file_readback_verified": false,
+    "github_file_readback_verified": true,
     "hermes_received_verified": false,
     "hermes_persisted_verified": false,
     "hermes_effect_ack_verified": false,
@@ -174,5 +174,19 @@
     "independent_knowledge_ingest_ack_verified": false,
     "authoritative_for_satelites": "live_combo_only",
     "not_a_new_scheduled_job": true
+  },
+  "github_readback": {
+    "verified": true,
+    "scope": "six-public-safe-documents+existing-manifest",
+    "blobs": {
+      "README.md": "7c41804ca24e606a76f7415cfb108293ad73c9a4",
+      "chronologia.md": "e7a61381b8c7231acfa1ac90498f8192570e2e1a",
+      "poczatki-2026-09-10.md": "ab2e126bee87c6d7b1d3afa9a06fd51cc46d2814",
+      "system-i-status.md": "1f6f44fc300c87802f9568f4e38a3d4ccfb31a0b",
+      "digital-apps.md": "3f8e69584ee80e1af7a971c6e4fce8267ffdf630",
+      "provenance.md": "0a77cb9069fc830a173722a0ff5a95a5e4633ae0"
+    },
+    "manifest_pre_update_blob": "6295821bc9a64d0472b2708768aefa9ff3cf9f7c",
+    "disclaimer": "Only GitHub readback verified, not Hermes readback or knowledge.ingest"
   }
 }
