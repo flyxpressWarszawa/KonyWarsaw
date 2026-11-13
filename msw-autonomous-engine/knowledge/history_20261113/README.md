@@ -4,11 +4,11 @@
 
 ## Czytaj w tej kolejności
 
-1. [Chronologia publikacji, projektów i decyzji](./chronologia.md) — historia możliwa do odtworzenia z dostępnych materiałów i checkpointów.
-2. [Mapa systemu i granice potwierdzeń](./system-i-status.md) — COMBO, Hermes, WordPress, Render, cPanel, kolejki, AI, bezpieczeństwo i koszt.
-3. [MSW Digital Apps i publikacje](./digital-apps.md) — trzy aplikacje, numery publicznych stron/produktów, aktualne testy QA i warunki sprzedaży.
-4. [Przekazanie Hermesowi: manifest maszynowy](./hermes-handoff.json) — stabilny identyfikator, źródła prywatne, następny odczyt i wymagane ACK.
-5. [Pochodzenie i kompletność materiałów](./provenance.md) — zakres dostępnych archiwów, braki i zasady importu prywatnej historii.
+1. [Pierwsze odzyskane publikacje i źródła z września–października](./poczatki-2026-09-10.md) — datowane relacje o witrynach Sites i ośmiu stronach WP, z zastrzeżeniami dowodowymi.\n2. [Chronologia publikacji, projektów i decyzji](./chronologia.md) — historia możliwa do odtworzenia z dostępnych materiałów i checkpointów.
+3. [Mapa systemu i granice potwierdzeń](./system-i-status.md) — COMBO, Hermes, WordPress, Render, cPanel, kolejki, AI, bezpieczeństwo i koszt.
+4. [MSW Digital Apps i publikacje](./digital-apps.md) — trzy aplikacje, numery publicznych stron/produktów, aktualne testy QA i warunki sprzedaży.
+5. [Przekazanie Hermesowi: manifest maszynowy](./hermes-handoff.json) — stabilny identyfikator, źródła prywatne, następny odczyt i wymagane ACK.
+6. [Pochodzenie i kompletność materiałów](./provenance.md) — zakres dostępnych archiwów, braki i zasady importu prywatnej historii.
 
 - [Początki projektu (wrzesień–październik 2026)](./poczatki-2026-09-10.md) — wcześniejsze ślady ZIP i rozwój portali z rozróżnieniem projektów od rzeczywistych publikacji.
 
