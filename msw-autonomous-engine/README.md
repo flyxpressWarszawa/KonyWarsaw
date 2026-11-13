@@ -24,7 +24,7 @@ The auxiliary Render node can consume `seo.analyze` and `research.rank` with
 `MSW_RUNTIME_MODE=render-free` and `MSW_AUTONOMOUS_AGENT=0`. Register only these
 two kinds on its existing WordPress queue identity. It uses the signed queue
 and a persistent `MSW_DATA_DIR` for receipts and any business ranking evidence.
-One legacy single claim is made per five-minute cycle. A fresh account CPU
+The queue is polled at most once per hour, with exponential failure backoff up to 24 hours. The origin-pressure gate may request one additional fresh health sample 25–60 seconds later before claiming work. A fresh account CPU
 reading of at least 70% permits one remote computation while physical memory
 is below 70%; stale telemetry or memory pressure blocks new claims. A completed
 job requires a verified server acknowledgement. This does not migrate native

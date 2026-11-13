@@ -29,12 +29,12 @@ from .runner import Worker, WorkerDraining
 
 CAPABILITY = "seo.analyze"
 CAPABILITIES = ("seo.analyze", "research.rank")
-POLL_SECONDS = 300
+POLL_SECONDS = 3600
 WARMUP_POLL_SECONDS = 60
 LOW_SAMPLE_RECHECK_SECONDS = 25
 MAX_JOBS_PER_CYCLE = 4
 MAX_RECEIPT_REPLAYS_PER_CYCLE = 1
-MAX_RETRY_SECONDS = 3600
+MAX_RETRY_SECONDS = 24 * 60 * 60
 MAX_SERVER_WAIT_SECONDS = 7 * 24 * 60 * 60
 
 
@@ -180,9 +180,8 @@ def emit(state: str, **details) -> None:
 
 
 def retry_delay(failures: int, retry_after: int = 0) -> int:
-    # One failed call causes at least five minutes of silence; repeated
-    # failures exponentially increase the delay. A longer valid server wait
-    # takes precedence over the locally calculated ceiling.
+    # One failed call causes at least one hour of silence; repeated failures
+    # exponentially back off to one day. A longer server wait takes precedence.
     return max(retry_after, min(MAX_RETRY_SECONDS, POLL_SECONDS * 2 ** min(max(failures - 1, 0), 4)))
 
 

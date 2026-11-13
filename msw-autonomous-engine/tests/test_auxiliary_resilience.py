@@ -181,11 +181,11 @@ class AuxiliaryResilienceTests(unittest.TestCase):
         event = StopAfterCycle()
         calls, _ = self.run_main(event, error=TransportError("outage", 503))
         self.assertEqual(calls, 1)
-        self.assertEqual(event.waits, [300, 1200])
-        self.assertEqual(self.backoff().read(), (3, 1200))
+        self.assertEqual(event.waits, [3600, 3600])
+        self.assertEqual(self.backoff().read(), (3, 3600))
         self.clock[0] += 1800
         self.run_main(StopAfterCycle(), result="idle")
-        self.assertEqual(self.backoff().read(), (0, 300))
+        self.assertEqual(self.backoff().read(), (0, 3600))
 
     def test_success_never_shortens_an_unexpired_server_deadline(self):
         self.backoff().save(3, 7200)
@@ -227,7 +227,7 @@ class AuxiliaryResilienceTests(unittest.TestCase):
         with patch.object(auxiliary.AuxiliaryBackoff, "save", side_effect=OSError("test full disk")):
             calls, emitted = self.run_main(event)
         self.assertEqual(calls, 1)
-        self.assertEqual(event.waits, [300, None])
+        self.assertEqual(event.waits, [3600, None])
         self.assertTrue(any(call.args[0] == "backoff_storage_blocked" for call in emitted))
 
     def test_checkpoint_contains_only_timing_metadata_and_is_private(self):
