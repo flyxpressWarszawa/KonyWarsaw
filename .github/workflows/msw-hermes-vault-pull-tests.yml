@@ -43,6 +43,21 @@ jobs:
           python3 -m py_compile tools/msw_hermes_github_pull.py
           python3 -m unittest discover -s tests -p test_msw_hermes_github_pull.py -v
 
+      - name: Download the full public vault and verify GitHub SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 "$RUNNER_TEMP/msw-vault-test/msw-autonomous-engine/tools/msw_hermes_github_pull.py" \
+            --dest "$RUNNER_TEMP/msw-hermes-public-download"
+
+      - name: Publish public archive as downloadable verified artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: msw-hermes-public-archive-${{ github.run_id }}
+          path: ${{ runner.temp }}/msw-hermes-public-download/
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Verify the machine-readable index is available
         shell: bash
         run: |
