@@ -105,6 +105,11 @@ class Store:
             raise MirrorError("archive_state")
         with self.connect() as db:
             value = db.execute("SELECT snapshot_until,cursor_time,cursor_id,finished FROM cursors WHERE state=?", (state,)).fetchone()
+        if value and value[3] and int(now) >= value[0] + 3600:
+            # Next snapshot starts at the previous high-water mark. The one-
+            # second overlap covers jobs at the same UNIX timestamp; IDs are
+            # deduplicated in the encrypted ledger and private GitHub archive.
+            return {"snapshot_until": int(now), "cursor_created_at": max(0, value[0] - 1), "cursor_id": "", "finished": False}
         return {"snapshot_until": value[0], "cursor_created_at": value[1], "cursor_id": value[2], "finished": bool(value[3])} if value else {"snapshot_until": int(now), "cursor_created_at": 0, "cursor_id": "", "finished": False}
 
     def save_page(self, state: str, page: dict, cursor: dict, now: int):
