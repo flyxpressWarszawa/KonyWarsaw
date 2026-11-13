@@ -338,6 +338,16 @@ class Worker:
         if not once and "llm.generate" in handlers():
             from .priority_lane import PriorityLane
             self.track(PriorityLane(self.client, self.journal.data_dir).start(self.lane_stopping, lambda: self.stopping))
+        # Opt-in private GitHub backup of signed queue records. Archives only:
+        # WordPress remains the sole source of truth for execution and ACK.
+        if (not once and os.environ.get("MSW_HERMES_QUEUE_MIRROR", "0") == "1"
+                and getattr(self.client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"):
+            try:
+                from .hermes_queue_mirror import MirrorLane
+                self.track(MirrorLane(self.journal.data_dir).start(self.lane_stopping))
+            except (RuntimeError, ValueError, OSError, sqlite3.Error) as error:
+                print(json.dumps({"hermes_queue_archive": {"state": "startup_blocked",
+                    "error_class": type(error).__name__}}), flush=True)
         if not once and os.environ.get("MSW_FOTOATLAS_ENABLED") == "1":
             from .fotoatlas_render_bridge import AtlasClient, FotoAtlas
             self.track(FotoAtlas(AtlasClient(self.client), self.journal.data_dir).start(self.lane_stopping))
