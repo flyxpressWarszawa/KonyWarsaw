@@ -1,0 +1,33 @@
+{
+  "schema": "msw.api20k.free-noauth-manifest.v1",
+  "date_utc": "2026-11-13",
+  "distinct_document_urls_claiming_no_key": 1575,
+  "official_directory_claims_free_and_no_auth": 764,
+  "conflicting_auth_claims": 7,
+  "independently_confirmed_free_noauth": 0,
+  "enabled_on_hermes": 0,
+  "shards": [
+    {
+      "path": "msw-autonomous-engine/knowledge/api20k/FREE-NOAUTH-CLAIMS-001.json",
+      "count": 500
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/api20k/FREE-NOAUTH-CLAIMS-002.json",
+      "count": 500
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/api20k/FREE-NOAUTH-CLAIMS-003.json",
+      "count": 500
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/api20k/FREE-NOAUTH-CLAIMS-004.json",
+      "count": 75
+    }
+  ],
+  "sources": [
+    "https://apidirectory.dev/apis.json",
+    "https://github.com/public-apis/public-apis",
+    "https://github.com/marcelscruz/public-apis"
+  ],
+  "instructions": "Do not activate or infer free cost from directory labels. Vendor license, pricing, auth and live inference remain to be independently validated."
+}
