@@ -115,9 +115,9 @@ class AuxiliaryTest(unittest.TestCase):
             step(client, worker, lambda: True, gate=self.gate)
         self.assertEqual(client.calls, [])
 
-    def test_backoff_is_at_least_five_minutes_and_increases(self):
-        self.assertEqual([retry_delay(i) for i in (1, 2, 3, 4, 8)], [300, 600, 1200, 2400, 3600])
-        self.assertEqual(retry_delay(1, 900), 900)
+    def test_backoff_starts_hourly_and_grows_to_one_day(self):
+        self.assertEqual([retry_delay(i) for i in (1, 2, 3, 4, 8)], [3600, 7200, 14400, 28800, 86400])
+        self.assertEqual(retry_delay(1, 900), 3600)
         self.assertEqual(retry_delay(1, 7200), 7200)
 
     def test_retry_after_supports_seconds_and_http_dates(self):
@@ -192,7 +192,7 @@ class AuxiliaryTest(unittest.TestCase):
              patch.object(render_auxiliary, "emit"), \
              patch.object(render_auxiliary, "run_cycle", side_effect=TransportError("server_rejected_request", 503)) as run:
             self.assertEqual(render_auxiliary.main(), 0)
-        self.assertEqual(event.waits, [300, 300])
+        self.assertEqual(event.waits, [3600, 3600])
         self.assertEqual(run.call_count, 1)
 
     def test_stop_during_quiet_start_does_not_contact_queue(self):
@@ -234,7 +234,7 @@ class AuxiliaryTest(unittest.TestCase):
              patch.object(render_auxiliary, "emit"), \
              patch.object(render_auxiliary, "run_cycle", side_effect=TransportError("rejected", 401)) as run:
             self.assertEqual(render_auxiliary.main(), 0)
-        self.assertEqual(event.waits, [300, None])
+        self.assertEqual(event.waits, [3600, None])
         self.assertEqual(run.call_count, 1)
 
 
