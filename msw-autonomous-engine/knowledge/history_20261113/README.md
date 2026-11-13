@@ -8,7 +8,8 @@
 3. [Mapa systemu i granice potwierdzeń](./system-i-status.md) — COMBO, Hermes, WordPress, Render, cPanel, kolejki, AI, bezpieczeństwo i koszt.
 4. [MSW Digital Apps i publikacje](./digital-apps.md) — trzy aplikacje, numery publicznych stron/produktów, aktualne testy QA i warunki sprzedaży.
 5. [Przekazanie Hermesowi: manifest maszynowy](./hermes-handoff.json) — stabilny identyfikator, źródła prywatne, następny odczyt i wymagane ACK.
-6. [Pochodzenie i kompletność materiałów](./provenance.md) — zakres dostępnych archiwów, braki i zasady importu prywatnej historii.
+6. [Pochodzenie i kompletność materiałów]
+7. [Świeży odczyt COMBO i stanu mostu Hermesa](./readback-20261113.md) — punktowy stan kolejki i brak końcowego ACK.(./provenance.md) — zakres dostępnych archiwów, braki i zasady importu prywatnej historii.
 
 - [Początki projektu (wrzesień–październik 2026)](./poczatki-2026-09-10.md) — wcześniejsze ślady ZIP i rozwój portali z rozróżnieniem projektów od rzeczywistych publikacji.
 
