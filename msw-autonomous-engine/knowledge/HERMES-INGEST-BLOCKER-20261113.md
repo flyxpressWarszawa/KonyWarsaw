@@ -17,3 +17,9 @@ Data kontroli: 2026-11-13. Ten dokument jest **zapisanym zadaniem inżynierskim*
 5. Dopiero po GO rozliczyć wcześniejsze joby i przekazywać wyniki badań w kolejnych 100-elementowych partiach, z licznikami realnie zapisanych pozycji.
 
 Nie tworzyć nowego crona, płatnej infrastruktury ani nowych kont. Nie ujawniać sekretów do publicznego AI ani GitHub. `failed` może wymagać diagnostyki pierwotnej przyczyny przed powtórką. Do czasu GO paczki pozostają source-only w GitHub.
+
+## Test wejścia do kolejki — 2026-11-13
+- W świeżej odpowiedzi WordPress worker `msw-render-central-1` ponownie ogłosił `knowledge.ingest`, mimo wcześniejszego braku w rejestrze; możliwe przejściowe/naprzemienne ogłaszanie zdolności, nie potwierdzona stabilna naprawa.
+- Jedna (1) paczka próbna została zapisana przez uwierzytelniony `POST /msw-unified-engine/v1/remote/jobs`: `job_id=91557273-dea0-3531-a128-ef769d52b11d`, `payload_sha256=ccdabd2cc751257eda00a034ec9c9f4b35b8decdb4f16965c4f92004f8146b35`.
+- Kolejny odczyt z tabeli: `kind=knowledge.ingest`, `state=running`, `attempts=1`, `applied=0`, pusty `result_sha256`. Brak trwałego potwierdzenia wykonania. Render COMBO heartbeat pokazał `ack_pending`.
+- Nie uruchomiono masowej retransmisji dokumentów, ponieważ `completed + SHA + readback` nie zostały potwierdzone.
