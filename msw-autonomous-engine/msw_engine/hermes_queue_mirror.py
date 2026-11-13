@@ -89,6 +89,7 @@ class Store:
         with self.connect() as db:
             db.execute("CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY,kind TEXT NOT NULL,state TEXT NOT NULL,payload_sha256 TEXT NOT NULL,job_key TEXT NOT NULL,created_at INTEGER NOT NULL,updated_at INTEGER NOT NULL,nonce BLOB NOT NULL,ciphertext BLOB NOT NULL,observed_at INTEGER NOT NULL)")
             db.execute("CREATE TABLE IF NOT EXISTS cursors (state TEXT PRIMARY KEY,snapshot_until INTEGER NOT NULL,cursor_time INTEGER NOT NULL,cursor_id TEXT NOT NULL,finished INTEGER NOT NULL)")
+            db.execute("CREATE TABLE IF NOT EXISTS outbox (state TEXT PRIMARY KEY, envelope_json TEXT NOT NULL)")
         os.chmod(self.path, 0o600)
 
     def connect(self):
@@ -111,6 +112,16 @@ class Store:
             # deduplicated in the encrypted ledger and private GitHub archive.
             return {"snapshot_until": int(now), "cursor_created_at": max(0, value[0] - 1), "cursor_id": "", "finished": False}
         return {"snapshot_until": value[0], "cursor_created_at": value[1], "cursor_id": value[2], "finished": bool(value[3])} if value else {"snapshot_until": int(now), "cursor_created_at": 0, "cursor_id": "", "finished": False}
+
+    def pending_page(self, state):
+        with self.connect() as db:
+            row = db.execute("SELECT envelope_json FROM outbox WHERE state=?", (state,)).fetchone()
+        if row is None:
+            return None
+        envelope = json.loads(row[0])
+        if not isinstance(envelope, dict) or envelope.get("state") != state or not isinstance(envelope.get("sealed"), list):
+            raise MirrorError("archive_outbox_integrity")
+        return envelope
 
     def save_page(self, state: str, page: dict, cursor: dict, now: int):
         if state not in STATES or not isinstance(page, dict) or page.get("schema") != SCHEMA:
@@ -149,8 +160,15 @@ class Store:
         expected = {"created_at": previous[0], "id": previous[1]}
         if not isinstance(declared, dict) or declared != expected or (not rows and not page["finished"]):
             raise MirrorError("archive_page_cursor")
-        # Local durable write is idempotent, and verifies decrypted payload for every row.
+        # Local durable write and the sealed GitHub outbox form one transaction.
+        # Do not fetch a changed origin page after an uncertain remote upload.
+        envelope = {"state":state,"snapshot_until":page["snapshot_until"],
+                    "next_cursor":page["next_cursor"],"finished":page["finished"],
+                    "sealed":sealed}
         with self.connect() as db:
+            old_page=db.execute("SELECT envelope_json FROM outbox WHERE state=?", (state,)).fetchone()
+            if old_page is not None and json.loads(old_page[0]) != envelope:
+                raise MirrorError("archive_outbox_pending_conflict")
             for rec, wire in zip(rows, sealed):
                 old = db.execute("SELECT kind,payload_sha256,nonce,ciphertext FROM jobs WHERE id=?", (rec["id"],)).fetchone()
                 if old:
@@ -160,6 +178,8 @@ class Store:
                         raise MirrorError("archive_existing_readback")
                 else:
                     db.execute("INSERT INTO jobs VALUES(?,?,?,?,?,?,?,?,?,?)", (rec["id"], rec["kind"], state, rec["payload_sha256"], rec["job_key"], rec["created_at"], rec["updated_at"], base64.b64decode(wire["nonce_b64"]), base64.b64decode(wire["ciphertext_b64"]), int(now)))
+            if old_page is None:
+                db.execute("INSERT INTO outbox VALUES(?,?)", (state, json.dumps(envelope, ensure_ascii=False, separators=(',',':'))))
         return sealed
 
     def commit_cursor(self, state: str, page: dict, now: int):
@@ -167,6 +187,7 @@ class Store:
         next_cursor = page["next_cursor"]
         with self.connect() as db:
             db.execute("INSERT INTO cursors VALUES(?,?,?,?,?) ON CONFLICT(state) DO UPDATE SET snapshot_until=excluded.snapshot_until,cursor_time=excluded.cursor_time,cursor_id=excluded.cursor_id,finished=excluded.finished", (state, page["snapshot_until"], next_cursor["created_at"], next_cursor["id"], int(page["finished"])))
+            db.execute("DELETE FROM outbox WHERE state=?", (state,))
         return self.cursor(state, now)
 
     def summary(self):
@@ -285,8 +306,16 @@ class Mirror:
         cursor=self.store.cursor(state, now)
         if cursor["finished"]:
             return {"state":"snapshot_complete", "mirror":self.store.summary()}
-        page=self.reader.fetch(state,cursor)
-        sealed=self.store.save_page(state,page,cursor,now)
+        waiting=self.store.pending_page(state)
+        if waiting is None:
+            page=self.reader.fetch(state,cursor)
+            sealed=self.store.save_page(state,page,cursor,now)
+        else:
+            page={"schema":SCHEMA,"state":waiting["state"],
+                  "snapshot_until":waiting["snapshot_until"],
+                  "next_cursor":waiting["next_cursor"],
+                  "finished":waiting["finished"]}
+            sealed=waiting["sealed"]
         remote=None
         if sealed:
             remote=self.vault.put_page(state,page,sealed)
