@@ -138,7 +138,7 @@
     }
   ],
   "ack_contract": {
-    "github_file_readback_verified": true,
+    "github_file_readback_verified": false,
     "hermes_received_verified": false,
     "hermes_persisted_verified": false,
     "hermes_effect_ack_verified": false,
@@ -152,5 +152,27 @@
     "no_hmac_material": true,
     "no_unverified_model_weight_training_claims": true
   },
-  "status": "GITHUB_BRANCH_WRITTEN_HERMES_ACK_NOT_VERIFIED"
+  "status": "GITHUB_BRANCH_WRITTEN_PRIVATE_CHECKPOINT_READY_HERMES_ACK_NOT_VERIFIED",
+  "private_checkpoint": {
+    "name": "MSW-HERMES-HISTORIA-GITHUB-PRYWATNY-CHECKPOINT-20261113.zip",
+    "location_class": "owner_private_file_library",
+    "sha256": "aca136f9ae272faf2e07a48b58c009bb5a0134bd75b0659d4c9c220afd047186",
+    "zip_integrity_verified": true,
+    "independent_library_readback_verified": true,
+    "is_complete_chatgpt_export": false,
+    "public_github_upload_allowed": false,
+    "hermes_readback_verified": false,
+    "source_note": "Częściowy historyczny podręcznik, dowody i manifest; pobranie wymaga osobnego autoryzowanego dostępu do prywatnej biblioteki właściciela"
+  },
+  "latest_read_only_status_observation": {
+    "observed_date": "2026-11-13",
+    "combo_reported_satellites": 41,
+    "combo_source": "authenticated_msw_direct_combo_connections_status",
+    "hermes_pending_receipts_observed": 152,
+    "hermes_plugin_catalog_sync": "pending",
+    "hermes_sync_digest_verified": false,
+    "independent_knowledge_ingest_ack_verified": false,
+    "authoritative_for_satelites": "live_combo_only",
+    "not_a_new_scheduled_job": true
+  }
 }
