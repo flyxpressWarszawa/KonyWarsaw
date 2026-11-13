@@ -7,9 +7,9 @@ Stan: **repozytorium publiczne / gałąź robocza / bez automatycznego importu p
 Manifest: `msw-autonomous-engine/knowledge/HERMES-GITHUB-SOURCE-MANIFEST.json`
 
 Adres do bezpośredniego odczytu:
-https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-free-ai-candidate-20261113/msw-autonomous-engine/knowledge/HERMES-GITHUB-SOURCE-MANIFEST.json
+https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-knowledge-vault/msw-autonomous-engine/knowledge/HERMES-GITHUB-SOURCE-MANIFEST.json
 
-Repozytorium: `flyxpressWarszawa/KonyWarsaw`; gałąź: `msw/hermes-free-ai-candidate-20261113`.
+Repozytorium: `flyxpressWarszawa/KonyWarsaw`; gałąź: `msw/hermes-knowledge-vault`.
 PR roboczy: https://github.com/flyxpressWarszawa/KonyWarsaw/pull/41
 
 ## Procedura dla Hermesa (wyłącznie po aktywacji zgodnego odbiorcy)
