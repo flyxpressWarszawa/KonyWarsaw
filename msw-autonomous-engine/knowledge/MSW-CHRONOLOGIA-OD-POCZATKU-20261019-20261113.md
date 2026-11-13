@@ -66,7 +66,7 @@ Archiwum właściciela `MSW-WIEDZA-15028-PELNA- Do Chata GPTPACZKA.zip` opisywa�
 
 ## 7. Stan archiwizacji i brakujące źródła
 
-- Repozytorium: `flyxpressWarszawa/KonyWarsaw`, draft PR #41, gałąź `msw/hermes-free-ai-candidate-20261113`.
+- Repozytorium: `flyxpressWarszawa/KonyWarsaw`, draft PR #41, gałąź `msw/hermes-knowledge-vault`.
 - Publiczny manifest: `msw-autonomous-engine/knowledge/HERMES-GITHUB-SOURCE-MANIFEST.json`.
 - Archiwa historyczne: prywatny pakiet 103 ZIP i prywatna pojedyncza rozmowa 15 024 wiadomości. Nie ma zweryfikowanego pełnego eksportu wszystkich rozmów ChatGPT.
 - Ta kronika zawiera **bezpieczny, kuratorski zapis wiedzy, statusów, działań i luk**. Nie zawiera prywatnych rozmów 1:1, surowych kluczy, archiwów ZIP ani niezależnego dostępu do pamięci konta.
