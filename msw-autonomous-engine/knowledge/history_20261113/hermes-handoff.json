@@ -10,8 +10,8 @@
   "source_path": "msw-autonomous-engine/knowledge/history_20261113",
   "documents": [
     "README.md",
-    "chronologia.md",
     "poczatki-2026-09-10.md",
+    "chronologia.md",
     "system-i-status.md",
     "digital-apps.md",
     "provenance.md"
@@ -63,7 +63,9 @@
     "last_reported_opportunity_hypotheses": 363,
     "last_reported_opportunity_cursor": 55,
     "reported_satelites": 41,
-    "reported_plugins_20261113": 333
+    "reported_plugins_20261113": 333,
+    "earliest_public_sites_report": "2026-10-08 (historical conversation report, not fresh live readback)",
+    "early_wordpress_eight_pages_report": "2026-10-16 (historical assistant publication report, IDs not retrieved)"
   },
   "release_gates": {
     "product_sale": "NO_GO",
@@ -136,7 +138,7 @@
     }
   ],
   "ack_contract": {
-    "github_file_readback_verified": false,
+    "github_file_readback_verified": true,
     "hermes_received_verified": false,
     "hermes_persisted_verified": false,
     "hermes_effect_ack_verified": false,
