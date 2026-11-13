@@ -10,6 +10,8 @@
 4. [Przekazanie Hermesowi: manifest maszynowy](./hermes-handoff.json) — stabilny identyfikator, źródła prywatne, następny odczyt i wymagane ACK.
 5. [Pochodzenie i kompletność materiałów](./provenance.md) — zakres dostępnych archiwów, braki i zasady importu prywatnej historii.
 
+- [Początki projektu (wrzesień–październik 2026)](./poczatki-2026-09-10.md) — wcześniejsze ślady ZIP i rozwój portali z rozróżnieniem projektów od rzeczywistych publikacji.
+
 ## Co faktycznie jest tu zapisane
 
 To **kuratorski, odtwarzalny indeks wiedzy projektu MSW**, nie dosłowny i kompletny zapis wszystkich czatów konta ChatGPT. Przeszukiwalne, dostępne tu źródła obejmują m.in. właścicielski manifest jednej rozmowy Hermes z 2026-10-23–2026-11-06, 15 024 wiadomości / 4 dokumenty kuratorskie (łącznie 15 028 pozycji), starsze checkpointy, znane publikacje WordPress, dokumentację repozytorium i testy 2026-11-13. Dwie reprezentacje tej samej historii (conversations.json/history.jsonl) nie są dwoma korpusami. **Nie przeprowadzono pełnego eksportu i niezależnego sprawdzenia całego konta.**
