@@ -1,65 +1,19 @@
-name: MSW Hermes — vault downloader offline tests
+name: MSW Hermes — public archive PAUSED (private-only policy)
 
+# Owner changed archival policy on 2026-11-13: all future MSW/Hermes
+# knowledge archives must be private. This formerly scheduled public pipeline
+# is intentionally disabled. No secrets or private history are stored here.
+# Public history and previously published Git objects remain potentially public
+# until the repository visibility is changed by its owner.
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/msw-hermes-vault-pull-tests.yml'
   workflow_dispatch:
-  schedule:
-    - cron: '38 5 * * *'
 
 permissions:
   contents: read
 
-concurrency:
-  group: msw-hermes-vault-pull-tests
-  cancel-in-progress: false
-
 jobs:
-  verify-download-contract:
-    if: github.repository == 'flyxpressWarszawa/KonyWarsaw'
+  paused:
     runs-on: ubuntu-latest
-    timeout-minutes: 7
     steps:
-      - name: Check out trusted workflow
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          persist-credentials: false
-
-      - name: Fetch public vault as source-only (no execution permission)
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch --no-tags origin             '+refs/heads/msw/hermes-knowledge-vault:refs/remotes/origin/msw/hermes-knowledge-vault'
-          git worktree add --detach "$RUNNER_TEMP/msw-vault-test"             refs/remotes/origin/msw/hermes-knowledge-vault
-
-      - name: Offline test the checksum-verified downloader
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd "$RUNNER_TEMP/msw-vault-test/msw-autonomous-engine"
-          python3 -m py_compile tools/msw_hermes_github_pull.py
-          python3 -m unittest discover -s tests -p test_msw_hermes_github_pull.py -v
-
-      - name: Download the full public vault and verify GitHub SHA-256
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 "$RUNNER_TEMP/msw-vault-test/msw-autonomous-engine/tools/msw_hermes_github_pull.py" \
-            --dest "$RUNNER_TEMP/msw-hermes-public-download"
-
-      - name: Publish public archive as downloadable verified artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: msw-hermes-public-archive-${{ github.run_id }}
-          path: ${{ runner.temp }}/msw-hermes-public-download/
-          if-no-files-found: error
-          retention-days: 14
-
-      - name: Verify the machine-readable index is available
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 .github/scripts/msw_hermes_archive_index.py             --root "$RUNNER_TEMP/msw-vault-test" --check-only
+      - name: Public research archival disabled
+        run: echo 'HOLD: MSW Hermes knowledge must only be stored in private repository.'
