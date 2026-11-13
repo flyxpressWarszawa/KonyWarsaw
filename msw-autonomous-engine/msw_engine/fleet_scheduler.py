@@ -5,6 +5,7 @@ from .recovery import protected_open
 
 import ipaddress
 import json
+import os
 import re
 import socket
 import ssl
@@ -15,6 +16,15 @@ from urllib.parse import urlsplit
 from urllib.request import HTTPSHandler, Request, build_opener
 
 from .client import NoRedirect, encode, signed_headers
+
+
+def central_wake_interval() -> int:
+    """Keep central WordPress wakeups to at most one request per hour."""
+    try:
+        configured = int(os.environ.get("MSW_WP_CRON_INTERVAL", "3600"))
+    except (TypeError, ValueError):
+        configured = 3600
+    return max(3600, min(86400, configured))
 
 
 def public_base(value: str, *, resolve: bool = True) -> str:
@@ -100,6 +110,7 @@ class FleetScheduler:
         self.fetch, self.wake, self.clock = fetch, wake, clock
         self.maintain = maintain
         self.consume = consume
+        self.central_interval = central_wake_interval()
         self.roster: list[dict] = []
         self.refreshed = self.next_refresh = self.next_central = 0.0
         self.next_control = 0.0
@@ -126,7 +137,7 @@ class FleetScheduler:
                 ok += 1
             except Exception:
                 failed += 1
-            self.next_central = now + 300
+            self.next_central = now + self.central_interval
         if now >= self.next_refresh:
             try:
                 source = self.fetch()
@@ -173,7 +184,7 @@ class FleetScheduler:
                   "central_control_plane": self.control_plane,
                   "data_lane": self.data_lane,
                   "cadence_seconds": 60, "satellites_per_cycle": 3, "nodes": self.observed}
-        status["central_wp_cron_seconds"] = 300
+        status["central_wp_cron_seconds"] = self.central_interval
         temporary = self.path.with_suffix(".tmp")
         temporary.write_text(json.dumps(status, sort_keys=True), encoding="utf-8")
         temporary.replace(self.path)
