@@ -1,0 +1,4212 @@
+{
+  "schema": "msw.hermes.free-api-source-index.v1",
+  "date_utc": "2026-11-13",
+  "target_verified_free_apis": 20000,
+  "source_document_urls": 700,
+  "unique_source_urls": 700,
+  "verified_free_apis": 0,
+  "verified_hermes_connections": 0,
+  "classification": "NO_API_VERIFICATION",
+  "sources": [
+    {
+      "url": "https://animica.dev/docs",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Haidra-Org/AI-Horde/blob/main/README.md",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://haidra-org.github.io/AI-Horde/how-to/send_text_generation_requests/",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://animica.dev/llms-full.txt",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://stablehorde.net//",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://animica.dev/",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://animica.dev/llms.txt",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.modelhubby.com/guides/aihorde/",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/animicaorg/all/blob/7f186389/website/src/pages/index.astro",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://gitlab.com/Animica/animica-core/-/blob/main/README.md",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://fshy.ajam.dev/p/aihorde/",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/animicaorg/all/blob/7f186389/sites/animica.dev/index.html",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://freeinferencing.com/provider/ai_horde/",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/AIPowerGrid/grid-sdk",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://deepwiki.com/animicaorg/animica-mcp/2.1-ai-inference-tools",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://deepwiki.com/animicaorg/animica-mcp/3.3-animica-inference-(ena-ai-gateway",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://freellmapihub.com/guides/free-image-generation-apis",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Haidra-Org/AI-Horde/main/README.md",
+      "group": "anonymous",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/latest/serving/online_serving/openai_compatible_server/",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://huggingface.co/docs/inference-endpoints/engines/tgi",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://localai.io/docs/model-compatibility/",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/stable/getting_started/quickstart/",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.union.ai/docs/v2/union/user-guide/inference/self-hosted-endpoints/",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.gatellm.io/en/sdk/local-inference.md",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/latest/",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://localai.io/docs/model-compatibility/index.html",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.getwayland.com/core/self-hosted/",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.openllm.sh/providers/local",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://withlore.ai/docs/guides/local-inference/",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://weftos.weavelogic.ai/docs/weftos/integrations/local-inference",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://ibl.ai/blog/self-hosted-llm-serving-stack-ollama-vllm-tgi",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://zed.dev/docs/ai/use-a-local-model",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Unicorn/Radium/blob/main/website/docs/self-hosted/universal-provider-guide.md",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.trustgraph.ai/deployment/self-hosting-intro.html",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://qwen.readthedocs.io/en/latest/deployment/vllm.html",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.futureagi.com/docs/command-center/features/self-hosted-models/",
+      "group": "selfhosted",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://researchguides.smu.edu.sg/api-list/metadata-api",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://help.openalex.org/api/",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://europepmc.org/restfulwebservice",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/tools/developers/",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://europepmc.org/developers",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.crossref.org/documentation/retrieve-metadata/",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/spinov001-art/awesome-free-academic-apis",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://ceu.libguides.com/apis",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://swarmnest.ai/directory/academic-research/",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://alandefreitas.github.io/bibexplorer/APIs.html",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.onekeyapi.dev/solutions/science-research-data-api",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/TimmySnr7/phd-lit-metadata-engine-public",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://intuitionlabs.ai/articles/research-paper-apis-scientific-literature",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/hongkongkiwi/research-master/blob/main/docs/sources.md",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/MeekPhills/citewire/blob/main/docs/providers.md",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://dev.to/0012303/5-free-academic-apis-every-developer-should-know-no-key-required-32gj",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://bytetools.bytevancer.com/public-apis/science",
+      "group": "science",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.wikidata.org/wiki/Wikidata:Data_access",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://archive.org/developers/index-apis.html",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.mediawiki.org/wiki/Wikimedia_APIs",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://enterprise.wikimedia.com/project-data/wikidata-api/",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://enterprise.wikimedia.com/api/",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.wikidata.org/wiki/Wikidata:REST_API",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://commoncrawl.org/get-started",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.mediawiki.org/wiki/API:Action_API",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://index.commoncrawl.org/",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://en.wikipedia.org/api/rest_v1/",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://data.commoncrawl.org/",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.mediawiki.org/wiki/API:Data_retrieval",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://archive.readme.io/reference/getting-started",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://commoncrawl.org/",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.wikidata.org/wiki/Wikidata%3AList_of_Internet_APIs_with_user_manual",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/geometalab/awesome-apis-for-crowdsourced-data",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://commoncrawl.org/about",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/api-evangelist/wikipedia/blob/main/apis.yml",
+      "group": "public_data",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://gen.pollinations.ai/docs",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://xyzs996.github.io/free-llm-api/",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://cors.dev/guides/free-ai-api",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://opengpuradar.com/free-llm-apis",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://grokified.com/blog/free-llm-api",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://cheapos.lol/providers",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://dev.to/shiva_prasad_cc614c6ee026/free-openai-compatible-llm-apis-in-2026-how-to-switch-baseurl-in-python-and-js-268p",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.benchleader.com/free-llm-api",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://continuumcode.ai/guides/free-llm-api/",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://plan2api.com/free-ai-api",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://luciqa.com/blog/best-free-ai-apis-2026/",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://saaspuppy.com/articles/free-ai-apis-for-developers",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Shaivpidadi/FreeRideV3/blob/main/docs/providers/SURVEY.md",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://merginit.com/blog/16062026-free-ai-api-inference-comparison",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/cheahjs/free-llm-api-resources?tab=readme-ov-file",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://freellmapihub.com/guides/free-speech-to-text-apis",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://dev.to/shiva_prasad_cc614c6ee026/free-llm-apis-for-coding-assistants-11me",
+      "group": "free_tiers",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/lifecycle/announcements/bing-search-api-retirement",
+      "group": "search_platforms",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/v3/guides/quota_and_compliance_audits",
+      "group": "search_platforms",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/data/determine_quota_cost",
+      "group": "search_platforms",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/custom-search/v1/overview?hl=zh-tw",
+      "group": "search_platforms",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.googleblog.com/from-prompt-to-app-build-with-google-maps-in-ai-studio/",
+      "group": "search_platforms",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/custom-search/v1/overview?hl=ar",
+      "group": "search_platforms",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/v3",
+      "group": "search_platforms",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.cloud.google.com/apis/docs/capping-api-usage",
+      "group": "search_platforms",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/v3/revision_history",
+      "group": "search_platforms",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/2.0/deprecation_faq",
+      "group": "search_platforms",
+      "source_batch": 8,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://murakumo.cloud/docs",
+      "group": "hosted_no_key",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://lmstudio.ai/docs/developer/core/server",
+      "group": "local_models",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://ai.google.dev/gemini-api/docs/rate-limits?authuser=1",
+      "group": "google_ai",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/bingwebmaster/",
+      "group": "bing_seo",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/v3/determine_quota_cost",
+      "group": "youtube",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/permissions/",
+      "group": "facebook_meta",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap",
+      "group": "seo_docs",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://europepmc.org/RestfulWebService",
+      "group": "research_open",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://murakumo.cloud/free",
+      "group": "hosted_no_key",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/stable/usage/security/",
+      "group": "local_models",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://aistudio.google.com/docs/get-started",
+      "group": "google_ai",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www2.bing.com/indexnow/getstarted",
+      "group": "bing_seo",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/v3/docs?hl=en",
+      "group": "youtube",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/pages-api/",
+      "group": "facebook_meta",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/crawling-indexing/robots/intro",
+      "group": "seo_docs",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.tu.berlin/en/ub/search-borrow/e-media/free-online-resources/apis-for-scientific-resources",
+      "group": "research_open",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://net.beaverai.org/",
+      "group": "hosted_no_key",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/latest/cli/serve/",
+      "group": "local_models",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://ai.google.dev/api?authuser=19",
+      "group": "google_ai",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.indexnow.org/en_gb/documentation",
+      "group": "bing_seo",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/v3/docs/search/list",
+      "group": "youtube",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/graph-api/overview/rate-limiting/",
+      "group": "facebook_meta",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/crawling-indexing/ask-google-to-recrawl",
+      "group": "seo_docs",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://guides.library.utoronto.ca/c.php?g=744383&p=5387165",
+      "group": "research_open",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://free-llm.com/provider/ai-horde",
+      "group": "hosted_no_key",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://magpie.apache.org/docs/adapters/local-llm/",
+      "group": "local_models",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://aistudio.google.com/docs/pricing",
+      "group": "google_ai",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www4.bing.com/webmasters/help/indexnow-0z209wby",
+      "group": "bing_seo",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/data/reference/rest/v3/videos/list",
+      "group": "youtube",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/graph-api/webhooks/getting-started/webhooks-for-instagram/",
+      "group": "facebook_meta",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/apis/indexing-api/v3/quickstart",
+      "group": "seo_docs",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.ncbi.nlm.nih.gov/research/bionlp/APIs/BioC-PMC/",
+      "group": "research_open",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://stillworks.supercapybara.com/",
+      "group": "hosted_no_key",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/stable/deployment/docker/",
+      "group": "local_models",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://aistudio.google.com/docs",
+      "group": "google_ai",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www2.bing.com/webmasters/help/url-submission-62f2860b",
+      "group": "bing_seo",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/data",
+      "group": "youtube",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/graph-api/reference/page/insights/",
+      "group": "facebook_meta",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview",
+      "group": "seo_docs",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www-crossref-org.turing.library.northwestern.edu/community/developers/",
+      "group": "research_open",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://fshy.ajam.dev/need/inference-no-card-no-phone/",
+      "group": "hosted_no_key",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://beta.lmstudio.ai/llms-full.txt",
+      "group": "local_models",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://aistudio.google.com/docs/batch-api",
+      "group": "google_ai",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www2.bing.com/webmasters/help/Webmaster-Guidelines-30fba23a",
+      "group": "bing_seo",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/v3/docs/channels",
+      "group": "youtube",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/documentation/pages-api/overview",
+      "group": "facebook_meta",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag?hl=en",
+      "group": "seo_docs",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.crossref.org/community/researchers/",
+      "group": "research_open",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Beesonn/free-ai-api/blob/main/README.md",
+      "group": "hosted_no_key",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/latest/deployment/integrations/production-stack/",
+      "group": "local_models",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://aistudio.google.com/docs/optimization",
+      "group": "google_ai",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www4.bing.com/webmasters/help/Webmaster-Guidelines-30fba23a",
+      "group": "bing_seo",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/v3/guides/auth/server-side-web-apps",
+      "group": "youtube",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/graph-api/overview",
+      "group": "facebook_meta",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/crawling-indexing",
+      "group": "seo_docs",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://crossref.readthedocs.io/en/latest/",
+      "group": "research_open",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://wikitech.wikimedia.org/wiki/Machine_Learning/LiftWing/Large_Language_Models/Wikimania_2026",
+      "group": "hosted_no_key",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/varad-more/selfhosted-chat-api",
+      "group": "local_models",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://ai.google.dev/gemini-api/docs/pricing?authuser=002",
+      "group": "google_ai",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://blogs.bing.com/webmaster/2019/1/bingbot-Series-Get-your-content-indexed-fast-by-now-submitting-up-to-10%2C000-URLs-per-day-to-Bing/",
+      "group": "bing_seo",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/v3/quickstart/js",
+      "group": "youtube",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/insights/overview/",
+      "group": "facebook_meta",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/monitor-debug/search-console-start",
+      "group": "seo_docs",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.crossref.org/documentation/retrieve-metadata/oai-pmh/",
+      "group": "research_open",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://route.cat/docs/",
+      "group": "hosted_no_key",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://opentine.com/docs/models/compat",
+      "group": "local_models",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://fast.io/resources/gemini-api-rate-limit/",
+      "group": "google_ai",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/advertising/msa-help/hlp_ba_conc_indexnow",
+      "group": "bing_seo",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/v3/docs/errors",
+      "group": "youtube",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/graph-api/reference",
+      "group": "facebook_meta",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/fundamentals/get-started-developers",
+      "group": "seo_docs",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://browse.welch.jhmi.edu/content_permissions_for_tdm/tdm_data_sources",
+      "group": "research_open",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.persorai.com/",
+      "group": "hosted_no_key",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.tokios.com/setup/supported-backends",
+      "group": "local_models",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.scriptbyai.com/gemini-api-rate-limits/",
+      "group": "google_ai",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://blogs.bing.com/webmaster/2021/10/IndexNow-Instantly-Index-your-web-content-in-Search-Engines/",
+      "group": "bing_seo",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/data/guides/implementation/videos",
+      "group": "youtube",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/graph-api/webhooks/",
+      "group": "facebook_meta",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/crawling-indexing/troubleshoot-crawling-errors",
+      "group": "seo_docs",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://kitchingroup.cheme.cmu.edu/s26-06643/03-working-with-apis/03-working-with-apis.html",
+      "group": "research_open",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://freeinference.dev/free-keyless-api/",
+      "group": "hosted_no_key",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/MindMadeLab/quartermaster-sdk-py/blob/master/docs/providers.md",
+      "group": "local_models",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://ai.google.dev/gemini-api/docs/gemini-3?authuser=0",
+      "group": "google_ai",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://searchhandled.com/blog/bing-webmaster-tools-seo-automation",
+      "group": "bing_seo",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/data/reference/rest/v3/search/list",
+      "group": "youtube",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/graph-api/webhooks/reference/",
+      "group": "facebook_meta",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/updates",
+      "group": "seo_docs",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/sotashimozono/doiget/blob/main/docs/SOURCES.md",
+      "group": "research_open",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://hybra.lol/docs",
+      "group": "hosted_no_key",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/varad-more/selfhosted-chat-api/blob/main/README.md",
+      "group": "local_models",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://comparedge.com/tools/gemini/api",
+      "group": "google_ai",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://autoindexnow.com/indexnow-for-bing",
+      "group": "bing_seo",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/resources/api-libraries/documentation/youtube/v3/java/latest/index-all.html",
+      "group": "youtube",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login/create-a-meta-app-with-instagram/",
+      "group": "facebook_meta",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/crawling/docs/crawl-budget",
+      "group": "seo_docs",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.ub.unibe.ch/services/digital_scholarship/apis/index_eng.html",
+      "group": "research_open",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://freeinference.dev/free-openai-compatible-api/index.md",
+      "group": "hosted_no_key",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.openclaw.ai/gateway/local-models",
+      "group": "local_models",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.modern-datatools.com/tools/gemini-api",
+      "group": "google_ai",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.trysight.ai/blog/indexnow-vs-traditional-sitemap-submission",
+      "group": "bing_seo",
+      "source_batch": 9,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/compatibility-of-openai-with-dashscope",
+      "group": "alibaba_qwen",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.x.ai/developers/pricing",
+      "group": "xai_anthropic",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://inference-docs.cerebras.ai/support/rate-limits",
+      "group": "groq_cerebras",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.mistral.ai/inference/pricing",
+      "group": "mistral_deepseek",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.sambanova.ai/docs/en/models/rate-limits",
+      "group": "sambanova_together",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://replicate.com/docs/topics/predictions/rate-limits",
+      "group": "fireworks_replicate",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.cloudflare.com/workers-ai/get-started/rest-api/",
+      "group": "cloudflare",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://huggingface.co/docs/inference-providers/main/index",
+      "group": "huggingface",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.perplexity.ai/docs/getting-started/pricing",
+      "group": "perplexity_cohere",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://unsloth.ai/docs/get-started/unsloth-model-catalog",
+      "group": "open_models",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/rate-limit",
+      "group": "alibaba_qwen",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://platform.claude.com/docs/en/api/rate-limits",
+      "group": "xai_anthropic",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://console.groq.com/docs/rate-limits",
+      "group": "groq_cerebras",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.mistral.ai/admin/billing-usage/usage-limits",
+      "group": "mistral_deepseek",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.together.ai/docs/serverless/rate-limits",
+      "group": "sambanova_together",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.fireworks.ai/guides/quotas_usage/account-quotas",
+      "group": "fireworks_replicate",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.cloudflare.com/workers-ai/models/",
+      "group": "cloudflare",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://huggingface.co/docs/inference-providers/main/en/guides/first-api-call",
+      "group": "huggingface",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.cohere.com/docs/rate-limits",
+      "group": "perplexity_cohere",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://huggingface.co/blog/daya-shankar/open-source-llm-models-to-run-locally",
+      "group": "open_models",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/new-free-quota",
+      "group": "alibaba_qwen",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "group": "xai_anthropic",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://freellm.today/compare/groq-vs-cerebras/",
+      "group": "groq_cerebras",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.mistral.ai/resources/known-limitations",
+      "group": "mistral_deepseek",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://cloud.sambanova.ai/plans",
+      "group": "sambanova_together",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.fireworks.ai/serverless/rate-limits",
+      "group": "fireworks_replicate",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.cloudflare.com/workers-ai/platform/limits/",
+      "group": "cloudflare",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://huggingface.co/docs/inference-providers/main/en/hub-integration",
+      "group": "huggingface",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.perplexity.ai/docs/getting-started/quickstart",
+      "group": "perplexity_cohere",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://swcatalog.intel.com/developer/docs/intel-inference-microservices/models-and-hardware/model-catalog",
+      "group": "open_models",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/what-is-model-studio",
+      "group": "alibaba_qwen",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching",
+      "group": "xai_anthropic",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://limithit.com/free",
+      "group": "groq_cerebras",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://api-docs.deepseek.com/quick_start/pricing/",
+      "group": "mistral_deepseek",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.together.ai/docs/serverless/overview",
+      "group": "sambanova_together",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://replicate.com/docs/topics/billing",
+      "group": "fireworks_replicate",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.cloudflare.com/api/resources/ai/methods/run/",
+      "group": "cloudflare",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/huggingface/skills/blob/HEAD/skills/huggingface-spaces/references/inference-providers.md",
+      "group": "huggingface",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://cohere.com/pricing",
+      "group": "perplexity_cohere",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.irurueta.com/ai/local-llms/open-weight-models.html",
+      "group": "open_models",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.modelstudio.console.alibabacloud.com/zh/model-studio/token-plan-team-quickstart",
+      "group": "alibaba_qwen",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.x.ai/developers/rate-limits",
+      "group": "xai_anthropic",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://refusalrate.com/groq-vs-cerebras",
+      "group": "groq_cerebras",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://api-docs.deepseek.com/",
+      "group": "mistral_deepseek",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.together.ai/docs/changelog",
+      "group": "sambanova_together",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.fireworks.ai/serverless/overview",
+      "group": "fireworks_replicate",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.cloudflare.com/changelog/product/workers-ai/",
+      "group": "cloudflare",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://huggingface.co/docs/inference-providers/en/pricing",
+      "group": "huggingface",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.perplexity.ai/docs/admin/rate-limits-usage-tiers",
+      "group": "perplexity_cohere",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://selfhost.directory/models",
+      "group": "open_models",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/token-plan-overview",
+      "group": "alibaba_qwen",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.x.ai/developers/advanced-api-usage/prompt-caching/usage-and-pricing",
+      "group": "xai_anthropic",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://stacksfree.com/blog/free-tier-rate-limits-across-ai-inference-apis-in-2026/",
+      "group": "groq_cerebras",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://mistral.ai/pricing/",
+      "group": "mistral_deepseek",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://support.together.ai/articles/2650779384-build-tiers-required-spend-and-rate-limits",
+      "group": "sambanova_together",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://fireworks.ai/pricing",
+      "group": "fireworks_replicate",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.cloudflare.com/workers-ai/llms-full.txt",
+      "group": "cloudflare",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://huggingface.co/docs/inference-providers/main/en/guides/responses-api",
+      "group": "huggingface",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.cohere.com/docs/how-does-cohere-pricing-work.mdx",
+      "group": "perplexity_cohere",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://localllms.dev/llm/all/",
+      "group": "open_models",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.modelstudio.console.alibabacloud.com/en/model-studio/more-tools",
+      "group": "alibaba_qwen",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.x.ai/developers/grok-4-7",
+      "group": "xai_anthropic",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://aireiter.com/blog/free-llm-api-quota-comparison",
+      "group": "groq_cerebras",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://api-docs.deepseek.com/quick_start/rate_limit.md",
+      "group": "mistral_deepseek",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.together.ai/pricing-capacity",
+      "group": "sambanova_together",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://replicate.com/pricing",
+      "group": "fireworks_replicate",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.cloudflare.com/ai-gateway/usage/rest-api/",
+      "group": "cloudflare",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://huggingface.co/blog/inference-providers",
+      "group": "huggingface",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.perplexity.ai/docs/getting-started/projects",
+      "group": "perplexity_cohere",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://runailocal.dev/models/",
+      "group": "open_models",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.modelstudio.console.alibabacloud.com/en/model-studio/model-pricing.md",
+      "group": "alibaba_qwen",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://platform.claude.com/docs/en/api/overview",
+      "group": "xai_anthropic",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://xyzs996.github.io/free-llm-api/provider/cerebras.html",
+      "group": "groq_cerebras",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://help.mistral.ai/en/articles/698531-why-am-i-hitting-api-rate-limits-and-how-do-i-increase-them",
+      "group": "mistral_deepseek",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.together.ai/intro",
+      "group": "sambanova_together",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://replicate.com/docs/",
+      "group": "fireworks_replicate",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.cloudflare.com/api/resources/ai/",
+      "group": "cloudflare",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://huggingface.co/docs/inference-providers/main/hub-api",
+      "group": "huggingface",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.perplexity.ai/docs/resources/faq",
+      "group": "perplexity_cohere",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://d-central.tech/data/local-llm-model-database/",
+      "group": "open_models",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.modelstudio.console.alibabacloud.com/en/model-studio/token-plan-overview",
+      "group": "alibaba_qwen",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.x.ai/developers/advanced-api-usage/prompt-caching",
+      "group": "xai_anthropic",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://fast.io/resources/groq-rate-limit/",
+      "group": "groq_cerebras",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.mistral.ai/inference",
+      "group": "mistral_deepseek",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.together.ai/docs/inference/batch/overview",
+      "group": "sambanova_together",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.fireworks.ai/guides/inference-error-codes",
+      "group": "fireworks_replicate",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.cloudflare.com/changelog/post/2026-08-07-workers-ai-unified-billing/",
+      "group": "cloudflare",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://huggingface.co/docs/hub/enterprise",
+      "group": "huggingface",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.cohere.com/docs/cohere-faqs",
+      "group": "perplexity_cohere",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://huggingface.co/datasets/tbukuai/hf-papers-wiki/blob/main/comparisons/open-model-families.md",
+      "group": "open_models",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/chatbox",
+      "group": "alibaba_qwen",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.x.ai/developers/models",
+      "group": "xai_anthropic",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://aifree.dev/learn/free-groq-api-key",
+      "group": "groq_cerebras",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.mistral.ai/inference/model-selection-guide.md",
+      "group": "mistral_deepseek",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.together.ai/docs/error-codes",
+      "group": "sambanova_together",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.codeworlds.com/en/collections/replicate",
+      "group": "fireworks_replicate",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.cloudflare.com/products/workers-ai/",
+      "group": "cloudflare",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://huggingface.co/inference/models",
+      "group": "huggingface",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.cohere.com/docs/going-live",
+      "group": "perplexity_cohere",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/rafska/awesome-local-llm",
+      "group": "open_models",
+      "source_batch": 10,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.aihorde.net/",
+      "group": "anonymous_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/ggml-org/llama.cpp/blob/HEAD/tools/server/README.md",
+      "group": "local_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/meta-llama/llama-models/blob/main/models/llama3/LICENSE",
+      "group": "open_models",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/ggml-org/whisper.cpp/",
+      "group": "audio_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.comfy.org/development/deploy/self-hosting",
+      "group": "image_video_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/simple_proxy",
+      "group": "model_gateway",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/webmaster-tools/v1/searchanalytics/query",
+      "group": "search_evidence",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication/",
+      "group": "semantic_science",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/rate-limits",
+      "group": "security",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Haidra-Org/AI-Horde",
+      "group": "anonymous_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://lmstudio.ai/docs/developer",
+      "group": "local_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.ertas.ai/docs/reference/supported-models",
+      "group": "open_models",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://speaches.ai/",
+      "group": "audio_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.comfy.org/api-reference/v2/overview",
+      "group": "image_video_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/router/learn/reliability",
+      "group": "model_gateway",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/webmaster-tools/limits",
+      "group": "search_evidence",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://ourresearch.gitbook.io/help.openalex.org/how-it-works",
+      "group": "semantic_science",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/production-best-practices",
+      "group": "security",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://stillworks.supercapybara.com/free-llm-api-no-key",
+      "group": "anonymous_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://koboldai.com/KoboldCpp/",
+      "group": "local_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://pocketllm.app/models/",
+      "group": "open_models",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://hangry-labs.github.io/kokoroTTS/docs/dockerhub.html",
+      "group": "audio_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.comfy.org/development/comfyui-server/comms_overview",
+      "group": "image_video_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/router/api_reference/configuration",
+      "group": "model_gateway",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/webmaster-tools",
+      "group": "search_evidence",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://hyperresearch.ai/guides/open-access-full-text-for-agents",
+      "group": "semantic_science",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/safety-best-practices",
+      "group": "security",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://vireonix.ai/docs",
+      "group": "anonymous_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/stable/usage/",
+      "group": "local_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.scaleway.com/en/docs/generative-apis/reference-content/supported-models/",
+      "group": "open_models",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.usemacaw.io/docs/getting-started/quickstart",
+      "group": "audio_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.comfy.org/development/comfyui-server/comms_routes",
+      "group": "image_video_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/proxy/architecture",
+      "group": "model_gateway",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/webmaster-tools/v1/api_reference_index",
+      "group": "search_evidence",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.crossref.org/services/metadata-retrieval/public-data-file/",
+      "group": "semantic_science",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/error-codes",
+      "group": "security",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://blockrun.ai/free",
+      "group": "anonymous_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://thewaspen.com/docs/configure/ai/local-compatible-providers/",
+      "group": "local_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://aiswcatalog.intel.com/developer/docs/intel-inference-microservices/models-and-hardware/model-catalog",
+      "group": "open_models",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/OHF-Voice/piper1-gpl/",
+      "group": "audio_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.comfy.org/development/comfy-router/quickstart",
+      "group": "image_video_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/proxy/load_balancing",
+      "group": "model_gateway",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/blog/2022/01/url-inspection-api",
+      "group": "search_evidence",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://research.draconitic.com/sources",
+      "group": "semantic_science",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.openai.com/api/reference/resources/completions/methods/create/index.md",
+      "group": "security",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://animica.org/",
+      "group": "anonymous_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/mudler/LocalAI/blob/0d82efde/docs/content/reference/compatibility-table.md",
+      "group": "local_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.modelstudio.console.alibabacloud.com/zh/model-studio/open-source-model-terms",
+      "group": "open_models",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://hangry-labs.github.io/kokoroTTS/docs/",
+      "group": "audio_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://support.comfy.org/articles/1674221690-comfy-apis-an-overview",
+      "group": "image_video_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/proxy/config_settings",
+      "group": "model_gateway",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/webmaster-tools/v1/prereqs",
+      "group": "search_evidence",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.crossref.org/documentation/retrieve-metadata/openurl/",
+      "group": "semantic_science",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/safety-checks",
+      "group": "security",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Haidra-Org/AI-Horde?tab=readme-ov-file",
+      "group": "anonymous_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://revka.ai/docs/providers/local-and-custom/",
+      "group": "local_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://openweightlicenses.com/family",
+      "group": "open_models",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.pipecat.ai/api-reference/server/services/tts/piper",
+      "group": "audio_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.comfy.org/development/comfyui-server/api-examples",
+      "group": "image_video_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/proxy/configs",
+      "group": "model_gateway",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/webmaster-tools/pricing",
+      "group": "search_evidence",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.crossref.org/pdfs/enhancing-repository-integration-with-crossref-services.pdf",
+      "group": "semantic_science",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.verda.com/inference/faq/",
+      "group": "security",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/InftyAI/llmaz/blob/main/docs/examples/README.md",
+      "group": "local_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://llmeu.com/en/licences/",
+      "group": "open_models",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://ethosagent.ai/docs/using/how-to/local-voice.md",
+      "group": "audio_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://kb.stability.ai/knowledge-base/self-hosting-101-deploying-stable-diffusion-models",
+      "group": "image_video_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/routing",
+      "group": "model_gateway",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://googleapis.dev/dotnet/Google.Apis.SearchConsole.v1/latest/api/Google.Apis.SearchConsole.v1.Data.html",
+      "group": "search_evidence",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.crossref.org/categories/apis/",
+      "group": "semantic_science",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.crossmodel.ai/docs/guides/production",
+      "group": "security",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.liter-llm.xberg.io/usage/local-llms/",
+      "group": "local_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://intuitionlabs.ai/pdfs/open-weight-ai-model-licenses.pdf",
+      "group": "open_models",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/remsky/kokoro-fastapi",
+      "group": "audio_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://comfy.org/platform/comfy-api/",
+      "group": "image_video_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/proxy/prod",
+      "group": "model_gateway",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://pkg.go.dev/google.golang.org/api/webmasters/v3",
+      "group": "search_evidence",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.crossref.org/documentation/retrieve-metadata/bulk-downloads/",
+      "group": "semantic_science",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.parasail.io/parasail-docs/operate-in-production/retries-and-idempotency",
+      "group": "security",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Chuzom/Chuzom/blob/main/Docs/local-inference.md",
+      "group": "local_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://stratumus.com/models",
+      "group": "open_models",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/byte271/Openlive/blob/refs/heads/main/docs/open-source-stack.md",
+      "group": "audio_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/ashleykleynhans/stable-diffusion-docker/blob/main/README.md",
+      "group": "image_video_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/BerriAI/litellm/blob/main/litellm/router.py",
+      "group": "model_gateway",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://indexing.io/google-search-console-api",
+      "group": "search_evidence",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/crossref/rest-api-doc/blob/master/api_format.md",
+      "group": "semantic_science",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.prisminference.com/errors",
+      "group": "security",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/sheawinkler/hermes-agent-ultra/blob/main/docs/local-backends.md",
+      "group": "local_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://absolutedigitalpublishers.com/articles/llama-mistral-deepseek-qwen-gemma-and-olmo-what-open-actually-means",
+      "group": "open_models",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/abedshaaban/local-tts-gateway",
+      "group": "audio_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.comfy.org/development/api-development/sdks-design",
+      "group": "image_video_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/harness/gateway",
+      "group": "model_gateway",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://cromojo.com/post/indexing-notifications",
+      "group": "search_evidence",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.crossref.org/blog/using-the-crossref-rest-api.-part-12-with-europe-pmc/",
+      "group": "semantic_science",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://inference.alphacurve.io/en/docs/rate-limits",
+      "group": "security",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/varunvasudeva1/llm-server-docs",
+      "group": "local_llm",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://hidekazu-konishi.com/entry/open_weights_llm_release_history_and_timeline.html",
+      "group": "open_models",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/agjs/voicebox",
+      "group": "audio_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://gpu.ai/docs/guides/deployable-templates",
+      "group": "image_video_ai",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/BerriAI/litellm?tab=readme-ov-file",
+      "group": "model_gateway",
+      "source_batch": 11,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.cn/webmaster-tools/v1/how-tos/search_analytics",
+      "group": "gsc_api",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/analytics/devguides/reporting/data/v1/quotas",
+      "group": "ga4_analytics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/google-ads/api/docs/oauth/overview",
+      "group": "google_ads",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi?view=bing-webmaster-dotnet",
+      "group": "bing_indexnow",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/development/create-an-app",
+      "group": "meta_insights",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/reporting",
+      "group": "youtube_metrics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/crawling-indexing/mobile/mobile-sites-mobile-first-indexing",
+      "group": "crawl_seo",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://stablehorde.net/api/",
+      "group": "free_text_ai",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/edgi-govdata-archiving/wayback/issues/205",
+      "group": "open_search_data",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://localai.io/docs/basics/getting_started/",
+      "group": "local_runtime",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://support.google.com/webmasters/answer/17011259?hl=en",
+      "group": "gsc_api",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/analytics/blog/2023/data-api-quota-management",
+      "group": "ga4_analytics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/google-ads/api/docs/keyword-planning/overview",
+      "group": "google_ads",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/bingwebmaster/getting-access",
+      "group": "bing_indexnow",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/graph-api/overview/access-levels/",
+      "group": "meta_insights",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/analytics/content_owner_reports",
+      "group": "youtube_metrics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls",
+      "group": "crawl_seo",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://haidra-org.github.io/AI-Horde/haidra-assets/docs/definitions/",
+      "group": "free_text_ai",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/science-as-data/openalex/blob/main/api/api-reference.md",
+      "group": "open_search_data",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://localai.io/docs/overview/",
+      "group": "local_runtime",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/webmaster-tools/v1/urlInspection.index/UrlInspectionResult",
+      "group": "gsc_api",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/analytics/devguides/reporting/data/v1/quickstart-client-libraries",
+      "group": "ga4_analytics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/google-ads/api/docs/get-started/make-first-call",
+      "group": "google_ads",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/bingwebmaster/api-protocols",
+      "group": "bing_indexnow",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/development/release/access-verification/",
+      "group": "meta_insights",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/data/reference/rest",
+      "group": "youtube_metrics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+      "group": "crawl_seo",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://haidra-org.github.io/AI-Horde/reference/chat_requests/",
+      "group": "free_text_ai",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://ub-unibe-ch.github.io/ds-pytools/tdm-ai/en.html",
+      "group": "open_search_data",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://localai.io/docs/faq/",
+      "group": "local_runtime",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/blog/2022/10/performance-data-deep-dive",
+      "group": "gsc_api",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/analytics/devguides/reporting/data/v1/errors",
+      "group": "ga4_analytics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/google-ads/api/samples",
+      "group": "google_ads",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www2.bing.com/webmasters/help/URL-Submission-62f2860b",
+      "group": "bing_indexnow",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/graph-api/reference/page/",
+      "group": "meta_insights",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/analytics/sample-requests",
+      "group": "youtube_metrics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/crawling-indexing/canonicalization",
+      "group": "crawl_seo",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://aihorde.net/details/models/text/",
+      "group": "free_text_ai",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.crossref.org/blog/announcing-changes-to-rest-api-rate-limits/",
+      "group": "open_search_data",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/mudler/LocalAI/releases/tag/v4.2.0",
+      "group": "local_runtime",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://support.google.com/webmasters/answer/12919192?hl=en",
+      "group": "gsc_api",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/analytics/devguides/reporting/data/v1/rest/v1alpha/PropertyQuota",
+      "group": "ga4_analytics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.cn/google-ads/api/docs/reporting/example",
+      "group": "google_ads",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/bingwebmaster/getting-started",
+      "group": "bing_indexnow",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.postman.com/meta/instagram/folder/23987686-f659d7d1-d74c-44e4-9192-9b1e8694c511",
+      "group": "meta_insights",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.cn/youtube/data/revision_history?hl=zh-tw",
+      "group": "youtube_metrics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.cn/search/docs/crawling-indexing/sitemaps/build-sitemap",
+      "group": "crawl_seo",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://horde-sdk.readthedocs.io/en/stable/reference/api/horde_sdk/ai_horde_api/endpoints/",
+      "group": "free_text_ai",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/rpatrik96/bibtexupdater/blob/main/docs/LANDSCAPE.md",
+      "group": "open_search_data",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.docker.com/ai/model-runner",
+      "group": "local_runtime",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://googleapis.github.io/google-api-python-client/docs/dyn/searchconsole_v1.searchanalytics.html",
+      "group": "gsc_api",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/analytics/devguides/reporting/data/v1/rest",
+      "group": "ga4_analytics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/google-ads/api/rest/examples",
+      "group": "google_ads",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://blogs.bing.com/webmaster/2019/11/Accessing-Bing-webmaster-tools-api-using-cURL/",
+      "group": "bing_indexnow",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://bollardai.com/resources/metagraph",
+      "group": "meta_insights",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/reporting/v1/reports/content_owner_reports",
+      "group": "youtube_metrics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.cn/search/docs/fundamentals/get-started",
+      "group": "crawl_seo",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://haidra-org.github.io/AI-Horde/reference/",
+      "group": "free_text_ai",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://wiki.openstreetmap.org/wiki/Sophox",
+      "group": "open_search_data",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/mudler/LocalAI/blob/master/README.md",
+      "group": "local_runtime",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://support.google.com/webmasters/answer/96568?hl=en",
+      "group": "gsc_api",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/analytics/devguides/reporting/metadata/v3/devguide",
+      "group": "ga4_analytics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/google-ads/api/docs/reporting/uireports",
+      "group": "google_ads",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://gscmagic.com/blog/bing-webmaster-tools-api-data",
+      "group": "bing_indexnow",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/documentation/instagram-platform/webhooks",
+      "group": "meta_insights",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/v3/code_samples/python_appengine",
+      "group": "youtube_metrics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/help/office-hours/2023/august",
+      "group": "crawl_seo",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://horde-sdk.readthedocs.io/en/stable/how-to/generate-text/",
+      "group": "free_text_ai",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/api-evangelist/overpass-api/refs/heads/main/apis.yml",
+      "group": "open_search_data",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://llamay.com/docs/",
+      "group": "local_runtime",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://support.google.com/webmasters/answer/12917174?hl=en",
+      "group": "gsc_api",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/analytics/devguides/reporting/data/v1/advanced?hl=ko",
+      "group": "ga4_analytics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/google-ads/api/docs/oauth/multi-user-authentication",
+      "group": "google_ads",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://blogs.bing.com/webmaster/2021/5/Easy-set-up-guide-for-Bing%E2%80%99s-Content-Submission-API-(Beta)/",
+      "group": "bing_indexnow",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/documentation/instagram-platform/instagram-api-with-facebook-login/creator-marketplace",
+      "group": "meta_insights",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/apis",
+      "group": "youtube_metrics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/fundamentals/how-search-works",
+      "group": "crawl_seo",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Haidra-org/AI-Horde",
+      "group": "free_text_ai",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://moltchat-agent-commons.onrender.com/wiki/Free_APIs_without_keys.md",
+      "group": "open_search_data",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/av/harbor/blob/main/docs/2.-Services.md",
+      "group": "local_runtime",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://keylogs.io/blog/google-search-console-api",
+      "group": "gsc_api",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.cloud.google.com/nodejs/docs/reference/data/latest",
+      "group": "ga4_analytics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/google-ads/api/fields/v22/overview",
+      "group": "google_ads",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://semoptimiser.com/docs/getting-started/connecting-bing-webmaster-tools",
+      "group": "bing_indexnow",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/documentation/business-messaging/messenger-platform/overview",
+      "group": "meta_insights",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://outlierkit.com/resources/youtube-api-quota/",
+      "group": "youtube_metrics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/crawling-indexing/url-structure",
+      "group": "crawl_seo",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://horde-model-reference.readthedocs.io/en/latest/reference/http_api/v2_endpoints/",
+      "group": "free_text_ai",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://support.crossref.org/hc/en-us/articles/215750203-Researcher-FAQ",
+      "group": "open_search_data",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://d-central.tech/local-ai-runtime-comparison/",
+      "group": "local_runtime",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://searchconsole.ai/knowledge-base/api-quota-reference",
+      "group": "gsc_api",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.cloud.google.com/data-studio/connect-to-google-analytics",
+      "group": "ga4_analytics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/google-ads/api/docs/query/cookbook",
+      "group": "google_ads",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.broworks.net/resources/bing-webmaster-tools-api-automate-webflow-url-indexing",
+      "group": "bing_indexnow",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/graph-api/reference/adaccount/insights/",
+      "group": "meta_insights",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://casrai.org/guides/youtube-data-api",
+      "group": "youtube_metrics",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/crawling/docs/myths-about-crawling",
+      "group": "crawl_seo",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://aihorde.net/profile/",
+      "group": "free_text_ai",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/derekurban/forage/blob/507dcb28d7b2db033829e009ce633abb7cb1acaa/deep_research_free_tier_apis.md",
+      "group": "open_search_data",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://quox.ai/docs/plugins/local-inference",
+      "group": "local_runtime",
+      "source_batch": 12,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://llama.app/docs/api",
+      "group": "openai_compat",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://haidra-org.github.io/AI-Horde/haidra-assets/docs/workers/",
+      "group": "dist_inference",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/mcp",
+      "group": "agent_frameworks",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/spinov001-art/free-apis-list",
+      "group": "search_public",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/HackerNews/API",
+      "group": "dev_data",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.modelhubby.com/guides/",
+      "group": "ai_free_tiers",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.modelstudio.console.alibabacloud.com/en/model-studio/open-source-model-terms",
+      "group": "asia_models",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/OHF-voice/piper1-gpl",
+      "group": "multimodal",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.comfy.org/get_started/cloud",
+      "group": "image_local",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.openai.com/api/reference/overview",
+      "group": "security_provenance",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://ai.google.dev/gemini-api/docs/batch-api?authuser=1",
+      "group": "google_official",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/v3/guides/quota_and_compliance_audits?hl=en",
+      "group": "meta_bing_youtube",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README-dev.md",
+      "group": "openai_compat",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://haidra-org.github.io/AI-Horde/haidra-assets/docs/kudos/",
+      "group": "dist_inference",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/",
+      "group": "agent_frameworks",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13157964/",
+      "group": "search_public",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.federalregister.gov/reader-aids/developer-resources/rest-api",
+      "group": "dev_data",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://creditforstartups.com/resources/free-ai-api",
+      "group": "ai_free_tiers",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.modelstudio.console.alibabacloud.com/en/model-studio/compatibility-of-openai-with-dashscope",
+      "group": "asia_models",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/echogarden-project/echogarden/blob/master/docs/Licenses.md",
+      "group": "multimodal",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Comfy-Org/ComfyUI/blob/c011fb52/openapi.yaml",
+      "group": "image_local",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.opinference.com/docs/reference/errors",
+      "group": "security_provenance",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://ai.google.dev/gemini-api/docs/google-search?authuser=0",
+      "group": "google_official",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/blog/post/2022/11/08/getting-started-with-page-insights-api/",
+      "group": "meta_bing_youtube",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/ggml-org/llama.cpp/blob/master/tools/server/server-schema.cpp",
+      "group": "openai_compat",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Haidra-Org/horde-worker-reGen?tab=readme-ov-file",
+      "group": "dist_inference",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/providers",
+      "group": "agent_frameworks",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/pi-scientific-skills@1.1.0/skills/paper-lookup/references/europepmc.md",
+      "group": "search_public",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://freepublicapis.dev/open-data",
+      "group": "dev_data",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://decodethefuture.org/en/best-free-llm-apis-2026/",
+      "group": "ai_free_tiers",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://help.aliyun.com/en/model-studio/get-api-key",
+      "group": "asia_models",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://d-central.tech/local-voice-ai-models/",
+      "group": "multimodal",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://huggingface.co/docs/diffusers/en/using-diffusers/create_a_server",
+      "group": "image_local",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.quiver.ai/developers/guides/errors-and-debugging",
+      "group": "security_provenance",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/batch-inference",
+      "group": "google_official",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/audience-network/optimization/apis/FB-login-Reporting-API/",
+      "group": "meta_bing_youtube",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/ggml-org/llama.cpp?tab=readme-ov-file",
+      "group": "openai_compat",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Haidra-Org/AI-Horde/blob/f40ae696acd0f23f6484db7f3d2408884185e960/FAQ.md",
+      "group": "dist_inference",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/mcp_deployment",
+      "group": "agent_frameworks",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://citation.today/docs/licensing.html",
+      "group": "search_public",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/appbrewery/public-api-lists",
+      "group": "dev_data",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://freeapihub.com/blog/best-free-ai-apis-developers",
+      "group": "ai_free_tiers",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.llmabacus.com/en/chinese-llm-api-trust",
+      "group": "asia_models",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/hexgrad/kokoro",
+      "group": "multimodal",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Comfy-Org/ComfyUI_prev/blob/master/openapi.yaml",
+      "group": "image_local",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.prem.io/llms.txt",
+      "group": "security_provenance",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://staxly.dev/platforms/gemini",
+      "group": "google_official",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/graph-api/reference/post/insights/",
+      "group": "meta_bing_youtube",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://build.nvidia.com/playbooks/llama-cpp/instructions",
+      "group": "openai_compat",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://aihorde.net/faq/",
+      "group": "dist_inference",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/router/api_reference/core_and_host",
+      "group": "agent_frameworks",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://freepublicapis.dev/science-and-math",
+      "group": "search_public",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Ada40/Ada40.github.io/blob/main/public_api_sources.py",
+      "group": "dev_data",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://llmperks.com/providers",
+      "group": "ai_free_tiers",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/models",
+      "group": "asia_models",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://hangry-labs.github.io/kokoroTTS/",
+      "group": "multimodal",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.comfy.org/development/deploy/overview",
+      "group": "image_local",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.inferencebureau.com/docs/api",
+      "group": "security_provenance",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/deploy/batch-inference",
+      "group": "google_official",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www4.bing.com/webmasters/help/url-submission-62f2860b",
+      "group": "meta_bing_youtube",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://llama.app/docs/serve",
+      "group": "openai_compat",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://horde-sdk.readthedocs.io/en/latest/how-to/",
+      "group": "dist_inference",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/harness",
+      "group": "agent_frameworks",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/brycewang-stanford/lit-review-agent-tools/blob/main/skills/literature-review-tools/reference/apis/openalex.md",
+      "group": "search_public",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/public-apis/public-apis?tab=readme-ov-file",
+      "group": "dev_data",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.tcp.systems/capacity/capacity-finders-western-2026-10-21/",
+      "group": "ai_free_tiers",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://intuitionlabs.ai/articles/open-weight-ai-model-licenses",
+      "group": "asia_models",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://pypi.org/project/vocal-ai/",
+      "group": "multimodal",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.comfy.org/development/examples",
+      "group": "image_local",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://multigrid.ai/api-reference",
+      "group": "security_provenance",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://flatkey.ai/blog/gemini-api-pricing",
+      "group": "google_official",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/marketing-api/insights?locale=pt_BR",
+      "group": "meta_bing_youtube",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://corso-llamacpp.giuseppebosi.com/en/moduli/04-server-api/",
+      "group": "openai_compat",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://stablehorde.net/contribute/workers/",
+      "group": "dist_inference",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/agent_resources",
+      "group": "agent_frameworks",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/brycewang-stanford/lit-review-agent-tools/blob/main/skills/literature-review-tools/reference/apis/README.md",
+      "group": "search_public",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://terminalfeed.io/blog/free-apis-2026",
+      "group": "dev_data",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://discuss.huggingface.co/t/free-api-for-beginners/179088/4",
+      "group": "ai_free_tiers",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://seminal.ai/reference/providers/chinese-labs/",
+      "group": "asia_models",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://huiahub.com/blog/open-source-text-to-speech-models",
+      "group": "multimodal",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://narrativegoldmine.com/notes/pages/ComfyUI-API-Specification",
+      "group": "image_local",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.meetalto.ai/api/requests",
+      "group": "security_provenance",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://modelmeridian.com/guides/google-gemini-api-costs-pro-flash-batch/",
+      "group": "google_official",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/documentation/ads-commerce/marketing-api/insights/best-practices",
+      "group": "meta_bing_youtube",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/mozilla-ai/llamafile/blob/main/docs/api.md",
+      "group": "openai_compat",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.sillytavern.app/usage/api-connections/horde/",
+      "group": "dist_inference",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://agentgateway.dev/docs/standalone/latest",
+      "group": "agent_frameworks",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Aperivue/medsci-skills/blob/master/docs/connectors.md",
+      "group": "search_public",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://dev.to/morinaga/three-public-http-apis-i-read-daily-without-registering-for-a-key-1aid",
+      "group": "dev_data",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.aitoolspro.tech/blog/free-ai-inference-apis-developers-2026",
+      "group": "ai_free_tiers",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://help.aliyun.com/en/model-studio/llms.txt",
+      "group": "asia_models",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.feral.sh/guides/local-models",
+      "group": "multimodal",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://comfy.org/llms.txt",
+      "group": "image_local",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.ryuhq.com/docs/gateway/reliability",
+      "group": "security_provenance",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://geminipricing.lol/gemini-api-pricing",
+      "group": "google_official",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://fbdevwiki.com/wiki/FQL:insights",
+      "group": "meta_bing_youtube",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/ggml-org/llama.pages/blob/master/src/docs/api.md",
+      "group": "openai_compat",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/wildcard/caro/blob/main/docs/adr/ADR-015-distributed-llm-backends-hybrid-privacy.md",
+      "group": "dist_inference",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://pypi.org/project/buildwright/0.8.3/",
+      "group": "agent_frameworks",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/K-Dense-AI/scientific-agent-skills/HEAD/skills/citation-management/references/api_contracts.md",
+      "group": "search_public",
+      "source_batch": 13,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://aistudio.google.com/docs/api-key",
+      "group": "google_ai_cost",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www2.bing.com/webmasters/help/soap-pox-api-deprecation-s0appox01",
+      "group": "bing_seo_api",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/instagram-platform/content-publishing/",
+      "group": "facebook_analytics",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/analytics/reference/reports/query",
+      "group": "youtube_developer",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://horde.aivo.chat/terms",
+      "group": "free_llm_public",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.kensink.com/models/open-weight-2026.md",
+      "group": "free_models_license",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://llm.mlc.ai/docs/deploy/rest.html",
+      "group": "local_runtime_security",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28",
+      "group": "mcp_agents",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.oecd.org/en/data/insights/data-explainers/2024/09/api.html",
+      "group": "search_open_data",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://commons.wikimedia.org/wiki/Commons:API/MediaWiki",
+      "group": "public_media",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://build.nvidia.com/search",
+      "group": "ai_provider_dev",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://layer.ai/docs/v2/rest-api",
+      "group": "quota_retry",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://aistudio.google.com/docs/terms",
+      "group": "google_ai_cost",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.indexnow.org/documentation",
+      "group": "bing_seo_api",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/facebook-login/facebook-login-for-business/",
+      "group": "facebook_analytics",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/analytics/dimensions",
+      "group": "youtube_developer",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://haidra-org.github.io/AI-Horde/decisions/0035-keep-anonymous-access-on-the-chat-front/",
+      "group": "free_llm_public",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://ossfidelity.com/models/",
+      "group": "free_models_license",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.jan.ai/desktop/api-server",
+      "group": "local_runtime_security",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/specification/2025-11-25/basic/authorization.mdx",
+      "group": "mcp_agents",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://ec.europa.eu/eurostat/web/user-guides/data-browser/api-data-access/api-getting-started/sdmx3.0",
+      "group": "search_open_data",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://archive.org/help/aboutsearch.htm",
+      "group": "public_media",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://home.cloud.groq.io/groqcloud",
+      "group": "ai_provider_dev",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.opinference.com/docs/account/rate-limits",
+      "group": "quota_retry",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://discuss.ai.google.dev/t/terms-and-conditions-for-gemini-api/178519",
+      "group": "google_ai_cost",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://learn.microsoft.com/hi-in/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getcrawlstats?view=bing-webmaster-dotnet",
+      "group": "bing_seo_api",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/instagram-platform/reference/instagram-media?locale=zh_CN",
+      "group": "facebook_analytics",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.cn/youtube/analytics/sample-requests",
+      "group": "youtube_developer",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Haidra-Org/AI-Horde/blob/main/README_integration.md",
+      "group": "free_llm_public",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://lindstead.com/models",
+      "group": "free_models_license",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://koboldcpp.net/docs/api/overview/",
+      "group": "local_runtime_security",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/specification/2026-07-28/server/tools.mdx",
+      "group": "mcp_agents",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://ec.europa.eu/eurostat/web/user-guides/data-browser/api-data-access/api-detailed-guidelines/sdmx3-0/data-query",
+      "group": "search_open_data",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://commons.wikimedia.org/wiki/Commons:Machine-readable_data/en",
+      "group": "public_media",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://inference-docs.cerebras.ai/",
+      "group": "ai_provider_dev",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/azure/api-management/llm-token-limit-policy",
+      "group": "quota_retry",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://perimattic.com/products/llm-gateway/pricing/gemini-api/",
+      "group": "google_ai_cost",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www2.bing.com/webmasters/help/indexnow-0z209wby",
+      "group": "bing_seo_api",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media/",
+      "group": "facebook_analytics",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/resources/api-libraries/documentation/youtubeAnalytics/v2/java/latest/com/google/api/services/youtubeAnalytics/v2/YouTubeAnalytics.Reports.Query.html",
+      "group": "youtube_developer",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/Haidra-Org/AI-Horde/",
+      "group": "free_llm_public",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://llmeu.com/cs/use/open-weights/",
+      "group": "free_models_license",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/raspoli/mlx-serve/blob/main/docs/api.md",
+      "group": "local_runtime_security",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html",
+      "group": "mcp_agents",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://datahelpdesk.worldbank.org/knowledgebase/articles/1886701-sdmx-api-queries",
+      "group": "search_open_data",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/imranshiundu/Hoovi",
+      "group": "public_media",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.fireworks.ai/getting-started/introduction",
+      "group": "ai_provider_dev",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.opinference.com/docs/routing/idempotency",
+      "group": "quota_retry",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://adlega.com/blog/gemini-api-price-increase/",
+      "group": "google_ai_cost",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.rankizz.com/docs/api/bing-webmaster",
+      "group": "bing_seo_api",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/docs/app-review/support/rejection-guides/instagram/",
+      "group": "facebook_analytics",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/analytics/metrics",
+      "group": "youtube_developer",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://freellmapihub.com/p/ai-horde",
+      "group": "free_llm_public",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/xigh/open-weight-models",
+      "group": "free_models_license",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.prismml.com/run/server",
+      "group": "local_runtime_security",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://modelcontextprotocol.io/docs/draft/tutorials/security/authorization",
+      "group": "mcp_agents",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://sdmx.oecd.org/public",
+      "group": "search_open_data",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://commons.wikimedia.org/wiki/Help:Search",
+      "group": "public_media",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.cerebras.ai/inference",
+      "group": "ai_provider_dev",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://help.openai.com/en/articles/5955604-troubleshooting-api-rate-limits-and-429-errors",
+      "group": "quota_retry",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://discuss.ai.google.dev/t/terms-and-conditions-for-gemini-api/178519/1",
+      "group": "google_ai_cost",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/piyush-gambhir/bing-webmaster-cli",
+      "group": "bing_seo_api",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/products/instagram/apis/",
+      "group": "facebook_analytics",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.cn/youtube/analytics/reference?hl=zh-cn",
+      "group": "youtube_developer",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/haidra-org/ai-horde",
+      "group": "free_llm_public",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://modelsbay.io/en/open-source/",
+      "group": "free_models_license",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/tumma72/mlx-manager/blob/main/docs/MLX_SERVER.md",
+      "group": "local_runtime_security",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/architecture/index",
+      "group": "mcp_agents",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://sdmx.oecd.org/public/swagger/index.html?urls.primaryName=v2",
+      "group": "search_open_data",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://commons.wikimedia.org/wiki/Commons:API",
+      "group": "public_media",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://xyzs996.github.io/free-llm-api/compare/coding-agents.html",
+      "group": "ai_provider_dev",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.prem.io/rate-limits",
+      "group": "quota_retry",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://yosuke4061.com/new_toppage/briefings/brief013/",
+      "group": "google_ai_cost",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://projects.piyushgambhir.com/bing-webmaster-cli/docs/reference/api-coverage",
+      "group": "bing_seo_api",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.facebook.com/documentation/facebook-login/facebook-login-for-business.md",
+      "group": "facebook_analytics",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://googleapis.github.io/google-api-python-client/docs/dyn/youtubeAnalytics_v2.reports.html",
+      "group": "youtube_developer",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://displaii.com/directory/platform-aihorde",
+      "group": "free_llm_public",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/hyeonseo2/open-model-license-index",
+      "group": "free_models_license",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/janhq/server/tree/main/docs/api/llm-api",
+      "group": "local_runtime_security",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices",
+      "group": "mcp_agents",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://gitlab.algobank.oecd.org/public-documentation/dotstat-migration/-/raw/main/OECD_Data_API_documentation-Upgrading_from_the_legacy_OECD.Stat_APIs.pdf",
+      "group": "search_open_data",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://help.archive.org/help/search-a-basic-guide/",
+      "group": "public_media",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://agentscamp.com/guides/comparisons/best-llm-inference-providers-2026",
+      "group": "ai_provider_dev",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/retry-strategy",
+      "group": "quota_retry",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.glamdringresearch.com/post/gemini-pro-api-pricing",
+      "group": "google_ai_cost",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/idowebid/bing-webmaster-mcp",
+      "group": "bing_seo_api",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.postman.com/meta/instagram/documentation/6yqw8pt/instagram-api",
+      "group": "facebook_analytics",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.com/youtube/analytics/revision_history",
+      "group": "youtube_developer",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/chigwell/llm7.io/blob/main/TERMS.md",
+      "group": "free_llm_public",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://guidetoartificialintelligence.com/en/learn/which-open-weight-model-compared/",
+      "group": "free_models_license",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://opentine.com/docs/models/ollama",
+      "group": "local_runtime_security",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/OWASP/MCP-Security-Testing-Guide/blob/main/04.%20Secure%20MCP%20Development.md",
+      "group": "mcp_agents",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://wits.worldbank.org/API/V1/SDMX/V21/",
+      "group": "search_open_data",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.savepanda.io/developers",
+      "group": "public_media",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://github.com/crnst8/cascade",
+      "group": "ai_provider_dev",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://docs.gloo.com/api-reference/general/limits",
+      "group": "quota_retry",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://web.archive.org/web/20250621161929/https:/ai.google.dev/gemini-api/docs/pricing",
+      "group": "google_ai_cost",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://indexnowtool.com/bing-seo/bing-indexnow-api-documentation",
+      "group": "bing_seo_api",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://www.upload-post.com/instagram-api/",
+      "group": "facebook_analytics",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    },
+    {
+      "url": "https://developers.google.cn/youtube/reporting/v1/reports/channel_reports?hl=ar",
+      "group": "youtube_developer",
+      "source_batch": 14,
+      "status": "SOURCE_URL_ONLY_NOT_VERIFIED_API"
+    }
+  ]
+}

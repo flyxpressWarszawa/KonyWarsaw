@@ -1,0 +1,510 @@
+{
+  "schema": "msw.hermes.source-candidates.v1",
+  "batch": 14,
+  "status": "DISCOVERED_UNFETCHED",
+  "date_utc": "2026-11-13",
+  "candidate_count": 125,
+  "prior_batch_unique_url_count": 600,
+  "sources": [
+    {
+      "group": "google_ai_cost",
+      "url": "https://aistudio.google.com/docs/api-key"
+    },
+    {
+      "group": "bing_seo_api",
+      "url": "https://www2.bing.com/webmasters/help/soap-pox-api-deprecation-s0appox01"
+    },
+    {
+      "group": "facebook_analytics",
+      "url": "https://developers.facebook.com/docs/instagram-platform/content-publishing/"
+    },
+    {
+      "group": "youtube_developer",
+      "url": "https://developers.google.com/youtube/analytics/reference/reports/query"
+    },
+    {
+      "group": "free_llm_public",
+      "url": "https://horde.aivo.chat/terms"
+    },
+    {
+      "group": "free_models_license",
+      "url": "https://www.kensink.com/models/open-weight-2026.md"
+    },
+    {
+      "group": "local_runtime_security",
+      "url": "https://llm.mlc.ai/docs/deploy/rest.html"
+    },
+    {
+      "group": "mcp_agents",
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28"
+    },
+    {
+      "group": "search_open_data",
+      "url": "https://www.oecd.org/en/data/insights/data-explainers/2024/09/api.html"
+    },
+    {
+      "group": "public_media",
+      "url": "https://commons.wikimedia.org/wiki/Commons:API/MediaWiki"
+    },
+    {
+      "group": "ai_provider_dev",
+      "url": "https://build.nvidia.com/search"
+    },
+    {
+      "group": "quota_retry",
+      "url": "https://layer.ai/docs/v2/rest-api"
+    },
+    {
+      "group": "google_ai_cost",
+      "url": "https://aistudio.google.com/docs/terms"
+    },
+    {
+      "group": "bing_seo_api",
+      "url": "https://www.indexnow.org/documentation"
+    },
+    {
+      "group": "facebook_analytics",
+      "url": "https://developers.facebook.com/docs/facebook-login/facebook-login-for-business/"
+    },
+    {
+      "group": "youtube_developer",
+      "url": "https://developers.google.com/youtube/analytics/dimensions"
+    },
+    {
+      "group": "free_llm_public",
+      "url": "https://haidra-org.github.io/AI-Horde/decisions/0035-keep-anonymous-access-on-the-chat-front/"
+    },
+    {
+      "group": "free_models_license",
+      "url": "https://ossfidelity.com/models/"
+    },
+    {
+      "group": "local_runtime_security",
+      "url": "https://docs.jan.ai/desktop/api-server"
+    },
+    {
+      "group": "mcp_agents",
+      "url": "https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/specification/2025-11-25/basic/authorization.mdx"
+    },
+    {
+      "group": "search_open_data",
+      "url": "https://ec.europa.eu/eurostat/web/user-guides/data-browser/api-data-access/api-getting-started/sdmx3.0"
+    },
+    {
+      "group": "public_media",
+      "url": "https://archive.org/help/aboutsearch.htm"
+    },
+    {
+      "group": "ai_provider_dev",
+      "url": "https://home.cloud.groq.io/groqcloud"
+    },
+    {
+      "group": "quota_retry",
+      "url": "https://docs.opinference.com/docs/account/rate-limits"
+    },
+    {
+      "group": "google_ai_cost",
+      "url": "https://discuss.ai.google.dev/t/terms-and-conditions-for-gemini-api/178519"
+    },
+    {
+      "group": "bing_seo_api",
+      "url": "https://learn.microsoft.com/hi-in/dotnet/api/microsoft.bing.webmaster.api.interfaces.iwebmasterapi.getcrawlstats?view=bing-webmaster-dotnet"
+    },
+    {
+      "group": "facebook_analytics",
+      "url": "https://developers.facebook.com/docs/instagram-platform/reference/instagram-media?locale=zh_CN"
+    },
+    {
+      "group": "youtube_developer",
+      "url": "https://developers.google.cn/youtube/analytics/sample-requests"
+    },
+    {
+      "group": "free_llm_public",
+      "url": "https://github.com/Haidra-Org/AI-Horde/blob/main/README_integration.md"
+    },
+    {
+      "group": "free_models_license",
+      "url": "https://lindstead.com/models"
+    },
+    {
+      "group": "local_runtime_security",
+      "url": "https://koboldcpp.net/docs/api/overview/"
+    },
+    {
+      "group": "mcp_agents",
+      "url": "https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/specification/2026-07-28/server/tools.mdx"
+    },
+    {
+      "group": "search_open_data",
+      "url": "https://ec.europa.eu/eurostat/web/user-guides/data-browser/api-data-access/api-detailed-guidelines/sdmx3-0/data-query"
+    },
+    {
+      "group": "public_media",
+      "url": "https://commons.wikimedia.org/wiki/Commons:Machine-readable_data/en"
+    },
+    {
+      "group": "ai_provider_dev",
+      "url": "https://inference-docs.cerebras.ai/"
+    },
+    {
+      "group": "quota_retry",
+      "url": "https://learn.microsoft.com/en-us/azure/api-management/llm-token-limit-policy"
+    },
+    {
+      "group": "google_ai_cost",
+      "url": "https://perimattic.com/products/llm-gateway/pricing/gemini-api/"
+    },
+    {
+      "group": "bing_seo_api",
+      "url": "https://www2.bing.com/webmasters/help/indexnow-0z209wby"
+    },
+    {
+      "group": "facebook_analytics",
+      "url": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media/"
+    },
+    {
+      "group": "youtube_developer",
+      "url": "https://developers.google.com/resources/api-libraries/documentation/youtubeAnalytics/v2/java/latest/com/google/api/services/youtubeAnalytics/v2/YouTubeAnalytics.Reports.Query.html"
+    },
+    {
+      "group": "free_llm_public",
+      "url": "https://github.com/Haidra-Org/AI-Horde/"
+    },
+    {
+      "group": "free_models_license",
+      "url": "https://llmeu.com/cs/use/open-weights/"
+    },
+    {
+      "group": "local_runtime_security",
+      "url": "https://github.com/raspoli/mlx-serve/blob/main/docs/api.md"
+    },
+    {
+      "group": "mcp_agents",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html"
+    },
+    {
+      "group": "search_open_data",
+      "url": "https://datahelpdesk.worldbank.org/knowledgebase/articles/1886701-sdmx-api-queries"
+    },
+    {
+      "group": "public_media",
+      "url": "https://github.com/imranshiundu/Hoovi"
+    },
+    {
+      "group": "ai_provider_dev",
+      "url": "https://docs.fireworks.ai/getting-started/introduction"
+    },
+    {
+      "group": "quota_retry",
+      "url": "https://docs.opinference.com/docs/routing/idempotency"
+    },
+    {
+      "group": "google_ai_cost",
+      "url": "https://adlega.com/blog/gemini-api-price-increase/"
+    },
+    {
+      "group": "bing_seo_api",
+      "url": "https://www.rankizz.com/docs/api/bing-webmaster"
+    },
+    {
+      "group": "facebook_analytics",
+      "url": "https://developers.facebook.com/docs/app-review/support/rejection-guides/instagram/"
+    },
+    {
+      "group": "youtube_developer",
+      "url": "https://developers.google.com/youtube/analytics/metrics"
+    },
+    {
+      "group": "free_llm_public",
+      "url": "https://freellmapihub.com/p/ai-horde"
+    },
+    {
+      "group": "free_models_license",
+      "url": "https://github.com/xigh/open-weight-models"
+    },
+    {
+      "group": "local_runtime_security",
+      "url": "https://docs.prismml.com/run/server"
+    },
+    {
+      "group": "mcp_agents",
+      "url": "https://modelcontextprotocol.io/docs/draft/tutorials/security/authorization"
+    },
+    {
+      "group": "search_open_data",
+      "url": "https://sdmx.oecd.org/public"
+    },
+    {
+      "group": "public_media",
+      "url": "https://commons.wikimedia.org/wiki/Help:Search"
+    },
+    {
+      "group": "ai_provider_dev",
+      "url": "https://www.cerebras.ai/inference"
+    },
+    {
+      "group": "quota_retry",
+      "url": "https://help.openai.com/en/articles/5955604-troubleshooting-api-rate-limits-and-429-errors"
+    },
+    {
+      "group": "google_ai_cost",
+      "url": "https://discuss.ai.google.dev/t/terms-and-conditions-for-gemini-api/178519/1"
+    },
+    {
+      "group": "bing_seo_api",
+      "url": "https://github.com/piyush-gambhir/bing-webmaster-cli"
+    },
+    {
+      "group": "facebook_analytics",
+      "url": "https://developers.facebook.com/products/instagram/apis/"
+    },
+    {
+      "group": "youtube_developer",
+      "url": "https://developers.google.cn/youtube/analytics/reference?hl=zh-cn"
+    },
+    {
+      "group": "free_llm_public",
+      "url": "https://github.com/haidra-org/ai-horde"
+    },
+    {
+      "group": "free_models_license",
+      "url": "https://modelsbay.io/en/open-source/"
+    },
+    {
+      "group": "local_runtime_security",
+      "url": "https://github.com/tumma72/mlx-manager/blob/main/docs/MLX_SERVER.md"
+    },
+    {
+      "group": "mcp_agents",
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/architecture/index"
+    },
+    {
+      "group": "search_open_data",
+      "url": "https://sdmx.oecd.org/public/swagger/index.html?urls.primaryName=v2"
+    },
+    {
+      "group": "public_media",
+      "url": "https://commons.wikimedia.org/wiki/Commons:API"
+    },
+    {
+      "group": "ai_provider_dev",
+      "url": "https://xyzs996.github.io/free-llm-api/compare/coding-agents.html"
+    },
+    {
+      "group": "quota_retry",
+      "url": "https://docs.prem.io/rate-limits"
+    },
+    {
+      "group": "google_ai_cost",
+      "url": "https://yosuke4061.com/new_toppage/briefings/brief013/"
+    },
+    {
+      "group": "bing_seo_api",
+      "url": "https://projects.piyushgambhir.com/bing-webmaster-cli/docs/reference/api-coverage"
+    },
+    {
+      "group": "facebook_analytics",
+      "url": "https://developers.facebook.com/documentation/facebook-login/facebook-login-for-business.md"
+    },
+    {
+      "group": "youtube_developer",
+      "url": "https://googleapis.github.io/google-api-python-client/docs/dyn/youtubeAnalytics_v2.reports.html"
+    },
+    {
+      "group": "free_llm_public",
+      "url": "https://displaii.com/directory/platform-aihorde"
+    },
+    {
+      "group": "free_models_license",
+      "url": "https://github.com/hyeonseo2/open-model-license-index"
+    },
+    {
+      "group": "local_runtime_security",
+      "url": "https://github.com/janhq/server/tree/main/docs/api/llm-api"
+    },
+    {
+      "group": "mcp_agents",
+      "url": "https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices"
+    },
+    {
+      "group": "search_open_data",
+      "url": "https://gitlab.algobank.oecd.org/public-documentation/dotstat-migration/-/raw/main/OECD_Data_API_documentation-Upgrading_from_the_legacy_OECD.Stat_APIs.pdf"
+    },
+    {
+      "group": "public_media",
+      "url": "https://help.archive.org/help/search-a-basic-guide/"
+    },
+    {
+      "group": "ai_provider_dev",
+      "url": "https://agentscamp.com/guides/comparisons/best-llm-inference-providers-2026"
+    },
+    {
+      "group": "quota_retry",
+      "url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/retry-strategy"
+    },
+    {
+      "group": "google_ai_cost",
+      "url": "https://www.glamdringresearch.com/post/gemini-pro-api-pricing"
+    },
+    {
+      "group": "bing_seo_api",
+      "url": "https://github.com/idowebid/bing-webmaster-mcp"
+    },
+    {
+      "group": "facebook_analytics",
+      "url": "https://www.postman.com/meta/instagram/documentation/6yqw8pt/instagram-api"
+    },
+    {
+      "group": "youtube_developer",
+      "url": "https://developers.google.com/youtube/analytics/revision_history"
+    },
+    {
+      "group": "free_llm_public",
+      "url": "https://github.com/chigwell/llm7.io/blob/main/TERMS.md"
+    },
+    {
+      "group": "free_models_license",
+      "url": "https://guidetoartificialintelligence.com/en/learn/which-open-weight-model-compared/"
+    },
+    {
+      "group": "local_runtime_security",
+      "url": "https://opentine.com/docs/models/ollama"
+    },
+    {
+      "group": "mcp_agents",
+      "url": "https://github.com/OWASP/MCP-Security-Testing-Guide/blob/main/04.%20Secure%20MCP%20Development.md"
+    },
+    {
+      "group": "search_open_data",
+      "url": "https://wits.worldbank.org/API/V1/SDMX/V21/"
+    },
+    {
+      "group": "public_media",
+      "url": "https://www.savepanda.io/developers"
+    },
+    {
+      "group": "ai_provider_dev",
+      "url": "https://github.com/crnst8/cascade"
+    },
+    {
+      "group": "quota_retry",
+      "url": "https://docs.gloo.com/api-reference/general/limits"
+    },
+    {
+      "group": "google_ai_cost",
+      "url": "https://web.archive.org/web/20250621161929/https:/ai.google.dev/gemini-api/docs/pricing"
+    },
+    {
+      "group": "bing_seo_api",
+      "url": "https://indexnowtool.com/bing-seo/bing-indexnow-api-documentation"
+    },
+    {
+      "group": "facebook_analytics",
+      "url": "https://www.upload-post.com/instagram-api/"
+    },
+    {
+      "group": "youtube_developer",
+      "url": "https://developers.google.cn/youtube/reporting/v1/reports/channel_reports?hl=ar"
+    },
+    {
+      "group": "free_models_license",
+      "url": "https://github.com/hadihonarvar/flock/commit/ec8f057294e0daf53876e4269f7614794845dc39"
+    },
+    {
+      "group": "local_runtime_security",
+      "url": "https://github.com/janhq/server"
+    },
+    {
+      "group": "mcp_agents",
+      "url": "https://github.com/microsoft/mcp-for-beginners/blob/main/05-AdvancedTopics/mcp-security/README.md"
+    },
+    {
+      "group": "search_open_data",
+      "url": "https://raw.githubusercontent.com/sdmx-twg/sdmx-rest/v2.1.0/api/sdmx-rest.yaml"
+    },
+    {
+      "group": "public_media",
+      "url": "https://flashdata.dev/products/youtube-data"
+    },
+    {
+      "group": "ai_provider_dev",
+      "url": "https://github.com/pacocartones/free-llm-api-hub/blob/main/collections/commercial-use.md"
+    },
+    {
+      "group": "quota_retry",
+      "url": "https://multigrid.ai/docs/rate-limits"
+    },
+    {
+      "group": "google_ai_cost",
+      "url": "https://costbench.com/software/llm-api-providers/google-gemini-api/"
+    },
+    {
+      "group": "bing_seo_api",
+      "url": "https://projects.piyushgambhir.com/bing-webmaster-cli/docs/compatibility"
+    },
+    {
+      "group": "facebook_analytics",
+      "url": "https://www.getphyllo.com/post/instagram-api-guide"
+    },
+    {
+      "group": "youtube_developer",
+      "url": "https://developers.google.com/youtube/reporting/v1/reports/full_report_list"
+    },
+    {
+      "group": "free_models_license",
+      "url": "https://llmeu.com/hu/use/open-weights/"
+    },
+    {
+      "group": "local_runtime_security",
+      "url": "https://github.com/ddalcu/mlx-serve/blob/main/docs/api.md"
+    },
+    {
+      "group": "mcp_agents",
+      "url": "https://docs.cloud.google.com/mcp/ai-security-safety"
+    },
+    {
+      "group": "search_open_data",
+      "url": "https://github.com/ondata/opensdmx/blob/main/docs/providers.md"
+    },
+    {
+      "group": "public_media",
+      "url": "https://help.archive.com/en/articles/14287752-what-you-can-do-with-archive-api"
+    },
+    {
+      "group": "ai_provider_dev",
+      "url": "https://blog.minz.li/posts/ai/accelerators/"
+    },
+    {
+      "group": "quota_retry",
+      "url": "https://yelno.ai/docs/errors"
+    },
+    {
+      "group": "google_ai_cost",
+      "url": "https://ai.google.dev/gemini-api/docs/pricing?authuser=2&hl=ko"
+    },
+    {
+      "group": "bing_seo_api",
+      "url": "https://projects.piyushgambhir.com/bing-webmaster-cli/docs/data"
+    },
+    {
+      "group": "facebook_analytics",
+      "url": "https://developers.facebook.com/docs/permissions?locale=zh_CN"
+    },
+    {
+      "group": "youtube_developer",
+      "url": "https://support.google.com/youtube/answer/14645915?hl=en"
+    },
+    {
+      "group": "free_models_license",
+      "url": "https://faun.dev/toolbox/integrations/open-weights-ollama-models/"
+    },
+    {
+      "group": "local_runtime_security",
+      "url": "https://github.com/Pasta-Devs/Marinara-Engine/blob/main/docs/connections/local-self-hosted.md"
+    },
+    {
+      "group": "mcp_agents",
+      "url": "https://arxiv.org/html/2511.20920"
+    }
+  ]
+}

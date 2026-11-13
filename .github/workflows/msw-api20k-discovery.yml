@@ -1,0 +1,47 @@
+# MSW: jednorazowy import katalogów publicznych na gałąź roboczą.
+# Run 2: official SwaggerHub `page` pagination (ASC/DESC); preserve existing public-apis shards.
+# Brak crona i brak wykonania jakichkolwiek odkrytych API.
+name: MSW API20K public discovery (staging)
+on:
+  push:
+    branches:
+      - msw/hermes-free-ai-candidate-20261113
+    paths:
+      - .github/workflows/msw-api20k-discovery.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: msw-api20k-discovery-staging
+  cancel-in-progress: false
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out specific staging branch
+        uses: actions/checkout@v4
+        with:
+          ref: msw/hermes-free-ai-candidate-20261113
+          persist-credentials: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test bounded catalog importer
+        run: python -m unittest discover -s msw-autonomous-engine/tests -p 'test_harvest_api20k.py' -v
+      - name: Read only public API directory metadata
+        run: |
+          python msw-autonomous-engine/tools/harvest_api20k.py \
+            --max-candidates 20000 \
+            --max-swaggerhub-pages 210 \
+            --output msw-autonomous-engine/knowledge/api20k
+      - name: Commit source-backed results (not production)
+        run: |
+          git config user.name "msw-api20k-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add msw-autonomous-engine/knowledge/api20k
+          if ! git diff --cached --quiet; then
+            git commit -m "Research: checkpoint publicly sourced API20k candidates"
+            git push origin HEAD:refs/heads/msw/hermes-free-ai-candidate-20261113
+          fi

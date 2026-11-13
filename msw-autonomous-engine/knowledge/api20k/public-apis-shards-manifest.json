@@ -1,0 +1,41 @@
+{
+  "schema": "msw.api20k.public-apis-manifest.v1",
+  "source_commits": {
+    "public-apis/public-apis": "43147f989e06bf2e445a95c0e81ed034c9196e9a",
+    "marcelscruz/public-apis": "5c6990d1100d96b12ab6ee422f0234d1f014c62e"
+  },
+  "record_count": 3445,
+  "claimed_no_auth": 1529,
+  "verified_free_no_auth": 0,
+  "shards": [
+    {
+      "path": "msw-autonomous-engine/knowledge/api20k/public-apis-shard-001.json",
+      "count": 500
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/api20k/public-apis-shard-002.json",
+      "count": 500
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/api20k/public-apis-shard-003.json",
+      "count": 500
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/api20k/public-apis-shard-004.json",
+      "count": 500
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/api20k/public-apis-shard-005.json",
+      "count": 500
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/api20k/public-apis-shard-006.json",
+      "count": 500
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/api20k/public-apis-shard-007.json",
+      "count": 445
+    }
+  ],
+  "note": "Deduplicated documentation/landing URLs from two upstream community directories; never assert free endpoint without vendor check."
+}

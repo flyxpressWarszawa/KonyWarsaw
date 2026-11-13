@@ -1,0 +1,489 @@
+{
+  "schema": "msw.research.source-discovery-candidates.v1",
+  "batch": "010",
+  "candidate_count": 120,
+  "verification": "URL_DISCOVERED_ONLY_NO_PAGE_FETCH",
+  "date_utc": "2026-11-13",
+  "candidates": [
+    {
+      "group": "alibaba_qwen",
+      "url": "https://www.alibabacloud.com/help/en/model-studio/compatibility-of-openai-with-dashscope"
+    },
+    {
+      "group": "xai_anthropic",
+      "url": "https://docs.x.ai/developers/pricing"
+    },
+    {
+      "group": "groq_cerebras",
+      "url": "https://inference-docs.cerebras.ai/support/rate-limits"
+    },
+    {
+      "group": "mistral_deepseek",
+      "url": "https://docs.mistral.ai/inference/pricing"
+    },
+    {
+      "group": "sambanova_together",
+      "url": "https://docs.sambanova.ai/docs/en/models/rate-limits"
+    },
+    {
+      "group": "fireworks_replicate",
+      "url": "https://replicate.com/docs/topics/predictions/rate-limits"
+    },
+    {
+      "group": "cloudflare",
+      "url": "https://developers.cloudflare.com/workers-ai/get-started/rest-api/"
+    },
+    {
+      "group": "huggingface",
+      "url": "https://huggingface.co/docs/inference-providers/main/index"
+    },
+    {
+      "group": "perplexity_cohere",
+      "url": "https://docs.perplexity.ai/docs/getting-started/pricing"
+    },
+    {
+      "group": "open_models",
+      "url": "https://unsloth.ai/docs/get-started/unsloth-model-catalog"
+    },
+    {
+      "group": "alibaba_qwen",
+      "url": "https://www.alibabacloud.com/help/en/model-studio/rate-limit"
+    },
+    {
+      "group": "xai_anthropic",
+      "url": "https://platform.claude.com/docs/en/api/rate-limits"
+    },
+    {
+      "group": "groq_cerebras",
+      "url": "https://console.groq.com/docs/rate-limits"
+    },
+    {
+      "group": "mistral_deepseek",
+      "url": "https://docs.mistral.ai/admin/billing-usage/usage-limits"
+    },
+    {
+      "group": "sambanova_together",
+      "url": "https://docs.together.ai/docs/serverless/rate-limits"
+    },
+    {
+      "group": "fireworks_replicate",
+      "url": "https://docs.fireworks.ai/guides/quotas_usage/account-quotas"
+    },
+    {
+      "group": "cloudflare",
+      "url": "https://developers.cloudflare.com/workers-ai/models/"
+    },
+    {
+      "group": "huggingface",
+      "url": "https://huggingface.co/docs/inference-providers/main/en/guides/first-api-call"
+    },
+    {
+      "group": "perplexity_cohere",
+      "url": "https://docs.cohere.com/docs/rate-limits"
+    },
+    {
+      "group": "open_models",
+      "url": "https://huggingface.co/blog/daya-shankar/open-source-llm-models-to-run-locally"
+    },
+    {
+      "group": "alibaba_qwen",
+      "url": "https://www.alibabacloud.com/help/en/model-studio/new-free-quota"
+    },
+    {
+      "group": "xai_anthropic",
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing"
+    },
+    {
+      "group": "groq_cerebras",
+      "url": "https://freellm.today/compare/groq-vs-cerebras/"
+    },
+    {
+      "group": "mistral_deepseek",
+      "url": "https://docs.mistral.ai/resources/known-limitations"
+    },
+    {
+      "group": "sambanova_together",
+      "url": "https://cloud.sambanova.ai/plans"
+    },
+    {
+      "group": "fireworks_replicate",
+      "url": "https://docs.fireworks.ai/serverless/rate-limits"
+    },
+    {
+      "group": "cloudflare",
+      "url": "https://developers.cloudflare.com/workers-ai/platform/limits/"
+    },
+    {
+      "group": "huggingface",
+      "url": "https://huggingface.co/docs/inference-providers/main/en/hub-integration"
+    },
+    {
+      "group": "perplexity_cohere",
+      "url": "https://docs.perplexity.ai/docs/getting-started/quickstart"
+    },
+    {
+      "group": "open_models",
+      "url": "https://swcatalog.intel.com/developer/docs/intel-inference-microservices/models-and-hardware/model-catalog"
+    },
+    {
+      "group": "alibaba_qwen",
+      "url": "https://www.alibabacloud.com/help/en/model-studio/what-is-model-studio"
+    },
+    {
+      "group": "xai_anthropic",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching"
+    },
+    {
+      "group": "groq_cerebras",
+      "url": "https://limithit.com/free"
+    },
+    {
+      "group": "mistral_deepseek",
+      "url": "https://api-docs.deepseek.com/quick_start/pricing/"
+    },
+    {
+      "group": "sambanova_together",
+      "url": "https://docs.together.ai/docs/serverless/overview"
+    },
+    {
+      "group": "fireworks_replicate",
+      "url": "https://replicate.com/docs/topics/billing"
+    },
+    {
+      "group": "cloudflare",
+      "url": "https://developers.cloudflare.com/api/resources/ai/methods/run/"
+    },
+    {
+      "group": "huggingface",
+      "url": "https://github.com/huggingface/skills/blob/HEAD/skills/huggingface-spaces/references/inference-providers.md"
+    },
+    {
+      "group": "perplexity_cohere",
+      "url": "https://cohere.com/pricing"
+    },
+    {
+      "group": "open_models",
+      "url": "https://www.irurueta.com/ai/local-llms/open-weight-models.html"
+    },
+    {
+      "group": "alibaba_qwen",
+      "url": "https://docs.modelstudio.console.alibabacloud.com/zh/model-studio/token-plan-team-quickstart"
+    },
+    {
+      "group": "xai_anthropic",
+      "url": "https://docs.x.ai/developers/rate-limits"
+    },
+    {
+      "group": "groq_cerebras",
+      "url": "https://refusalrate.com/groq-vs-cerebras"
+    },
+    {
+      "group": "mistral_deepseek",
+      "url": "https://api-docs.deepseek.com/"
+    },
+    {
+      "group": "sambanova_together",
+      "url": "https://docs.together.ai/docs/changelog"
+    },
+    {
+      "group": "fireworks_replicate",
+      "url": "https://docs.fireworks.ai/serverless/overview"
+    },
+    {
+      "group": "cloudflare",
+      "url": "https://developers.cloudflare.com/changelog/product/workers-ai/"
+    },
+    {
+      "group": "huggingface",
+      "url": "https://huggingface.co/docs/inference-providers/en/pricing"
+    },
+    {
+      "group": "perplexity_cohere",
+      "url": "https://docs.perplexity.ai/docs/admin/rate-limits-usage-tiers"
+    },
+    {
+      "group": "open_models",
+      "url": "https://selfhost.directory/models"
+    },
+    {
+      "group": "alibaba_qwen",
+      "url": "https://www.alibabacloud.com/help/en/model-studio/token-plan-overview"
+    },
+    {
+      "group": "xai_anthropic",
+      "url": "https://docs.x.ai/developers/advanced-api-usage/prompt-caching/usage-and-pricing"
+    },
+    {
+      "group": "groq_cerebras",
+      "url": "https://stacksfree.com/blog/free-tier-rate-limits-across-ai-inference-apis-in-2026/"
+    },
+    {
+      "group": "mistral_deepseek",
+      "url": "https://mistral.ai/pricing/"
+    },
+    {
+      "group": "sambanova_together",
+      "url": "https://support.together.ai/articles/2650779384-build-tiers-required-spend-and-rate-limits"
+    },
+    {
+      "group": "fireworks_replicate",
+      "url": "https://fireworks.ai/pricing"
+    },
+    {
+      "group": "cloudflare",
+      "url": "https://developers.cloudflare.com/workers-ai/llms-full.txt"
+    },
+    {
+      "group": "huggingface",
+      "url": "https://huggingface.co/docs/inference-providers/main/en/guides/responses-api"
+    },
+    {
+      "group": "perplexity_cohere",
+      "url": "https://docs.cohere.com/docs/how-does-cohere-pricing-work.mdx"
+    },
+    {
+      "group": "open_models",
+      "url": "https://localllms.dev/llm/all/"
+    },
+    {
+      "group": "alibaba_qwen",
+      "url": "https://docs.modelstudio.console.alibabacloud.com/en/model-studio/more-tools"
+    },
+    {
+      "group": "xai_anthropic",
+      "url": "https://docs.x.ai/developers/grok-4-7"
+    },
+    {
+      "group": "groq_cerebras",
+      "url": "https://aireiter.com/blog/free-llm-api-quota-comparison"
+    },
+    {
+      "group": "mistral_deepseek",
+      "url": "https://api-docs.deepseek.com/quick_start/rate_limit.md"
+    },
+    {
+      "group": "sambanova_together",
+      "url": "https://www.together.ai/pricing-capacity"
+    },
+    {
+      "group": "fireworks_replicate",
+      "url": "https://replicate.com/pricing"
+    },
+    {
+      "group": "cloudflare",
+      "url": "https://developers.cloudflare.com/ai-gateway/usage/rest-api/"
+    },
+    {
+      "group": "huggingface",
+      "url": "https://huggingface.co/blog/inference-providers"
+    },
+    {
+      "group": "perplexity_cohere",
+      "url": "https://docs.perplexity.ai/docs/getting-started/projects"
+    },
+    {
+      "group": "open_models",
+      "url": "https://runailocal.dev/models/"
+    },
+    {
+      "group": "alibaba_qwen",
+      "url": "https://docs.modelstudio.console.alibabacloud.com/en/model-studio/model-pricing.md"
+    },
+    {
+      "group": "xai_anthropic",
+      "url": "https://platform.claude.com/docs/en/api/overview"
+    },
+    {
+      "group": "groq_cerebras",
+      "url": "https://xyzs996.github.io/free-llm-api/provider/cerebras.html"
+    },
+    {
+      "group": "mistral_deepseek",
+      "url": "https://help.mistral.ai/en/articles/698531-why-am-i-hitting-api-rate-limits-and-how-do-i-increase-them"
+    },
+    {
+      "group": "sambanova_together",
+      "url": "https://docs.together.ai/intro"
+    },
+    {
+      "group": "fireworks_replicate",
+      "url": "https://replicate.com/docs/"
+    },
+    {
+      "group": "cloudflare",
+      "url": "https://developers.cloudflare.com/api/resources/ai/"
+    },
+    {
+      "group": "huggingface",
+      "url": "https://huggingface.co/docs/inference-providers/main/hub-api"
+    },
+    {
+      "group": "perplexity_cohere",
+      "url": "https://docs.perplexity.ai/docs/resources/faq"
+    },
+    {
+      "group": "open_models",
+      "url": "https://d-central.tech/data/local-llm-model-database/"
+    },
+    {
+      "group": "alibaba_qwen",
+      "url": "https://docs.modelstudio.console.alibabacloud.com/en/model-studio/token-plan-overview"
+    },
+    {
+      "group": "xai_anthropic",
+      "url": "https://docs.x.ai/developers/advanced-api-usage/prompt-caching"
+    },
+    {
+      "group": "groq_cerebras",
+      "url": "https://fast.io/resources/groq-rate-limit/"
+    },
+    {
+      "group": "mistral_deepseek",
+      "url": "https://docs.mistral.ai/inference"
+    },
+    {
+      "group": "sambanova_together",
+      "url": "https://docs.together.ai/docs/inference/batch/overview"
+    },
+    {
+      "group": "fireworks_replicate",
+      "url": "https://docs.fireworks.ai/guides/inference-error-codes"
+    },
+    {
+      "group": "cloudflare",
+      "url": "https://developers.cloudflare.com/changelog/post/2026-08-07-workers-ai-unified-billing/"
+    },
+    {
+      "group": "huggingface",
+      "url": "https://huggingface.co/docs/hub/enterprise"
+    },
+    {
+      "group": "perplexity_cohere",
+      "url": "https://docs.cohere.com/docs/cohere-faqs"
+    },
+    {
+      "group": "open_models",
+      "url": "https://huggingface.co/datasets/tbukuai/hf-papers-wiki/blob/main/comparisons/open-model-families.md"
+    },
+    {
+      "group": "alibaba_qwen",
+      "url": "https://www.alibabacloud.com/help/en/model-studio/chatbox"
+    },
+    {
+      "group": "xai_anthropic",
+      "url": "https://docs.x.ai/developers/models"
+    },
+    {
+      "group": "groq_cerebras",
+      "url": "https://aifree.dev/learn/free-groq-api-key"
+    },
+    {
+      "group": "mistral_deepseek",
+      "url": "https://docs.mistral.ai/inference/model-selection-guide.md"
+    },
+    {
+      "group": "sambanova_together",
+      "url": "https://docs.together.ai/docs/error-codes"
+    },
+    {
+      "group": "fireworks_replicate",
+      "url": "https://www.codeworlds.com/en/collections/replicate"
+    },
+    {
+      "group": "cloudflare",
+      "url": "https://www.cloudflare.com/products/workers-ai/"
+    },
+    {
+      "group": "huggingface",
+      "url": "https://huggingface.co/inference/models"
+    },
+    {
+      "group": "perplexity_cohere",
+      "url": "https://docs.cohere.com/docs/going-live"
+    },
+    {
+      "group": "open_models",
+      "url": "https://github.com/rafska/awesome-local-llm"
+    },
+    {
+      "group": "alibaba_qwen",
+      "url": "https://www.alibabacloud.com/help/en/llms.txt"
+    },
+    {
+      "group": "xai_anthropic",
+      "url": "https://docs.x.ai/cookbook/examples/prompt-caching"
+    },
+    {
+      "group": "groq_cerebras",
+      "url": "https://xyzs996.github.io/free-llm-api/provider/groq.html"
+    },
+    {
+      "group": "mistral_deepseek",
+      "url": "https://docs.mistral.ai/fr/getting-started/quickstarts/studio/activate-and-generate-api-key"
+    },
+    {
+      "group": "sambanova_together",
+      "url": "https://docs.together.ai/docs/serverless/models"
+    },
+    {
+      "group": "fireworks_replicate",
+      "url": "https://docs.fireworks.ai/guides/spot-serverless"
+    },
+    {
+      "group": "cloudflare",
+      "url": "https://developers.cloudflare.com/changelog/post/2026-11-12-inkling-2-small-workers-ai/"
+    },
+    {
+      "group": "huggingface",
+      "url": "https://opusjake.ai/blog/how-to-use-huggingface"
+    },
+    {
+      "group": "perplexity_cohere",
+      "url": "https://docs.cohere.com/changelog/pricing-update-and-new-dashboard-ui"
+    },
+    {
+      "group": "open_models",
+      "url": "https://github.com/StanfordSpezi/SpeziLLM/blob/main/Sources/SpeziLLMLocal/Configuration/LLMLocalModel.swift"
+    },
+    {
+      "group": "alibaba_qwen",
+      "url": "https://www.alibabacloud.com/help/en/model-studio/cherry-studio"
+    },
+    {
+      "group": "xai_anthropic",
+      "url": "https://platform.claude.com/docs/en/api/messages"
+    },
+    {
+      "group": "groq_cerebras",
+      "url": "https://free.branolabs.com/"
+    },
+    {
+      "group": "mistral_deepseek",
+      "url": "https://platform.deepseek.com/docs/api/pricing"
+    },
+    {
+      "group": "sambanova_together",
+      "url": "https://community.sambanova.ai/t/rate-limits-are-a-deal-breaker-too-many-requests-retrying-in-3m-8s-attempt-8/1602"
+    },
+    {
+      "group": "fireworks_replicate",
+      "url": "https://www.morphllm.com/comparisons/fireworks-vs-replicate"
+    },
+    {
+      "group": "cloudflare",
+      "url": "https://frontierdot.com/best/free-llm-apis/cloudflare-workers-ai/"
+    },
+    {
+      "group": "huggingface",
+      "url": "https://huggingface.co/docs/inference-providers/pricing"
+    },
+    {
+      "group": "perplexity_cohere",
+      "url": "https://www.perplexity.ai/hub/legal/perplexity-api-terms-of-service"
+    },
+    {
+      "group": "open_models",
+      "url": "https://cometlab.ai/atlas/category/open-weight-models/"
+    }
+  ]
+}
