@@ -36,8 +36,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags origin             '+refs/heads/msw/hermes-free-ai-candidate-20261113:refs/remotes/origin/msw/hermes-free-ai-candidate-20261113'
-          git worktree add --detach "$RUNNER_TEMP/msw-hermes-public-archive"             refs/remotes/origin/msw/hermes-free-ai-candidate-20261113
+          git fetch --no-tags origin             '+refs/heads/msw/hermes-knowledge-vault:refs/remotes/origin/msw/hermes-knowledge-vault'
+          git worktree add --detach "$RUNNER_TEMP/msw-hermes-public-archive"             refs/remotes/origin/msw/hermes-knowledge-vault
 
       - name: Validate source batches and deduplication
         shell: bash
@@ -66,7 +66,7 @@ jobs:
           fi
           git -C "$worktree" commit -m 'docs: refresh read-only Hermes public source manifest'
           # Protected branch or concurrent updates produce a failed run; no force pushes.
-          git -C "$worktree" push origin             HEAD:refs/heads/msw/hermes-free-ai-candidate-20261113
+          git -C "$worktree" push origin             HEAD:refs/heads/msw/hermes-knowledge-vault
 
       - name: Preserve run output
         if: always()
