@@ -1,13 +1,10 @@
 {
-  "schema": "msw.hermes.public-archive-pointer.v1",
-  "repository": "flyxpressWarszawa/KonyWarsaw",
-  "archive_branch": "msw/hermes-knowledge-vault",
-  "primary_index_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-knowledge-vault/msw-autonomous-engine/knowledge/HERMES-GITHUB-AUTO-INDEX.json",
-  "human_guide_url": "https://github.com/flyxpressWarszawa/KonyWarsaw/blob/msw/hermes-knowledge-vault/msw-autonomous-engine/knowledge/HERMES-ARCHIWUM-START.md",
-  "archive_chronology_url": "https://github.com/flyxpressWarszawa/KonyWarsaw/blob/msw/hermes-knowledge-vault/msw-autonomous-engine/knowledge/MSW-CHRONOLOGIA-OD-POCZATKU-20261019-20261113.md",
-  "pipeline_path": ".github/workflows/msw-hermes-github-archive.yml",
-  "cadence": "scheduled_every_15_minutes_UTC_and_main_push",
-  "scope": "safe public documents and historical milestone metadata; full private ChatGPT history excluded",
-  "confidence": "github_index_verified; Hermes_runtime_ingestion_not_verified",
-  "commercial_private_data": false
+  "schema": "msw.hermes.archive-public-policy.v2",
+  "status": "PUBLIC_HERMES_KNOWLEDGE_ARCHIVE_DISABLED",
+  "since": "2026-11-13",
+  "privacy": "owner_requires_private_only",
+  "public_archive_intentionally_not_updated": true,
+  "private_archive_uri": "RESTRICTED_NOT_DISCLOSED",
+  "hermes_ingest_verified": false,
+  "notice": "Do not store private ChatGPT conversations, owner knowledge, credentials, internal state or customer information in this public repository. Previously committed Git history may remain publicly accessible."
 }
