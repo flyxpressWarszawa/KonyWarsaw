@@ -14,7 +14,8 @@
     "chronologia.md",
     "system-i-status.md",
     "digital-apps.md",
-    "provenance.md"
+    "provenance.md",
+    "readback-20261113.md"
   ],
   "source_history": {
     "owner_archive_one_conversation": {
@@ -65,7 +66,22 @@
     "reported_satelites": 41,
     "reported_plugins_20261113": 333,
     "earliest_public_sites_report": "2026-10-08 (historical conversation report, not fresh live readback)",
-    "early_wordpress_eight_pages_report": "2026-10-16 (historical assistant publication report, IDs not retrieved)"
+    "early_wordpress_eight_pages_report": "2026-10-16 (historical assistant publication report, IDs not retrieved)",
+    "latest_combosnapshot_20261113": {
+      "reported_sites": 41,
+      "queue_pending": 4,
+      "queue_done_cumulative": 322,
+      "queue_failed_cumulative": 492,
+      "latest_cycle_processed": 0
+    },
+    "hermes_module_bus_readback_20261113": {
+      "plugins_installed": 333,
+      "active_plugins": 303,
+      "pending_receipts": 151,
+      "last_sync_job_state": "pending",
+      "digest_verified": false,
+      "full_business_control_verified": false
+    }
   },
   "release_gates": {
     "product_sale": "NO_GO",
