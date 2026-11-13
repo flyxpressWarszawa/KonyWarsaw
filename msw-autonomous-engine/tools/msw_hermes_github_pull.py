@@ -66,11 +66,9 @@ def _safe_path(relative: str) -> Path:
 
 def _atomic_write(path: Path, raw: bytes) -> None:
     path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-    p = path.parent
-    while p != path.parent.parent:
-        if p.is_symlink():
+    for parent in path.parents:
+        if parent.is_symlink():
             raise ValueError("symlink_parent_rejected")
-        p = p.parent
     if path.is_symlink():
         raise ValueError("symlink_destination_rejected")
     with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as handle:
