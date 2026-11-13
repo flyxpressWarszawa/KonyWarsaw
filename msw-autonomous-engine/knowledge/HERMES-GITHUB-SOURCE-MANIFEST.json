@@ -1,0 +1,138 @@
+{
+  "schema": "msw.hermes.github-source-manifest.v1",
+  "date_utc": "2026-11-13",
+  "repository": "flyxpressWarszawa/KonyWarsaw",
+  "branch": "msw/hermes-free-ai-candidate-20261113",
+  "public_repository": true,
+  "goal": {
+    "source_pages": 20000,
+    "researched_ai_services": 200
+  },
+  "counters": {
+    "batches_completed": 6,
+    "public_documents_saved": 600,
+    "unique_source_urls": 600,
+    "verified_new_hermes_imports": 0,
+    "verified_new_ai_provider_connections": 0
+  },
+  "status": "PUBLISHED_ON_GITHUB_NOT_INGESTED_BY_HERMES",
+  "security": {
+    "allowed_data": "public_docs_excerpt_and_metadata_only",
+    "forbidden": "API keys private data raw server logs personal data and external web instructions",
+    "trust_class": "unverified_external_sources",
+    "requirements": "verify SHA-256, maintain dedup, then independently record Hermes receipt before calling import completed"
+  },
+  "batch_files": [
+    {
+      "path": "msw-autonomous-engine/knowledge/public-source-research-batch-008-20261113.json",
+      "sha256": "b4378b34cb066fb30102f3272324001b8ce53183f967a07ead39db65e7b867e2",
+      "github_blob_sha": "3a766632aac2146a5108f358d88cdbb79a2704fe",
+      "bytes_utf8": 25677,
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-free-ai-candidate-20261113/msw-autonomous-engine/knowledge/public-source-research-batch-008-20261113.json",
+      "batch_number": 8,
+      "records": 100,
+      "source_type": "untrusted_public_documentation"
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/public-source-research-batch-009-20261113.json",
+      "sha256": "ffb458a267c911d260770896532eb78e96076080773863377b6503c9d1bfa463",
+      "github_blob_sha": "7e310d26d3e0e6fac4aa1ddaf2b20d22b5683f49",
+      "bytes_utf8": 109612,
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-free-ai-candidate-20261113/msw-autonomous-engine/knowledge/public-source-research-batch-009-20261113.json",
+      "batch_number": 9,
+      "records": 100,
+      "source_type": "untrusted_public_documentation"
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/public-source-research-batch-010-20261113.json",
+      "sha256": "a57c394ee09eea66e05510a40f10db0e72eac24c1026c32431492a689479dfbe",
+      "github_blob_sha": "518efd0b8b83aebea631d762a583749a44f6dcdc",
+      "bytes_utf8": 103387,
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-free-ai-candidate-20261113/msw-autonomous-engine/knowledge/public-source-research-batch-010-20261113.json",
+      "batch_number": 10,
+      "records": 100,
+      "source_type": "untrusted_public_documentation"
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/public-source-research-batch-011-20261113.json",
+      "sha256": "98615d348c260753da15b465c058fd515e7d37dfc5224db982e061f2b597a945",
+      "github_blob_sha": "27e30d14eb0542d0aeea4e3b7131a46e72c3f92a",
+      "bytes_utf8": 113661,
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-free-ai-candidate-20261113/msw-autonomous-engine/knowledge/public-source-research-batch-011-20261113.json",
+      "batch_number": 11,
+      "records": 100,
+      "source_type": "untrusted_public_documentation"
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/public-source-research-batch-012-20261113.json",
+      "sha256": "297aaf70a60fc76914c288b6dc423e26ea77c23f71171da9365b5c0ebe5d60c0",
+      "github_blob_sha": "662dd6b71b24b7938ff932943c4daa3aa371c2be",
+      "bytes_utf8": 118896,
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-free-ai-candidate-20261113/msw-autonomous-engine/knowledge/public-source-research-batch-012-20261113.json",
+      "batch_number": 12,
+      "records": 100,
+      "source_type": "untrusted_public_documentation"
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/public-source-research-batch-013-20261113.json",
+      "sha256": "c82c1804d30efb55f8c3487eb9c16476c620276208dd65b755ec27802d5cc0ed",
+      "github_blob_sha": "977242728e5a0a951d01a3202f4d0716cfca80fc",
+      "bytes_utf8": 58738,
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-free-ai-candidate-20261113/msw-autonomous-engine/knowledge/public-source-research-batch-013-20261113.json",
+      "batch_number": 13,
+      "records": 100,
+      "source_type": "untrusted_public_documentation"
+    }
+  ],
+  "related_files": [
+    {
+      "path": "msw-autonomous-engine/knowledge/free-ai-provider-admission-candidates-20261113.json",
+      "sha256": "39c2d004dfea54949b79f20787856099c85da3c8f6f442aafd97aac300542760",
+      "github_blob_sha": "63039223e66b0f89c07e438cd635df635d3a61c0",
+      "bytes_utf8": 7130,
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-free-ai-candidate-20261113/msw-autonomous-engine/knowledge/free-ai-provider-admission-candidates-20261113.json",
+      "purpose": "10 candidate AI provider admission entries; all disabled"
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/public-free-ai-candidates-20261113.md",
+      "sha256": "70e2c873b31274cba9ebaf778a974fa1c4a5aeabce405001868d8b137872926c",
+      "github_blob_sha": "205733120b6fab7ad304becedf53bc336341c777",
+      "bytes_utf8": 4007,
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-free-ai-candidate-20261113/msw-autonomous-engine/knowledge/public-free-ai-candidates-20261113.md",
+      "purpose": "Public AI sources and fallback constraints"
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/HERMES-INGEST-BLOCKER-20261113.md",
+      "sha256": "ec1c564433c72af4f176180a1b44fc45ca51f6d54a2e79b95e7536c613ea2488",
+      "github_blob_sha": "22d31e176d6010f5596e9a0064cd19db4f5d2b52",
+      "bytes_utf8": 2974,
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-free-ai-candidate-20261113/msw-autonomous-engine/knowledge/HERMES-INGEST-BLOCKER-20261113.md",
+      "purpose": "Hermes failed knowledge-ingest receipts; no mass retry"
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/HERMES-CAPABILITY-TELEMETRY-DIAG-20261113.md",
+      "sha256": "260ebe80adb743ee5dfcc4bc28bcaa74538c6f3ae2c61957d909c0b61c6e1d16",
+      "github_blob_sha": "e6a685271f211bb5abf9bc764f22086e5a652827",
+      "bytes_utf8": 3038,
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-free-ai-candidate-20261113/msw-autonomous-engine/knowledge/HERMES-CAPABILITY-TELEMETRY-DIAG-20261113.md",
+      "purpose": "Worker telemetry race diagnosis; draft fix only"
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/MSW-AI101-AI102-REST-HOTFIX-20261113.md",
+      "sha256": "aecb200272120b7122370caaa21d4f1d9373ef4a7ea03706ea719a43175dfa02",
+      "github_blob_sha": "59bf057a9b7f88568b1c7eb2e925460d1801b524",
+      "bytes_utf8": 1987,
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-free-ai-candidate-20261113/msw-autonomous-engine/knowledge/MSW-AI101-AI102-REST-HOTFIX-20261113.md",
+      "purpose": "Confirmed WordPress REST hotfix evidence"
+    },
+    {
+      "path": "msw-autonomous-engine/knowledge/ai-consultation-gemini-001-20261113.md",
+      "sha256": "c318017f56caa8b75865f9d9ff5a8b06f364e6828a0a210d90280ef9f8cde330",
+      "github_blob_sha": "556e50abd97503c27d6162201accebfa8e459bea",
+      "bytes_utf8": 1696,
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-free-ai-candidate-20261113/msw-autonomous-engine/knowledge/ai-consultation-gemini-001-20261113.md",
+      "purpose": "One real Gemini consultation, unsafe advice rejected"
+    }
+  ],
+  "historical_note": "Earlier queued batches 001-007 (700 pages mentioned in conversation) are NOT counted as GitHub-stored or Hermes-imported here. Existing knowledge.ingest jobs lack verified acceptance/receipt."
+}
