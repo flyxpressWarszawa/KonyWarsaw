@@ -136,6 +136,20 @@ class TestMirror(unittest.TestCase):
         with self.assertRaisesRegex(MirrorError,'page_scope'):
             Mirror(self.store,FakeReader(p),FakeVault(),clock=lambda:NOW).step()
 
+    def test_completed_snapshot_rolls_forward_after_hour_without_rescanning_old_backlog(self):
+        first = page([record()], finished=True)
+        Mirror(self.store,FakeReader(first),FakeVault(),clock=lambda:NOW).step()
+        self.assertTrue(self.store.cursor('pending',NOW+3599)['finished'])
+        next_cursor=self.store.cursor('pending',NOW+3601)
+        self.assertFalse(next_cursor['finished'])
+        self.assertEqual(next_cursor['cursor_created_at'],NOW-1)
+        self.assertEqual(next_cursor['snapshot_until'],NOW+3601)
+        later=record(id='12345678-1234-1234-1234-123456789abd', created_at=NOW+2500,updated_at=NOW+2500)
+        next_page=page([later],finished=True,until=NOW+3601)
+        second=Mirror(self.store,FakeReader(next_page),FakeVault(),clock=lambda:NOW+3601).step()
+        self.assertEqual(second['records_archived'],1)
+        self.assertEqual(self.store.summary()['counts']['pending'],2)
+
     def test_archive_key_validation(self):
         self.assertEqual(archive_key(base64.b64encode(b'Z'*32).decode()),b'Z'*32)
         with self.assertRaises(MirrorError): archive_key('not_base64')
