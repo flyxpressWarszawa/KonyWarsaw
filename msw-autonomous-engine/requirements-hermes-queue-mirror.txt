@@ -1,0 +1,2 @@
+# Optional separate archive dependency. Not installed with the main worker by default.
+cryptography==46.0.4

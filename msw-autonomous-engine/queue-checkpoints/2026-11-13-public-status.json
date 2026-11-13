@@ -1,0 +1,29 @@
+{
+  "schema": "msw.hermes.queue-public-checkpoint.v1",
+  "observed_at": "2026-11-13T11:21:22Z",
+  "source": "WordPress authenticated msw-unified-engine/v1/remote/status",
+  "source_of_truth": "ovse_mswue_remote_jobs (remains WordPress)",
+  "jobs": {
+    "completed": 14805,
+    "failed": 1872,
+    "pending": 11525,
+    "running": 2
+  },
+  "observed_cpanel_507797_cpu_percent_range": [
+    47,
+    96
+  ],
+  "github_repository_is_public": true,
+  "private_job_payloads_committed": 0,
+  "private_git_repository_configured_for_hermes": false,
+  "live_exporter_installed": false,
+  "next_steps": [
+    "private_repo_and_scoped_access",
+    "backup_readback",
+    "install_read_only_hmac_exporter",
+    "verify_12_jobs",
+    "encrypted_snapshot_with_github_readback",
+    "reconcile_original_leases"
+  ],
+  "note": "Counts are a historical read, not live. No payloads, customer data, credentials, task identifiers, or encrypted archive are stored in this public checkpoint."
+}
