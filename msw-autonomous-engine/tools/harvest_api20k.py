@@ -207,33 +207,45 @@ class Catalog:
             self.ingest_apis_guru(fetch_json(APIS_GURU))
         except RuntimeError as exc:
             self.errors["apis_guru"] = str(exc)
-        prev_signature = None
-        for offset in range(0, max_swaggerhub_pages * 100, 100):
-            if len(self.items) >= self.max:
+
+        # SwaggerHub uses PAGE, not OFFSET for its /specs query. The previous
+        # offset-based draft repeated the first page and stopped at 100.
+        # Search both ends of the public listing; stop on repeats, caps or 429.
+        pages_read = 0
+        for order in ("ASC", "DESC"):
+            observed_signatures = set()
+            for page_number in range(min(100, max_swaggerhub_pages)):
+                if len(self.items) >= self.max or pages_read >= max_swaggerhub_pages:
+                    break
+                url = SWAGGERHUB + "?" + urlencode({
+                    "limit": 100, "page": page_number, "specType": "API",
+                    "visibility": "PUBLIC", "sort": "NAME", "order": order
+                })
+                try:
+                    response = fetch_json(url)
+                except RuntimeError as exc:
+                    self.errors["swaggerhub_%s_page_%d" % (order, page_number)] = str(exc)
+                    break
+                rows = extracted_list(response)
+                if not rows:
+                    break
+                signature = hashlib.sha256(
+                    json.dumps(rows, sort_keys=True, ensure_ascii=False).encode()
+                ).hexdigest()
+                if signature in observed_signatures:
+                    self.errors["swaggerhub_%s" % order] = "repeating page detected; stopped"
+                    break
+                observed_signatures.add(signature)
+                pages_read += 1
+                received, added = self.ingest_swaggerhub_page(response)
+                if page_number % 10 == 0:
+                    print("SwaggerHub order=%s page=%d received=%d added=%d total=%d" %
+                          (order, page_number, received, added, len(self.items)), flush=True)
+                if received < 100:
+                    break
+                time.sleep(1.1)  # no aggressive crawling or quota evasion
+            if len(self.items) >= self.max or pages_read >= max_swaggerhub_pages:
                 break
-            url = SWAGGERHUB + "?" + urlencode({
-                "limit": 100, "offset": offset, "specType": "API", "visibility": "PUBLIC", "sort": "NAME", "order": "ASC"
-            })
-            try:
-                page = fetch_json(url)
-            except RuntimeError as exc:
-                self.errors["swaggerhub_at_offset_%d" % offset] = str(exc)
-                break
-            rows = extracted_list(page)
-            if not rows:
-                break
-            signature = hashlib.sha256(json.dumps(rows, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-            if signature == prev_signature:
-                self.errors["swaggerhub"] = "repeating page detected, stopping"
-                break
-            prev_signature = signature
-            received, added = self.ingest_swaggerhub_page(page)
-            if offset % 2000 == 0:
-                print("SwaggerHub offset=%d received=%d added=%d total=%d" %
-                      (offset, received, added, len(self.items)), flush=True)
-            if received < 100:
-                break
-            time.sleep(1.1)  # deliberately modest public API traffic; no quota evasion
 
     def write(self, directory):
         directory.mkdir(parents=True, exist_ok=True)
