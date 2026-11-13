@@ -1,0 +1,489 @@
+{
+  "schema": "msw.hermes.source-candidates.v1",
+  "batch": 11,
+  "date_utc": "2026-11-13",
+  "status": "DISCOVERED_ONLY_UNFETCHED",
+  "candidate_count": 120,
+  "sources": [
+    {
+      "group": "anonymous_llm",
+      "url": "https://www.aihorde.net/"
+    },
+    {
+      "group": "local_llm",
+      "url": "https://github.com/ggml-org/llama.cpp/blob/HEAD/tools/server/README.md"
+    },
+    {
+      "group": "open_models",
+      "url": "https://github.com/meta-llama/llama-models/blob/main/models/llama3/LICENSE"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://github.com/ggml-org/whisper.cpp/"
+    },
+    {
+      "group": "image_video_ai",
+      "url": "https://docs.comfy.org/development/deploy/self-hosting"
+    },
+    {
+      "group": "model_gateway",
+      "url": "https://docs.litellm.ai/docs/simple_proxy"
+    },
+    {
+      "group": "search_evidence",
+      "url": "https://developers.google.com/webmaster-tools/v1/searchanalytics/query"
+    },
+    {
+      "group": "semantic_science",
+      "url": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication/"
+    },
+    {
+      "group": "security",
+      "url": "https://developers.openai.com/api/docs/guides/rate-limits"
+    },
+    {
+      "group": "anonymous_llm",
+      "url": "https://github.com/Haidra-Org/AI-Horde"
+    },
+    {
+      "group": "local_llm",
+      "url": "https://lmstudio.ai/docs/developer"
+    },
+    {
+      "group": "open_models",
+      "url": "https://www.ertas.ai/docs/reference/supported-models"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://speaches.ai/"
+    },
+    {
+      "group": "image_video_ai",
+      "url": "https://docs.comfy.org/api-reference/v2/overview"
+    },
+    {
+      "group": "model_gateway",
+      "url": "https://docs.litellm.ai/docs/router/learn/reliability"
+    },
+    {
+      "group": "search_evidence",
+      "url": "https://developers.google.com/webmaster-tools/limits"
+    },
+    {
+      "group": "semantic_science",
+      "url": "https://ourresearch.gitbook.io/help.openalex.org/how-it-works"
+    },
+    {
+      "group": "security",
+      "url": "https://developers.openai.com/api/docs/guides/production-best-practices"
+    },
+    {
+      "group": "anonymous_llm",
+      "url": "https://stillworks.supercapybara.com/free-llm-api-no-key"
+    },
+    {
+      "group": "local_llm",
+      "url": "https://koboldai.com/KoboldCpp/"
+    },
+    {
+      "group": "open_models",
+      "url": "https://pocketllm.app/models/"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://hangry-labs.github.io/kokoroTTS/docs/dockerhub.html"
+    },
+    {
+      "group": "image_video_ai",
+      "url": "https://docs.comfy.org/development/comfyui-server/comms_overview"
+    },
+    {
+      "group": "model_gateway",
+      "url": "https://docs.litellm.ai/docs/router/api_reference/configuration"
+    },
+    {
+      "group": "search_evidence",
+      "url": "https://developers.google.com/webmaster-tools"
+    },
+    {
+      "group": "semantic_science",
+      "url": "https://hyperresearch.ai/guides/open-access-full-text-for-agents"
+    },
+    {
+      "group": "security",
+      "url": "https://developers.openai.com/api/docs/guides/safety-best-practices"
+    },
+    {
+      "group": "anonymous_llm",
+      "url": "https://vireonix.ai/docs"
+    },
+    {
+      "group": "local_llm",
+      "url": "https://docs.vllm.ai/en/stable/usage/"
+    },
+    {
+      "group": "open_models",
+      "url": "https://www.scaleway.com/en/docs/generative-apis/reference-content/supported-models/"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://docs.usemacaw.io/docs/getting-started/quickstart"
+    },
+    {
+      "group": "image_video_ai",
+      "url": "https://docs.comfy.org/development/comfyui-server/comms_routes"
+    },
+    {
+      "group": "model_gateway",
+      "url": "https://docs.litellm.ai/docs/proxy/architecture"
+    },
+    {
+      "group": "search_evidence",
+      "url": "https://developers.google.com/webmaster-tools/v1/api_reference_index"
+    },
+    {
+      "group": "semantic_science",
+      "url": "https://www.crossref.org/services/metadata-retrieval/public-data-file/"
+    },
+    {
+      "group": "security",
+      "url": "https://developers.openai.com/api/docs/guides/error-codes"
+    },
+    {
+      "group": "anonymous_llm",
+      "url": "https://blockrun.ai/free"
+    },
+    {
+      "group": "local_llm",
+      "url": "https://thewaspen.com/docs/configure/ai/local-compatible-providers/"
+    },
+    {
+      "group": "open_models",
+      "url": "https://aiswcatalog.intel.com/developer/docs/intel-inference-microservices/models-and-hardware/model-catalog"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://github.com/OHF-Voice/piper1-gpl/"
+    },
+    {
+      "group": "image_video_ai",
+      "url": "https://docs.comfy.org/development/comfy-router/quickstart"
+    },
+    {
+      "group": "model_gateway",
+      "url": "https://docs.litellm.ai/docs/proxy/load_balancing"
+    },
+    {
+      "group": "search_evidence",
+      "url": "https://developers.google.com/search/blog/2022/01/url-inspection-api"
+    },
+    {
+      "group": "semantic_science",
+      "url": "https://research.draconitic.com/sources"
+    },
+    {
+      "group": "security",
+      "url": "https://developers.openai.com/api/reference/resources/completions/methods/create/index.md"
+    },
+    {
+      "group": "anonymous_llm",
+      "url": "https://animica.org/"
+    },
+    {
+      "group": "local_llm",
+      "url": "https://github.com/mudler/LocalAI/blob/0d82efde/docs/content/reference/compatibility-table.md"
+    },
+    {
+      "group": "open_models",
+      "url": "https://docs.modelstudio.console.alibabacloud.com/zh/model-studio/open-source-model-terms"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://hangry-labs.github.io/kokoroTTS/docs/"
+    },
+    {
+      "group": "image_video_ai",
+      "url": "https://support.comfy.org/articles/1674221690-comfy-apis-an-overview"
+    },
+    {
+      "group": "model_gateway",
+      "url": "https://docs.litellm.ai/docs/proxy/config_settings"
+    },
+    {
+      "group": "search_evidence",
+      "url": "https://developers.google.com/webmaster-tools/v1/prereqs"
+    },
+    {
+      "group": "semantic_science",
+      "url": "https://www.crossref.org/documentation/retrieve-metadata/openurl/"
+    },
+    {
+      "group": "security",
+      "url": "https://developers.openai.com/api/docs/guides/safety-checks"
+    },
+    {
+      "group": "anonymous_llm",
+      "url": "https://github.com/Haidra-Org/AI-Horde?tab=readme-ov-file"
+    },
+    {
+      "group": "local_llm",
+      "url": "https://revka.ai/docs/providers/local-and-custom/"
+    },
+    {
+      "group": "open_models",
+      "url": "https://openweightlicenses.com/family"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://docs.pipecat.ai/api-reference/server/services/tts/piper"
+    },
+    {
+      "group": "image_video_ai",
+      "url": "https://docs.comfy.org/development/comfyui-server/api-examples"
+    },
+    {
+      "group": "model_gateway",
+      "url": "https://docs.litellm.ai/docs/proxy/configs"
+    },
+    {
+      "group": "search_evidence",
+      "url": "https://developers.google.com/webmaster-tools/pricing"
+    },
+    {
+      "group": "semantic_science",
+      "url": "https://www.crossref.org/pdfs/enhancing-repository-integration-with-crossref-services.pdf"
+    },
+    {
+      "group": "security",
+      "url": "https://docs.verda.com/inference/faq/"
+    },
+    {
+      "group": "local_llm",
+      "url": "https://github.com/InftyAI/llmaz/blob/main/docs/examples/README.md"
+    },
+    {
+      "group": "open_models",
+      "url": "https://llmeu.com/en/licences/"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://ethosagent.ai/docs/using/how-to/local-voice.md"
+    },
+    {
+      "group": "image_video_ai",
+      "url": "https://kb.stability.ai/knowledge-base/self-hosting-101-deploying-stable-diffusion-models"
+    },
+    {
+      "group": "model_gateway",
+      "url": "https://docs.litellm.ai/docs/routing"
+    },
+    {
+      "group": "search_evidence",
+      "url": "https://googleapis.dev/dotnet/Google.Apis.SearchConsole.v1/latest/api/Google.Apis.SearchConsole.v1.Data.html"
+    },
+    {
+      "group": "semantic_science",
+      "url": "https://www.crossref.org/categories/apis/"
+    },
+    {
+      "group": "security",
+      "url": "https://www.crossmodel.ai/docs/guides/production"
+    },
+    {
+      "group": "local_llm",
+      "url": "https://docs.liter-llm.xberg.io/usage/local-llms/"
+    },
+    {
+      "group": "open_models",
+      "url": "https://intuitionlabs.ai/pdfs/open-weight-ai-model-licenses.pdf"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://github.com/remsky/kokoro-fastapi"
+    },
+    {
+      "group": "image_video_ai",
+      "url": "https://comfy.org/platform/comfy-api/"
+    },
+    {
+      "group": "model_gateway",
+      "url": "https://docs.litellm.ai/docs/proxy/prod"
+    },
+    {
+      "group": "search_evidence",
+      "url": "https://pkg.go.dev/google.golang.org/api/webmasters/v3"
+    },
+    {
+      "group": "semantic_science",
+      "url": "https://www.crossref.org/documentation/retrieve-metadata/bulk-downloads/"
+    },
+    {
+      "group": "security",
+      "url": "https://docs.parasail.io/parasail-docs/operate-in-production/retries-and-idempotency"
+    },
+    {
+      "group": "local_llm",
+      "url": "https://github.com/Chuzom/Chuzom/blob/main/Docs/local-inference.md"
+    },
+    {
+      "group": "open_models",
+      "url": "https://stratumus.com/models"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://github.com/byte271/Openlive/blob/refs/heads/main/docs/open-source-stack.md"
+    },
+    {
+      "group": "image_video_ai",
+      "url": "https://github.com/ashleykleynhans/stable-diffusion-docker/blob/main/README.md"
+    },
+    {
+      "group": "model_gateway",
+      "url": "https://github.com/BerriAI/litellm/blob/main/litellm/router.py"
+    },
+    {
+      "group": "search_evidence",
+      "url": "https://indexing.io/google-search-console-api"
+    },
+    {
+      "group": "semantic_science",
+      "url": "https://github.com/crossref/rest-api-doc/blob/master/api_format.md"
+    },
+    {
+      "group": "security",
+      "url": "https://docs.prisminference.com/errors"
+    },
+    {
+      "group": "local_llm",
+      "url": "https://github.com/sheawinkler/hermes-agent-ultra/blob/main/docs/local-backends.md"
+    },
+    {
+      "group": "open_models",
+      "url": "https://absolutedigitalpublishers.com/articles/llama-mistral-deepseek-qwen-gemma-and-olmo-what-open-actually-means"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://github.com/abedshaaban/local-tts-gateway"
+    },
+    {
+      "group": "image_video_ai",
+      "url": "https://docs.comfy.org/development/api-development/sdks-design"
+    },
+    {
+      "group": "model_gateway",
+      "url": "https://docs.litellm.ai/docs/harness/gateway"
+    },
+    {
+      "group": "search_evidence",
+      "url": "https://cromojo.com/post/indexing-notifications"
+    },
+    {
+      "group": "semantic_science",
+      "url": "https://www.crossref.org/blog/using-the-crossref-rest-api.-part-12-with-europe-pmc/"
+    },
+    {
+      "group": "security",
+      "url": "https://inference.alphacurve.io/en/docs/rate-limits"
+    },
+    {
+      "group": "local_llm",
+      "url": "https://github.com/varunvasudeva1/llm-server-docs"
+    },
+    {
+      "group": "open_models",
+      "url": "https://hidekazu-konishi.com/entry/open_weights_llm_release_history_and_timeline.html"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://github.com/agjs/voicebox"
+    },
+    {
+      "group": "image_video_ai",
+      "url": "https://gpu.ai/docs/guides/deployable-templates"
+    },
+    {
+      "group": "model_gateway",
+      "url": "https://github.com/BerriAI/litellm?tab=readme-ov-file"
+    },
+    {
+      "group": "search_evidence",
+      "url": "https://infinisynapse.com/en/blog/google-search-console-api"
+    },
+    {
+      "group": "semantic_science",
+      "url": "https://www.crossref.org/documentation/retrieve-metadata/text-and-data-mining/"
+    },
+    {
+      "group": "security",
+      "url": "https://docs.inference.runatlas.com/resources/errors"
+    },
+    {
+      "group": "local_llm",
+      "url": "https://raw.githubusercontent.com/ggml-org/llama.cpp/HEAD/tools/server/README.md"
+    },
+    {
+      "group": "open_models",
+      "url": "https://gigagpu.com/open-weight-licensing-comparison/"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://docs.feral.sh/guides/local-models"
+    },
+    {
+      "group": "image_video_ai",
+      "url": "https://selfhostmap.com/categories/image-generation/"
+    },
+    {
+      "group": "model_gateway",
+      "url": "https://docs.litellm.ai/docs/tutorials/openai_codex"
+    },
+    {
+      "group": "search_evidence",
+      "url": "https://docs.datavirtuality.com/connectors/public-google-search-console-api"
+    },
+    {
+      "group": "semantic_science",
+      "url": "https://dumps.wikimedia.org/wikidatawiki/entities/"
+    },
+    {
+      "group": "security",
+      "url": "https://docs.optidata.com/inference/errors"
+    },
+    {
+      "group": "open_models",
+      "url": "https://onpremworld.com/en/models"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://docs.utsuwa.ai/guides/local-tts-setup"
+    },
+    {
+      "group": "image_video_ai",
+      "url": "https://docs.salad.com/container-engine/how-to-guides/ai-machine-learning/deploy-stable-diffusion-comfy"
+    },
+    {
+      "group": "model_gateway",
+      "url": "https://docs.litellm.ai/docs/proxy/deploy"
+    },
+    {
+      "group": "search_evidence",
+      "url": "https://jasonzhu.ai/en/go-global/indexing"
+    },
+    {
+      "group": "semantic_science",
+      "url": "https://crossref.gitlab.io/knowledge_base/prod_urls/"
+    },
+    {
+      "group": "security",
+      "url": "https://inference.eu/api/rate-limits-and-errors/"
+    },
+    {
+      "group": "open_models",
+      "url": "https://github.com/oumi-ai/oumi/blob/main/docs/resources/models/supported_models.md"
+    },
+    {
+      "group": "audio_ai",
+      "url": "https://askimo.chat/docs/desktop/voice/"
+    }
+  ]
+}
