@@ -1,0 +1,61 @@
+{
+  "schema": "msw.hermes.earliest-current-publications.v1",
+  "observation_date_utc": "2026-11-13",
+  "source": "live authenticated WordPress MariaDB SELECT through WPVibe (read-only)",
+  "site": "mobilny-serwis-warszawa.pl",
+  "query_scope": "published posts and pages existing in current DB, post_date_gmt >1970-01-01, ascending, first eight",
+  "rows": [
+    {
+      "id": 15,
+      "post_type": "page",
+      "post_date_gmt": "2026-09-03 12:39:41",
+      "title": "Blog"
+    },
+    {
+      "id": 17,
+      "post_type": "page",
+      "post_date_gmt": "2026-09-03 12:39:53",
+      "title": "Kontakt"
+    },
+    {
+      "id": 10,
+      "post_type": "page",
+      "post_date_gmt": "2026-09-03 12:40:33",
+      "title": "Mobilny Serwis Warszawa"
+    },
+    {
+      "id": 30,
+      "post_type": "post",
+      "post_date_gmt": "2026-09-03 13:12:13",
+      "title": "Profesjonalny montaż suszarek do rąk"
+    },
+    {
+      "id": 283,
+      "post_type": "post",
+      "post_date_gmt": "2026-09-07 06:18:15",
+      "title": "Montaż wideo domofon"
+    },
+    {
+      "id": 290,
+      "post_type": "post",
+      "post_date_gmt": "2026-09-07 07:25:34",
+      "title": "Montaż dwóch domofonów"
+    },
+    {
+      "id": 298,
+      "post_type": "post",
+      "post_date_gmt": "2026-09-07 07:31:57",
+      "title": "Spawanie bramki wejściowej"
+    },
+    {
+      "id": 303,
+      "post_type": "post",
+      "post_date_gmt": "2026-09-07 07:39:17",
+      "title": "Naprawa foteli kosmetycznych i podologiczny"
+    }
+  ],
+  "earliest_visible_published_at_gmt": "2026-09-03 12:39:41",
+  "evidence_status": "database_readback_verified",
+  "limitation": "These are earliest records currently visible under query filters, NOT proof of the first ever site publication, first ChatGPT action or original article creation. Items may have been imported or re-dated; revisions/deleted records not included.",
+  "customer_content_included": false
+}
