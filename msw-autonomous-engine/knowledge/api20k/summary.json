@@ -1,0 +1,49 @@
+{
+  "schema": "msw.hermes.api20k.discovery.v2",
+  "generated_utc": "2026-11-13T20:19:43.908717+00:00",
+  "target_candidates": 20000,
+  "candidate_registry_entries": 5675,
+  "unmet_candidate_target": 14325,
+  "all_candidates_unverified": true,
+  "directory_claimed_free_no_auth": 764,
+  "independently_verified_free_no_auth": 0,
+  "live_hermes_inference_verified": 0,
+  "count_basis": "distinct (source, identity), may overlap across registries",
+  "by_source": {
+    "apidirectory-curated": 3046,
+    "apis-guru": 2529,
+    "swaggerhub-public-registry": 100
+  },
+  "source_metadata": {
+    "apidirectory": {
+      "received": 3046,
+      "source": "https://apidirectory.dev/apis.json"
+    },
+    "apis_guru": {
+      "received": 2529,
+      "source": "https://api.apis.guru/v2/list.json"
+    }
+  },
+  "errors": {
+    "swaggerhub": "repeating page detected, stopping"
+  },
+  "sha256_shards": {
+    "candidates-001.jsonl": "d9e24d0a7b2956a998b9b77cdf704a13107c8f09de89026189a62b960fcc28ff",
+    "candidates-002.jsonl": "ac61cdf349d47faf955c7bb622b3f18974bb302a9d4cd5a08d4ef1864a164a33",
+    "candidates-003.jsonl": "c6eb49a91360b80393fb2ea0c76012dc5e45af34f50ddbb204fd9a139ca4f92d",
+    "candidates-004.jsonl": "d5f1ce1e75d5ba6acc112c2b19c18d90ffb90afd98fd3b68264f6ed30a9aafaf",
+    "candidates-005.jsonl": "cace8c25421dc3b44970eca6061d14fe31fec4e0a2f02955373473ee25e9bd28",
+    "candidates-006.jsonl": "685d18eec8ddcf35585aad2b4b578a25abf73f1c9ad736006223f5dba2c8a15e"
+  },
+  "sources": [
+    "https://apidirectory.dev/apis.json",
+    "https://api.apis.guru/v2/list.json",
+    "https://api.swaggerhub.com/specs"
+  ],
+  "attribution": {
+    "apidirectory": "https://apidirectory.dev/terms",
+    "apis_guru": "https://github.com/APIs-guru/openapi-directory",
+    "swaggerhub": "https://swagger.io/tools/swaggerhub/"
+  },
+  "warning": "A public spec is not a free or reachable API; do not connect Hermes from this inventory."
+}
