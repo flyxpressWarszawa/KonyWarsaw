@@ -1,0 +1,27 @@
+{
+  "schema": "msw.api20k.quality-audit.v1",
+  "date_utc": "2026-11-13",
+  "source_report": "msw-autonomous-engine/knowledge/api20k/summary.json",
+  "all_raw_catalog_entries": 20000,
+  "unique_primary_document_or_spec_urls": 19991,
+  "duplicated_primary_urls": 9,
+  "heuristic_sample_or_demo_titles": 6185,
+  "other_title_candidates": 13815,
+  "source_breakdown": {
+    "apidirectory-curated": 3046,
+    "apis-guru": 2529,
+    "swaggerhub-public-registry": 14425
+  },
+  "sample_title_counts": {
+    "Swagger Petstore": 2888,
+    "Simple Inventory API": 2317,
+    "home-iot-api": 1252,
+    "defaultTitle": 411
+  },
+  "heuristic_regex_description": "case-insensitive whole words: petstore, pet store, inventory, hello world, sample, mock, demo, template, tutorial, test API, testing API, swagger API, example",
+  "verification_status": "UNVERIFIED",
+  "verified_free_no_login": 0,
+  "verified_hermes_receipts": 0,
+  "important_limitations": "Unique catalog/spec URLs and demo-title heuristics are not equivalent to unique real services. No vendor-specific pricing, commercial ToS, authentication or live response was verified. All records remain disabled.",
+  "provenance": "Read all 20 downloaded 1000-line JSONL shards from GitHub Actions run 43501100996 and computed counts; all 20 shards were accessible."
+}
