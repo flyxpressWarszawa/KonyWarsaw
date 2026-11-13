@@ -104,6 +104,24 @@ class TestMirror(unittest.TestCase):
         self.assertEqual(self.store.cursor('pending',NOW)['cursor_created_at'],0)
         self.assertFalse(self.store.cursor('pending',NOW)['finished'])
 
+    def test_remote_timeout_replays_sealed_outbox_without_refetching_changing_origin(self):
+        first_page=page([record()],finished=True)
+        source=FakeReader(first_page)
+        failing=FakeVault(fail=True)
+        with self.assertRaises(MirrorError):
+            Mirror(self.store,source,failing,clock=lambda:NOW).step()
+        sealed_first=failing.calls[0][2]
+        self.assertIsNotNone(self.store.pending_page('pending'))
+        # Origin may change the row's state between the failed upload and retry.
+        source.response=page([],finished=True)
+        succeeding=FakeVault()
+        status=Mirror(self.store,source,succeeding,clock=lambda:NOW).step()
+        self.assertEqual(status['private_github_readback'],'uploaded_verified')
+        self.assertEqual(len(source.calls),1)
+        self.assertEqual(succeeding.calls[0][2],sealed_first)
+        self.assertIsNone(self.store.pending_page('pending'))
+        self.assertTrue(self.store.cursor('pending',NOW)['finished'])
+
     def test_verified_remote_write_advances_cursor(self):
         p=page([record()],finished=True)
         vault=FakeVault()
