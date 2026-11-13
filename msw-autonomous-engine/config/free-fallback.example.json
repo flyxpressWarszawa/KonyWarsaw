@@ -1,0 +1,27 @@
+{
+  "schema": "msw.free.fallback.v1",
+  "enabled": false,
+  "revision": "candidate-20261113-v1",
+  "primary": {
+    "daily_requests": 50,
+    "daily_output_tokens": 150000,
+    "min_interval_seconds": 1,
+    "max_tokens": 3000
+  },
+  "providers": [
+    {
+      "id": "ai_horde",
+      "daily_requests": 25,
+      "daily_output_tokens": 6400,
+      "min_interval_seconds": 30,
+      "max_tokens": 256
+    },
+    {
+      "id": "openrouter_wp",
+      "daily_requests": 50,
+      "daily_output_tokens": 25600,
+      "min_interval_seconds": 10,
+      "max_tokens": 512
+    }
+  ]
+}
