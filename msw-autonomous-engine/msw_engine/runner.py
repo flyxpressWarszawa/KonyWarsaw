@@ -338,6 +338,12 @@ class Worker:
         if not once and "llm.generate" in handlers():
             from .priority_lane import PriorityLane
             self.track(PriorityLane(self.client, self.journal.data_dir).start(self.lane_stopping, lambda: self.stopping))
+        # Opt-in bounded pure-compute lane: same signed transport and durable
+        # receipts, with no native PHP callback or new queue.
+        if (not once and os.environ.get("MSW_RENDER_PURE_OFFLOAD", "0") == "1"
+                and getattr(self.client, "wordpress_url", "") == "https://mobilny-serwis-warszawa.pl"):
+            from .pure_offload_lane import PureOffloadLane
+            self.track(PureOffloadLane(self.client, self.journal.data_dir).start(self.lane_stopping))
         if not once and os.environ.get("MSW_FOTOATLAS_ENABLED") == "1":
             from .fotoatlas_render_bridge import AtlasClient, FotoAtlas
             self.track(FotoAtlas(AtlasClient(self.client), self.journal.data_dir).start(self.lane_stopping))
