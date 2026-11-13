@@ -34,7 +34,7 @@ def normal_url(raw):
         host = p.hostname.lower()
         if host in ("localhost",) or host.endswith((".local", ".internal")):
             return None
-        if re.match(r"^(127\\.|0\\.|10\\.|192\\.168\\.|169\\.254\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.)", host):
+        if re.match(r"^(127\.|0\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2[0-9]|3[01])\.)", host):
             return None
         if ":" in host and not host.startswith("["): # IPv6 is not admitted by this offline importer
             return None
@@ -99,7 +99,7 @@ def write_catalog(records, rejected, out):
     records.sort(key=lambda x: x["id"])
     with (out / "catalog.jsonl").open("w", encoding="utf-8") as f:
         for record in records:
-            f.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\\n")
+            f.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
     report = {
         "schema": SCHEMA, "target_unique_verified_apis": TARGET,
         "discovered_unique_urls": len(records), "verified_apis": 0,
@@ -109,7 +109,7 @@ def write_catalog(records, rejected, out):
         "method": "OFFLINE_IMPORT_NO_NETWORK_NO_INFERENCE",
         "warning": "URLs and documentation must never be counted as verified free APIs."
     }
-    (out / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    (out / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return report
 
 def main():
