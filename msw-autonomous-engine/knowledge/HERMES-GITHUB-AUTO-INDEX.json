@@ -11,7 +11,7 @@
   ],
   "branch": "msw/hermes-knowledge-vault",
   "completion_policy": "No automatic claim of Hermes receipt, provider availability, or trained weights.",
-  "files_indexed": 27,
+  "files_indexed": 31,
   "hermes_handoff": "Fetch exact raw URLs; compare SHA256 of original bytes; isolate unverified research; require signed ingest receipt/readback before success.",
   "privacy": "PUBLIC_METADATA_AND_CURATED_FILES_ONLY. Never store raw ChatGPT exports, secrets or customer content here.",
   "repository": "flyxpressWarszawa/KonyWarsaw",
@@ -29,6 +29,20 @@
       "path": "msw-autonomous-engine/tests/test_free_fallback_policy.py",
       "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-knowledge-vault/msw-autonomous-engine/tests/test_free_fallback_policy.py",
       "sha256": "a9a3232a818f42db4ec1449a5ee9f69681456a2ab3a36ff447a7c23db72e8d6e",
+      "source_kind": "code_candidate"
+    },
+    {
+      "bytes": 4035,
+      "path": "msw-autonomous-engine/tests/test_msw_hermes_github_pull.py",
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-knowledge-vault/msw-autonomous-engine/tests/test_msw_hermes_github_pull.py",
+      "sha256": "bfeb18a8cdb1de217ff9efebafacbd59263b95954a9b1070365bc147c7801a03",
+      "source_kind": "code_candidate"
+    },
+    {
+      "bytes": 6372,
+      "path": "msw-autonomous-engine/tools/msw_hermes_github_pull.py",
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-knowledge-vault/msw-autonomous-engine/tools/msw_hermes_github_pull.py",
+      "sha256": "d3dc834cd0b853845f0146fda29daae077db327f7c4c62a1cf280a749e5dca41",
       "source_kind": "code_candidate"
     },
     {
@@ -95,6 +109,13 @@
       "source_kind": "research_candidate"
     },
     {
+      "bytes": 4509,
+      "path": "msw-autonomous-engine/knowledge/HERMES-ARCHIWUM-START.md",
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-knowledge-vault/msw-autonomous-engine/knowledge/HERMES-ARCHIWUM-START.md",
+      "sha256": "9286c2225b541d6fbcc63bc47ffa411a43f074752a6201a639328d8ef502cdc5",
+      "source_kind": "source_only_document"
+    },
+    {
       "bytes": 3038,
       "path": "msw-autonomous-engine/knowledge/HERMES-CAPABILITY-TELEMETRY-DIAG-20261113.md",
       "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-knowledge-vault/msw-autonomous-engine/knowledge/HERMES-CAPABILITY-TELEMETRY-DIAG-20261113.md",
@@ -113,6 +134,13 @@
       "path": "msw-autonomous-engine/knowledge/HERMES-INGEST-BLOCKER-20261113.md",
       "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-knowledge-vault/msw-autonomous-engine/knowledge/HERMES-INGEST-BLOCKER-20261113.md",
       "sha256": "ec1c564433c72af4f176180a1b44fc45ca51f6d54a2e79b95e7536c613ea2488",
+      "source_kind": "source_only_document"
+    },
+    {
+      "bytes": 10753,
+      "path": "msw-autonomous-engine/knowledge/HERMES-PRACE-I-PUBLIKACJE-LEDGER-20261113.jsonl",
+      "raw_url": "https://raw.githubusercontent.com/flyxpressWarszawa/KonyWarsaw/refs/heads/msw/hermes-knowledge-vault/msw-autonomous-engine/knowledge/HERMES-PRACE-I-PUBLIKACJE-LEDGER-20261113.jsonl",
+      "sha256": "11bd7d45cc7b213c415cdcdef757c3a69ca0a2315dfef889a277e6574c7a6c65",
       "source_kind": "source_only_document"
     },
     {
