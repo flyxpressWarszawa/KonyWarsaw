@@ -14,7 +14,7 @@ import re
 from urllib.parse import parse_qsl, urlsplit
 
 REPO = "flyxpressWarszawa/KonyWarsaw"
-BRANCH = "msw/hermes-free-ai-candidate-20261113"
+BRANCH = "msw/hermes-knowledge-vault"
 KNOWLEDGE = Path("msw-autonomous-engine/knowledge")
 OUTPUT = KNOWLEDGE / "HERMES-GITHUB-AUTO-INDEX.json"
 BATCH_RE = re.compile(r"public-source-research-batch-([0-9]{3})-[0-9]{8}\.json")
