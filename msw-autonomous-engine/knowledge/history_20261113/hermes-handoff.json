@@ -11,6 +11,7 @@
   "documents": [
     "README.md",
     "chronologia.md",
+    "poczatki-2026-09-10.md",
     "system-i-status.md",
     "digital-apps.md",
     "provenance.md"
@@ -83,7 +84,7 @@
       "id": "MSW-HIST-01",
       "priority": "P1",
       "mode": "READ_ONLY",
-      "action": "Fetch and independently verify GitHub archive branch/path; enumerate all six files including this manifest",
+      "action": "Fetch and verify all documents in documents[] on the exact specified GitHub branch; this index is public-safe and does not authorize production actions",
       "required_evidence": [
         "git blob SHA per file",
         "readback and matching HMAC/signature only at existing native receiver"
@@ -149,5 +150,5 @@
     "no_hmac_material": true,
     "no_unverified_model_weight_training_claims": true
   },
-  "status": "GITHUB_ARCHIVE_CANDIDATE_PENDING_HERMES_ACK"
+  "status": "GITHUB_BRANCH_WRITTEN_HERMES_ACK_NOT_VERIFIED"
 }
