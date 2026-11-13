@@ -1,4 +1,5 @@
 # MSW: jednorazowy import katalogów publicznych na gałąź roboczą.
+# Run 2: official SwaggerHub `page` pagination (ASC/DESC); preserve existing public-apis shards.
 # Brak crona i brak wykonania jakichkolwiek odkrytych API.
 name: MSW API20K public discovery (staging)
 on:
