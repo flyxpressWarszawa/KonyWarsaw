@@ -1,0 +1,78 @@
+name: MSW Hermes — autonomous GitHub knowledge index
+
+# Runs on the existing GitHub infrastructure, without calling WordPress,
+# Hermes, ChatGPT, paid AI, customer systems or private server endpoints.
+# Scheduled workflows must be on the default branch.
+on:
+  schedule:
+    - cron: '11,26,41,56 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/msw_hermes_archive_index.py'
+      - '.github/workflows/msw-hermes-github-archive.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: msw-hermes-github-archive-index
+  cancel-in-progress: false
+
+jobs:
+  source-checkpoint:
+    if: github.repository == 'flyxpressWarszawa/KonyWarsaw'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out trusted indexer on default branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+
+      - name: Fetch public research branch (no code from it is executed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin             '+refs/heads/msw/hermes-free-ai-candidate-20261113:refs/remotes/origin/msw/hermes-free-ai-candidate-20261113'
+          git worktree add --detach "$RUNNER_TEMP/msw-hermes-public-archive"             refs/remotes/origin/msw/hermes-free-ai-candidate-20261113
+
+      - name: Validate source batches and deduplication
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/msw_hermes_archive_index.py             --root "$RUNNER_TEMP/msw-hermes-public-archive" --check-only
+
+      - name: Update deterministic public archive manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/msw_hermes_archive_index.py             --root "$RUNNER_TEMP/msw-hermes-public-archive"
+
+      - name: Commit manifest ONLY when source content changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          worktree="$RUNNER_TEMP/msw-hermes-public-archive"
+          relative='msw-autonomous-engine/knowledge/HERMES-GITHUB-AUTO-INDEX.json'
+          git -C "$worktree" config user.name 'msw-hermes-archive[bot]'
+          git -C "$worktree" config user.email 'msw-hermes-archive@users.noreply.github.com'
+          git -C "$worktree" add -- "$relative"
+          if git -C "$worktree" diff --cached --quiet; then
+            echo 'No new public sources: manifest unchanged'
+            exit 0
+          fi
+          git -C "$worktree" commit -m 'docs: refresh read-only Hermes public source manifest'
+          # Protected branch or concurrent updates produce a failed run; no force pushes.
+          git -C "$worktree" push origin             HEAD:refs/heads/msw/hermes-free-ai-candidate-20261113
+
+      - name: Preserve run output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: msw-hermes-archive-audit-${{ github.run_id }}
+          path: ${{ runner.temp }}/msw-hermes-public-archive/msw-autonomous-engine/knowledge/HERMES-GITHUB-AUTO-INDEX.json
+          if-no-files-found: ignore
+          retention-days: 14
