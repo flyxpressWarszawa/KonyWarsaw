@@ -60,6 +60,7 @@ def choose_free_provider(
     required_capabilities: FrozenSet[str],
     contains_private_data: bool,
     free_only: bool = True,
+    excluded_provider_ids: FrozenSet[str] = frozenset(),
 ) -> Decision:
     """Plan a single zero-price request; no HTTP call, reservation or quota write.
 
@@ -78,8 +79,20 @@ def choose_free_provider(
         return Decision("hold", None, None, "invalid_clock")
     if not required_capabilities:
         return Decision("hold", None, None, "capabilities_required")
+    # A failed provider MUST be excluded even when quota counters have not synced.
+    # Without identifying it we cannot safely rotate after a known 429 / budget refusal.
+    if (previous_state in {"confirmed_quota_exceeded", "confirmed_budget_exhausted"}
+            and not excluded_provider_ids):
+        return Decision("hold", None, None, "failed_provider_identity_required")
 
     for candidate in sorted(providers, key=lambda item: (item.priority, item.provider_id)):
+        if candidate.provider_id in excluded_provider_ids:
+            continue
+        # A mistaken auth flag must never allow an authenticated model through.
+        if (candidate.auth == "existing_key") != candidate.requires_existing_key:
+            continue
+        if candidate.auth not in {"anonymous", "existing_key", "local"}:
+            continue
         if not (candidate.enabled_by_owner and candidate.zero_price_verified
                 and candidate.terms_verified and candidate.endpoint_verified
                 and candidate.inference_verified):
