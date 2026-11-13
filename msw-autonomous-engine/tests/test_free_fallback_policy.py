@@ -48,10 +48,42 @@ class FreeFallbackPolicyTest(unittest.TestCase):
                 )
 
     def test_confirmed_quota_failure_can_select_new_provider(self):
-        self.assertEqual(
-            self.decide(previous_state="confirmed_quota_exceeded").action,
-            "execute_once"
+        second = example(provider_id="public_b", priority=20)
+        result = self.decide(
+            providers=[example(), second],
+            previous_state="confirmed_quota_exceeded",
+            excluded_provider_ids=frozenset({"public_a"}),
         )
+        self.assertEqual(result.provider_id, "public_b")
+
+    def test_quota_failure_never_resends_to_rejected_provider(self):
+        decision = self.decide(
+            previous_state="confirmed_quota_exceeded",
+            excluded_provider_ids=frozenset({"public_a"}),
+        )
+        self.assertEqual(decision.action, "hold")
+
+    def test_budget_exhaustion_requires_failed_provider_identity(self):
+        decision = self.decide(previous_state="confirmed_budget_exhausted")
+        self.assertEqual(decision.reason, "failed_provider_identity_required")
+
+    def test_exclusion_works_before_quota_ledger_refresh(self):
+        second = example(provider_id="public_b", priority=20)
+        decision = self.decide(
+            providers=[example(), second],
+            previous_state="confirmed_quota_exceeded",
+            excluded_provider_ids=frozenset({"public_a"}),
+            meters={"public_a": Meter(day_count=0)},
+        )
+        self.assertEqual(decision.provider_id, "public_b")
+
+    def test_inconsistent_key_flag_blocks_provider(self):
+        for candidate in (
+            example(auth="existing_key", requires_existing_key=False),
+            example(auth="anonymous", requires_existing_key=True),
+        ):
+            with self.subTest(auth=candidate.auth):
+                self.assertEqual(self.decide(providers=[candidate]).action, "hold")
 
     def test_completed_request_is_never_repeated(self):
         self.assertEqual(
