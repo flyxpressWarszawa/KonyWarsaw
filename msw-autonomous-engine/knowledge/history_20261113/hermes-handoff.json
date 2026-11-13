@@ -1,0 +1,208 @@
+{
+  "schema": "msw.hermes.history-handoff.v1",
+  "handoff_id": "MSW-HERMES-CHATGPT-HISTORY-20261113-01",
+  "created_utc_date": "2026-11-13",
+  "classification": "public_safe_metadata_only",
+  "scope": "Partial evidence-backed archive of available MSW ChatGPT and WordPress project history; not entire ChatGPT account transcript",
+  "truth_source": "Existing COMBO/Cortex/Native Factory and native owner-authorized WordPress/Render sources remain authoritative",
+  "repository": "flyxpressWarszawa/KonyWarsaw",
+  "branch": "msw/knowledge-history-20261113",
+  "source_path": "msw-autonomous-engine/knowledge/history_20261113",
+  "documents": [
+    "README.md",
+    "poczatki-2026-09-10.md",
+    "chronologia.md",
+    "system-i-status.md",
+    "digital-apps.md",
+    "provenance.md",
+    "readback-20261113.md"
+  ],
+  "source_history": {
+    "owner_archive_one_conversation": {
+      "date_range": [
+        "2026-10-23",
+        "2026-11-06"
+      ],
+      "messages_claimed": 15024,
+      "curated_docs_claimed": 4,
+      "manifest_records_claimed": 15028,
+      "archive_sha256": "e30ffb2633c8c53ea5f92a6e4ceeebe8198d5f04bceed6698bb68f589c6632cf",
+      "public_content_published": false
+    },
+    "secondary_archives": {
+      "unique_archives_claimed": 103,
+      "source_sha256": "2c9b53b348a03a2ac3acccff4900b78821628f682424d6c0a0cb08fdeb504282",
+      "public_content_published": false
+    },
+    "private_staging_pointer_existing": "msw-autonomous-engine/knowledge/msw_operating_playbook_staging_pointer_20261111.json"
+  },
+  "verified_metadata": {
+    "central_public_page_ids": [
+      61102,
+      61225
+    ],
+    "woo_lab_product_ids": [
+      61195,
+      61206,
+      61216
+    ],
+    "older_energy_csv_product_id": 25059,
+    "satellite_demo_page_ids": [
+      148,
+      149,
+      150
+    ],
+    "catalogue_page_id": 153,
+    "local_qa_20261113": {
+      "node_passed": 122,
+      "node_total": 122,
+      "chromium_passed": 11,
+      "chromium_total": 11,
+      "qa_evidence_bundle_sha256": "46db6a93cba3926c645811c5095c3fae50eaac0fd260025cde4ae83949f4bc97",
+      "production_installations": 0
+    },
+    "last_reported_opportunity_hypotheses": 363,
+    "last_reported_opportunity_cursor": 55,
+    "reported_satelites": 41,
+    "reported_plugins_20261113": 333,
+    "earliest_public_sites_report": "2026-10-08 (historical conversation report, not fresh live readback)",
+    "early_wordpress_eight_pages_report": "2026-10-16 (historical assistant publication report, IDs not retrieved)",
+    "latest_combosnapshot_20261113": {
+      "reported_sites": 41,
+      "queue_pending": 4,
+      "queue_done_cumulative": 322,
+      "queue_failed_cumulative": 492,
+      "latest_cycle_processed": 0
+    },
+    "hermes_module_bus_readback_20261113": {
+      "plugins_installed": 333,
+      "active_plugins": 303,
+      "pending_receipts": 151,
+      "last_sync_job_state": "pending",
+      "digest_verified": false,
+      "full_business_control_verified": false
+    }
+  },
+  "release_gates": {
+    "product_sale": "NO_GO",
+    "backup_files_db_restore_verified": false,
+    "independent_scan_verified": false,
+    "paid_order_zip_delivery_verified": false,
+    "native_factory_ack_verified": false
+  },
+  "source_retrieval": {
+    "recommended_route": "READ_ONLY_GITHUB_FIRST_THEN_AUTHORIZED_PRIVATE_INGEST",
+    "private_data_must_not_be_fetched_from_public_repo": true,
+    "private_payload_import_requires_signed_existing_transport": true,
+    "do_not_create_new_schedule_or_queue": true,
+    "unknown_post_retry_allowed": false
+  },
+  "hermes_tasks": [
+    {
+      "id": "MSW-HIST-01",
+      "priority": "P1",
+      "mode": "READ_ONLY",
+      "action": "Fetch and verify all documents in documents[] on the exact specified GitHub branch; this index is public-safe and does not authorize production actions",
+      "required_evidence": [
+        "git blob SHA per file",
+        "readback and matching HMAC/signature only at existing native receiver"
+      ]
+    },
+    {
+      "id": "MSW-HIST-02",
+      "priority": "P1",
+      "mode": "READ_ONLY",
+      "action": "Check existing private MSW knowledge registry and deduplicate history against previously verified 325-record and 379-staging pointers; do not reimport unverified bytes",
+      "required_evidence": [
+        "existing source digests",
+        "records count",
+        "native readback"
+      ]
+    },
+    {
+      "id": "MSW-HIST-03",
+      "priority": "P1",
+      "mode": "SCOPED_PRIVATE_ONLY",
+      "action": "Only if authorized private source and verified receiver exist, transfer missing redacted knowledge via existing signed owner-authorized transport",
+      "required_evidence": [
+        "request_id",
+        "storage SHA/readback",
+        "recipient-specific ACK"
+      ]
+    },
+    {
+      "id": "MSW-HIST-04",
+      "priority": "P2",
+      "mode": "READ_ONLY",
+      "action": "Find independent result/receipt for oldest pending Native Factory work before additional product writes",
+      "required_evidence": [
+        "original job id",
+        "receipt",
+        "product readback"
+      ]
+    },
+    {
+      "id": "MSW-HIST-05",
+      "priority": "P2",
+      "mode": "LOCAL_QA",
+      "action": "Extend Woo Import Lab legal CSV/backorder variations and preserve NO-GO until independent release prerequisites",
+      "required_evidence": [
+        "local tests",
+        "real authorized CSV coverage",
+        "backup and security scan for any future live deploy"
+      ]
+    }
+  ],
+  "ack_contract": {
+    "github_file_readback_verified": true,
+    "hermes_received_verified": false,
+    "hermes_persisted_verified": false,
+    "hermes_effect_ack_verified": false,
+    "storage_location": "NOT_VERIFIED",
+    "next_action": "Hermes or existing authorized bridge must read and acknowledge manifest without creating a second queue"
+  },
+  "privacy_controls": {
+    "no_secrets": true,
+    "no_customer_data": true,
+    "no_private_chat_transcripts": true,
+    "no_hmac_material": true,
+    "no_unverified_model_weight_training_claims": true
+  },
+  "status": "GITHUB_BRANCH_WRITTEN_PRIVATE_CHECKPOINT_READY_HERMES_ACK_NOT_VERIFIED",
+  "private_checkpoint": {
+    "name": "MSW-HERMES-HISTORIA-GITHUB-PRYWATNY-CHECKPOINT-20261113.zip",
+    "location_class": "owner_private_file_library",
+    "sha256": "aca136f9ae272faf2e07a48b58c009bb5a0134bd75b0659d4c9c220afd047186",
+    "zip_integrity_verified": true,
+    "independent_library_readback_verified": true,
+    "is_complete_chatgpt_export": false,
+    "public_github_upload_allowed": false,
+    "hermes_readback_verified": false,
+    "source_note": "Częściowy historyczny podręcznik, dowody i manifest; pobranie wymaga osobnego autoryzowanego dostępu do prywatnej biblioteki właściciela"
+  },
+  "latest_read_only_status_observation": {
+    "observed_date": "2026-11-13",
+    "combo_reported_satellites": 41,
+    "combo_source": "authenticated_msw_direct_combo_connections_status",
+    "hermes_pending_receipts_observed": 152,
+    "hermes_plugin_catalog_sync": "pending",
+    "hermes_sync_digest_verified": false,
+    "independent_knowledge_ingest_ack_verified": false,
+    "authoritative_for_satelites": "live_combo_only",
+    "not_a_new_scheduled_job": true
+  },
+  "github_readback": {
+    "verified": true,
+    "scope": "six-public-safe-documents+existing-manifest",
+    "blobs": {
+      "README.md": "7c41804ca24e606a76f7415cfb108293ad73c9a4",
+      "chronologia.md": "e7a61381b8c7231acfa1ac90498f8192570e2e1a",
+      "poczatki-2026-09-10.md": "ab2e126bee87c6d7b1d3afa9a06fd51cc46d2814",
+      "system-i-status.md": "1f6f44fc300c87802f9568f4e38a3d4ccfb31a0b",
+      "digital-apps.md": "3f8e69584ee80e1af7a971c6e4fce8267ffdf630",
+      "provenance.md": "0a77cb9069fc830a173722a0ff5a95a5e4633ae0"
+    },
+    "manifest_pre_update_blob": "6295821bc9a64d0472b2708768aefa9ff3cf9f7c",
+    "disclaimer": "Only GitHub readback verified, not Hermes readback or knowledge.ingest"
+  }
+}
