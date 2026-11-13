@@ -1,0 +1,510 @@
+{
+  "schema": "msw.hermes.source-candidates.v1",
+  "batch": 13,
+  "date_utc": "2026-11-13",
+  "candidate_count": 125,
+  "verified_document_count": 0,
+  "status": "DISCOVERED_ONLY",
+  "sources": [
+    {
+      "group": "openai_compat",
+      "url": "https://llama.app/docs/api"
+    },
+    {
+      "group": "dist_inference",
+      "url": "https://haidra-org.github.io/AI-Horde/haidra-assets/docs/workers/"
+    },
+    {
+      "group": "agent_frameworks",
+      "url": "https://docs.litellm.ai/docs/mcp"
+    },
+    {
+      "group": "search_public",
+      "url": "https://github.com/spinov001-art/free-apis-list"
+    },
+    {
+      "group": "dev_data",
+      "url": "https://github.com/HackerNews/API"
+    },
+    {
+      "group": "ai_free_tiers",
+      "url": "https://www.modelhubby.com/guides/"
+    },
+    {
+      "group": "asia_models",
+      "url": "https://docs.modelstudio.console.alibabacloud.com/en/model-studio/open-source-model-terms"
+    },
+    {
+      "group": "multimodal",
+      "url": "https://github.com/OHF-voice/piper1-gpl"
+    },
+    {
+      "group": "image_local",
+      "url": "https://docs.comfy.org/get_started/cloud"
+    },
+    {
+      "group": "security_provenance",
+      "url": "https://developers.openai.com/api/reference/overview"
+    },
+    {
+      "group": "google_official",
+      "url": "https://ai.google.dev/gemini-api/docs/batch-api?authuser=1"
+    },
+    {
+      "group": "meta_bing_youtube",
+      "url": "https://developers.google.com/youtube/v3/guides/quota_and_compliance_audits?hl=en"
+    },
+    {
+      "group": "openai_compat",
+      "url": "https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README-dev.md"
+    },
+    {
+      "group": "dist_inference",
+      "url": "https://haidra-org.github.io/AI-Horde/haidra-assets/docs/kudos/"
+    },
+    {
+      "group": "agent_frameworks",
+      "url": "https://docs.litellm.ai/"
+    },
+    {
+      "group": "search_public",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13157964/"
+    },
+    {
+      "group": "dev_data",
+      "url": "https://www.federalregister.gov/reader-aids/developer-resources/rest-api"
+    },
+    {
+      "group": "ai_free_tiers",
+      "url": "https://creditforstartups.com/resources/free-ai-api"
+    },
+    {
+      "group": "asia_models",
+      "url": "https://docs.modelstudio.console.alibabacloud.com/en/model-studio/compatibility-of-openai-with-dashscope"
+    },
+    {
+      "group": "multimodal",
+      "url": "https://github.com/echogarden-project/echogarden/blob/master/docs/Licenses.md"
+    },
+    {
+      "group": "image_local",
+      "url": "https://github.com/Comfy-Org/ComfyUI/blob/c011fb52/openapi.yaml"
+    },
+    {
+      "group": "security_provenance",
+      "url": "https://docs.opinference.com/docs/reference/errors"
+    },
+    {
+      "group": "google_official",
+      "url": "https://ai.google.dev/gemini-api/docs/google-search?authuser=0"
+    },
+    {
+      "group": "meta_bing_youtube",
+      "url": "https://developers.facebook.com/blog/post/2022/11/08/getting-started-with-page-insights-api/"
+    },
+    {
+      "group": "openai_compat",
+      "url": "https://github.com/ggml-org/llama.cpp/blob/master/tools/server/server-schema.cpp"
+    },
+    {
+      "group": "dist_inference",
+      "url": "https://github.com/Haidra-Org/horde-worker-reGen?tab=readme-ov-file"
+    },
+    {
+      "group": "agent_frameworks",
+      "url": "https://docs.litellm.ai/docs/providers"
+    },
+    {
+      "group": "search_public",
+      "url": "https://cdn.jsdelivr.net/npm/pi-scientific-skills@1.1.0/skills/paper-lookup/references/europepmc.md"
+    },
+    {
+      "group": "dev_data",
+      "url": "https://freepublicapis.dev/open-data"
+    },
+    {
+      "group": "ai_free_tiers",
+      "url": "https://decodethefuture.org/en/best-free-llm-apis-2026/"
+    },
+    {
+      "group": "asia_models",
+      "url": "https://help.aliyun.com/en/model-studio/get-api-key"
+    },
+    {
+      "group": "multimodal",
+      "url": "https://d-central.tech/local-voice-ai-models/"
+    },
+    {
+      "group": "image_local",
+      "url": "https://huggingface.co/docs/diffusers/en/using-diffusers/create_a_server"
+    },
+    {
+      "group": "security_provenance",
+      "url": "https://docs.quiver.ai/developers/guides/errors-and-debugging"
+    },
+    {
+      "group": "google_official",
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/batch-inference"
+    },
+    {
+      "group": "meta_bing_youtube",
+      "url": "https://developers.facebook.com/docs/audience-network/optimization/apis/FB-login-Reporting-API/"
+    },
+    {
+      "group": "openai_compat",
+      "url": "https://github.com/ggml-org/llama.cpp?tab=readme-ov-file"
+    },
+    {
+      "group": "dist_inference",
+      "url": "https://github.com/Haidra-Org/AI-Horde/blob/f40ae696acd0f23f6484db7f3d2408884185e960/FAQ.md"
+    },
+    {
+      "group": "agent_frameworks",
+      "url": "https://docs.litellm.ai/docs/mcp_deployment"
+    },
+    {
+      "group": "search_public",
+      "url": "https://citation.today/docs/licensing.html"
+    },
+    {
+      "group": "dev_data",
+      "url": "https://github.com/appbrewery/public-api-lists"
+    },
+    {
+      "group": "ai_free_tiers",
+      "url": "https://freeapihub.com/blog/best-free-ai-apis-developers"
+    },
+    {
+      "group": "asia_models",
+      "url": "https://www.llmabacus.com/en/chinese-llm-api-trust"
+    },
+    {
+      "group": "multimodal",
+      "url": "https://github.com/hexgrad/kokoro"
+    },
+    {
+      "group": "image_local",
+      "url": "https://github.com/Comfy-Org/ComfyUI_prev/blob/master/openapi.yaml"
+    },
+    {
+      "group": "security_provenance",
+      "url": "https://docs.prem.io/llms.txt"
+    },
+    {
+      "group": "google_official",
+      "url": "https://staxly.dev/platforms/gemini"
+    },
+    {
+      "group": "meta_bing_youtube",
+      "url": "https://developers.facebook.com/docs/graph-api/reference/post/insights/"
+    },
+    {
+      "group": "openai_compat",
+      "url": "https://build.nvidia.com/playbooks/llama-cpp/instructions"
+    },
+    {
+      "group": "dist_inference",
+      "url": "https://aihorde.net/faq/"
+    },
+    {
+      "group": "agent_frameworks",
+      "url": "https://docs.litellm.ai/docs/router/api_reference/core_and_host"
+    },
+    {
+      "group": "search_public",
+      "url": "https://freepublicapis.dev/science-and-math"
+    },
+    {
+      "group": "dev_data",
+      "url": "https://github.com/Ada40/Ada40.github.io/blob/main/public_api_sources.py"
+    },
+    {
+      "group": "ai_free_tiers",
+      "url": "https://llmperks.com/providers"
+    },
+    {
+      "group": "asia_models",
+      "url": "https://www.alibabacloud.com/help/en/model-studio/models"
+    },
+    {
+      "group": "multimodal",
+      "url": "https://hangry-labs.github.io/kokoroTTS/"
+    },
+    {
+      "group": "image_local",
+      "url": "https://docs.comfy.org/development/deploy/overview"
+    },
+    {
+      "group": "security_provenance",
+      "url": "https://www.inferencebureau.com/docs/api"
+    },
+    {
+      "group": "google_official",
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/deploy/batch-inference"
+    },
+    {
+      "group": "meta_bing_youtube",
+      "url": "https://www4.bing.com/webmasters/help/url-submission-62f2860b"
+    },
+    {
+      "group": "openai_compat",
+      "url": "https://llama.app/docs/serve"
+    },
+    {
+      "group": "dist_inference",
+      "url": "https://horde-sdk.readthedocs.io/en/latest/how-to/"
+    },
+    {
+      "group": "agent_frameworks",
+      "url": "https://docs.litellm.ai/docs/harness"
+    },
+    {
+      "group": "search_public",
+      "url": "https://github.com/brycewang-stanford/lit-review-agent-tools/blob/main/skills/literature-review-tools/reference/apis/openalex.md"
+    },
+    {
+      "group": "dev_data",
+      "url": "https://github.com/public-apis/public-apis?tab=readme-ov-file"
+    },
+    {
+      "group": "ai_free_tiers",
+      "url": "https://docs.tcp.systems/capacity/capacity-finders-western-2026-10-21/"
+    },
+    {
+      "group": "asia_models",
+      "url": "https://intuitionlabs.ai/articles/open-weight-ai-model-licenses"
+    },
+    {
+      "group": "multimodal",
+      "url": "https://pypi.org/project/vocal-ai/"
+    },
+    {
+      "group": "image_local",
+      "url": "https://docs.comfy.org/development/examples"
+    },
+    {
+      "group": "security_provenance",
+      "url": "https://multigrid.ai/api-reference"
+    },
+    {
+      "group": "google_official",
+      "url": "https://flatkey.ai/blog/gemini-api-pricing"
+    },
+    {
+      "group": "meta_bing_youtube",
+      "url": "https://developers.facebook.com/docs/marketing-api/insights?locale=pt_BR"
+    },
+    {
+      "group": "openai_compat",
+      "url": "https://corso-llamacpp.giuseppebosi.com/en/moduli/04-server-api/"
+    },
+    {
+      "group": "dist_inference",
+      "url": "https://stablehorde.net/contribute/workers/"
+    },
+    {
+      "group": "agent_frameworks",
+      "url": "https://docs.litellm.ai/docs/agent_resources"
+    },
+    {
+      "group": "search_public",
+      "url": "https://github.com/brycewang-stanford/lit-review-agent-tools/blob/main/skills/literature-review-tools/reference/apis/README.md"
+    },
+    {
+      "group": "dev_data",
+      "url": "https://terminalfeed.io/blog/free-apis-2026"
+    },
+    {
+      "group": "ai_free_tiers",
+      "url": "https://discuss.huggingface.co/t/free-api-for-beginners/179088/4"
+    },
+    {
+      "group": "asia_models",
+      "url": "https://seminal.ai/reference/providers/chinese-labs/"
+    },
+    {
+      "group": "multimodal",
+      "url": "https://huiahub.com/blog/open-source-text-to-speech-models"
+    },
+    {
+      "group": "image_local",
+      "url": "https://narrativegoldmine.com/notes/pages/ComfyUI-API-Specification"
+    },
+    {
+      "group": "security_provenance",
+      "url": "https://docs.meetalto.ai/api/requests"
+    },
+    {
+      "group": "google_official",
+      "url": "https://modelmeridian.com/guides/google-gemini-api-costs-pro-flash-batch/"
+    },
+    {
+      "group": "meta_bing_youtube",
+      "url": "https://developers.facebook.com/documentation/ads-commerce/marketing-api/insights/best-practices"
+    },
+    {
+      "group": "openai_compat",
+      "url": "https://github.com/mozilla-ai/llamafile/blob/main/docs/api.md"
+    },
+    {
+      "group": "dist_inference",
+      "url": "https://docs.sillytavern.app/usage/api-connections/horde/"
+    },
+    {
+      "group": "agent_frameworks",
+      "url": "https://agentgateway.dev/docs/standalone/latest"
+    },
+    {
+      "group": "search_public",
+      "url": "https://github.com/Aperivue/medsci-skills/blob/master/docs/connectors.md"
+    },
+    {
+      "group": "dev_data",
+      "url": "https://dev.to/morinaga/three-public-http-apis-i-read-daily-without-registering-for-a-key-1aid"
+    },
+    {
+      "group": "ai_free_tiers",
+      "url": "https://www.aitoolspro.tech/blog/free-ai-inference-apis-developers-2026"
+    },
+    {
+      "group": "asia_models",
+      "url": "https://help.aliyun.com/en/model-studio/llms.txt"
+    },
+    {
+      "group": "multimodal",
+      "url": "https://docs.feral.sh/guides/local-models"
+    },
+    {
+      "group": "image_local",
+      "url": "https://comfy.org/llms.txt"
+    },
+    {
+      "group": "security_provenance",
+      "url": "https://docs.ryuhq.com/docs/gateway/reliability"
+    },
+    {
+      "group": "google_official",
+      "url": "https://geminipricing.lol/gemini-api-pricing"
+    },
+    {
+      "group": "meta_bing_youtube",
+      "url": "https://fbdevwiki.com/wiki/FQL:insights"
+    },
+    {
+      "group": "openai_compat",
+      "url": "https://github.com/ggml-org/llama.pages/blob/master/src/docs/api.md"
+    },
+    {
+      "group": "dist_inference",
+      "url": "https://github.com/wildcard/caro/blob/main/docs/adr/ADR-015-distributed-llm-backends-hybrid-privacy.md"
+    },
+    {
+      "group": "agent_frameworks",
+      "url": "https://pypi.org/project/buildwright/0.8.3/"
+    },
+    {
+      "group": "search_public",
+      "url": "https://raw.githubusercontent.com/K-Dense-AI/scientific-agent-skills/HEAD/skills/citation-management/references/api_contracts.md"
+    },
+    {
+      "group": "dev_data",
+      "url": "https://dev.to/fetchsmith/hacker-news-has-two-public-json-apis-neither-needs-a-key-and-only-half-their-numbers-are-safe-to-19ek"
+    },
+    {
+      "group": "ai_free_tiers",
+      "url": "https://fireworks.ai/blog/best-llm-api-providers"
+    },
+    {
+      "group": "asia_models",
+      "url": "https://github.com/ForgeOmni/SuperAgent/blob/HEAD/docs/NATIVE_PROVIDERS.md"
+    },
+    {
+      "group": "multimodal",
+      "url": "https://docs.pipecat.ai/api-reference/server/services/tts/kokoro"
+    },
+    {
+      "group": "image_local",
+      "url": "https://github.com/SaladTechnologies/comfyui-api?tab=readme-ov-file"
+    },
+    {
+      "group": "security_provenance",
+      "url": "https://docs.comfy.org/development/comfy-router/headers"
+    },
+    {
+      "group": "google_official",
+      "url": "https://apidog.com/blog/gemini-3-8-flash-pricing/"
+    },
+    {
+      "group": "meta_bing_youtube",
+      "url": "https://projects.piyushgambhir.com/bing-webmaster-cli/docs/data"
+    },
+    {
+      "group": "openai_compat",
+      "url": "https://www.edgepedia.org/llama-cpp"
+    },
+    {
+      "group": "dist_inference",
+      "url": "https://github.com/Haidra-Org/AI-Horde/blob/main/FAQ.md"
+    },
+    {
+      "group": "agent_frameworks",
+      "url": "https://github.com/agentgateway/agentgateway"
+    },
+    {
+      "group": "dev_data",
+      "url": "https://github.com/spinov001-art/hidden-json-apis"
+    },
+    {
+      "group": "ai_free_tiers",
+      "url": "https://dreamprompting.com/blog/free-llm-apis-compared-2026"
+    },
+    {
+      "group": "asia_models",
+      "url": "https://revka.ai/docs/providers/china-providers/"
+    },
+    {
+      "group": "multimodal",
+      "url": "https://www.umberlab.com/localtts/licenses"
+    },
+    {
+      "group": "image_local",
+      "url": "https://andrewaltimit.github.io/Documentation/docs/ai-ml/comfyui-guide.html"
+    },
+    {
+      "group": "security_provenance",
+      "url": "https://docs.api7.ai/ai-gateway/reference/headers-and-error-codes"
+    },
+    {
+      "group": "google_official",
+      "url": "https://yosuke4061.com/new_toppage/briefings/brief013/"
+    },
+    {
+      "group": "meta_bing_youtube",
+      "url": "https://busyless.space/seo-apis/bing-webmaster"
+    },
+    {
+      "group": "openai_compat",
+      "url": "https://github.com/pudepiedj/llama.cpp/blob/a130eccef42b75a84da270411cefeed45c153e30/examples/server/README.md"
+    },
+    {
+      "group": "dist_inference",
+      "url": "https://github.com/Haidra-Org/haidra-assets/blob/main/docs/workers.md"
+    },
+    {
+      "group": "agent_frameworks",
+      "url": "https://github.com/baladithyab/RouteIQ"
+    },
+    {
+      "group": "dev_data",
+      "url": "https://github.com/hfcorriez/agent-public-apis/blob/main/README.md"
+    },
+    {
+      "group": "ai_free_tiers",
+      "url": "https://belski.me/blog/ai_inference_providers_2026_free_tier_deep_dive/"
+    },
+    {
+      "group": "asia_models",
+      "url": "https://www.toolbox365.cn/tools/llm-api/"
+    }
+  ]
+}
