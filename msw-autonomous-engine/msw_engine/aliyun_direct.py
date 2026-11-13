@@ -180,7 +180,8 @@ def generate(values: dict, directory: Path) -> dict:
             code = "msw_brain_uncertain:aliyun_" + code
             finish("unknown", error_code=code)
             raise TaskError(code) from None
-        code = "aliyun_terminal_failure:" + code
+        from .free_fallback import retry_suffix
+        code = "aliyun_terminal_failure:" + code + retry_suffix(error.headers)
         finish("failed", error_code=code)
         raise TaskError(code) from None
     except (URLError, TimeoutError, OSError, ValueError):

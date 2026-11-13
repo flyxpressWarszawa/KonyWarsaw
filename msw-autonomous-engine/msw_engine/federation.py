@@ -87,7 +87,7 @@ def technical_peer() -> dict:
         return {"reachable": False, "state": "unavailable_or_cold_start"}
 
 
-def _finish_request(saved: dict, directory: Path) -> dict:
+def _primary_answer(saved: dict, directory: Path) -> dict:
     from .tasks import TaskError
     values = saved["values"]
     if saved.get("transport") == "direct_openai":
@@ -104,7 +104,7 @@ def _finish_request(saved: dict, directory: Path) -> dict:
         answer = aliyun_generate(values, directory, protocol="responses")
     elif saved.get("transport") == "native_runtime":
         from .runtime_bridge import generate as native_generate
-        answer = native_generate(values, allow_fallback=True)
+        answer = native_generate(values, allow_fallback=not bool(os.environ.get("MSW_FREE_FALLBACK_POLICY")))
     else:
         answer = gateway("generate", values)
     deadline = time.monotonic() + 180
@@ -124,12 +124,21 @@ def _finish_request(saved: dict, directory: Path) -> dict:
         answer = gateway("generate", values)
     if not isinstance(answer.get("text"), str) or not answer["text"].strip():
         raise TaskError("federation_empty_answer")
+    return answer
+
+
+def _finish_request(saved: dict, directory: Path) -> dict:
+    from .free_fallback import maybe_generate
+    values = saved["values"]
+    answer = maybe_generate(saved, directory, lambda: _primary_answer(saved, directory))
     steps = saved["steps"] + [{"component": answer.get("provider", "openai_router"), "api_text_verified": True, "model": answer["model"]}]
     return {"schema": "msw.federation.result.v1", "text": answer["text"], "model": answer["model"],
             "provider": answer.get("provider", "wordpress_openai_router"), "task": values["task"], "contributors": steps, "sources": saved["sources"],
             "answer_sha256": hashlib.sha256(answer["text"].encode()).hexdigest(), "context_truncated": saved["context_truncated"],
             "unavailable_peers": [row["component"] for row in steps if row.get("state") in {"transport_unavailable","unavailable","pairing_or_transport_unavailable","unavailable_or_cold_start","generation_unavailable"}],
-            "training_performed": False, "weights_modified": False, "publication_performed": False}
+            "training_performed": False, "weights_modified": False, "publication_performed": False,
+            **({"routing": answer["routing"]} if "routing" in answer else {}),
+            **({"quality_review_required": answer["quality_review_required"]} if "quality_review_required" in answer else {})}
 
 
 def generate(payload: dict, directory: Path) -> dict:
