@@ -1,0 +1,1244 @@
+{
+  "schema": "msw.api20k.claimed-free-noauth.v1",
+  "record_status": "UNVERIFIED_SOURCE_CLAIMS",
+  "date_utc": "2026-11-13",
+  "records": [
+    {
+      "url": "https://www.penguinrandomhouse.biz/webservices/rest",
+      "name": "Penguin Publishing",
+      "category": "open-data",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.pickanagency.com/developers",
+      "name": "Pick an Agency",
+      "category": "data-backend",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.postman-echo.com",
+      "name": "Postman Echo",
+      "category": "dev-tools",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.profitvana.com/developers",
+      "name": "Profitvana",
+      "category": "Shopping",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.purgomalum.com",
+      "name": "PurgoMalum",
+      "category": "dev-tools",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.qiuxiaoce.com/data-docs",
+      "name": "QiuXiaoCe Football",
+      "category": "Sports & Fitness",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.qrcode-monkey.com/qr-code-api-with-logo",
+      "name": "Qrcode Monkey",
+      "category": "dev-tools",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.qrtag.net/api",
+      "name": "QR code",
+      "category": "dev-tools",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.quivad.com/api",
+      "name": "QuiVad",
+      "category": "Finance",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.quotelinks.com/api",
+      "name": "Quotelinks",
+      "category": "Finance",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.quoterism.com/developer",
+      "name": "Quoterism",
+      "category": "games-fun",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.rainviewer.com/api.html",
+      "name": "RainViewer",
+      "category": "weather",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.receitaws.com.br",
+      "name": "Brazil Receita WS",
+      "category": "open-data",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.refugerestrooms.org/api/docs",
+      "name": "REFUGE Restrooms",
+      "category": "transport",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.scento.com/developers/perfume-api",
+      "name": "Scento Perfume API",
+      "category": "Open Data",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.scorebat.com/video-api",
+      "name": "Football (Soccer) Videos",
+      "category": "Sports & Fitness",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.screenshot-studio.com/docs",
+      "name": "Screenshot Studio",
+      "category": "Photography",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.sec.gov/edgar/sec-api-documentation",
+      "name": "SEC EDGAR Data",
+      "category": "finance-crypto",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.sec.gov/search-filings/edgar-application-programming-interfaces",
+      "name": "SEC EDGAR Data",
+      "category": "Finance",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.sellerscalc.com/data",
+      "name": "Marketplace Fee Data",
+      "category": "ecommerce",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.seodata.dev",
+      "name": "seodata",
+      "category": "Development",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.sharpe.ai/docs/free-api",
+      "name": "Sharpe",
+      "category": "finance-crypto",
+      "discovery_sources": [
+        "apidirectory-curated"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.solematica.it/sviluppatori",
+      "name": "Solematica",
+      "category": "open-data",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.songsterr.com",
+      "name": "Songsterr",
+      "category": "Music",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.stackerscan.com",
+      "name": "StackerScan",
+      "category": "finance-crypto",
+      "discovery_sources": [
+        "apidirectory-curated"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.stardewvalleywiki.net/developers",
+      "name": "Stardew Valley Wiki",
+      "category": "Games & Comics",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.stromberg-api.de",
+      "name": "Stromberg Quotes",
+      "category": "media",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.sudoku100.com/api",
+      "name": "Sudoku100",
+      "category": "Games & Comics",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.swapi.tech",
+      "name": "SWAPI",
+      "category": "Video",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.thecolorapi.com",
+      "name": "The Color",
+      "category": "media",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.thunderclient.com",
+      "name": "Thunder Client",
+      "category": "dev-tools",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.tilth.uk/data",
+      "name": "Tilth",
+      "category": "open-data",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.timezone.io/docs/worldtimeapi",
+      "name": "Timezone WorldTime",
+      "category": "Development",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.tradedatahub.net",
+      "name": "TradeDataHub",
+      "category": "Business",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.transit.land/documentation/datastore/api-endpoints.html",
+      "name": "TransitLand",
+      "category": "transport",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.tronalddump.io",
+      "name": "Tronald Dump",
+      "category": "games-fun",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.tvmaze.com/api",
+      "name": "TVMaze",
+      "category": "media",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.unblockmaster.com/free-ip-api",
+      "name": "Unblock Master IP",
+      "category": "Geocoding",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.usacallerlookup.com/api",
+      "name": "USA Caller Lookup",
+      "category": "Phone",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.usmortgagecalc.com/developers/api",
+      "name": "US Mortgage Calculator",
+      "category": "Finance",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.uspto.gov/learning-and-resources/open-data-and-mobility",
+      "name": "USPTO",
+      "category": "open-data",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.uuidtools.com/docs",
+      "name": "UUID Generator",
+      "category": "dev-tools",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.valueray.com/api",
+      "name": "ValueRay",
+      "category": "finance-crypto",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.vatcomply.com/documentation",
+      "name": "VATComply.com",
+      "category": "Currency Exchange",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.velib-metropole.fr/donnees-open-data-gbfs-du-service-velib-metropole",
+      "name": "Velib metropolis, Paris, France",
+      "category": "Transportation",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.veridionmarkets.com/data-api/docs",
+      "name": "Veridion",
+      "category": "Government",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.wadifa-info.com",
+      "name": "Wadifa Info",
+      "category": "Jobs",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.weather.gov/documentation/services-web-api",
+      "name": "National Weather Service",
+      "category": "weather",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.workingstudentjobs.de/developers",
+      "name": "Working Student Jobs",
+      "category": "Jobs",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.zaproxy.org/docs/api",
+      "name": "OWASP ZAP",
+      "category": "security",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www.zippopotam.us",
+      "name": "Zippopotam.us",
+      "category": "maps-geo",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://www2.purpleair.com",
+      "name": "Purple Air",
+      "category": "open-data",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://x-math.herokuapp.com",
+      "name": "xMath",
+      "category": "Science & Math",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://x402-list.com",
+      "name": "x402-list",
+      "category": "Cryptocurrency",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://xaxios.com/docs/stream",
+      "name": "xAxios",
+      "category": "Cryptocurrency",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://xeno-canto.org/explore/api",
+      "name": "xeno-canto",
+      "category": "open-data",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://xivapi.com",
+      "name": "Final Fantasy XIV",
+      "category": "games-fun",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://xkcd.com/json.html",
+      "name": "xkcd",
+      "category": "games-fun",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://xmrlist.com",
+      "name": "XMRList",
+      "category": "Cryptocurrency",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://xn--shknhintanyt-gcb8w.org/integraatiot",
+      "name": "Sähkön hinta nyt",
+      "category": "Environment",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://xoomar.com/markets/api",
+      "name": "XOOMAR",
+      "category": "Finance",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://xposedornot.com/mcp",
+      "name": "XposedOrNot",
+      "category": "APIs Covered Under APILayer Suite!",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://xrpl.to/docs",
+      "name": "XRPL.to",
+      "category": "Cryptocurrency",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://yamline.com/json",
+      "name": "YAMLine",
+      "category": "dev-tools",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://yesno.wtf/api",
+      "name": "Yes No",
+      "category": "dev-tools",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://yesnooracle.app/api",
+      "name": "Yes or No Oracle",
+      "category": "Entertainment",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://yiminshuju.com/cite",
+      "name": "YiminShuju Visa Bulletin",
+      "category": "Government",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://yubhub.co/api",
+      "name": "YubHub",
+      "category": "Jobs",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://yubhub.co/developers/api-reference",
+      "name": "YubHub",
+      "category": "Jobs",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://zaptu.ai",
+      "name": "Zaptu",
+      "category": "Business",
+      "discovery_sources": [
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": false,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://zelothorn.com/developers",
+      "name": "Zelothorn",
+      "category": "finance-crypto",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://zennet.cloud",
+      "name": "Zennet",
+      "category": "finance-crypto",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://zenquotes.io",
+      "name": "Zen Quotes",
+      "category": "games-fun",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://ziptasticapi.com",
+      "name": "Ziptastic",
+      "category": "maps-geo",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    },
+    {
+      "url": "https://zmok.io",
+      "name": "ZMOK",
+      "category": "finance-crypto",
+      "discovery_sources": [
+        "apidirectory-curated",
+        "public-apis-community"
+      ],
+      "claimed_no_auth": true,
+      "claimed_free_and_no_auth": true,
+      "auth_claim_conflict": false,
+      "verified_free_no_auth": false,
+      "commercial_terms_verified": false,
+      "endpoint_live_verified": false,
+      "hermes_ack_verified": false,
+      "enabled": false
+    }
+  ]
+}
