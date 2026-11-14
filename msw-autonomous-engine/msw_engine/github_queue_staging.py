@@ -104,7 +104,13 @@ def main() -> int:
             print(json.dumps({"python_receipt_attestation":
                               {"state": "uncertain_no_retry"}}), flush=True)
     while not stopping:
-        if not registry_sync_handled and os.environ.get("MSW_HERMES_WP_REGISTRY_STAGING_ENABLED") == "1":
+        if os.environ.get("MSW_HERMES_WP_REGISTRY_CYCLE_ENABLED") == "1":
+            try:
+                from .wp_registry_cycle import run_live_cycle
+                print(json.dumps({"wp_registry_cycle": run_live_cycle()}, separators=(",", ":")), flush=True)
+            except Exception:
+                print(json.dumps({"wp_registry_cycle": {"state": "uncertain_no_reissue"}}), flush=True)
+        elif not registry_sync_handled and os.environ.get("MSW_HERMES_WP_REGISTRY_STAGING_ENABLED") == "1":
             registry_sync_handled = True
             try:
                 from .wp_registry_staging import run_live_once
