@@ -173,3 +173,28 @@ def run_live_once():
         return {"state": "blocked", "code": str(exc)[:80]}
     except Exception:
         return {"state": "uncertain_no_retry"}
+
+
+def signed_queue_receipt_handler(payload: dict, data_dir) -> dict:
+    """Candidate capability for the existing signed WordPress -> Hermes queue.
+
+    This handler is never installed in the disk-backed production entrypoint by
+    merely merging a PR. The existing Worker must execute it and independently
+    confirm WordPress complete/status. Verification does not ACK the two old
+    staging tasks; it only prepares a bounded evidence bundle.
+    """
+    if os.environ.get("MSW_HERMES_PYTHON_RECEIPT_VERIFY_HANDLER") != "1":
+        raise AttestationError("handler_opt_in_missing")
+    if os.environ.get("RENDER_SERVICE_ID") != "srv-dbltdb9srm7s73ec0v00":
+        raise AttestationError("central_worker_identity_missing")
+    if (not isinstance(payload, dict)
+            or set(payload) != {"schema", "purpose", "manifest_sha256"}
+            or payload.get("schema") != "msw.hermes.python-pilot.verify-job.v1"
+            or payload.get("purpose") != "read_only_receipt_verification"
+            or payload.get("manifest_sha256") != MANIFEST_SHA):
+        raise AttestationError("verification_job_contract")
+    report = verify_previous_pilot(GitHubStore())
+    return {**report, "signed_queue_handler_executed": True,
+            "execution_runtime_id": "srv-dbltdb9srm7s73ec0v00",
+            "wordpress_server_ack_verified": False,
+            "central_pilot_ack_verified": False}
