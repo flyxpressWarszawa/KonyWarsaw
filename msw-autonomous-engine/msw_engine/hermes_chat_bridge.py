@@ -18,6 +18,7 @@ MAX_ROUNDS = 12
 LEASE_SECONDS = 900
 LEGACY_EXECUTOR = "chatgpt_work"
 SCHEDULED_EXECUTOR = "chatgpt_scheduled"
+HERMES_EXECUTOR = "hermes"
 
 
 def _fail(code):
@@ -68,13 +69,17 @@ def _connection(directory):
         outcome TEXT,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
-        executor TEXT NOT NULL DEFAULT 'chatgpt_work')""")
-    if "executor" not in {column["name"] for column in db.execute("PRAGMA table_info(jobs)")}:
+        executor TEXT NOT NULL DEFAULT 'chatgpt_work',
+        work_key TEXT)""")
+    columns = {column["name"] for column in db.execute("PRAGMA table_info(jobs)")}
+    if not {"executor", "work_key"}.issubset(columns):
         try:
             db.execute("BEGIN IMMEDIATE")
             columns = {column["name"] for column in db.execute("PRAGMA table_info(jobs)")}
             if "executor" not in columns:
                 db.execute("ALTER TABLE jobs ADD COLUMN executor TEXT NOT NULL DEFAULT 'chatgpt_work'")
+            if "work_key" not in columns:
+                db.execute("ALTER TABLE jobs ADD COLUMN work_key TEXT")
             db.execute("COMMIT")
         except Exception:
             if db.in_transaction:
@@ -83,6 +88,7 @@ def _connection(directory):
             raise
     db.execute("CREATE INDEX IF NOT EXISTS ix_jobs_state ON jobs(state,created_at)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_jobs_conversation ON jobs(conversation,depth)")
+    db.execute("CREATE UNIQUE INDEX IF NOT EXISTS ix_jobs_work_key ON jobs(work_key)")
     return db
 
 
@@ -93,39 +99,62 @@ def _row(row):
 
 
 def _receipt(row):
-    return {"schema": SCHEMA, "task_id": row["id"],
-            "conversation_key": row["conversation"], "parent_id": row["parent_id"],
-            "depth": row["depth"], "state": row["state"],
-            "request_sha256": row["request_sha"],
-            "result_sha256": row["result_sha"],
-            "outcome": row["outcome"],
-            "readback_verified": True}
+    receipt = {"schema": SCHEMA, "task_id": row["id"],
+               "conversation_key": row["conversation"], "parent_id": row["parent_id"],
+               "depth": row["depth"], "state": row["state"],
+               "request_sha256": row["request_sha"],
+               "result_sha256": row["result_sha"],
+               "outcome": row["outcome"],
+               "readback_verified": True}
+    if row["work_key"] is not None:
+        receipt.update(work_key=row["work_key"], executor=row["executor"])
+    return receipt
 
 
 def submit(payload, directory):
     expected = {"schema", "operation", "task_id", "conversation_key", "kind", "goal"}
-    if not expected.issubset(payload) or set(payload) - expected - {"parent_id", "executor"}:
+    if not expected.issubset(payload) or set(payload) - expected - {
+        "parent_id", "executor", "work_key", "start_next"
+    }:
         _fail("submit_fields")
     ident, conv = payload["task_id"], payload["conversation_key"]
     kind, goal, parent = payload["kind"], payload["goal"], payload.get("parent_id")
     executor = payload.get("executor", LEGACY_EXECUTOR)
-    if executor not in (LEGACY_EXECUTOR, SCHEDULED_EXECUTOR):
+    work_key = payload.get("work_key")
+    start_next = payload.get("start_next", False)
+    if executor not in (LEGACY_EXECUTOR, SCHEDULED_EXECUTOR, HERMES_EXECUTOR):
         _fail("submit_executor")
     if not _id(ident) or not _id(conv) or (parent is not None and not _id(parent)):
         _fail("submit_identifiers")
-    if kind not in KINDS or not isinstance(goal, str) or not goal.strip() or len(goal.encode("utf-8")) > 8192:
+    if (work_key is not None and not _id(work_key)) or (executor == HERMES_EXECUTOR and work_key is None):
+        _fail("work_key")
+    if not isinstance(start_next, bool) or (start_next and (parent is None or work_key is None)):
+        _fail("start_next")
+    if not isinstance(kind, str) or kind not in KINDS or not isinstance(goal, str) or not goal.strip() or len(goal.encode("utf-8")) > 8192:
         _fail("submit_content")
-    digest = _sha(_canonical([ident, conv, kind, goal, parent]))
+    fields = [conv, kind, goal, parent]
+    if start_next:
+        fields.append(True)
+    digest = _sha(_canonical([ident, *fields]))
     now = int(time.time())
     with closing(_connection(directory)) as db:
         db.execute("BEGIN IMMEDIATE")
         try:
             old = db.execute("SELECT * FROM jobs WHERE id=?", (ident,)).fetchone()
             if old:
-                if old["request_sha"] != digest or old["executor"] != executor:
+                if old["request_sha"] != digest or old["executor"] != executor or old["work_key"] != work_key:
                     _fail("idempotency_conflict")
                 db.execute("COMMIT")
                 return _receipt(_row(old))
+            if work_key is not None:
+                reserved = db.execute("SELECT * FROM jobs WHERE work_key=?", (work_key,)).fetchone()
+                if reserved is not None:
+                    if reserved["executor"] != executor or reserved["request_sha"] != _sha(
+                        _canonical([reserved["id"], *fields])
+                    ):
+                        _fail("work_already_assigned")
+                    db.execute("COMMIT")
+                    return _receipt(_row(reserved))
             pending = db.execute("SELECT 1 FROM jobs WHERE conversation=? AND state<>'acknowledged' LIMIT 1",
                                  (conv,)).fetchone()
             if pending:
@@ -140,19 +169,21 @@ def submit(payload, directory):
                 earlier = db.execute("SELECT * FROM jobs WHERE id=?", (parent,)).fetchone()
                 if not earlier or earlier["conversation"] != conv or earlier["state"] != "acknowledged":
                     _fail("parent_not_acknowledged")
-                if earlier["executor"] != executor:
+                if start_next and earlier["outcome"] != "completed":
+                    _fail("parent_not_completed")
+                if not start_next and earlier["executor"] != executor:
                     _fail("parent_executor_mismatch")
-                depth = earlier["depth"] + 1
+                depth = 1 if start_next else earlier["depth"] + 1
                 if depth > MAX_ROUNDS:
                     _fail("max_rounds")
                 branching = db.execute("SELECT 1 FROM jobs WHERE parent_id=? LIMIT 1", (parent,)).fetchone()
                 if branching:
                     _fail("parent_already_continued")
             db.execute("INSERT INTO jobs (id,conversation,parent_id,depth,kind,goal,request_sha,state,"
-                       "lease_sha,lease_until,result,result_sha,outcome,created_at,updated_at,executor) "
-                       "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                       "lease_sha,lease_until,result,result_sha,outcome,created_at,updated_at,executor,work_key) "
+                       "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                        (ident, conv, parent, depth, kind, goal, digest, "queued",
-                        None, None, None, None, None, now, now, executor))
+                        None, None, None, None, None, now, now, executor, work_key))
             stored = db.execute("SELECT * FROM jobs WHERE id=?", (ident,)).fetchone()
             db.execute("COMMIT")
             return _receipt(_row(stored))
@@ -165,7 +196,7 @@ def claim(payload, directory):
     expected = {"schema", "operation", "executor"}
     executor = payload.get("executor")
     conversation = payload.get("conversation_key")
-    if executor == SCHEDULED_EXECUTOR:
+    if executor in (SCHEDULED_EXECUTOR, HERMES_EXECUTOR):
         if set(payload) != expected | {"conversation_key"} or not _id(conversation):
             _fail("claim_fields")
     elif executor != LEGACY_EXECUTOR or set(payload) != expected:
@@ -173,7 +204,7 @@ def claim(payload, directory):
     with closing(_connection(directory)) as db:
         db.execute("BEGIN IMMEDIATE")
         try:
-            if executor == SCHEDULED_EXECUTOR:
+            if executor != LEGACY_EXECUTOR:
                 item = db.execute(
                     "SELECT id FROM jobs WHERE state='queued' AND executor=? AND conversation=? "
                     "ORDER BY created_at,id LIMIT 1", (executor, conversation),

@@ -1,5 +1,6 @@
 """Offline state-machine tests for job and reply exchange."""
 from contextlib import closing
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import os
 from pathlib import Path
@@ -8,7 +9,7 @@ from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
-from msw_engine.hermes_chat_bridge import LEGACY_EXECUTOR, MAX_ROUNDS, SCHEMA, SCHEDULED_EXECUTOR, handle
+from msw_engine.hermes_chat_bridge import HERMES_EXECUTOR, LEGACY_EXECUTOR, MAX_ROUNDS, SCHEMA, SCHEDULED_EXECUTOR, handle
 from msw_engine.tasks import TaskError, handlers
 
 def sha(value):
@@ -37,6 +38,10 @@ class ExchangeTests(unittest.TestCase):
     def claim_scheduled(self, conversation):
         return self.command(schema=SCHEMA, operation="claim", executor=SCHEDULED_EXECUTOR,
                             conversation_key=conversation)
+
+    def claim_hermes(self):
+        return self.command(schema=SCHEMA, operation="claim", executor=HERMES_EXECUTOR,
+                            conversation_key=self.conv)
 
     def report(self, claimed, answer="Wykonałem analizę.", outcome="completed", **kw):
         data=dict(schema=SCHEMA,operation="report",task_id=claimed["task_id"],
@@ -98,6 +103,55 @@ class ExchangeTests(unittest.TestCase):
         self.acknowledge(self.key, "Wykonałem analizę.")
         with self.assertRaisesRegex(TaskError, "parent_executor_mismatch"):
             self.submit(task_id="msw-owner-task-0002", parent_id=self.key)
+
+    def test_same_work_across_executors_is_assigned_once(self):
+        work = "msw-owner-work-0001"
+        first = self.submit(executor=SCHEDULED_EXECUTOR, work_key=work)
+        replay = self.submit(task_id="msw-owner-task-0002", executor=SCHEDULED_EXECUTOR, work_key=work)
+        self.assertEqual(first, replay)
+        self.assertEqual(first["work_key"], work)
+        self.assertEqual(first["executor"], SCHEDULED_EXECUTOR)
+        with self.assertRaisesRegex(TaskError, "work_already_assigned"):
+            self.submit(task_id="msw-owner-task-0003", executor=HERMES_EXECUTOR, work_key=work)
+        self.assertEqual(self.claim_hermes()["state"], "empty")
+
+    def test_concurrent_assignment_replays_original_task_id(self):
+        def assign(task_id):
+            return self.submit(task_id=task_id, executor=SCHEDULED_EXECUTOR,
+                               work_key="msw-owner-work-0001")
+
+        self.claim_scheduled(self.conv)
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            a, b = pool.map(assign, [self.key, "msw-owner-task-0002"])
+        self.assertEqual(a, b)
+        self.assertEqual(self.command(schema=SCHEMA, operation="status")["counts"], {"queued": 1})
+
+    def test_concurrent_claims_return_one_lease(self):
+        self.submit(executor=SCHEDULED_EXECUTOR, work_key="msw-owner-work-0001")
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            claims = list(pool.map(self.claim_scheduled, [self.conv, self.conv]))
+        self.assertEqual(sorted(claim["state"] for claim in claims), ["empty", "leased"])
+
+    def test_hermes_can_take_next_work_in_same_chat_after_ack(self):
+        self.submit(executor=SCHEDULED_EXECUTOR, work_key="msw-owner-work-0001")
+        self.report(self.claim_scheduled(self.conv))
+        next_work = dict(task_id="msw-owner-task-0002", parent_id=self.key,
+                         work_key="msw-owner-work-0002", executor=HERMES_EXECUTOR, start_next=True)
+        with self.assertRaisesRegex(TaskError, "conversation_busy"):
+            self.submit(**next_work)
+        self.acknowledge(self.key, "Wykonałem analizę.")
+        next_task = self.submit(**next_work)
+        self.assertEqual(next_task["depth"], 1)
+        self.assertEqual(self.claim_scheduled(self.conv)["state"], "empty")
+        self.assertEqual(self.claim_hermes()["task_id"], next_task["task_id"])
+
+    def test_blocked_work_cannot_start_next_as_completed(self):
+        self.submit(executor=SCHEDULED_EXECUTOR, work_key="msw-owner-work-0001")
+        self.report(self.claim_scheduled(self.conv), outcome="blocked")
+        self.acknowledge(self.key, "Wykonałem analizę.")
+        with self.assertRaisesRegex(TaskError, "parent_not_completed"):
+            self.submit(task_id="msw-owner-task-0002", parent_id=self.key,
+                        work_key="msw-owner-work-0002", executor=HERMES_EXECUTOR, start_next=True)
 
     def test_submit_is_idempotent_and_rejects_conflicts(self):
         self.assertEqual(self.submit(),self.submit())
