@@ -1,6 +1,6 @@
 import copy
 import unittest
-from msw_engine.github_queue_staging import safe_snapshot, verified_snapshot
+from msw_engine.github_queue_staging import safe_snapshot, verified_snapshot, optional_one_shot
 from msw_engine.github_chat_receipt_audit import ReceiptAuditError
 from msw_engine.tasks import TaskError
 
@@ -70,6 +70,29 @@ class ReadOnlyStagingProbeTests(unittest.TestCase):
         queue.doc["revision"] = True
         with self.assertRaisesRegex(ReceiptAuditError, "audit_queue_invalid"):
             verified_snapshot(queue)
+
+
+    def test_one_shot_opt_in_disabled_never_claims(self):
+        queue = FakeQueue({"github_queue_connected": True, "counts": {}})
+        self.assertEqual(optional_one_shot(queue, environment={})["state"], "disabled")
+        self.assertEqual(queue.payloads, [])
+
+    def test_one_shot_policy_prohibits_production_mutation(self):
+        queue = FakeQueue({"github_queue_connected": True, "counts": {}})
+        policy = {"MSW_HERMES_STAGING_PYTHON_ONE_SHOT": "1",
+                  "MSW_HERMES_CHAT_BACKEND": "github",
+                  "MSW_HERMES_CHAT_LOOP_ENABLED": "1",
+                  "MSW_HERMES_PRODUCTION_MUTATION_ALLOWED": "1"}
+        self.assertEqual(optional_one_shot(queue, environment=policy)["state"], "policy_blocked")
+        self.assertEqual(queue.payloads, [])
+
+    def test_one_shot_bad_task_binding_never_claims(self):
+        queue = FakeQueue({"github_queue_connected": True, "counts": {}})
+        policy = {"MSW_HERMES_STAGING_PYTHON_ONE_SHOT": "1",
+                  "MSW_HERMES_CHAT_BACKEND": "github",
+                  "MSW_HERMES_CHAT_LOOP_ENABLED": "1"}
+        self.assertEqual(optional_one_shot(queue, environment=policy)["state"], "invalid_staging_binding")
+        self.assertEqual(queue.payloads, [])
 
 
 if __name__ == "__main__":
