@@ -50,3 +50,36 @@ Do not turn on the feature flag or route production traffic to this adapter unti
 ## Isolated staging probe
 
 The existing Render standby can run `python -m msw_engine.github_queue_staging` from this branch. The probe performs read-only `status` calls against the fixed private queue; it never claims or modifies work. Logs reveal only whether the credential is present, bounded state counts, and a bounded error code. Configure `MSW_HERMES_GITHUB_TOKEN` as a secret on the staging service only after review. This verifies GitHub connectivity, not Hermes-originated task submission or a ChatGPT/ACK round trip.
+
+## Staging Python HUB execution candidate — 2026-11-14
+
+The staging probe now contains an **explicitly disabled by default** one-shot
+handler for a single, strictly identified, *read-only* Python HUB health task.
+Implementation: `msw_engine/github_python_hub_once.py`, wired into the existing
+`msw_engine.github_queue_staging` process.
+
+The handler will not claim a task unless all conditions hold:
+
+- `MSW_HERMES_STAGING_PYTHON_ONE_SHOT=1`;
+- `MSW_HERMES_CHAT_BACKEND=github` and `MSW_HERMES_CHAT_LOOP_ENABLED=1`;
+- `MSW_HERMES_PRODUCTION_MUTATION_ALLOWED` is **not** `1`;
+- `MSW_HERMES_STAGING_TASK_ID` and `MSW_HERMES_CONVERSATION_KEY` are valid, explicitly selected;
+- a single queued `pending` task is assigned to `executor=hermes` with
+  `kind=review`, no parent, the literal goal
+  `MSW_PYTHON_HUB_READONLY_STATUS_V1`, and matching request SHA-256.
+
+For that single task, the worker checks a fixed public HTTPS Python HUB status
+endpoint (no task-provided URL, no redirects, 8 s timeout, 16 KiB cap).
+It writes a bounded `report` with the source SHA-256 and performs a separate
+readback for matching result SHA-256. It **does not** call `ack`,
+modify WordPress or production, call a paid AI provider, inject messages into
+an ordinary ChatGPT thread, or execute code from task text.
+
+If the result is uncertain, the task is not retried automatically.
+If the exact task is absent, the process remains in read-only mode.
+This is a candidate for a scoped live staging trial, not general Python
+capability execution or proof of Hermes's identity. Authenticated Hermes
+readback and ACK are still required for a full round trip.
+
+Offline regression tests: GitHub Actions run 43639323773 (success).
+No live one-shot execution, ChatGPT delivery or Hermes ACK is claimed.
