@@ -60,6 +60,7 @@ function msw_hrb_status() {
         if (($route['status'] ?? '') === 'READY') { $ready++; }
     }
     $seen = $present ? strtotime((string) ($snapshot['observedAtUtc'] ?? '')) : false;
+    $heartbeat = $present ? strtotime((string) ($snapshot['hermes']['lastSeen'] ?? '')) : false;
     return rest_ensure_response(array(
         'bridgeVersion' => '0.2.0',
         'scope' => 'metadata_snapshot_only',
@@ -72,7 +73,7 @@ function msw_hrb_status() {
         'runtimeRoutes' => count($routes),
         'readyRoutes' => $ready,
         'observedAtUtc' => $present ? $snapshot['observedAtUtc'] : null,
-        'stale' => !$seen || time() - $seen > 1800,
+        'stale' => !$seen || time() - $seen > 1800 || !$heartbeat || time() - $heartbeat > 1800,
         'digestSha256' => $present ? $snapshot['digestSha256'] : null,
     ));
 }
@@ -150,6 +151,12 @@ function msw_hrb_post(WP_REST_Request $request) {
         );
     }
     $rawHermes = is_array($input['hermes'] ?? null) ? $input['hermes'] : array();
+    if (!current_user_can('manage_options') && msw_hrb_token_auth($request)) {
+        $sourceHeartbeat = strtotime((string) ($rawHermes['lastSeen'] ?? ''));
+        if (!$sourceHeartbeat || $sourceHeartbeat > time() + 300 || time() - $sourceHeartbeat > 1800) {
+            return msw_hrb_error('msw_hrb_source_stale', 'Hermes heartbeat older than 30 minutes', 409);
+        }
+    }
     $snapshot = array(
         'schema' => MSW_HRB_SCHEMA,
         'registryRevision' => (int) $revision,
@@ -171,7 +178,8 @@ function msw_hrb_post(WP_REST_Request $request) {
     if (is_array($old) && !empty($old['digestSha256'])) {
         $oldRev = (int) ($old['registryRevision'] ?? -1);
         $oldTime = strtotime((string) ($old['observedAtUtc'] ?? '')) ?: 0;
-        if ($revision < $oldRev || ($revision === $oldRev && $seen < $oldTime)) {
+        if ($revision < $oldRev || $ack < (int) ($old['lastAckRevision'] ?? 0)
+            || ($revision === $oldRev && $seen < $oldTime)) {
             return msw_hrb_error('msw_hrb_stale', 'Older snapshot rejected', 409);
         }
     }
