@@ -120,7 +120,12 @@ final class MSWDC_Engines {
             if(!function_exists('mswh_connection_status'))return new WP_Error('mswdc_missing_hub','Nie wykryto autoryzowanego adaptera Python HUB.',['status'=>503]);
             try{
                 $out=mswh_connection_status(true);
-                if(is_wp_error($out))return new WP_Error('mswdc_hub_failure','Weryfikacja połączenia z HUB zakończyła się błędem.',['status'=>503]);
+                if(is_wp_error($out)){
+                    $cause=sanitize_key((string)$out->get_error_code());
+                    $safe=['mswh_setup','mswh_offline','mswh_auth','mswh_redirect','mswh_failed','mswh_nonce','mswh_payload','mswh_path','mswh_timeout','mswh_health','mswh_health_shape','mswh_search'];
+                    if(!in_array($cause,$safe,true))$cause='unknown';
+                    return new WP_Error('mswdc_hub_'.$cause,'Podpisany test Python HUB nie został zaliczony.',['status'=>503]);
+                }
                 if(!is_array($out)||($out['connected']??null)!==true||($out['cached_only']??null)!==false||($out['not_tested']??null)!==false||($out['connection_state']??null)!=='tested')return new WP_Error('mswdc_hub_unverified','Brak świeżo potwierdzonego połączenia.',['status'=>502]);
                 return ['engine'=>'hub','operation'=>$mode,'status'=>'completed','verified'=>true,
                   'version'=>substr(sanitize_text_field((string)($out['version']??'')),0,40),
