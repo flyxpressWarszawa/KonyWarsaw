@@ -1,12 +1,14 @@
-"""Offline state-machine tests: Hermes -> mailbox -> ChatGPT Work -> Hermes ACK."""
+"""Offline state-machine tests for job and reply exchange."""
+from contextlib import closing
 import hashlib
 import os
 from pathlib import Path
+import sqlite3
 from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
-from msw_engine.hermes_chat_bridge import SCHEMA, handle, MAX_ROUNDS
+from msw_engine.hermes_chat_bridge import LEGACY_EXECUTOR, MAX_ROUNDS, SCHEMA, SCHEDULED_EXECUTOR, handle
 from msw_engine.tasks import TaskError, handlers
 
 def sha(value):
@@ -30,7 +32,11 @@ class ExchangeTests(unittest.TestCase):
         return self.command(**{**self.sub, **kw})
 
     def claim(self):
-        return self.command(schema=SCHEMA, operation="claim", executor="chatgpt_work")
+        return self.command(schema=SCHEMA, operation="claim", executor=LEGACY_EXECUTOR)
+
+    def claim_scheduled(self, conversation):
+        return self.command(schema=SCHEMA, operation="claim", executor=SCHEDULED_EXECUTOR,
+                            conversation_key=conversation)
 
     def report(self, claimed, answer="Wykonałem analizę.", outcome="completed", **kw):
         data=dict(schema=SCHEMA,operation="report",task_id=claimed["task_id"],
@@ -53,6 +59,45 @@ class ExchangeTests(unittest.TestCase):
         self.assertEqual(ack["state"], "acknowledged")
         self.assertTrue(ack["hermes_ack_verified"])
         self.assertEqual(ack["result_sha256"], sha("Wykonałem analizę."))
+
+    def test_scheduled_claim_only_reads_its_conversation_and_executor(self):
+        other_conv = "msw-conv-20261115"
+        other_task = "msw-owner-task-0002"
+        self.submit(executor=SCHEDULED_EXECUTOR)
+        self.submit(task_id=other_task, conversation_key=other_conv, executor=SCHEDULED_EXECUTOR)
+        self.assertEqual(self.claim()["state"], "empty")
+        self.assertEqual(self.claim_scheduled("msw-conv-unknown")["state"], "empty")
+        with self.assertRaisesRegex(TaskError, "claim_fields"):
+            self.command(schema=SCHEMA, operation="claim", executor=SCHEDULED_EXECUTOR)
+        claim = self.claim_scheduled(other_conv)
+        self.assertEqual(claim["task_id"], other_task)
+        self.assertEqual(claim["executor"], SCHEDULED_EXECUTOR)
+        self.report(claim)
+        ack = self.acknowledge(other_task, "Wykonałem analizę.")
+        self.assertEqual(ack["result"], "Wykonałem analizę.")
+        next_task = "msw-owner-task-0003"
+        self.submit(task_id=next_task, conversation_key=other_conv, parent_id=other_task,
+                    executor=SCHEDULED_EXECUTOR, goal=ack["result"] + " Przygotuj kolejny krok.")
+        self.assertEqual(self.claim_scheduled(other_conv)["task_id"], next_task)
+        self.assertEqual(self.claim_scheduled(self.conv)["task_id"], self.key)
+
+    def test_legacy_queue_rows_survive_schema_upgrade(self):
+        queued = self.submit()
+        database = self.root / "hermes-chat-loop" / "exchange.sqlite3"
+        with closing(sqlite3.connect(database)) as db:
+            db.execute("ALTER TABLE jobs DROP COLUMN executor")
+        self.assertEqual(self.submit(), queued)
+        self.assertEqual(self.claim_scheduled(self.conv)["state"], "empty")
+        self.assertEqual(self.claim()["task_id"], self.key)
+
+    def test_executor_cannot_change_on_retry_or_follow_up(self):
+        self.submit(executor=SCHEDULED_EXECUTOR)
+        with self.assertRaisesRegex(TaskError, "idempotency_conflict"):
+            self.submit()
+        self.report(self.claim_scheduled(self.conv))
+        self.acknowledge(self.key, "Wykonałem analizę.")
+        with self.assertRaisesRegex(TaskError, "parent_executor_mismatch"):
+            self.submit(task_id="msw-owner-task-0002", parent_id=self.key)
 
     def test_submit_is_idempotent_and_rejects_conflicts(self):
         self.assertEqual(self.submit(),self.submit())

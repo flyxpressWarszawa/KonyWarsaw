@@ -30,7 +30,7 @@ This supersedes the earlier Work/Workspace deployment proposal in this document.
 
 **Important:** `MSW_HERMES_CHAT_LOOP_ENABLED=1` enables the mailbox handler only. It does not connect ChatGPT and must not be used to claim that the P0 requirement is implemented.
 
-The current prototype's `executor="chatgpt_work"` literal is a legacy mailbox label from the earlier proposal, not a registered or connected ChatGPT executor. That proposal is superseded. This literal must not be treated as permission to choose Work or as proof of a connection to the ordinary chat. The code has not been converted into a direct-chat transport by this documentation update.
+The existing hourly task in an ordinary ChatGPT thread can use the `chatgpt_scheduled` executor once an authenticated connector to this mailbox is available. The scheduled executor requires a conversation key on every claim and receives only tasks explicitly assigned to that executor and key. The `chatgpt_work` label remains the default for legacy callers and pre-existing rows. Neither label enables an executor or grants access to a ChatGPT conversation.
 
 ## Mailbox protocol — local prototype only
 
@@ -45,6 +45,8 @@ Schema: `msw.hermes.chat-loop.v1`.
 | status | Authorized caller | Read mailbox counts and state |
 
 Storage is `hermes-chat-loop/exchange.sqlite3` under the worker's configured data directory. A `conversation_key` in SQLite is **not** an ordinary ChatGPT conversation ID or access authorization. The prototype creates no inbound ChatGPT endpoint and no external connector.
+
+For the scheduled executor, Hermes adds `"executor": "chatgpt_scheduled"` to submit requests. An authenticated scheduled client claims with `{"schema":"msw.hermes.chat-loop.v1","operation":"claim","executor":"chatgpt_scheduled","conversation_key":"msw-chat-thread-001"}`. The connector must bind that key to the authenticated caller's configured conversation and expose only the operations allowed for its role. Report still requires the lease token from that claim. Hermes uses the resulting digest for ACK and explicitly assigns any follow-up to the same executor.
 
 Follow-up tasks require an acknowledged parent. A leased task is not automatically repeated after an uncertain outcome. These are mailbox protections, not proof that an external operation occurred.
 
