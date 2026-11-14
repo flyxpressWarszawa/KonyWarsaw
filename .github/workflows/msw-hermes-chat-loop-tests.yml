@@ -5,8 +5,10 @@ on:
       - msw/worker-autostart-final-20261111
     paths:
       - 'msw-autonomous-engine/msw_engine/hermes_chat_bridge.py'
+      - 'msw-autonomous-engine/msw_engine/github_chat_queue.py'
       - 'msw-autonomous-engine/msw_engine/tasks.py'
       - 'msw-autonomous-engine/tests/test_hermes_chat_bridge.py'
+      - 'msw-autonomous-engine/tests/test_github_chat_queue.py'
       - '.github/workflows/msw-hermes-chat-loop-tests.yml'
   workflow_dispatch:
 
@@ -26,4 +28,4 @@ jobs:
         working-directory: msw-autonomous-engine
         env:
           MSW_HERMES_CHAT_LOOP_ENABLED: '0'
-        run: python -m unittest discover -s tests -p 'test_hermes_chat_bridge.py' -v
+        run: python -m unittest discover -s tests -p 'test_*chat*.py' -v
