@@ -86,7 +86,16 @@ def main() -> int:
     signal.signal(signal.SIGINT, stop)
     queue = GitHubChatQueue()
     one_shot_handled = False
+    registry_sync_handled = False
     while not stopping:
+        if not registry_sync_handled and os.environ.get("MSW_HERMES_WP_REGISTRY_STAGING_ENABLED") == "1":
+            registry_sync_handled = True
+            try:
+                from .wp_registry_staging import run_live_once
+                result = run_live_once()
+                print(json.dumps({"wp_registry_staging": result}, separators=(",", ":")), flush=True)
+            except Exception:
+                print(json.dumps({"wp_registry_staging": {"state": "uncertain_no_retry"}}), flush=True)
         if not os.environ.get("MSW_HERMES_GITHUB_TOKEN", "").strip():
             print(json.dumps({"staging_probe": {
                 "state": "credential_missing", "receipt_audit_version": RECEIPT_AUDIT_VERSION,
