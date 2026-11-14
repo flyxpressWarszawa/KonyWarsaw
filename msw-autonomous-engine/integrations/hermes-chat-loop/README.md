@@ -1,88 +1,84 @@
-# MSW Hermes <-> ChatGPT — command / receipt loop (staging)
+# Hermes -> ordinary ChatGPT -> Hermes: required target and mailbox prototype
 
-## Status as of 2026-11-14
-- Durable **mailbox implemented** and opt-in worker handler staged on this branch.
-- **NOT deployed to the active Hermes runtime** on Render. The production worker's
-  entrypoint runs from a persisted /var/data deployment; a GitHub commit or PR
-  does not change that runtime.
-- **NOT connected to the specific interactive chatgpt.com conversation**. A
-  remote service cannot insert a user message into that conversation and
-  asynchronously cause this assistant to work.
-- No unauthorized ChatGPT web scraping, no session cookies, no paid OpenAI calls.
-- Existing MSW paid, free, and own-model routes are unaffected.
-- After a reviewed deployment, a trusted ChatGPT Work task or approved Workspace
-  Agent could be connected as the executor via a separately authenticated
-  connector, not merely by setting the flag below.
+## Current status — reviewed 2026-11-14
 
-## Loop contract (already implemented, no network required)
+**BLOCKED: no supported and authorized ordinary-ChatGPT conversation transport has been identified or connected.**
 
-Use the signed existing WordPress queue to dispatch task kind
-"hermes.chat.exchange" to the Render MSW worker, after enabling
-MSW_HERMES_CHAT_LOOP_ENABLED=1 in the new runtime deployment.
+This branch contains a local task-mailbox prototype. It does not send messages into a personal chatgpt.com conversation, start ChatGPT replies, retrieve those replies, or run a live two-agent loop. A GitHub commit, a passing mailbox test, an OAuth login, or an enabled Python handler is not evidence of that connection.
 
-Operation | Origin | Effect
-- submit | Hermes director | commit durable task; one outstanding per conversation
-- claim | approved ChatGPT executor | lease one task once; return goal and lease token
-- report | approved executor | commit result + SHA-256, same-lease idempotence
-- ack | Hermes director | confirm result digest and read back result, then unlock next round
-- status | either authorized side | states/counts without raw task content
+## P0 requirement: the ordinary chat, not a substitute
 
-The message schema is msw.hermes.chat-loop.v1.
-Jobs are stored on the worker's local private persistent volume under
-hermes-chat-loop/exchange.sqlite3. It does not automatically create or
-install an external ChatGPT plugin or publish a new HTTP endpoint.
+The intended sequence is:
 
-Example payloads, for the signed queue only:
-- {"schema":"msw.hermes.chat-loop.v1","operation":"submit","task_id":"msw-job-20261114-0001","conversation_key":"msw-hermes-conv-001","kind":"plan","goal":"Prepare a safe sequence of next steps"}
-- {"schema":"msw.hermes.chat-loop.v1","operation":"claim","executor":"chatgpt_work"}
-- {"schema":"msw.hermes.chat-loop.v1","operation":"report","task_id":"msw-job-20261114-0001","lease_token":"<one-time-lease-from-claim>","result":"Completed plan","result_sha256":"<sha256-of-UTF8-result>","outcome":"completed"}
-- {"schema":"msw.hermes.chat-loop.v1","operation":"ack","task_id":"msw-job-20261114-0001","result_sha256":"<sha256-of-result>"}
+1. Hermes has a task and initiates a message itself.
+2. The message starts a new ordinary ChatGPT conversation or continues a specifically selected existing ordinary conversation.
+3. ChatGPT performs the authorized work and produces an actual reply.
+4. Hermes receives and verifies the reply, stores its receipt, and chooses the next task from that result.
+5. Hermes sends the next message without a human having to paste text, click Send, or run a command for each turn.
 
-Follow-up work is another submit with parent_id equal to the previous,
-**acknowledged** task. Maximum 12 turns per chain. No speculative retries
-for a leased but uncertain execution; reconcile the external runner first.
-Blocked/approval-required results are reported honestly, not rewritten as
-completed. No automatic WordPress writes or electrical/security operations.
+The target is ordinary ChatGPT. ChatGPT Work, Workspace Agents, separate API conversations, local Codex threads, periodic polling, and a simulated response are **not equivalent acceptance outcomes**. Do not activate any of them as a silent replacement for this requirement. Existing independent local/free/paid model routes remain outside the scope of this task and must not be disabled.
 
-## Production prerequisites
+This supersedes the earlier Work/Workspace deployment proposal in this document. It does not grant a missing platform capability.
 
-1. Verify deployed Hermes versions, its canonical data_dir, signed WordPress
-   queue adapter and actual source in /var/data before any rollout.
-2. Verify a ChatGPT-facing executor:
-   * ChatGPT Work event-triggered tasks: on supported GitHub pull-request
-     activity in the authorized PRIVATE repo. Runs are in Work, not this chat.
-     The owner must configure the trigger under Work -> Scheduled and
-     authorize GitHub. Confirm exact activity type and supported writes.
-   * Alternatively, Workspace Agent API triggers for eligible Business /
-     Enterprise workspaces with a published agent and scoped token. API status
-     alone is not the answer; the agent must write the receipt to the approved
-     private destination. Not assumed available in a Pro personal account.
-   * Optional ChatGPT Plan OAuth adapter in separate PR #47 is NOT an inbound
-     ChatGPT chat API and requires approved client credentials and consent.
-3. Provide an authenticated, scope-limited tool action linking ChatGPT Work
-   to submit/claim/report/ack (or a private GitHub output relay). The backend
-   must verify caller authorization and protect lease tokens; do not assume
-   that the generic WordPress queue exposes this endpoint to ChatGPT.
-4. Repair Hermes' GitHub credential issue only via approved secret manager,
-   if GitHub is used as the mailbox. No PAT/token in prompts, logs or GitHub.
-5. Run staging with a real task, model reply, signed completion, durable
-   readback and Hermes ACK. Verify a second round. Only then consider live.
-6. Set the opt-in flag in the deployed environment after all gates pass.
-   Rollback: remove the handler flag; do not destroy the persisted ledger.
+## What exists in this branch
 
-## Safety boundaries
+- `msw_engine/hermes_chat_bridge.py`: private SQLite mailbox with submit, claim, report, ack and status operations.
+- A local handler named `hermes.chat.exchange`, exposed only when `MSW_HERMES_CHAT_LOOP_ENABLED=1`.
+- Idempotent task IDs, one outstanding task per conversation key, result hashes, and a maximum of 12 rounds per chain.
+- Offline tests of mailbox state transitions. These tests use supplied strings instead of a live ChatGPT reply.
+- No deployment or live end-to-end ordinary-chat test is established by this branch.
 
-- The goal text is **untrusted data**: it cannot grant new tools, bypass
-  permission scopes, enable purchases, change billing, or run arbitrary code.
-- All state transitions are idempotent and backed by SQLite WAL.
-- A leased task will NOT be automatically reissued on timeout; its result
-  may be unknown. Do not mark "sent" as "done".
-- No new cron, public web listener, privileged WordPress rights, paid
-  API key, or unstoppable autonomous loop. Preserve all MSW quotas.
-- Any high-impact modification needs explicit reviewed permissions and
-  authoritative readback. No guarantee of truly simultaneous chats.
+**Important:** `MSW_HERMES_CHAT_LOOP_ENABLED=1` enables the mailbox handler only. It does not connect ChatGPT and must not be used to claim that the P0 requirement is implemented.
 
-Docs:
-https://help.openai.com/en/articles/10291617-scheduled-tasks-in-chatgpt
-https://developers.openai.com/workspace-agents/trigger-runs
-https://developers.openai.com/siwc/token-sharing-open-source
+The current prototype's `executor="chatgpt_work"` literal is a legacy mailbox label from the earlier proposal, not a registered or connected ChatGPT executor. That proposal is superseded. This literal must not be treated as permission to choose Work or as proof of a connection to the ordinary chat. The code has not been converted into a direct-chat transport by this documentation update.
+
+## Mailbox protocol — local prototype only
+
+Schema: `msw.hermes.chat-loop.v1`.
+
+| Operation | Intended caller | Local effect |
+| --- | --- | --- |
+| submit | Hermes | Store a task with task ID and conversation key |
+| claim | Separately authenticated executor | Lease a queued task |
+| report | The leased executor | Store result text, outcome and SHA-256 |
+| ack | Hermes | Check the stored result digest and acknowledge receipt |
+| status | Authorized caller | Read mailbox counts and state |
+
+Storage is `hermes-chat-loop/exchange.sqlite3` under the worker's configured data directory. A `conversation_key` in SQLite is **not** an ordinary ChatGPT conversation ID or access authorization. The prototype creates no inbound ChatGPT endpoint and no external connector.
+
+Follow-up tasks require an acknowledged parent. A leased task is not automatically repeated after an uncertain outcome. These are mailbox protections, not proof that an external operation occurred.
+
+## Platform verification
+
+Official documentation checked on 2026-11-14:
+
+- Sign in with ChatGPT can authorize eligible Responses API inference. Its documented HTTP flow requires `store=false` and `stream=true`; `conversation` is unsupported and the client supplies the required history. This does not provide the required ordinary-chat input/reply transport.
+- The Conversations API documents API-side conversation objects used with Responses. Do not treat such an object as an existing personal ChatGPT web conversation.
+- The documented external ChatGPT trigger is for published Workspace Agents. It is not this project's accepted target, and its trigger API does not itself return the generated answer.
+- Event-triggered tasks documented for Gmail, Slack and GitHub run in Work. A scheduled pull is also not direct initiation of an ordinary chat by Hermes.
+
+No supported endpoint for sending to and reading from a selected ordinary ChatGPT web conversation was found in the interfaces reviewed. This is a scoped verification result, not a claim about all future platform capabilities.
+
+Sources:
+- https://developers.openai.com/siwc/quickstart
+- https://developers.openai.com/siwc/token-sharing-open-source/preview-limitations
+- https://developers.openai.com/api/docs/guides/conversation-state
+- https://developers.openai.com/workspace-agents/trigger-runs
+- https://help.openai.com/en/articles/10291617-scheduled-tasks-in-chatgpt
+
+## Required evidence before claiming completion
+
+1. A documented, authorized mechanism for ordinary personal ChatGPT conversations, including server-side initiation and reply retrieval, available to the account.
+2. Confirmed secure authentication for that mechanism, without secrets in GitHub, chat, or logs.
+3. An actual Hermes-originated job with an ordinary ChatGPT conversation identifier and an actual generated reply correlated to that job.
+4. Durable result storage and an explicit Hermes ACK of that result.
+5. A second Hermes task derived from that reply, sent into the same ordinary conversation, with a second verified response.
+6. Controlled verification of both new-chat creation and continuation of an explicitly selected existing chat before claiming both modes.
+
+The missing platform transport comes **before** deployment. Do not create more scaffolding, deploy the mailbox, or claim completion merely to make the status green. No browser-session extraction, undocumented private endpoint, or access-control bypass is included in this project.
+
+## Deployment and safety scope
+
+The existing signed WordPress queue and Render runtime must be inspected before a future release. A source commit does not replace the worker's persisted runtime automatically. Keep the prototype disabled in production until the missing transport and authentication are available and a real end-to-end test succeeds.
+
+Goal text is untrusted task data: it cannot grant tools, spend authority, account access, or permission for arbitrary changes. Report blocked or unknown outcomes honestly. Preserve existing MSW services, quotas and independent provider routes.
