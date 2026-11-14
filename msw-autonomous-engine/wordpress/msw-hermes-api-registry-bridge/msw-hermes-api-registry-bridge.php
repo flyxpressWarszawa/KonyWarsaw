@@ -2,19 +2,50 @@
 /**
  * Plugin Name: MSW Hermes API Registry Bridge
  * Description: Private, read-only-to-visitors registry snapshot gateway. Does not run inference or store secrets.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Requires PHP: 8.0
  */
 defined('ABSPATH') || exit;
 
 const MSW_HRB_OPTION = 'msw_hermes_registry_snapshot_v1';
 const MSW_HRB_SCHEMA = 'msw.hermes.wp-ai-registry.snapshot.v1';
+const MSW_HRB_TOKEN_HASH_OPTION = 'msw_hermes_registry_token_hash_v1';
+const MSW_HRB_LAST_TOKEN_WRITE = 'msw_hermes_registry_last_token_write_v1';
 
-function msw_hrb_can_read() {
+function msw_hrb_token_auth($request) {
+    if (!($request instanceof WP_REST_Request)) { return false; }
+    $token = (string) $request->get_header('x-msw-registry-token');
+    $storedHash = get_option(MSW_HRB_TOKEN_HASH_OPTION, '');
+    return strlen($token) === 64
+        && preg_match('/^[a-f0-9]{64}$/D', $token) === 1
+        && is_string($storedHash)
+        && strlen($storedHash) === 64
+        && hash_equals($storedHash, hash('sha256', $token));
+}
+function msw_hrb_can_read($request) {
+    return current_user_can('manage_options') || msw_hrb_token_auth($request);
+}
+function msw_hrb_can_write($request) {
+    return current_user_can('manage_options')
+        || current_user_can('msw_hermes_registry_write')
+        || msw_hrb_token_auth($request);
+}
+function msw_hrb_admin_only() {
     return current_user_can('manage_options');
 }
-function msw_hrb_can_write() {
-    return current_user_can('manage_options') || current_user_can('msw_hermes_registry_write');
+function msw_hrb_issue_token() {
+    try {
+        $token = bin2hex(random_bytes(32));
+    } catch (Throwable $e) {
+        return msw_hrb_error('msw_hrb_entropy', 'Token generation unavailable', 503);
+    }
+    update_option(MSW_HRB_TOKEN_HASH_OPTION, hash('sha256', $token), false);
+    return rest_ensure_response(array(
+        'token' => $token,
+        'scope' => 'registry_snapshot_only',
+        'rotatesPreviousToken' => true,
+        'note' => 'Store on authorized Hermes staging only. Do not copy to GitHub or reports.',
+    ));
 }
 function msw_hrb_error($code, $message, $status) {
     return new WP_Error($code, $message, array('status' => $status));
@@ -30,10 +61,11 @@ function msw_hrb_status() {
     }
     $seen = $present ? strtotime((string) ($snapshot['observedAtUtc'] ?? '')) : false;
     return rest_ensure_response(array(
-        'bridgeVersion' => '0.1.0',
+        'bridgeVersion' => '0.2.0',
         'scope' => 'metadata_snapshot_only',
         'inferenceTransportVerified' => false,
         'snapshotPresent' => $present,
+        'scopedTokenConfigured' => is_string(get_option(MSW_HRB_TOKEN_HASH_OPTION, '')) && strlen((string) get_option(MSW_HRB_TOKEN_HASH_OPTION, '')) === 64,
         'registryRevision' => $present ? (int) $snapshot['registryRevision'] : null,
         'lastAckRevision' => $present ? (int) $snapshot['lastAckRevision'] : null,
         'providerRecords' => count($providers),
@@ -52,6 +84,12 @@ function msw_hrb_snapshot() {
     ));
 }
 function msw_hrb_post(WP_REST_Request $request) {
+    if (!current_user_can('manage_options') && msw_hrb_token_auth($request)) {
+        $lastWrite = (int) get_option(MSW_HRB_LAST_TOKEN_WRITE, 0);
+        if ($lastWrite > 0 && time() - $lastWrite < 45) {
+            return msw_hrb_error('msw_hrb_rate_limit', 'Scoped sync is limited to one write per 45 seconds', 429);
+        }
+    }
     $length = (int) $request->get_header('content-length');
     if ($length > 128000) { return msw_hrb_error('msw_hrb_too_large', 'Snapshot exceeds 128 KB', 413); }
     $input = $request->get_json_params();
@@ -143,6 +181,9 @@ function msw_hrb_post(WP_REST_Request $request) {
     }
     $snapshot['digestSha256'] = hash('sha256', $encoded);
     update_option(MSW_HRB_OPTION, $snapshot, false);
+    if (!current_user_can('manage_options')) {
+        update_option(MSW_HRB_LAST_TOKEN_WRITE, time(), false);
+    }
     return rest_ensure_response(array(
         'stored' => true,
         'registryRevision' => $revision,
@@ -162,5 +203,10 @@ add_action('rest_api_init', function () {
     register_rest_route('msw-hermes-registry/v1', '/snapshot', array(
         array('methods' => WP_REST_Server::READABLE, 'callback' => 'msw_hrb_snapshot', 'permission_callback' => 'msw_hrb_can_read'),
         array('methods' => WP_REST_Server::CREATABLE, 'callback' => 'msw_hrb_post', 'permission_callback' => 'msw_hrb_can_write'),
+    ));
+    register_rest_route('msw-hermes-registry/v1', '/token', array(
+        'methods' => WP_REST_Server::CREATABLE,
+        'callback' => 'msw_hrb_issue_token',
+        'permission_callback' => 'msw_hrb_admin_only',
     ));
 });
