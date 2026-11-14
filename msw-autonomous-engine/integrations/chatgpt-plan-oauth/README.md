@@ -44,3 +44,11 @@ https://developers.openai.com/siwc/token-sharing-open-source
 https://developers.openai.com/siwc/token-sharing-open-source/models-and-inference
 https://developers.openai.com/siwc/token-sharing-open-source/self-hosted-vms
 https://developers.openai.com/siwc/token-sharing-open-source/preview-limitations
+
+## Hermes product distinction
+
+OpenAI lists the *NousResearch Hermes Agent* among participating ChatGPT plan-usage apps. In that **specific** upstream product, the owner can run `hermes auth add openai-codex --type oauth` (or choose ChatGPT or Codex Subscription in `hermes model`) and complete the device-code login. Do not assume those commands are installed on the MSW custom Render worker: it uses the `msw_engine` Python runtime and a separate router. The upstream OAuth consent or credentials must not be imported into MSW's custom transport without a reviewed, authorized handoff and permission to use the supported integration.
+
+Official documentation:
+- https://learn.chatgpt.com/docs/sign-in-with-chatgpt
+- https://hermes-agent.nousresearch.com/docs/integrations/providers
