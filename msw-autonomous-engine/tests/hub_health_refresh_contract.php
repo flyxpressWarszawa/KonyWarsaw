@@ -16,6 +16,7 @@ function current_user_can($cap) { return $cap === 'manage_options' && $GLOBALS['
 function mswh_connection_status($refresh = false) {
     $GLOBALS['seen_refresh'][] = $refresh;
     if ($GLOBALS['test_case'] === 'error') return new WP_Error('mswh_offline', 'Backend unavailable');
+    if ($GLOBALS['test_case'] === 'unexpected_error') return new WP_Error('internal_secret_marker', 'Do not expose backend details');
     $state = ['connected'=>true, 'cached_only'=>false, 'not_tested'=>false,
               'connection_state'=>'tested', 'version'=>'0.2.0', 'providers'=>[]];
     if ($GLOBALS['test_case'] === 'cached') $state['cached_only'] = true;
@@ -43,6 +44,7 @@ check('success', 'completed', [true]);
 check('cached', 'mswdc_hub_unverified', [true]);
 check('not_tested', 'mswdc_hub_unverified', [true]);
 check('disconnected', 'mswdc_hub_unverified', [true]);
-check('error', 'mswdc_hub_failure', [true]);
+check('error', 'mswdc_hub_mswh_offline', [true]);
+check('unexpected_error', 'mswdc_hub_unknown', [true]);
 check('success', 'mswdc_forbidden', [], false);
-echo "HUB signed refresh PHP checks: $checked/6 PASS\n";
+echo "HUB signed refresh PHP checks: $checked/7 PASS\n";
