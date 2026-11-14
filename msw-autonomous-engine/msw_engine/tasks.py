@@ -445,6 +445,10 @@ def handlers() -> dict:
         result["supreme.observe"] = supreme_observe
     from .private_adapters import available_handlers
     result.update(available_handlers())
+    # Opt-in, authenticated queue capability; never opens a new public endpoint.
+    if os.environ.get('MSW_HERMES_CHAT_LOOP_ENABLED') == '1':
+        from .hermes_chat_bridge import handle as chat_loop_handle
+        result['hermes.chat.exchange'] = chat_loop_handle
     from .native_autonomy import execute as native_execute
     if os.environ.get('MSW_WP_URL') and os.environ.get('MSW_NODE') and len(os.environ.get('MSW_SECRET', '')) >= 32:
         result['module.execute'] = native_execute

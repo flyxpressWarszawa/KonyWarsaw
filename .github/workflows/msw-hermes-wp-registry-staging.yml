@@ -1,0 +1,25 @@
+name: Hermes WordPress registry staging tests
+on:
+  push:
+    branches: [msw/hermes-chat-loop-20261114]
+    paths:
+      - 'msw-autonomous-engine/msw_engine/wp_registry_staging.py'
+      - 'msw-autonomous-engine/msw_engine/github_queue_staging.py'
+      - 'msw-autonomous-engine/tests/test_wp_registry_staging.py'
+      - '.github/workflows/msw-hermes-wp-registry-staging.yml'
+  pull_request:
+    paths:
+      - 'msw-autonomous-engine/msw_engine/wp_registry_staging.py'
+      - 'msw-autonomous-engine/msw_engine/github_queue_staging.py'
+      - 'msw-autonomous-engine/tests/test_wp_registry_staging.py'
+      - '.github/workflows/msw-hermes-wp-registry-staging.yml'
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python compile
+        run: python -m py_compile msw-autonomous-engine/msw_engine/wp_registry_staging.py msw-autonomous-engine/msw_engine/github_queue_staging.py
+      - name: Offline no-network tests
+        run: cd msw-autonomous-engine && python -m unittest discover -s tests -p 'test_wp_registry_staging.py' -v
