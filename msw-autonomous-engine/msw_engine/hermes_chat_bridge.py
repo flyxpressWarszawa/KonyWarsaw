@@ -312,6 +312,12 @@ def inspect(payload, directory):
 def handle(payload: dict, directory: Path) -> dict:
     if not isinstance(payload, dict) or payload.get("schema") != SCHEMA:
         _fail("schema")
+    backend = os.environ.get("MSW_HERMES_CHAT_BACKEND", "sqlite")
+    if backend == "github":
+        from .github_chat_queue import handle as github_handle
+        return github_handle(payload, directory)
+    if backend != "sqlite":
+        _fail("backend_configuration")
     operation = payload.get("operation")
     if operation == "submit":
         return submit(payload, directory)
