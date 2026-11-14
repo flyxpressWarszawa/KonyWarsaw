@@ -1,4 +1,4 @@
-# MSW Hermes API Registry Bridge v0.1.0 — WordPress
+# MSW Hermes API Registry Bridge v0.2.0 — WordPress
 
 This code is **metadata only**, not a general-purpose model inference proxy. It never exports API keys, calls providers, or makes public claims that a catalog item is usable. Registry catalog status is intentionally separate from Hermes runtime READY.
 
@@ -36,3 +36,17 @@ Deactivate `msw-hermes-api-registry-bridge` via WP-CLI or WordPress plugin scree
 ## Source-of-truth
 
 The detailed 30-point checkpoint and sanitized full catalog are private under `signal-harbor-companion/main/knowledge/hermes-api-registry`. Never copy secret material into public GitHub.
+
+## Confirmed staging Hermes → WordPress round-trip (2026-11-14 20:59 UTC)
+
+- Render isolated worker `srv-dbnodkbrjlhs739drc5g` (feature branch `msw/hermes-chat-loop-20261114`) started release commit `d633e0d47a2f938d1e8e8ae1b28f33f7e2b3131a`.
+- A one-shot opt-in path read the private GitHub checkpoint and submitted the whitelisted catalog through `X-MSW-Registry-Token`; only the **SHA-256 of the 256-bit token** resides in the WordPress option. The actual token was passed only to Render staging environment, never to GitHub or chat messages.
+- Render log recorded `verified_staging_metadata_only`: registry 119, **157 records**, **27 routes**, **7 runtime READY**. Independent WordPress GET confirmed digest `5e42d032f33aa386852ae4b7b959b6570204b51781c83ca12c81a0a53b9673c9`, revision 119, ACK revision 119, `stale=false`.
+- GitHub Actions PHP lint and scoped-auth offline checks: `43640763882` SUCCESS. Staging Python test suite and existing chat-loop tests: `43640141960` and `43640141953` SUCCESS.
+- Only **metadata** has been delivered from Hermes staging to WordPress. User-directed provider inference from WordPress, production auto-sync, budget failover and ordinary ChatGPT messages are **not** verified.
+
+### Scoped token handling and rotation
+
+An administrator can issue or rotate the scoped credential through authenticated `POST /wp-json/msw-hermes-registry/v1/token`. **Do not paste the returned token into a conversation, logs or GitHub.** Rotation instantly invalidates the previous token; update the isolated worker's environment with the new value through an authenticated secrets channel, followed by a controlled deploy. The endpoint does not allow token access to the registry's service identity. WordPress enforces a 45-second minimum between service-token writes, and rejects a Hermes heartbeat older than 30 minutes (on service-token writes). Successful authentication grants **only** the read/write of sanitized snapshot endpoints, not post editing, plugin management, model-provider credentials or chat-history access.
+
+The staging publisher has one-shot semantics: no automatic replay of uncertain POSTs. Continuous periodic sync remains out of scope until the live Hermes heartbeat source is wired to a bounded production fetcher.
