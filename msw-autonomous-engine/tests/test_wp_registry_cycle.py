@@ -193,6 +193,49 @@ class RegistryCycleTests(unittest.TestCase):
             self.assertEqual(db.execute("SELECT state FROM syncs").fetchone()[0], 'pending')
         self.assertEqual(self.remote.posts, 1)
 
+    def test_approved_newer_operator_snapshot_supersedes_unknown(self):
+        self.remote.raise_after_write = True
+        with self.assertRaisesRegex(SyncError, 'transport_unknown'):
+            self.run_sync()
+        self.remote.raise_after_write = False
+        now = NOW + timedelta(minutes=1)
+        d = fixture(); d['evidence']['hermes']['lastSeen'] = now.isoformat().replace('+00:00', 'Z')
+        current = build_payload(d, now)
+        self.remote.value = dict(current, source='operator_mcp_audit', digestSha256='f' * 64)
+        out = self.run_sync(d, now)
+        self.assertEqual(out['state'], 'operator_snapshot_verified_prior_superseded')
+        self.assertFalse(out['priorPostVerified'])
+        self.assertEqual(out['providerCalls'], 0)
+        self.assertEqual(self.remote.posts, 1)
+        with sqlite3.connect(self.root / 'sync.sqlite3') as db:
+            states = dict(db.execute("SELECT state,count(*) FROM syncs GROUP BY state").fetchall())
+        self.assertEqual(states, {'superseded': 1, 'external_verified': 1})
+
+    def test_older_or_altered_operator_snapshot_never_satisfies_unknown(self):
+        self.remote.raise_after_write = True
+        with self.assertRaises(SyncError): self.run_sync()
+        self.remote.raise_after_write = False
+        now = NOW + timedelta(minutes=1)
+        d = fixture(); d['evidence']['hermes']['lastSeen'] = now.isoformat().replace('+00:00', 'Z')
+        current = build_payload(d, now)
+        current['routes'][0]['status'] = 'ERROR'
+        self.remote.value = dict(current, source='operator_mcp_audit', digestSha256='f' * 64)
+        with self.assertRaisesRegex(SyncError, 'independent_content_mismatch'):
+            self.run_sync(d, now)
+        self.assertEqual(self.remote.posts, 1)
+        with sqlite3.connect(self.root / 'sync.sqlite3') as db:
+            self.assertEqual(db.execute('SELECT state FROM syncs').fetchone()[0], 'pending')
+
+    def test_unknown_write_never_superseded_by_equal_or_older_observation(self):
+        self.remote.raise_after_write = True
+        with self.assertRaises(SyncError): self.run_sync()
+        self.remote.raise_after_write = False
+        current = build_payload(fixture(), NOW)
+        self.remote.value = dict(current, source='operator_mcp_audit', digestSha256='f' * 64)
+        with self.assertRaisesRegex(SyncError, 'pending_supersession_not_newer'):
+            self.run_sync()
+        self.assertEqual(self.remote.posts, 1)
+
     def test_unknown_without_remote_does_not_repeat(self):
         self.remote.raise_before_write = True
         with self.assertRaises(SyncError): self.run_sync()
