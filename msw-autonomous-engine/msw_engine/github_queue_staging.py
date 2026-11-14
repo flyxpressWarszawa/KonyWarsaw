@@ -93,6 +93,16 @@ def main() -> int:
             print(json.dumps({"python_task_pilot": run_python_pilot()}, separators=(",", ":")), flush=True)
         except Exception:
             print(json.dumps({"python_task_pilot": {"state": "uncertain_no_retry"}}), flush=True)
+    # One read-only pass over previously recorded receipts. It does not ACK.
+    if os.environ.get("MSW_HERMES_RECEIPT_ATTEST_STAGING") == "1":
+        try:
+            from .python_receipt_attestor import run_live_once as verify_python_receipts
+            report = verify_python_receipts()
+            print(json.dumps({"python_receipt_attestation": report},
+                             separators=(",", ":")), flush=True)
+        except Exception:
+            print(json.dumps({"python_receipt_attestation":
+                              {"state": "uncertain_no_retry"}}), flush=True)
     while not stopping:
         if not registry_sync_handled and os.environ.get("MSW_HERMES_WP_REGISTRY_STAGING_ENABLED") == "1":
             registry_sync_handled = True
