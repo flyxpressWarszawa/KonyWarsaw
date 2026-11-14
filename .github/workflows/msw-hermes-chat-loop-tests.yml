@@ -19,6 +19,8 @@ on:
       - 'msw-autonomous-engine/tests/test_github_python_hub_once.py'
       - 'msw-autonomous-engine/tests/test_python_task_pilot.py'
       - 'msw-autonomous-engine/tests/test_python_receipt_attestor.py'
+      - 'msw-autonomous-engine/integrations/python-hub-health-live/class-mswdc-engines.php'
+      - 'msw-autonomous-engine/tests/hub_health_refresh_contract.php'
       - '.github/workflows/msw-hermes-chat-loop-tests.yml'
   workflow_dispatch:
 
@@ -44,3 +46,5 @@ jobs:
           python -m unittest discover -s tests -p 'test_github_python_hub_once.py' -v
           python -m unittest discover -s tests -p 'test_python_task_pilot.py' -v
           python -m unittest discover -s tests -p 'test_python_receipt_attestor.py' -v
+          php -l integrations/python-hub-health-live/class-mswdc-engines.php
+          php tests/hub_health_refresh_contract.php
