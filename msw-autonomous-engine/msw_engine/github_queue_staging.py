@@ -18,6 +18,24 @@ from .tasks import TaskError
 RECEIPT_AUDIT_VERSION = 1
 
 
+def optional_one_shot(queue: GitHubChatQueue, environment=None, reader=None) -> dict:
+    """Never claim anything unless the operator opted into one exact read-only job."""
+    env = os.environ if environment is None else environment
+    if env.get("MSW_HERMES_STAGING_PYTHON_ONE_SHOT") != "1":
+        return {"state": "disabled", "reported": False}
+    if (env.get("MSW_HERMES_CHAT_BACKEND") != "github"
+            or env.get("MSW_HERMES_CHAT_LOOP_ENABLED") != "1"
+            or env.get("MSW_HERMES_PRODUCTION_MUTATION_ALLOWED") == "1"):
+        return {"state": "policy_blocked", "reported": False}
+    from .github_python_hub_once import run_exact_readonly_task, read_hub_status
+    return run_exact_readonly_task(
+        queue, task_id=env.get("MSW_HERMES_STAGING_TASK_ID", ""),
+        conversation_id=env.get("MSW_HERMES_CONVERSATION_KEY", ""),
+        reader=reader if reader is not None else read_hub_status,
+    )
+
+
+
 def safe_snapshot(queue: GitHubChatQueue) -> dict:
     result = queue.handle({"schema": SCHEMA, "operation": "status"})
     counts = result.get("counts", {})
@@ -67,6 +85,7 @@ def main() -> int:
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
     queue = GitHubChatQueue()
+    one_shot_handled = False
     while not stopping:
         if not os.environ.get("MSW_HERMES_GITHUB_TOKEN", "").strip():
             print(json.dumps({"staging_probe": {
@@ -75,6 +94,19 @@ def main() -> int:
         else:
             try:
                 print(json.dumps({"staging_probe": verified_snapshot(queue)}, separators=(",", ":")), flush=True)
+                if not one_shot_handled and os.environ.get("MSW_HERMES_STAGING_PYTHON_ONE_SHOT") == "1":
+                    try:
+                        result = optional_one_shot(queue)
+                        safe = {key: value for key, value in result.items()
+                                if key in {"state", "reported", "outcome", "result_sha256",
+                                           "hermes_ack_verified", "external_chat_verified"}}
+                        print(json.dumps({"staging_python_one_shot": safe}, separators=(",", ":")), flush=True)
+                        if result.get("state") != "empty":
+                            one_shot_handled = True
+                    except Exception:
+                        # Unknown write outcomes are never retried automatically.
+                        one_shot_handled = True
+                        print(json.dumps({"staging_python_one_shot": {"state": "uncertain_manual_review"}}), flush=True)
             except (TaskError, ReceiptAuditError) as exc:
                 # Internal code only; no request headers, credentials or result text.
                 code = str(exc).split(":", 1)[-1][:80]
