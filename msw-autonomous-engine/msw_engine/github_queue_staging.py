@@ -1,8 +1,8 @@
-"""Read-only Render staging probe for the private GitHub Hermes queue.
+"""Render staging probe with explicitly opted-in bounded integration pilots.
 
-This process never claims, reports, acknowledges, or creates work. It reads the
-fixed queue and, when referenced by last_ack, its bounded receipt. No secrets or
-private task contents are logged. Storage checks are not live-chat proof.
+Default mode only reads the fixed chat queue and its bounded receipts. Optional
+pilots have separate scopes; no status or execution receipt proves live chat.
+Private task contents and credentials are never logged.
 """
 from __future__ import annotations
 
@@ -87,6 +87,12 @@ def main() -> int:
     queue = GitHubChatQueue()
     one_shot_handled = False
     registry_sync_handled = False
+    if os.environ.get("MSW_HERMES_PYTHON_TASK_PILOT") == "1":
+        try:
+            from .python_task_pilot import run_live_once as run_python_pilot
+            print(json.dumps({"python_task_pilot": run_python_pilot()}, separators=(",", ":")), flush=True)
+        except Exception:
+            print(json.dumps({"python_task_pilot": {"state": "uncertain_no_retry"}}), flush=True)
     while not stopping:
         if not registry_sync_handled and os.environ.get("MSW_HERMES_WP_REGISTRY_STAGING_ENABLED") == "1":
             registry_sync_handled = True
