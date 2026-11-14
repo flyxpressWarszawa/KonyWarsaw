@@ -1,0 +1,29 @@
+name: MSW Hermes Chat Loop offline tests
+on:
+  pull_request:
+    branches:
+      - msw/worker-autostart-final-20261111
+    paths:
+      - 'msw-autonomous-engine/msw_engine/hermes_chat_bridge.py'
+      - 'msw-autonomous-engine/msw_engine/tasks.py'
+      - 'msw-autonomous-engine/tests/test_hermes_chat_bridge.py'
+      - '.github/workflows/msw-hermes-chat-loop-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mailbox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run only isolated mailbox tests, no network or paid API
+        working-directory: msw-autonomous-engine
+        env:
+          MSW_HERMES_CHAT_LOOP_ENABLED: '0'
+        run: python -m unittest discover -s tests -p 'test_hermes_chat_bridge.py' -v
