@@ -241,6 +241,20 @@ class ExchangeTests(unittest.TestCase):
         with patch.dict(os.environ, {"MSW_HERMES_CHAT_LOOP_ENABLED": "1"}):
             self.assertIn("hermes.chat.exchange",handlers())
 
+    def test_github_backend_requires_explicit_selection(self):
+        request = dict(schema=SCHEMA, operation="status")
+        with patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "unsupported"}):
+            with self.assertRaisesRegex(TaskError, "backend_configuration"):
+                self.command(**request)
+
+    def test_github_backend_delegates_only_when_selected(self):
+        request = dict(schema=SCHEMA, operation="status")
+        with patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "github"}):
+            with patch("msw_engine.github_chat_queue.handle", return_value={"github_queue_connected": True}) as remote:
+                result = self.command(**request)
+        self.assertTrue(result["github_queue_connected"])
+        remote.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()
