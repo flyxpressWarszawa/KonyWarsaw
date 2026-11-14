@@ -18,6 +18,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: PHP 8 syntax validation
         run: php -l msw-autonomous-engine/wordpress/msw-hermes-api-registry-bridge/msw-hermes-api-registry-bridge.php
+      - name: Offline PHP policy regression suite
+        run: php msw-autonomous-engine/wordpress/msw-hermes-api-registry-bridge/test-offline.php
       - name: Assert administrative gates and no provider calls
         shell: bash
         run: |
