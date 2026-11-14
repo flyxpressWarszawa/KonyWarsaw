@@ -103,6 +103,18 @@ def main() -> int:
         except Exception:
             print(json.dumps({"python_receipt_attestation":
                               {"state": "uncertain_no_retry"}}), flush=True)
+    if os.environ.get("MSW_PYTHON_LIVE_QUEUE_PROOF") == "1":
+        # Fixed trusted program, not a job-supplied command. Isolate its environment.
+        import subprocess
+        import sys
+        try:
+            completed = subprocess.run([sys.executable, "-c",
+                "import json; from msw_engine.python_live_queue_once import run_live_once; print(json.dumps({'python_live_queue_proof':run_live_once()},separators=(',',':')),flush=True)"],
+                timeout=120, check=False)
+            if completed.returncode:
+                print(json.dumps({"python_live_queue_proof":{"state":"child_failed_no_retry"}}), flush=True)
+        except Exception:
+            print(json.dumps({"python_live_queue_proof":{"state":"child_uncertain_no_retry"}}), flush=True)
     while not stopping:
         if os.environ.get("MSW_HERMES_WP_REGISTRY_CYCLE_ENABLED") == "1":
             try:
