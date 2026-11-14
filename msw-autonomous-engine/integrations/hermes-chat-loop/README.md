@@ -45,3 +45,8 @@ Do not turn on the feature flag or route production traffic to this adapter unti
 - https://help.openai.com/en/articles/10291617-scheduled-tasks-in-chatgpt
 - https://developers.openai.com/workspace-agents/trigger-runs
 - https://docs.github.com/en/rest/repos/contents
+
+
+## Isolated staging probe
+
+The existing Render standby can run `python -m msw_engine.github_queue_staging` from this branch. The probe performs read-only `status` calls against the fixed private queue; it never claims or modifies work. Logs reveal only whether the credential is present, bounded state counts, and a bounded error code. Configure `MSW_HERMES_GITHUB_TOKEN` as a secret on the staging service only after review. This verifies GitHub connectivity, not Hermes-originated task submission or a ChatGPT/ACK round trip.
