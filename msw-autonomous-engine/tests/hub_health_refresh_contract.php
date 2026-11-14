@@ -9,6 +9,7 @@ class WP_Error {
 }
 function is_wp_error($v) { return $v instanceof WP_Error; }
 function sanitize_text_field($v) { return trim(strip_tags((string) $v)); }
+function sanitize_key($v) { return strtolower((string) preg_replace('/[^a-z0-9_-]/', '', strtolower((string) $v))); }
 $GLOBALS['test_case'] = 'success';
 $GLOBALS['admin_allowed'] = true;
 $GLOBALS['seen_refresh'] = [];
