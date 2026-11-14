@@ -9,12 +9,14 @@ on:
       - 'msw-autonomous-engine/msw_engine/github_chat_receipt_audit.py'
       - 'msw-autonomous-engine/msw_engine/github_queue_staging.py'
       - 'msw-autonomous-engine/msw_engine/github_python_hub_once.py'
+      - 'msw-autonomous-engine/msw_engine/python_task_pilot.py'
       - 'msw-autonomous-engine/msw_engine/tasks.py'
       - 'msw-autonomous-engine/tests/test_hermes_chat_bridge.py'
       - 'msw-autonomous-engine/tests/test_github_chat_queue.py'
       - 'msw-autonomous-engine/tests/test_github_chat_receipt_audit.py'
       - 'msw-autonomous-engine/tests/test_github_queue_staging.py'
       - 'msw-autonomous-engine/tests/test_github_python_hub_once.py'
+      - 'msw-autonomous-engine/tests/test_python_task_pilot.py'
       - '.github/workflows/msw-hermes-chat-loop-tests.yml'
   workflow_dispatch:
 
@@ -38,3 +40,4 @@ jobs:
           python -m unittest discover -s tests -p 'test_*chat*.py' -v
           python -m unittest discover -s tests -p 'test_github_queue_staging.py' -v
           python -m unittest discover -s tests -p 'test_github_python_hub_once.py' -v
+          python -m unittest discover -s tests -p 'test_python_task_pilot.py' -v
