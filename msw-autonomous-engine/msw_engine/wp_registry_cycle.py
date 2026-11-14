@@ -20,7 +20,7 @@ import time
 from urllib.error import HTTPError, URLError
 from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, build_opener
 
-VERSION = "0.3.1"
+VERSION = "0.3.2"
 SERVICE = "srv-dbnodkbrjlhs739drc5g"
 MOUNT = Path("/tmp/msw-aux-seo")
 ROOT = MOUNT / "wp-registry-cycle"
@@ -262,7 +262,41 @@ def sync_once(doc, root, post, read, now=None):
         prior = db.execute("SELECT id,payload FROM syncs WHERE state='pending' ORDER BY at LIMIT 1").fetchone()
         if prior:
             previous = strict_json(prior[1])
-            proof = verify_snapshot(previous, read())
+            remote = read()
+            try:
+                proof = verify_snapshot(previous, remote)
+            except SyncError as exc:
+                if str(exc) != "independent_content_mismatch":
+                    raise
+                # An operator may independently repair WordPress while an old
+                # POST outcome is unknown. Do not retry or label it successful.
+                # A newer authenticated snapshot with exactly the current
+                # approved metadata is evidence that the old state has been
+                # superseded; the original write stays UNVERIFIED.
+                candidate = build_payload(doc, now)
+                if (candidate["registryRevision"] < previous["registryRevision"]
+                        or candidate["lastAckRevision"] < previous["lastAckRevision"]
+                        or timestamp(candidate["observedAtUtc"]) <= timestamp(previous["observedAtUtc"])):
+                    raise SyncError("pending_supersession_not_newer")
+                snapshot = remote.get("snapshot") if isinstance(remote, dict) else None
+                source = snapshot.get("source") if isinstance(snapshot, dict) else None
+                if source not in {"operator_mcp_audit", "hermes_staging_private_checkpoint"}:
+                    raise SyncError("pending_supersession_untrusted_source")
+                observed = dict(candidate, source=source)
+                latest_proof = verify_snapshot(observed, remote)
+                old_record = canonical({"state": "superseded_unverified",
+                                         "remote_digest": latest_proof["serverDigestSha256"]}).decode()
+                db.execute("UPDATE syncs SET state='superseded',receipt=? WHERE id=? AND state='pending'",
+                           (old_record, prior[0]))
+                fresh_digest = digest(candidate)
+                if db.execute("SELECT id FROM syncs WHERE id=?", (fresh_digest,)).fetchone():
+                    raise SyncError("pending_supersession_conflict")
+                # This records evidence of an operator's GET readback, NOT a
+                # successful POST by the staging worker and NOT model inference.
+                db.execute("INSERT INTO syncs VALUES(?,?,'external_verified',?,?)",
+                           (fresh_digest, canonical(candidate), canonical(latest_proof).decode(), time.time()))
+                return dict(latest_proof, state="operator_snapshot_verified_prior_superseded",
+                            priorPostVerified=False, providerCalls=0, version=VERSION)
             db.execute("UPDATE syncs SET state='verified',receipt=? WHERE id=? AND state='pending'", (canonical(proof).decode(), prior[0]))
             # Only after receipt readback may we validate a candidate for
             # a NEW POST. A stale source remains blocked and is never sent.
