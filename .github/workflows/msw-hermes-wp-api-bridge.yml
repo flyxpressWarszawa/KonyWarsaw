@@ -1,0 +1,34 @@
+name: MSW Hermes WordPress API bridge checks
+on:
+  push:
+    branches:
+      - msw/hermes-wp-api-registry-20261114
+    paths:
+      - 'msw-autonomous-engine/wordpress/msw-hermes-api-registry-bridge/**'
+      - '.github/workflows/msw-hermes-wp-api-bridge.yml'
+  pull_request:
+    paths:
+      - 'msw-autonomous-engine/wordpress/msw-hermes-api-registry-bridge/**'
+      - '.github/workflows/msw-hermes-wp-api-bridge.yml'
+jobs:
+  php-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP 8 syntax validation
+        run: php -l msw-autonomous-engine/wordpress/msw-hermes-api-registry-bridge/msw-hermes-api-registry-bridge.php
+      - name: Offline PHP policy regression suite
+        run: php msw-autonomous-engine/wordpress/msw-hermes-api-registry-bridge/test-offline.php
+      - name: Assert administrative gates and no provider calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          f=msw-autonomous-engine/wordpress/msw-hermes-api-registry-bridge/msw-hermes-api-registry-bridge.php
+          grep -Fq "current_user_can('manage_options')" "$f"
+          grep -Fq "current_user_can('msw_hermes_registry_write')" "$f"
+          grep -Fq "msw.hermes.wp-ai-registry.snapshot.v1" "$f"
+          if grep -Ei 'curl_exec|wp_remote_(post|get)|file_get_contents\(.+http' "$f"; then
+            echo "Remote provider call introduced" >&2
+            exit 1
+          fi
