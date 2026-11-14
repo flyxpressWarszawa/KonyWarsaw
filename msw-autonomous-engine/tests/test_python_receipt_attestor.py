@@ -166,7 +166,7 @@ class AttestationTests(unittest.TestCase):
         with patch.object(a, "MANIFEST_SHA", p.sha(raw)):
             self.store.files[p.REQUEST_PATH] = raw
             with self.assertRaisesRegex(a.AttestationError, "expected_two_tasks"):
-                self.run_verify()
+                a.verify_previous_pilot(self.store, p.sha(raw))
 
     def sample_ack(self, bundle_sha, secret=b"x" * 32):
         content = {
