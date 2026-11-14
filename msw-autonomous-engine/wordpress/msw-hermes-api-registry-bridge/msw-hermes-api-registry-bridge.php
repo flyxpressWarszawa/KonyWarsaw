@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MSW Hermes API Registry Bridge
  * Description: Private, read-only-to-visitors registry snapshot gateway. Does not run inference or store secrets.
- * Version: 0.2.0
+ * Version: 0.2.1
  * Requires PHP: 8.0
  */
 defined('ABSPATH') || exit;
@@ -62,7 +62,7 @@ function msw_hrb_status() {
     $seen = $present ? strtotime((string) ($snapshot['observedAtUtc'] ?? '')) : false;
     $heartbeat = $present ? strtotime((string) ($snapshot['hermes']['lastSeen'] ?? '')) : false;
     return rest_ensure_response(array(
-        'bridgeVersion' => '0.2.0',
+        'bridgeVersion' => '0.2.1',
         'scope' => 'metadata_snapshot_only',
         'inferenceTransportVerified' => false,
         'snapshotPresent' => $present,
@@ -134,9 +134,12 @@ function msw_hrb_post(WP_REST_Request $request) {
     $routeIds = array();
     foreach ($rawRoutes as $route) {
         if (!is_array($route)) { return msw_hrb_error('msw_hrb_route', 'Route must be an object', 422); }
-        $id = sanitize_key((string) ($route['id'] ?? ''));
+        // Route identifiers may contain meaningful dots, e.g. local-qwen3-0.6b.
+        // Never rewrite an ID silently: explicit ASCII validation keeps SHA
+        // and job routing stable between Hermes and WordPress.
+        $id = (string) ($route['id'] ?? '');
         $status = strtoupper(sanitize_text_field((string) ($route['status'] ?? 'ERROR')));
-        if (!$id || strlen($id) > 100 || !preg_match('/^[A-Z_]{2,40}$/D', $status) || isset($routeIds[$id])) {
+        if (!preg_match('/^[a-z0-9][a-z0-9._-]{0,99}$/D', $id) || !preg_match('/^[A-Z_]{2,40}$/D', $status) || isset($routeIds[$id])) {
             return msw_hrb_error('msw_hrb_route', 'Invalid or duplicate runtime route', 422);
         }
         $routeIds[$id] = true;
