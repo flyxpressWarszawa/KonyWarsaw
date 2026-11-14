@@ -20,7 +20,7 @@ import time
 from urllib.error import HTTPError, URLError
 from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, build_opener
 
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 SERVICE = "srv-dbnodkbrjlhs739drc5g"
 MOUNT = Path("/tmp/msw-aux-seo")
 ROOT = MOUNT / "wp-registry-cycle"
@@ -255,17 +255,21 @@ def _database(root):
 
 
 def sync_once(doc, root, post, read, now=None):
-    payload = build_payload(doc, now)
-    ident, encoded = digest(payload), canonical(payload)
     with closing(_database(root)) as db:
-        # Reject new work while an older outcome remains unresolved.
+        # Reconcile any durable unknown write FIRST. This is a GET-only
+        # action and must remain possible even when the upstream source has
+        # become stale since the original POST. Never manufacture freshness.
         prior = db.execute("SELECT id,payload FROM syncs WHERE state='pending' ORDER BY at LIMIT 1").fetchone()
         if prior:
             previous = strict_json(prior[1])
             proof = verify_snapshot(previous, read())
             db.execute("UPDATE syncs SET state='verified',receipt=? WHERE id=? AND state='pending'", (canonical(proof).decode(), prior[0]))
-            if prior[0] == ident:
-                return dict(proof, state="reconciled_without_post", version=VERSION)
+            # Only after receipt readback may we validate a candidate for
+            # a NEW POST. A stale source remains blocked and is never sent.
+        payload = build_payload(doc, now)
+        ident, encoded = digest(payload), canonical(payload)
+        if prior and prior[0] == ident:
+            return dict(proof, state="reconciled_without_post", version=VERSION)
         row = db.execute("SELECT state,receipt FROM syncs WHERE id=?", (ident,)).fetchone()
         if row:
             proof = verify_snapshot(payload, read())
