@@ -237,5 +237,50 @@ class AttestationTests(unittest.TestCase):
             self.assertEqual(a.run_live_once(), {"state": "policy_blocked"})
 
 
+    def job_payload(self):
+        return {"schema": "msw.hermes.python-pilot.verify-job.v1",
+                "purpose": "read_only_receipt_verification",
+                "manifest_sha256": a.MANIFEST_SHA}
+
+    def test_handler_unconfigured_denied(self):
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaisesRegex(a.AttestationError, "handler_opt_in_missing"):
+                a.signed_queue_receipt_handler(self.job_payload(), Path("/tmp"))
+
+    def test_handler_wrong_runtime_denied(self):
+        with patch.dict(os.environ, {"MSW_HERMES_PYTHON_RECEIPT_VERIFY_HANDLER": "1",
+                                      "RENDER_SERVICE_ID": p.SERVICE}, clear=True):
+            with self.assertRaisesRegex(a.AttestationError, "central_worker_identity_missing"):
+                a.signed_queue_receipt_handler(self.job_payload(), Path("/tmp"))
+
+    def test_handler_rejects_unapproved_payload_before_network(self):
+        env = {"MSW_HERMES_PYTHON_RECEIPT_VERIFY_HANDLER": "1",
+               "RENDER_SERVICE_ID": "srv-dbltdb9srm7s73ec0v00"}
+        payload = self.job_payload()
+        payload["kind"] = "shell.execute"
+        with patch.dict(os.environ, env, clear=True):
+            with self.assertRaisesRegex(a.AttestationError, "verification_job_contract"):
+                a.signed_queue_receipt_handler(payload, Path("/tmp"))
+
+    def test_handler_produces_preflight_but_never_ack(self):
+        env = {"MSW_HERMES_PYTHON_RECEIPT_VERIFY_HANDLER": "1",
+               "RENDER_SERVICE_ID": "srv-dbltdb9srm7s73ec0v00"}
+        with patch.dict(os.environ, env, clear=True):
+            with patch.object(a, "GitHubStore", return_value=self.store):
+                out = a.signed_queue_receipt_handler(self.job_payload(), Path("/tmp"))
+        self.assertTrue(out["signed_queue_handler_executed"])
+        self.assertTrue(out["actual_python_execution_checked"])
+        self.assertFalse(out["wordpress_server_ack_verified"])
+        self.assertFalse(out["central_pilot_ack_verified"])
+
+    def test_handler_not_exposed_without_explicit_opt_in(self):
+        from msw_engine.tasks import handlers
+        with patch.dict(os.environ, {"MSW_HERMES_PYTHON_RECEIPT_VERIFY_HANDLER": "0"}):
+            self.assertNotIn("python.pilot.verify", handlers())
+        with patch.dict(os.environ, {"MSW_HERMES_PYTHON_RECEIPT_VERIFY_HANDLER": "1",
+                                      "MSW_RUNTIME_MODE": ""}):
+            self.assertIn("python.pilot.verify", handlers())
+
+
 if __name__ == "__main__":
     unittest.main()
