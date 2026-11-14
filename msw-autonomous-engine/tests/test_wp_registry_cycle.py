@@ -166,6 +166,33 @@ class RegistryCycleTests(unittest.TestCase):
         r = self.run_sync()
         self.assertEqual(r['state'], 'reconciled_without_post')
         self.assertEqual(self.remote.posts, 1)
+    def test_stale_source_reconciles_earlier_applied_write(self):
+        self.remote.raise_after_write = True
+        with self.assertRaisesRegex(SyncError, 'transport_unknown'):
+            self.run_sync()
+        self.remote.raise_after_write = False
+        # Heartbeat is now stale but a previously sent POST can still be
+        # reconciled via GET without a second provider or WordPress call.
+        with self.assertRaisesRegex(SyncError, 'stale_source'):
+            self.run_sync(now=NOW + timedelta(minutes=31))
+        with sqlite3.connect(self.root / 'sync.sqlite3') as db:
+            row = db.execute("SELECT state,receipt FROM syncs").fetchone()
+        self.assertEqual(row[0], 'verified')
+        self.assertIn('contentSha256', row[1])
+        self.assertEqual(self.remote.posts, 1)
+        self.assertGreaterEqual(self.remote.reads, 1)
+
+    def test_stale_source_with_unknown_write_never_resends(self):
+        self.remote.raise_before_write = True
+        with self.assertRaisesRegex(SyncError, 'transport_unknown'):
+            self.run_sync()
+        self.remote.raise_before_write = False
+        with self.assertRaisesRegex(SyncError, 'snapshot_missing'):
+            self.run_sync(now=NOW + timedelta(minutes=31))
+        with sqlite3.connect(self.root / 'sync.sqlite3') as db:
+            self.assertEqual(db.execute("SELECT state FROM syncs").fetchone()[0], 'pending')
+        self.assertEqual(self.remote.posts, 1)
+
     def test_unknown_without_remote_does_not_repeat(self):
         self.remote.raise_before_write = True
         with self.assertRaises(SyncError): self.run_sync()
