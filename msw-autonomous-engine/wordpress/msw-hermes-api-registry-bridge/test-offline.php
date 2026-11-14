@@ -106,7 +106,7 @@ $payload = [
         'reservedUsd' => 0.008,
     ],
     'providers' => [['id' => 'openai', 'registryStatus' => 'KEY_REPORTED', 'keyReported' => true, 'apiSecret' => 'never_store']],
-    'routes' => [['id' => 'openai-gpt5-mini', 'provider' => 'openai', 'model' => 'gpt-5-mini', 'status' => 'READY', 'secret' => 'never_store']],
+    'routes' => [['id' => 'local-qwen3-0.6b', 'provider' => 'openai', 'model' => 'gpt-5-mini', 'status' => 'READY', 'secret' => 'never_store']],
 ];
 $stored = msw_hrb_post(new WP_REST_Request($payload, $auth));
 verify(is_array($stored) && $stored['stored'] === true, 'Scoped POST stored');
@@ -119,6 +119,7 @@ $snapshot = msw_hrb_snapshot()['snapshot'];
 $raw = json_encode($snapshot);
 verify(!str_contains($raw, 'never_store'), 'Incoming secret fields removed');
 verify(!str_contains($raw, 'apiSecret'), 'Secret key not persisted');
+verify(($snapshot['routes'][0]['id'] ?? null) === 'local-qwen3-0.6b', 'Dotted route ID preserved exactly for independent digest');
 
 $rate = msw_hrb_post(new WP_REST_Request($payload, $auth));
 verify(err_status($rate,429), 'Scoped rate limit active');
@@ -129,6 +130,8 @@ verify(err_status(msw_hrb_post(new WP_REST_Request($stale,$auth)),409), 'Stale H
 $dup = $payload;
 $dup['providers'][] = $dup['providers'][0];
 verify(err_status(msw_hrb_post(new WP_REST_Request($dup,$auth)),422), 'Duplicate provider rejected');
+$badId = $payload; $badId['routes'][0]['id'] = '../local-qwen3-0.6b';
+verify(err_status(msw_hrb_post(new WP_REST_Request($badId,$auth)),422), 'Unsafe route ID rejected without rewriting');
 $broken = $payload; $broken['schema'] = 'invalid';
 verify(err_status(msw_hrb_post(new WP_REST_Request($broken,$auth)),422), 'Incorrect schema rejected');
 $old = $payload; $old['registryRevision'] = 118; $old['lastAckRevision']=118;
