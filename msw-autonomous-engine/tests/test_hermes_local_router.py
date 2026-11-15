@@ -140,6 +140,16 @@ class TestHermesLocalRouter(unittest.TestCase):
         with closing(sqlite3.connect(self.root/"requests.sqlite3")) as db:
             self.assertEqual(db.execute("SELECT state FROM requests").fetchone()[0], "pending")
 
+    def test_invalid_sender_result_never_committed(self):
+        def bad(*_):
+            self.calls.append("invalid")
+            return {"text": "not a verified result"}
+        with self.assertRaisesRegex(RouterError, "unverified_model_result"):
+            execute_once(sample(), self.root, bad)
+        with self.assertRaisesRegex(RouterError, "unknown_outcome_no_reissue"):
+            execute_once(sample(), self.root, self.sender)
+        self.assertEqual(self.calls, ["invalid"])
+
     def test_receipt_tamper_fail_closed(self):
         execute_once(sample(), self.root, self.sender)
         with closing(sqlite3.connect(self.root/"requests.sqlite3")) as db:
