@@ -450,7 +450,8 @@ def handlers() -> dict:
         result['module.execute'] = native_execute
     from .own_model import available_handlers as own_handlers
     from .aliyun_direct import queue_configured
-    if os.environ.get("MSW_LLM_MODEL") or own_handlers() or queue_configured():
+    if (os.environ.get("MSW_LLM_MODEL") or own_handlers() or queue_configured()
+            or os.environ.get("MSW_HERMES_LOCAL_ROUTER_ENABLED") == "1"):
         result["llm.generate"] = llm_dispatch
     if os.environ.get("MSW_DISCOVERY_CORPUS"):
         result["legacy.discovery.topics"] = legacy_discovery
@@ -468,6 +469,12 @@ def llm_dispatch(payload: dict, data_dir: Path) -> dict:
     from .aliyun_direct import QUEUE_SCHEMA, queue_generate
     if payload.get("schema") == QUEUE_SCHEMA:
         return queue_generate(payload, data_dir)
+    # Explicit opt-in only. The existing signed queue remains the job source;
+    # localhost msw-auto owns legal provider selection, holds, quotas and bills.
+    # Never fall back to another paid client after an unknown router outcome.
+    if os.environ.get("MSW_HERMES_LOCAL_ROUTER_ENABLED") == "1":
+        from .hermes_local_router import generate as hermes_generate
+        return hermes_generate(payload, data_dir)
     from .federation import configured
     if not os.environ.get('MSW_LLM_MODEL') and not configured():
         raise TaskError('legacy_model_not_configured_no_silent_substitution')
