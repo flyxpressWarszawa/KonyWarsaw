@@ -215,6 +215,72 @@ class TestHermesLocalRouter(unittest.TestCase):
         self.assertEqual(json.loads(opener.request.data)["model"], "msw-auto")
         self.assertNotIn(b"sk-proj", opener.request.data)
 
+    def test_optin_dispatches_native_without_fallback(self):
+        from msw_engine import tasks
+        data_dir = Path(self.temp.name)
+        with patch.dict(os.environ, {"MSW_HERMES_LOCAL_ROUTER_ENABLED": "1",
+                                     "MSW_NODE": "msw-render-central-1"}, clear=True):
+            with patch("msw_engine.hermes_local_router.generate",
+                       return_value={"channel": "localhost"}) as native, \
+                 patch("msw_engine.federation.generate") as legacy:
+                out = tasks.llm_dispatch(sample(), data_dir)
+                self.assertEqual(out, {"channel": "localhost"})
+                native.assert_called_once()
+                legacy.assert_not_called()
+
+    def test_unknown_native_never_falls_back_to_paid_wordpress(self):
+        from msw_engine import tasks
+        with patch.dict(os.environ, {"MSW_HERMES_LOCAL_ROUTER_ENABLED": "1",
+                                     "MSW_NODE": "msw-render-central-1"}, clear=True):
+            with patch("msw_engine.hermes_local_router.generate",
+                       side_effect=tasks.TaskError("unknown_outcome_no_reissue")) as native, \
+                 patch("msw_engine.federation.generate") as legacy:
+                with self.assertRaisesRegex(tasks.TaskError, "unknown_outcome_no_reissue"):
+                    tasks.llm_dispatch(sample(), Path(self.temp.name))
+                native.assert_called_once()
+                legacy.assert_not_called()
+
+    def test_owner_model_contract_precedes_native_router(self):
+        from msw_engine import tasks
+        with patch.dict(os.environ, {"MSW_HERMES_LOCAL_ROUTER_ENABLED": "1"}, clear=True):
+            with patch("msw_engine.own_model.handle",
+                       return_value={"branch": "owner"}) as original, \
+                 patch("msw_engine.hermes_local_router.generate") as local:
+                self.assertEqual(tasks.llm_dispatch({"schema": "msw.own-model.job.v1"},
+                                                     Path(self.temp.name)), {"branch": "owner"})
+                original.assert_called_once()
+                local.assert_not_called()
+
+    def test_alibaba_queue_contract_precedes_native_router(self):
+        from msw_engine import tasks
+        from msw_engine.aliyun_direct import QUEUE_SCHEMA
+        with patch.dict(os.environ, {"MSW_HERMES_LOCAL_ROUTER_ENABLED": "1"}, clear=True):
+            with patch("msw_engine.aliyun_direct.queue_generate",
+                       return_value={"branch": "aliyun"}) as aliyun, \
+                 patch("msw_engine.hermes_local_router.generate") as local:
+                self.assertEqual(tasks.llm_dispatch({"schema": QUEUE_SCHEMA},
+                                                     Path(self.temp.name)), {"branch": "aliyun"})
+                aliyun.assert_called_once()
+                local.assert_not_called()
+
+    def test_legacy_route_unchanged_without_optin(self):
+        from msw_engine import tasks
+        with patch.dict(os.environ, {"MSW_LLM_MODEL": "gpt-5-mini",
+                                     "MSW_LLM_PROVIDER": "wordpress"}, clear=True):
+            with patch("msw_engine.federation.configured", return_value=True), \
+                 patch("msw_engine.federation.generate",
+                       return_value={"branch": "legacy"}) as legacy, \
+                 patch("msw_engine.hermes_local_router.generate") as local:
+                self.assertEqual(tasks.llm_dispatch(sample(), Path(self.temp.name)),
+                                 {"branch": "legacy"})
+                legacy.assert_called_once()
+                local.assert_not_called()
+
+    def test_optin_declares_native_handler(self):
+        from msw_engine import tasks
+        with patch.dict(os.environ, {"MSW_HERMES_LOCAL_ROUTER_ENABLED": "1"}, clear=True):
+            self.assertIn("llm.generate", tasks.handlers())
+
     def test_no_external_provider_key_needed(self):
         with patch.dict(os.environ, {}, clear=True):
             self.assertEqual(_verify_response(model_response())["requestModel"], "msw-auto")
