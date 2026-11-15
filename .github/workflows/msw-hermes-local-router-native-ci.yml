@@ -1,0 +1,36 @@
+name: Hermes local AI router — no-charge native integration tests
+on:
+  push:
+    branches: [msw/hermes-local-router-native-20261115]
+    paths:
+      - "msw-autonomous-engine/msw_engine/hermes_local_router.py"
+      - "msw-autonomous-engine/msw_engine/tasks.py"
+      - "msw-autonomous-engine/tests/test_hermes_local_router.py"
+      - ".github/workflows/msw-hermes-local-router-native-ci.yml"
+  pull_request:
+    paths:
+      - "msw-autonomous-engine/msw_engine/hermes_local_router.py"
+      - "msw-autonomous-engine/msw_engine/tasks.py"
+      - "msw-autonomous-engine/tests/test_hermes_local_router.py"
+      - ".github/workflows/msw-hermes-local-router-native-ci.yml"
+jobs:
+  offline-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Install existing engine dependencies
+        run: python -m pip install --disable-pip-version-check -r msw-autonomous-engine/requirements.txt
+      - name: Compile Python
+        run: |
+          python -m py_compile msw-autonomous-engine/msw_engine/hermes_local_router.py
+          python -m py_compile msw-autonomous-engine/msw_engine/tasks.py
+      - name: Run no-network contract tests
+        working-directory: msw-autonomous-engine
+        run: python -m unittest discover -s tests -p 'test_hermes_local_router.py' -v
