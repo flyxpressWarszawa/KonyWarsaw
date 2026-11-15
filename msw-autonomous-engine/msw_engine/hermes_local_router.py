@@ -6,6 +6,7 @@ inside the existing Hermes localhost msw-auto service. Unknown outcomes never
 cause an automatic paid retry.
 """
 from __future__ import annotations
+from contextlib import contextmanager
 
 import hashlib
 import json
@@ -61,7 +62,7 @@ def admit(payload):
             raise RouterError("unsupported_context_flag")
     # The router may route to a paid provider; keep the existing WP privacy
     # guard for phone numbers and e-mail. No override from job payload.
-    if re.search(r"(?:\b[0-9][ -]?){8}[0-9]\b|[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}", prompt, re.I):
+    if re.search(r"\b(?:[0-9][ -]?){8,11}[0-9]\b|[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}", prompt, re.I):
         raise RouterError("customer_data_rejected")
     return task, prompt, limit, request_id
 
@@ -152,11 +153,21 @@ def send_local(task, prompt, limit, request_id):
     return _verify_response(result)
 
 
+@contextmanager
+def _connection(directory):
+    db = _open_db(directory)
+    try:
+        with db:
+            yield db
+    finally:
+        db.close()
+
+
 def execute_once(payload, directory: Path, sender=send_local):
     task, prompt, limit, request_id = admit(payload)
     fingerprint = hashlib.sha256(canonical(payload)).hexdigest()
     directory = Path(directory)
-    with _open_db(directory) as db:
+    with _connection(directory) as db:
         db.execute("BEGIN IMMEDIATE")
         row = db.execute("SELECT * FROM requests WHERE id=?", (request_id,)).fetchone()
         if row is not None:
@@ -182,6 +193,12 @@ def execute_once(payload, directory: Path, sender=send_local):
             result = sender(task, prompt, limit, request_id)
         except Exception:
             raise RouterError("unknown_outcome_no_reissue") from None
+        if (not isinstance(result, dict) or result.get("router_response_verified") is not True
+                or not isinstance(result.get("text"), str) or not result["text"].strip()
+                or not isinstance(result.get("model"), str)
+                or result.get("answer_sha256") != hashlib.sha256(result["text"].encode()).hexdigest()
+                or result.get("publication_performed") is not False):
+            raise RouterError("unverified_model_result")
         raw = canonical(result).decode("utf-8")
         sha = hashlib.sha256(raw.encode("utf-8")).hexdigest()
         db.execute("BEGIN IMMEDIATE")
