@@ -5,6 +5,9 @@ on:
       - msw/worker-autostart-final-20261111
     paths:
       - 'msw-autonomous-engine/msw_engine/hermes_chat_bridge.py'
+      - 'msw-autonomous-engine/integrations/hermes_codex_native_v1/guarded_receipt_entry.py'
+      - 'msw-autonomous-engine/integrations/hermes_codex_native_v1/sqlite_apply_adapter.py'
+      - 'msw-autonomous-engine/tests/test_guarded_codex_handoff.py'
       - 'msw-autonomous-engine/msw_engine/github_chat_queue.py'
       - 'msw-autonomous-engine/msw_engine/github_chat_receipt_audit.py'
       - 'msw-autonomous-engine/msw_engine/github_queue_staging.py'
@@ -46,5 +49,6 @@ jobs:
           python -m unittest discover -s tests -p 'test_github_python_hub_once.py' -v
           python -m unittest discover -s tests -p 'test_python_task_pilot.py' -v
           python -m unittest discover -s tests -p 'test_python_receipt_attestor.py' -v
+          python -m unittest discover -s tests -p 'test_guarded_codex_handoff.py' -v
           php -l integrations/python-hub-health-live/class-mswdc-engines.php
           php tests/hub_health_refresh_contract.php
