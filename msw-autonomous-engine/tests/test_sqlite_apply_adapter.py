@@ -1,13 +1,17 @@
 """Offline tests for SQLite native Codex apply adapter."""
+from contextlib import closing
 import hashlib
+import os
 import importlib.util
 from pathlib import Path
 import sqlite3
 from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
+from unittest import mock
 
 from msw_engine.hermes_chat_bridge import SCHEMA, handle
+from msw_engine import hermes_chat_bridge as bridge
 
 ADAPTER = Path(__file__).resolve().parents[1] / "integrations" / "hermes_codex_native_v1" / "sqlite_apply_adapter.py"
 spec = importlib.util.spec_from_file_location("sqlite_apply_adapter", ADAPTER)
@@ -15,9 +19,10 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 
-def receipt(text):
+def receipt(text, job):
     obj = {"status": "VERIFIED", "independent_readback": True, "tools": 0,
            "text": text, "response_sha256": hashlib.sha256(text.encode()).hexdigest()}
+    obj.update({key: job[key] for key in ("root_id", "task_id", "request_id", "work_key", "parent_id")})
     obj["receipt_sha256"] = hashlib.sha256(module.canonical(obj).encode()).hexdigest()
     return obj
 
@@ -54,31 +59,32 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                             self.directory)["lease_token"]
 
     def test_full_native_ack_readback(self):
-        result = module.apply_once(self.directory, self.job, self.lease, receipt("ok"))
+        result = module.apply_once(self.directory, self.job, self.lease, receipt("ok", self.job))
         self.assertEqual(result["status"], "APPLIED_VERIFIED")
         self.assertTrue(result["readback_verified"])
         self.assertEqual(result["native_ack"]["state"], "acknowledged")
 
     def test_wrong_work_key_does_not_write(self):
+        changed_job = dict(self.job, work_key="wrong-00000001")
         with self.assertRaisesRegex(module.ApplyHold, "work_identity_mismatch"):
-            module.apply_once(self.directory, dict(self.job, work_key="wrong-00000001"),
-                              self.lease, receipt("ok"))
+            module.apply_once(self.directory, changed_job,
+                              self.lease, receipt("ok", changed_job))
         status = handle({"schema": SCHEMA, "operation": "status",
                          "task_id": self.job["task_id"]}, self.directory)
         self.assertEqual(status["state"], "leased")
 
     def test_wrong_parent_does_not_write(self):
+        changed_job = dict(self.job, parent_id="other-parent-00000001")
         with self.assertRaisesRegex(module.ApplyHold, "work_identity_mismatch"):
-            module.apply_once(self.directory,
-                              dict(self.job, parent_id="other-parent-00000001"),
-                              self.lease, receipt("ok"))
+            module.apply_once(self.directory, changed_job,
+                              self.lease, receipt("ok", changed_job))
         status = handle({"schema": SCHEMA, "operation": "status",
                          "task_id": self.job["task_id"]}, self.directory)
         self.assertEqual(status["state"], "leased")
 
     def test_duplicate_same_receipt_is_idempotent(self):
-        first = module.apply_once(self.directory, self.job, self.lease, receipt("ok"))
-        second = module.apply_once(self.directory, self.job, self.lease, receipt("ok"))
+        first = module.apply_once(self.directory, self.job, self.lease, receipt("ok", self.job))
+        second = module.apply_once(self.directory, self.job, self.lease, receipt("ok", self.job))
         self.assertEqual(first["result_sha256"], second["result_sha256"])
         self.assertEqual(second["native_ack"]["state"], "acknowledged")
 
@@ -99,7 +105,7 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
 
         with patch("msw_engine.hermes_chat_bridge.handle", side_effect=reject_second_report):
             applied = module.apply_once(self.directory, self.job, self.lease,
-                                        receipt(answer))
+                                        receipt(answer, self.job))
         self.assertEqual(applied["native_ack"]["state"], "acknowledged")
         self.assertTrue(applied["readback_verified"])
         self.assertEqual(applied["result_sha256"], digest)
@@ -112,28 +118,112 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                 "result_sha256": digest, "outcome": "completed"}, self.directory)
         with self.assertRaisesRegex(module.ApplyHold, "conflicting_recorded_result"):
             module.apply_once(self.directory, self.job, self.lease,
-                              receipt("different result"))
+                              receipt("different result", self.job))
         status = handle({"schema": SCHEMA, "operation": "status",
                          "task_id": self.job["task_id"]}, self.directory)
         self.assertEqual(status["state"], "reported")
         self.assertEqual(status["result_sha256"], digest)
 
     def test_conflicting_second_result_is_rejected(self):
-        module.apply_once(self.directory, self.job, self.lease, receipt("ok"))
+        module.apply_once(self.directory, self.job, self.lease, receipt("ok", self.job))
         with self.assertRaises(Exception):
-            module.apply_once(self.directory, self.job, self.lease, receipt("different"))
+            module.apply_once(self.directory, self.job, self.lease, receipt("different", self.job))
         state = handle({"schema": SCHEMA, "operation": "status",
                         "task_id": self.job["task_id"]}, self.directory)
         self.assertEqual(state["result_sha256"], hashlib.sha256(b"ok").hexdigest())
 
     def test_invalid_digest_does_not_write(self):
-        bad = receipt("ok")
+        bad = receipt("ok", self.job)
         bad["response_sha256"] = "0" * 64
         with self.assertRaises(module.ApplyHold):
             module.apply_once(self.directory, self.job, self.lease, bad)
         status = handle({"schema": SCHEMA, "operation": "status",
                          "task_id": self.job["task_id"]}, self.directory)
         self.assertEqual(status["state"], "leased")
+
+
+class BackendIsolationTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name) / "engine"
+        self.job = dict(root_id="root-test-0001", task_id="task-test-0001",
+                        request_id="request-test-0001", work_key="work-test-0001",
+                        parent_id="parent-test-0001")
+        self.token = "test-only-original-lease-token"
+        self.proof = dict(status="VERIFIED", independent_readback=True, tools=0,
+                          task_id=self.job["task_id"], work_key=self.job["work_key"],
+                          text="bounded local fixture", response_sha256=bridge._sha("bounded local fixture"))
+        self.proof.update({key: self.job[key] for key in ("root_id", "request_id", "parent_id")})
+        self.proof["receipt_sha256"] = bridge._sha(module.canonical(self.proof))
+
+    def apply(self):
+        return module.apply_once(self.root, self.job, self.token, self.proof)
+
+    def seed_existing_lease(self):
+        # Real isolated SQLite schema/row, independent of the backend router.
+        import time
+        now = int(time.time())
+        with closing(bridge._connection(self.root)) as db:
+            db.execute("""INSERT INTO jobs
+                (id,conversation,parent_id,depth,kind,goal,request_sha,state,
+                 lease_sha,lease_until,created_at,updated_at,executor,work_key)
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (self.job["task_id"], "conversation-test-0001", self.job["parent_id"],
+                 2, "review", "local test only", bridge._sha("local test only"),
+                 "leased", bridge._sha(self.token), now + 900, now, now,
+                 "hermes", self.job["work_key"]))
+
+    def test_github_backend_rejected_without_creating_sqlite(self):
+        with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "github"}):
+            try:
+                self.apply()
+            except module.ApplyHold as error:
+                code = str(error)
+            else:
+                self.fail("non-SQLite backend was accepted")
+        self.assertFalse(self.root.exists(), "rejected GitHub call created local storage")
+        self.assertEqual(code, "sqlite_backend_required")
+
+    def test_github_backend_cannot_route_report_from_existing_local_lease(self):
+        self.seed_existing_lease()
+        with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "github"}), \
+                mock.patch.object(module, "_connection", wraps=module._connection) as connection, \
+                mock.patch.object(bridge, "handle", side_effect=AssertionError("remote operation attempted")) as handle:
+            with self.assertRaisesRegex(module.ApplyHold, "sqlite_backend_required"):
+                self.apply()
+            connection.assert_not_called()
+            handle.assert_not_called()
+        with closing(bridge._connection(self.root)) as db:
+            row = db.execute("SELECT state,result,result_sha FROM jobs WHERE id=?", (self.job["task_id"],)).fetchone()
+            self.assertEqual(tuple(row), ("leased", None, None))
+
+    def test_unknown_backends_rejected_before_storage(self):
+        for backend in ("", "unknown", "GITHUB", "sqlite "):
+            with self.subTest(backend=backend), \
+                    mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": backend}), \
+                    mock.patch.object(module, "_connection", side_effect=AssertionError("storage touched")) as connection:
+                with self.assertRaisesRegex(module.ApplyHold, "sqlite_backend_required"):
+                    self.apply()
+                connection.assert_not_called()
+
+    def test_explicit_sqlite_keeps_real_report_ack_and_idempotent_readback(self):
+        self.seed_existing_lease()
+        with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}):
+            first, second = self.apply(), self.apply()
+        self.assertEqual(first["status"], "APPLIED_VERIFIED")
+        self.assertTrue(first["readback_verified"])
+        self.assertEqual(first["result_sha256"], second["result_sha256"])
+        with closing(bridge._connection(self.root)) as db:
+            rows = db.execute("SELECT state,result,result_sha FROM jobs WHERE work_key=?", (self.job["work_key"],)).fetchall()
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(tuple(rows[0]), ("acknowledged", self.proof["text"], self.proof["response_sha256"]))
+
+    def test_unset_backend_preserves_existing_sqlite_default(self):
+        self.seed_existing_lease()
+        with mock.patch.dict(os.environ):
+            os.environ.pop("MSW_HERMES_CHAT_BACKEND", None)
+            self.assertEqual(self.apply()["status"], "APPLIED_VERIFIED")
 
 
 if __name__ == "__main__":
