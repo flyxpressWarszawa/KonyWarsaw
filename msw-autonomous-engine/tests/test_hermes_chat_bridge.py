@@ -184,6 +184,7 @@ class ExchangeTests(unittest.TestCase):
         database = self.root / "hermes-chat-loop" / "exchange.sqlite3"
         with closing(sqlite3.connect(database)) as db:
             db.execute("UPDATE jobs SET lease_until=0 WHERE id=?", (self.key,))
+            db.commit()
         with self.assertRaisesRegex(TaskError, "lease_expired"):
             self.report(lease)
         state = self.command(schema=SCHEMA, operation="status", task_id=self.key)
