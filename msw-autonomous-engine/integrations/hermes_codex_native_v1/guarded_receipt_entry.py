@@ -35,4 +35,9 @@ def apply_codex_result(directory, job, lease_token, receipt, *, dispatch_enabled
         raise ApplyHold("receipt_task_mismatch")
     if receipt.get("work_key") != job["work_key"]:
         raise ApplyHold("receipt_work_mismatch")
+    # Bind Codex output to the *exact* dispatched request and ancestor. SHA
+    # alone only proves byte integrity, not that a receipt belongs to this job.
+    for field in ("root_id", "request_id", "parent_id"):
+        if receipt.get(field) != job[field]:
+            raise ApplyHold("receipt_" + field + "_mismatch")
     return apply_once(Path(directory), job, lease_token, receipt)
