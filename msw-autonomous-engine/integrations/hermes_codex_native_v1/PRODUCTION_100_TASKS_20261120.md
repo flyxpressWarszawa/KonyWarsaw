@@ -3,16 +3,16 @@
 > Lista kontrolna. [x] tylko dla prac potwierdzonych dowodem w bieżącej sesji; pozostałe [ ] nie są deklaracją wykonania. Nie uruchamiać zadania 498623 ponownie bez niezależnego dowodu stanu efektu.
 
 ## Audyt istniejącego środowiska
-- [ ] 001. Potwierdź workspace Robot
-- [ ] 002. Zidentyfikuj główny worker Render
-- [ ] 003. Zidentyfikuj worker standby
-- [ ] 004. Zapisz aktywną gałąź produkcyjną
-- [ ] 005. Zapisz aktywny commit wdrożenia
-- [ ] 006. Sprawdź aktualny startCommand
-- [ ] 007. Sprawdź politykę autoDeploy
+- [x] 001. Potwierdź workspace Robot
+- [x] 002. Zidentyfikuj główny worker Render
+- [x] 003. Zidentyfikuj worker standby
+- [x] 004. Zapisz aktywną gałąź produkcyjną
+- [x] 005. Zapisz aktywny commit wdrożenia
+- [x] 006. Sprawdź aktualny startCommand
+- [x] 007. Sprawdź politykę autoDeploy
 - [ ] 008. Sprawdź stan dysku /var/data
-- [ ] 009. Sprawdź aktualne błędy ACK
-- [ ] 010. Sprawdź status zadania 498623
+- [x] 009. Sprawdź aktualne błędy ACK
+- [x] 010. Sprawdź status zadania 498623
 
 ## Inwentaryzacja kodu
 - [ ] 011. Zidentyfikuj native_entry.py
@@ -121,3 +121,9 @@
 - [ ] 098. Zweryfikuj limit kosztów i kwot
 - [ ] 099. Zweryfikuj pełny E2E Hermes–Codex–ACK
 - [ ] 100. Zapisz końcowy raport produkcyjny
+
+## Dowody audytu — 2026-11-20
+- 001–007: Render workspace Robot `tea-dbeakqnavr4c73a9c8lg`; główny worker `srv-dbltdb9srm7s73ec0v00`, standby `srv-dbnodkbrjlhs739drc5g`; główny branch `msw/worker-autostart-final-20261111`, autoDeploy=no, startCommand rozpoczyna się od `python -B -` (embedded supplement transport V3).
+- 005: ostatni potwierdzony live deploy `dep-dbuvtc7f3r2c73ekdpqg`, commit `105ad24c1c00ffdcad2857035419afaffa97dcdb`.
+- 009–010: log Render 2026-11-20 15:43 UTC: `chat_blocked_no_ack` dla `msw-agent-v1:business:498623` (held), oraz `knowledge_effect_contract_required` (deferred_unverified). Stan po tej chwili niepotwierdzony.
+- 008: rozmiar dysku 10 GB i mount /var/data są znane z konfiguracji, ale aktualne wykorzystanie dysku nie zostało odczytane — pozostaje otwarte.
