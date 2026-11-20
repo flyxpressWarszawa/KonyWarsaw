@@ -10,6 +10,7 @@ on:
       - 'msw-autonomous-engine/tests/test_hermes_chat_bridge.py'
       - 'msw-autonomous-engine/tests/test_sqlite_apply_adapter.py'
       - 'msw-autonomous-engine/tests/test_standby_safe_entrypoint.py'
+      - 'msw-autonomous-engine/tests/test_guarded_codex_handoff.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -35,7 +36,8 @@ jobs:
       - name: Test native SQLite ACK integration and lease regression
         working-directory: msw-autonomous-engine
         run: |
-          python -B -m py_compile integrations/hermes_codex_native_v1/sqlite_apply_adapter.py tests/test_sqlite_apply_adapter.py tests/test_standby_safe_entrypoint.py msw_engine/hermes_chat_bridge.py
+          python -B -m py_compile integrations/hermes_codex_native_v1/sqlite_apply_adapter.py tests/test_sqlite_apply_adapter.py tests/test_standby_safe_entrypoint.py tests/test_guarded_codex_handoff.py integrations/hermes_codex_native_v1/guarded_receipt_entry.py msw_engine/hermes_chat_bridge.py
           python -B -m unittest discover -s tests -p 'test_sqlite_apply_adapter.py' -v
           python -B -m unittest discover -s tests -p 'test_standby_safe_entrypoint.py' -v
+          python -B -m unittest discover -s tests -p 'test_guarded_codex_handoff.py' -v
           python -B -m unittest discover -s tests -p 'test_hermes_chat_bridge.py' -v
