@@ -75,6 +75,28 @@ class GuardedHandoff(unittest.TestCase):
                                     task_id=self.job["task_id"]), self.root)
                 self.assertEqual(state["state"], "leased")
 
+    def test_corrupted_receipt_digest_prevents_ack(self):
+        proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+        proof["receipt_sha256"] = "0" * 64
+        with self.assertRaisesRegex(adapter.ApplyHold, "receipt_digest_mismatch"):
+            self.apply(proof, dispatch_enabled=True)
+        state = handle(dict(schema=SCHEMA, operation="status",
+                            task_id=self.job["task_id"]), self.root)
+        self.assertEqual(state["state"], "leased")
+
+    def test_corrupted_response_digest_prevents_ack(self):
+        proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+        proof["response_sha256"] = "0" * 64
+        proof["receipt_sha256"] = hashlib.sha256(
+            adapter.canonical({k: v for k, v in proof.items()
+                               if k != "receipt_sha256"}).encode()
+        ).hexdigest()
+        with self.assertRaisesRegex(adapter.ApplyHold, "result_digest_mismatch"):
+            self.apply(proof, dispatch_enabled=True)
+        state = handle(dict(schema=SCHEMA, operation="status",
+                            task_id=self.job["task_id"]), self.root)
+        self.assertEqual(state["state"], "leased")
+
     def test_wrong_work_key_rejected_without_ack(self):
         proof = receipt("ok", self.job["task_id"], "different-work")
         with self.assertRaisesRegex(adapter.ApplyHold, "receipt_work_mismatch"):
