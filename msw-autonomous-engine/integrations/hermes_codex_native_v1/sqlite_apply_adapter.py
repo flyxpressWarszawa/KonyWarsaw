@@ -34,6 +34,11 @@ def apply_once(directory, job, lease_token, codex_receipt):
         raise ApplyHold("invalid_lease")
     if not isinstance(codex_receipt, dict) or codex_receipt.get("status") != "VERIFIED":
         raise ApplyHold("receipt_unverified")
+    # The adapter is also importable directly; enforce the same request binding
+    # as its entrypoint so bypassing the wrapper cannot weaken admission.
+    for field in ("task_id", "work_key", "root_id", "request_id", "parent_id"):
+        if codex_receipt.get(field) != job[field]:
+            raise ApplyHold("receipt_" + field + "_mismatch")
     if codex_receipt.get("independent_readback") is not True or codex_receipt.get("tools") != 0:
         raise ApplyHold("receipt_unsafe")
     result = codex_receipt.get("text")
