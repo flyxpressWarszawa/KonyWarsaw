@@ -49,16 +49,31 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # The existing report operation owns the SQLite BEGIN IMMEDIATE transaction,
     # validates the lease, and enforces idempotency.
     with closing(_connection(directory)) as db:
-        row = db.execute("SELECT id,work_key,parent_id,state FROM jobs WHERE id=?",
+        row = db.execute("SELECT id,work_key,parent_id,state,lease_sha,result,result_sha,outcome "
+                         "FROM jobs WHERE id=?",
                          (job["task_id"],)).fetchone()
         if (row is None or row["work_key"] != job["work_key"]
                 or row["parent_id"] != job["parent_id"]):
             raise ApplyHold("work_identity_mismatch")
-    report = handle(dict(schema=SCHEMA, operation="report", task_id=job["task_id"],
-                         lease_token=lease_token, result=result,
-                         result_sha256=digest, outcome="completed"), directory)
-    if report.get("state") not in ("reported", "acknowledged") or report.get("result_sha256") != digest:
-        raise ApplyHold("report_not_verified")
+        if row["lease_sha"] != _sha(lease_token):
+            raise ApplyHold("lease_not_valid")
+        if row["state"] in ("reported", "acknowledged"):
+            # A previous report may have committed before its response was lost.
+            # Read the stored effect; never submit the uncertain report again.
+            if (row["result"] != result or row["result_sha"] != digest
+                    or row["outcome"] != "completed"):
+                raise ApplyHold("conflicting_recorded_result")
+            report_already_recorded = True
+        elif row["state"] == "leased":
+            report_already_recorded = False
+        else:
+            raise ApplyHold("work_not_leased")
+    if not report_already_recorded:
+        report = handle(dict(schema=SCHEMA, operation="report", task_id=job["task_id"],
+                             lease_token=lease_token, result=result,
+                             result_sha256=digest, outcome="completed"), directory)
+        if report.get("state") not in ("reported", "acknowledged") or report.get("result_sha256") != digest:
+            raise ApplyHold("report_not_verified")
     # The native ACK verifies the stored bytes and commits acknowledgement.
     ack = handle(dict(schema=SCHEMA, operation="ack", task_id=job["task_id"],
                       result_sha256=digest), directory)
