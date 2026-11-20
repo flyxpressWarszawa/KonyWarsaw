@@ -258,9 +258,14 @@ def report(payload, directory):
                     _fail("conflicting_result")
             elif row["state"] != "leased":
                 _fail("not_leased")
+            elif not isinstance(row["lease_until"], int) or row["lease_until"] <= now:
+                _fail("lease_expired")
             else:
-                db.execute("UPDATE jobs SET state='reported',result=?,result_sha=?,outcome=?,updated_at=? "
-                           "WHERE id=?", (result, digest, outcome, now, ident))
+                updated = db.execute("UPDATE jobs SET state='reported',result=?,result_sha=?,outcome=?,updated_at=? "
+                                     "WHERE id=? AND state='leased' AND lease_sha=? AND lease_until>?",
+                                     (result, digest, outcome, now, ident, _sha(token), now))
+                if updated.rowcount != 1:
+                    _fail("lease_changed")
             stored = _row(db.execute("SELECT * FROM jobs WHERE id=?", (ident,)).fetchone())
             db.execute("COMMIT")
             return _receipt(stored)
