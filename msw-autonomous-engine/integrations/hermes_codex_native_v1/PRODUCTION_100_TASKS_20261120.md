@@ -138,3 +138,9 @@
 ## Dowód testów — 2026-11-20
 - 076: GitHub Actions Hermes Codex admission run 44772601726: SUCCESS; Hermes Chat Loop 44772614294: SUCCESS; WordPress registry 44772614308: SUCCESS, commit 6defa75858aac5f03ff031a6545f367f0e0d4501.
 - Render live deploy dep-dbuvtc7f3r2c73ekdpqg nadal commit 105ad24c1c00ffdcad2857035419afaffa97dcdb. CI nie jest testem E2E z Codexem na Renderze; zadania 95 i 99 pozostają otwarte.
+
+## Render readback 2026-11-20 16:43 UTC
+- Standby deploy dep-dc07grrncjis73808csg LIVE on 60bb7361f73f; process started at 16:43:00 UTC.
+- Runtime log: public_head_matches_tested=false; overlay pinned to a4dea48638e7721fa3e318de1eb4b2c2c4029908. No production Codex execution can be claimed.
+- Staging probe: github_queue_connected=true, live_external_chat_connected=false; ACK counts 1/1 are storage-consistency only, not native Hermes identity.
+- Blocker: runtime overlay compatibility pin and Codex auth/real E2E. Do not re-dispatch blocked task 498623.
