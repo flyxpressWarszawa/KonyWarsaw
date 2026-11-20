@@ -29,6 +29,12 @@ def apply_verified(job, codex_receipt, apply_once, readback):
         raise Hold('CODEX_RECEIPT_DIGEST_MISMATCH')
     if hashlib.sha256(codex_receipt['text'].encode()).hexdigest()!=codex_receipt.get('response_sha256'):
         raise Hold('CODEX_TEXT_DIGEST_MISMATCH')
+    # A valid digest proves only receipt integrity, not ownership of this job.
+    # Check the COMPLETE identity before invoking any potentially costly or
+    # irreversible native apply; an old/cross-root receipt must fail closed.
+    for field in required:
+        if codex_receipt.get(field) != job[field]:
+            raise Hold('CODEX_RECEIPT_'+field.upper()+'_MISMATCH')
     identity={k:job[k] for k in required}
     payload={'identity':identity,'codex_receipt_sha256':codex_receipt['receipt_sha256'],'result':codex_receipt['text']}
     payload_digest=hashlib.sha256(canonical(payload)).hexdigest()
