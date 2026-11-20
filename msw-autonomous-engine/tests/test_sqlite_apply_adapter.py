@@ -50,6 +50,20 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                          "task_id": self.job["task_id"]}, self.directory)
         self.assertEqual(status["state"], "leased")
 
+    def test_duplicate_same_receipt_is_idempotent(self):
+        first = module.apply_once(self.directory, self.job, self.lease, receipt("ok"))
+        second = module.apply_once(self.directory, self.job, self.lease, receipt("ok"))
+        self.assertEqual(first["result_sha256"], second["result_sha256"])
+        self.assertEqual(second["native_ack"]["state"], "acknowledged")
+
+    def test_conflicting_second_result_is_rejected(self):
+        module.apply_once(self.directory, self.job, self.lease, receipt("ok"))
+        with self.assertRaises(Exception):
+            module.apply_once(self.directory, self.job, self.lease, receipt("different"))
+        state = handle({"schema": SCHEMA, "operation": "status",
+                        "task_id": self.job["task_id"]}, self.directory)
+        self.assertEqual(state["result_sha256"], hashlib.sha256(b"ok").hexdigest())
+
     def test_invalid_digest_does_not_write(self):
         bad = receipt("ok")
         bad["response_sha256"] = "0" * 64
