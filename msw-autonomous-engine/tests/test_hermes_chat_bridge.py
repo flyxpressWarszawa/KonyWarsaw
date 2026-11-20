@@ -178,6 +178,18 @@ class ExchangeTests(unittest.TestCase):
             self.report(lease,result_sha256="0" * 64)
         self.assertEqual(self.command(schema=SCHEMA,operation="status",task_id=self.key)["state"],"leased")
 
+    def test_expired_lease_rejects_first_report_without_mutation(self):
+        self.submit()
+        lease = self.claim()
+        database = self.root / "hermes-chat-loop" / "exchange.sqlite3"
+        with closing(sqlite3.connect(database)) as db:
+            db.execute("UPDATE jobs SET lease_until=0 WHERE id=?", (self.key,))
+        with self.assertRaisesRegex(TaskError, "lease_expired"):
+            self.report(lease)
+        state = self.command(schema=SCHEMA, operation="status", task_id=self.key)
+        self.assertEqual(state["state"], "leased")
+        self.assertIsNone(state["result_sha256"])
+
     def test_report_replay_with_same_digest_only(self):
         self.submit()
         lease=self.claim()
