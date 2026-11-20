@@ -31,8 +31,8 @@ def apply_codex_result(directory, job, lease_token, receipt, *, dispatch_enabled
         raise ApplyHold("unverified_codex_result")
     if receipt.get("tools") != 0:
         raise ApplyHold("tool_execution_not_approved")
-    if receipt.get("task_id") not in (None, job["task_id"]):
+    if receipt.get("task_id") != job["task_id"]:
         raise ApplyHold("receipt_task_mismatch")
-    if receipt.get("work_key") not in (None, job["work_key"]):
+    if receipt.get("work_key") != job["work_key"]:
         raise ApplyHold("receipt_work_mismatch")
     return apply_once(Path(directory), job, lease_token, receipt)
