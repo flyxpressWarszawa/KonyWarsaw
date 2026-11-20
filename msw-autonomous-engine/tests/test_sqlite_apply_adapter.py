@@ -27,11 +27,26 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
         self.directory = Path(self.temp.name)
         self.job = {"root_id": "root-00000001", "task_id": "task-00000001",
                     "request_id": "request-00000001", "work_key": "work-00000001",
-                    "parent_id": "parent-00000001"}
+                    "parent_id": "root-00000001"}
+        handle({"schema": SCHEMA, "operation": "submit",
+                "task_id": self.job["root_id"], "conversation_key": "conv-00000001",
+                "kind": "plan", "goal": "Acknowledged parent", "executor": "hermes",
+                "work_key": "work-root-00000001"}, self.directory)
+        parent_lease = handle({"schema": SCHEMA, "operation": "claim",
+                               "executor": "hermes", "conversation_key": "conv-00000001"},
+                              self.directory)["lease_token"]
+        parent_result = "parent complete"
+        parent_digest = hashlib.sha256(parent_result.encode()).hexdigest()
+        handle({"schema": SCHEMA, "operation": "report", "task_id": self.job["root_id"],
+                "lease_token": parent_lease, "result": parent_result,
+                "result_sha256": parent_digest, "outcome": "completed"}, self.directory)
+        handle({"schema": SCHEMA, "operation": "ack", "task_id": self.job["root_id"],
+                "result_sha256": parent_digest}, self.directory)
         handle({"schema": SCHEMA, "operation": "submit",
                 "task_id": self.job["task_id"], "conversation_key": "conv-00000001",
                 "kind": "plan", "goal": "Offline test", "executor": "hermes",
-                "work_key": self.job["work_key"]}, self.directory)
+                "work_key": self.job["work_key"], "parent_id": self.job["parent_id"]},
+               self.directory)
         self.lease = handle({"schema": SCHEMA, "operation": "claim",
                              "executor": "hermes", "conversation_key": "conv-00000001"},
                             self.directory)["lease_token"]
@@ -45,6 +60,15 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
     def test_wrong_work_key_does_not_write(self):
         with self.assertRaisesRegex(module.ApplyHold, "work_identity_mismatch"):
             module.apply_once(self.directory, dict(self.job, work_key="wrong-00000001"),
+                              self.lease, receipt("ok"))
+        status = handle({"schema": SCHEMA, "operation": "status",
+                         "task_id": self.job["task_id"]}, self.directory)
+        self.assertEqual(status["state"], "leased")
+
+    def test_wrong_parent_does_not_write(self):
+        with self.assertRaisesRegex(module.ApplyHold, "work_identity_mismatch"):
+            module.apply_once(self.directory,
+                              dict(self.job, parent_id="other-parent-00000001"),
                               self.lease, receipt("ok"))
         status = handle({"schema": SCHEMA, "operation": "status",
                          "task_id": self.job["task_id"]}, self.directory)
