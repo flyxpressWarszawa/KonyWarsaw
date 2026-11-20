@@ -1,0 +1,25 @@
+name: Hermes Codex admission guard tests
+on:
+  push:
+    branches:
+      - msw/hermes-chat-loop-20261114
+    paths:
+      - 'msw-autonomous-engine/integrations/hermes_codex_native_v1/**'
+      - '.github/workflows/hermes-codex-admission.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  admission-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Syntax and fail-closed regression tests
+        working-directory: msw-autonomous-engine/integrations/hermes_codex_native_v1
+        run: |
+          python -B -m py_compile canary_admission_guard.py test_canary_admission_guard.py
+          python -B -m unittest -v test_canary_admission_guard.py
