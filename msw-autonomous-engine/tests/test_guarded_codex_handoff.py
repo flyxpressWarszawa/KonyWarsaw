@@ -14,6 +14,8 @@ adapter = importlib.import_module("integrations.hermes_codex_native_v1.sqlite_ap
 def receipt(text, task_id, work_key):
     data = {"status": "VERIFIED", "independent_readback": True, "tools": 0,
             "text": text, "task_id": task_id, "work_key": work_key,
+            "root_id": "root-00000001", "request_id": "request-00000001",
+            "parent_id": "root-00000001",
             "response_sha256": hashlib.sha256(text.encode()).hexdigest()}
     data["receipt_sha256"] = hashlib.sha256(adapter.canonical(data).encode()).hexdigest()
     return data
@@ -71,6 +73,41 @@ class GuardedHandoff(unittest.TestCase):
                 ).hexdigest()
                 with self.assertRaisesRegex(adapter.ApplyHold, reason):
                     self.apply(proof, dispatch_enabled=True)
+                state = handle(dict(schema=SCHEMA, operation="status",
+                                    task_id=self.job["task_id"]), self.root)
+                self.assertEqual(state["state"], "leased")
+
+    def test_receipt_root_request_parent_binding(self):
+        # Even a correctly hashed but misassociated proof must not ACK a job.
+        for field in ("root_id", "request_id", "parent_id"):
+            for new_value in (None, "other-" + field):
+                with self.subTest(field=field, new_value=new_value):
+                    proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+                    if new_value is None:
+                        proof.pop(field)
+                    else:
+                        proof[field] = new_value
+                    proof["receipt_sha256"] = hashlib.sha256(
+                        adapter.canonical({k: v for k, v in proof.items()
+                                           if k != "receipt_sha256"}).encode()
+                    ).hexdigest()
+                    with self.assertRaisesRegex(adapter.ApplyHold, "receipt_" + field + "_mismatch"):
+                        self.apply(proof, dispatch_enabled=True)
+                    state = handle(dict(schema=SCHEMA, operation="status",
+                                        task_id=self.job["task_id"]), self.root)
+                    self.assertEqual(state["state"], "leased")
+
+    def test_direct_adapter_cannot_bypass_receipt_identity(self):
+        for field in ("root_id", "request_id", "parent_id", "task_id", "work_key"):
+            with self.subTest(field=field):
+                proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+                proof[field] = "other-" + field
+                proof["receipt_sha256"] = hashlib.sha256(
+                    adapter.canonical({k: v for k, v in proof.items()
+                                       if k != "receipt_sha256"}).encode()
+                ).hexdigest()
+                with self.assertRaisesRegex(adapter.ApplyHold, "receipt_" + field + "_mismatch"):
+                    adapter.apply_once(self.root, self.job, self.lease, proof)
                 state = handle(dict(schema=SCHEMA, operation="status",
                                     task_id=self.job["task_id"]), self.root)
                 self.assertEqual(state["state"], "leased")
