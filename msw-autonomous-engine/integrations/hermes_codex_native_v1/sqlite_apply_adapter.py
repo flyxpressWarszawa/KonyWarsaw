@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from contextlib import closing
 
 from msw_engine.hermes_chat_bridge import _connection, _sha, _id
@@ -27,6 +28,10 @@ def apply_once(directory, job, lease_token, codex_receipt):
     A successful database commit may precede a transport timeout. In that case
     caller must inspect the original task, never dispatch a second execution.
     """
+    # Local row validation and routed report/ACK must use the same backend.
+    # Refuse before _connection can create or migrate an unrelated SQLite DB.
+    if os.environ.get("MSW_HERMES_CHAT_BACKEND", "sqlite") != "sqlite":
+        raise ApplyHold("sqlite_backend_required")
     fields = ("root_id", "task_id", "request_id", "work_key", "parent_id")
     if not isinstance(job, dict) or any(not isinstance(job.get(k), str) or not job[k] for k in fields):
         raise ApplyHold("invalid_identity")
