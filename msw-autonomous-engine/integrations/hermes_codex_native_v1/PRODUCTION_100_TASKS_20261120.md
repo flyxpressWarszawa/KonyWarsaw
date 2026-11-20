@@ -2,6 +2,8 @@
 
 > Lista kontrolna. [x] tylko dla prac potwierdzonych dowodem w bieżącej sesji; pozostałe [ ] nie są deklaracją wykonania. Nie uruchamiać zadania 498623 ponownie bez niezależnego dowodu stanu efektu.
 
+> Raportowanie: informuj po każdych 10 potwierdzonych fizycznych zmianach. Audyt i dokumentacja nie liczą się jako wdrożenia. Poprzednie 9/100 to wyniki audytu, nie 9 zmian produkcyjnych. Wymagany dowód: commit, test, wdrożenie i readback stosownie do zadania.
+
 ## Audyt istniejącego środowiska
 - [x] 001. Potwierdź workspace Robot
 - [x] 002. Zidentyfikuj główny worker Render
@@ -127,3 +129,8 @@
 - 005: ostatni potwierdzony live deploy `dep-dbuvtc7f3r2c73ekdpqg`, commit `105ad24c1c00ffdcad2857035419afaffa97dcdb`.
 - 009–010: log Render 2026-11-20 15:43 UTC: `chat_blocked_no_ack` dla `msw-agent-v1:business:498623` (held), oraz `knowledge_effect_contract_required` (deferred_unverified). Stan po tej chwili niepotwierdzony.
 - 008: rozmiar dysku 10 GB i mount /var/data są znane z konfiguracji, ale aktualne wykorzystanie dysku nie zostało odczytane — pozostaje otwarte.
+
+## Licznik wdrożonych zmian
+- Potwierdzone zmiany na produkcyjnym Renderze: 0/100.
+- Dotychczasowe 9 odznaczeń dotyczy wyłącznie audytu.
+- Raportuj kamienie milowe co 10 fizycznych zmian, nie co 10 kontroli.
