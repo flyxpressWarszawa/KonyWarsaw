@@ -144,3 +144,9 @@
 - Runtime log: public_head_matches_tested=false; overlay pinned to a4dea48638e7721fa3e318de1eb4b2c2c4029908. No production Codex execution can be claimed.
 - Staging probe: github_queue_connected=true, live_external_chat_connected=false; ACK counts 1/1 are storage-consistency only, not native Hermes identity.
 - Blocker: runtime overlay compatibility pin and Codex auth/real E2E. Do not re-dispatch blocked task 498623.
+
+## Render production deployment evidence — 2026-11-20 16:48 UTC
+- Standby deploy dep-dc07j749v7es73as12t0 LIVE; commit 8023610c8e2fd16d563e504492f24237d42fba44; finished 16:48:06Z.
+- Runtime process is still /tmp/msw-aux-seo/hermes-chat-staging/overlay-v7-repinned-a4dea/overlay_launcher.py.
+- Runtime public_head_matches_tested=false (tested_head a4dea48638e7721fa3e318de1eb4b2c2c4029908); live_external_chat_connected=false. Native Codex E2E and ACK remain unverified.
+- Release gate: DO NOT count this as successful Codex integration. Change actual Render startCommand/overlay pin only with compatible, verified runtime; do not redeploy same config as a workaround.
