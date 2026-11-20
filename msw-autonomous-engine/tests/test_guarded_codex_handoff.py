@@ -26,10 +26,23 @@ class GuardedHandoff(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.job = dict(root_id="root-00000001", task_id="task-00000001",
                         request_id="request-00000001", work_key="work-00000001",
-                        parent_id="parent-00000001")
+                        parent_id="root-00000001")
+        handle(dict(schema=SCHEMA, operation="submit", task_id=self.job["root_id"],
+                    conversation_key="conv-00000001", kind="plan", goal="Parent",
+                    executor="hermes", work_key="work-root-00000001"), self.root)
+        parent_lease = handle(dict(schema=SCHEMA, operation="claim", executor="hermes",
+                                   conversation_key="conv-00000001"), self.root)["lease_token"]
+        parent_result = "parent complete"
+        parent_digest = hashlib.sha256(parent_result.encode()).hexdigest()
+        handle(dict(schema=SCHEMA, operation="report", task_id=self.job["root_id"],
+                    lease_token=parent_lease, result=parent_result,
+                    result_sha256=parent_digest, outcome="completed"), self.root)
+        handle(dict(schema=SCHEMA, operation="ack", task_id=self.job["root_id"],
+                    result_sha256=parent_digest), self.root)
         handle(dict(schema=SCHEMA, operation="submit", task_id=self.job["task_id"],
                     conversation_key="conv-00000001", kind="plan", goal="Test",
-                    executor="hermes", work_key=self.job["work_key"]), self.root)
+                    executor="hermes", work_key=self.job["work_key"],
+                    parent_id=self.job["parent_id"]), self.root)
         self.lease = handle(dict(schema=SCHEMA, operation="claim", executor="hermes",
                                  conversation_key="conv-00000001"), self.root)["lease_token"]
 
