@@ -94,7 +94,7 @@
 - [ ] 073. Uruchom testy kolejki
 - [ ] 074. Uruchom testy bezpieczeństwa JSON
 - [ ] 075. Uruchom testy współbieżności
-- [ ] 076. Uruchom testy CI GitHub Actions
+- [x] 076. Uruchom testy CI GitHub Actions
 - [ ] 077. Sprawdź logi nieudanych testów
 - [ ] 078. Napraw błędy regresji
 - [ ] 079. Uruchom ponownie testy po poprawkach
@@ -134,3 +134,7 @@
 - Potwierdzone zmiany na produkcyjnym Renderze: 0/100.
 - Dotychczasowe 9 odznaczeń dotyczy wyłącznie audytu.
 - Raportuj kamienie milowe co 10 fizycznych zmian, nie co 10 kontroli.
+
+## Dowód testów — 2026-11-20
+- 076: GitHub Actions Hermes Codex admission run 44772601726: SUCCESS; Hermes Chat Loop 44772614294: SUCCESS; WordPress registry 44772614308: SUCCESS, commit 6defa75858aac5f03ff031a6545f367f0e0d4501.
+- Render live deploy dep-dbuvtc7f3r2c73ekdpqg nadal commit 105ad24c1c00ffdcad2857035419afaffa97dcdb. CI nie jest testem E2E z Codexem na Renderze; zadania 95 i 99 pozostają otwarte.
