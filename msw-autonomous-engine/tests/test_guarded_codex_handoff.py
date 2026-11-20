@@ -59,6 +59,30 @@ class GuardedHandoff(unittest.TestCase):
         with self.assertRaisesRegex(adapter.ApplyHold, "receipt_task_mismatch"):
             self.apply(receipt("ok", "different-task", self.job["work_key"]), dispatch_enabled=True)
 
+    def test_missing_identity_fields_hold_without_ack(self):
+        for missing, reason in (("task_id", "receipt_task_mismatch"),
+                                ("work_key", "receipt_work_mismatch")):
+            with self.subTest(missing=missing):
+                proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+                proof.pop(missing)
+                proof["receipt_sha256"] = hashlib.sha256(
+                    adapter.canonical({k: v for k, v in proof.items()
+                                       if k != "receipt_sha256"}).encode()
+                ).hexdigest()
+                with self.assertRaisesRegex(adapter.ApplyHold, reason):
+                    self.apply(proof, dispatch_enabled=True)
+                state = handle(dict(schema=SCHEMA, operation="status",
+                                    task_id=self.job["task_id"]), self.root)
+                self.assertEqual(state["state"], "leased")
+
+    def test_wrong_work_key_rejected_without_ack(self):
+        proof = receipt("ok", self.job["task_id"], "different-work")
+        with self.assertRaisesRegex(adapter.ApplyHold, "receipt_work_mismatch"):
+            self.apply(proof, dispatch_enabled=True)
+        state = handle(dict(schema=SCHEMA, operation="status",
+                            task_id=self.job["task_id"]), self.root)
+        self.assertEqual(state["state"], "leased")
+
     def test_ack_and_repeat_are_idempotent(self):
         proof = receipt("ok", self.job["task_id"], self.job["work_key"])
         first = self.apply(proof, dispatch_enabled=True)
