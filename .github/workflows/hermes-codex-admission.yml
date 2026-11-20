@@ -24,9 +24,11 @@ jobs:
       - name: Compile and run fail-closed regression tests
         working-directory: msw-autonomous-engine/integrations/hermes_codex_native_v1
         run: |
-          python -B -m py_compile canary_admission_guard.py native_apply_bridge.py codex_render_probe.py test_canary_admission_guard.py test_native_apply_bridge.py
+          python -B -m py_compile canary_admission_guard.py native_apply_bridge.py codex_render_probe.py standby_safe_entrypoint.py test_canary_admission_guard.py test_native_apply_bridge.py
           python -B -m unittest -v test_canary_admission_guard.py test_native_apply_bridge.py
           python -B codex_render_probe.py
+          python -B standby_safe_entrypoint.py > /tmp/msw-standby-probe.log 2>&1 && exit 1 || test $? -eq 78
+          grep -q 'standby_overlay_missing' /tmp/msw-standby-probe.log
       - name: Test native SQLite ACK integration and lease regression
         working-directory: msw-autonomous-engine
         run: |
