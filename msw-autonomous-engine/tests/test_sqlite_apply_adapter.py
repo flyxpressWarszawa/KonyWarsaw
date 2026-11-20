@@ -2,8 +2,10 @@
 import hashlib
 import importlib.util
 from pathlib import Path
+import sqlite3
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
 from msw_engine.hermes_chat_bridge import SCHEMA, handle
 
@@ -79,6 +81,42 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
         second = module.apply_once(self.directory, self.job, self.lease, receipt("ok"))
         self.assertEqual(first["result_sha256"], second["result_sha256"])
         self.assertEqual(second["native_ack"]["state"], "acknowledged")
+
+    def test_uncertain_committed_report_is_read_back_then_acked(self):
+        answer = "ok after uncertain report"
+        digest = hashlib.sha256(answer.encode()).hexdigest()
+        handle({"schema": SCHEMA, "operation": "report", "task_id": self.job["task_id"],
+                "lease_token": self.lease, "result": answer,
+                "result_sha256": digest, "outcome": "completed"}, self.directory)
+        database = self.directory / "hermes-chat-loop" / "exchange.sqlite3"
+        with sqlite3.connect(database) as db:
+            db.execute("UPDATE jobs SET lease_until=0 WHERE id=?", (self.job["task_id"],))
+
+        def reject_second_report(payload, directory):
+            if payload["operation"] == "report":
+                self.fail("A committed report was submitted again")
+            return handle(payload, directory)
+
+        with patch("msw_engine.hermes_chat_bridge.handle", side_effect=reject_second_report):
+            applied = module.apply_once(self.directory, self.job, self.lease,
+                                        receipt(answer))
+        self.assertEqual(applied["native_ack"]["state"], "acknowledged")
+        self.assertTrue(applied["readback_verified"])
+        self.assertEqual(applied["result_sha256"], digest)
+
+    def test_uncertain_conflicting_report_stays_unacknowledged(self):
+        original = "first result"
+        digest = hashlib.sha256(original.encode()).hexdigest()
+        handle({"schema": SCHEMA, "operation": "report", "task_id": self.job["task_id"],
+                "lease_token": self.lease, "result": original,
+                "result_sha256": digest, "outcome": "completed"}, self.directory)
+        with self.assertRaisesRegex(module.ApplyHold, "conflicting_recorded_result"):
+            module.apply_once(self.directory, self.job, self.lease,
+                              receipt("different result"))
+        status = handle({"schema": SCHEMA, "operation": "status",
+                         "task_id": self.job["task_id"]}, self.directory)
+        self.assertEqual(status["state"], "reported")
+        self.assertEqual(status["result_sha256"], digest)
 
     def test_conflicting_second_result_is_rejected(self):
         module.apply_once(self.directory, self.job, self.lease, receipt("ok"))
