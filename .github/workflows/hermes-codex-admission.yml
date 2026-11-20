@@ -6,6 +6,9 @@ on:
     paths:
       - 'msw-autonomous-engine/integrations/hermes_codex_native_v1/**'
       - '.github/workflows/hermes-codex-admission.yml'
+      - 'msw-autonomous-engine/msw_engine/hermes_chat_bridge.py'
+      - 'msw-autonomous-engine/tests/test_hermes_chat_bridge.py'
+      - 'msw-autonomous-engine/tests/test_sqlite_apply_adapter.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,3 +26,9 @@ jobs:
         run: |
           python -B -m py_compile canary_admission_guard.py native_apply_bridge.py test_canary_admission_guard.py test_native_apply_bridge.py
           python -B -m unittest -v test_canary_admission_guard.py test_native_apply_bridge.py
+      - name: Test native SQLite ACK integration and lease regression
+        working-directory: msw-autonomous-engine
+        run: |
+          python -B -m py_compile integrations/hermes_codex_native_v1/sqlite_apply_adapter.py tests/test_sqlite_apply_adapter.py msw_engine/hermes_chat_bridge.py
+          python -B -m unittest discover -s tests -p 'test_sqlite_apply_adapter.py' -v
+          python -B -m unittest discover -s tests -p 'test_hermes_chat_bridge.py' -v
