@@ -7,7 +7,7 @@ class Hold(RuntimeError): pass
 def canonical(obj):
     return json.dumps(obj,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()
 
-def _explicit_negative_native_outcome(record):
+def _explicit_negative_native_outcome(record, *, persisted_effect=False):
     """Treat explicit native failure/denial as HOLD even when hashes match.
 
     Absence of a status field is not success evidence: identity, payload and
@@ -25,6 +25,12 @@ def _explicit_negative_native_outcome(record):
     # not final native application. Do not infer success from matching hashes.
     terminal = {'success', 'succeeded', 'completed', 'verified', 'applied',
                 'applied_verified', 'acknowledged', 'native_observed'}
+    if persisted_effect:
+        # A transport/storage ACK or a generic "completed" is not evidence
+        # that Hermes natively applied the result. If the persisted record
+        # exposes a state, only an explicit native-apply state can qualify.
+        # The receiver must still authenticate provenance independently.
+        terminal = {'applied', 'applied_verified', 'native_observed'}
     for key in ('status', 'state', 'outcome'):
         if key in record:
             value = record[key]
@@ -104,6 +110,6 @@ def apply_verified(job, codex_receipt, apply_once, readback):
             or persisted.get('payload_sha256') != payload_digest
             or persisted.get('effect_verified') is not True):
         raise Hold('NATIVE_EFFECT_NOT_VERIFIED')
-    if _explicit_negative_native_outcome(persisted):
+    if _explicit_negative_native_outcome(persisted, persisted_effect=True):
         raise Hold('NATIVE_EFFECT_NEGATIVE_OUTCOME')
     return {'status':'APPLIED_VERIFIED','task_id':job['task_id'],'work_key':job['work_key'],'native_ack':ack,'payload_sha256':payload_digest}
