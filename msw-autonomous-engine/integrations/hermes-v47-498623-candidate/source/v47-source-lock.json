@@ -1,0 +1,39 @@
+{
+  "schema": "msw.hermes.498623.v47.source-lock.v1",
+  "release": "V47-498623-candidate",
+  "repository": "flyxpressWarszawa/signal-harbor-companion",
+  "commit": "808b1d804e80ac919998afa009b2efca70ae58de",
+  "hash_algorithm": "git_blob_sha1",
+  "base_v46_owner_source_sha256": "6fea6bf77ba4b1021fe69756b1c73ca2cbc85267db5d21ae89e82716a005a7c0",
+  "owner_cli_command": "grant-498623",
+  "files": {
+    "business_host_bridge_498623.py": "7cc8a0b798c85d0dbce6c992a4288b41298b1cf0",
+    "durable_intent_498623.py": "2b04ea1d0de4db7b40fb25717a530330e0bd0453",
+    "final_job_guard_498623.py": "4d84a63b7c1cce8a1ca231db9ae02867280c1315",
+    "github_evidence_498623.py": "609e0c73df125a365badeafd0164e82ebaab09f1",
+    "initial_grant_498623.py": "a0da9262de120728e058505e9fa1b189abff0d9c",
+    "native_job_barrier_498623.py": "e6bfcab12e89014e24205d0879ecf347886bddbd",
+    "owner_final_readback_498623.py": "eb96c3e83005766d7ad2820fa2092e3d2983af8b",
+    "owner_grant_adapter_498623.py": "154b424ae569fe9f2f488ce1aba5e40ac7e14e95",
+    "owner_grant_issue_498623.py": "c052b3d6c392c4d7f65128df6d14a43afbd5c57d",
+    "owner_grant_route_498623.py": "8546e22819957d00205b3a771af2f584072cfe54",
+    "owner_patch_498623.py": "9fa241555929607f4cf2f0148023d63536fc72df",
+    "owner_preflight_498623.py": "aafb242fc132db1982261426d5ebdff36f1e635a",
+    "owner_status_498623.py": "db982380804d01461cb910747d3bf66e5fb1a9ee",
+    "profile_498623.py": "4d97687dfea60b122d066d246ccf75f693a3f6b9",
+    "receipt_transition_498623.py": "3a93a7209bf34f6e7ffc029e6d35e28fa6f27593",
+    "receiver_498623.py": "28e9361d05f15a1c82a87d038053c7eef508ca40",
+    "owner_initial_grant_store_498623.py": "e492b40841902a6fc92b568e4f796bf356990e13"
+  },
+  "required_owner_apis": [
+    "snapshot_498623",
+    "assert_498623_fences",
+    "read_498623_admission",
+    "read_498623_current_run",
+    "append_498623_initial_grant",
+    "read_498623_initial_grant"
+  ],
+  "status": "candidate_only_owner_runtime_apis_not_implemented_native_jobs_cas_callback_required",
+  "production_ack_verified": false,
+  "native_effect_verified": false
+}
