@@ -178,13 +178,36 @@ class GuardedHandoff(unittest.TestCase):
                             task_id=self.job["task_id"]), self.root)
         self.assertEqual(state["state"], "leased")
 
-    def test_ack_and_repeat_are_idempotent(self):
+    def test_report_and_repeat_do_not_synthesize_native_ack(self):
+        # Two applications of the same immutable result remain one storage
+        # report. The Codex adapter must NEVER issue Hermes's native ACK.
         proof = receipt("ok", self.job["task_id"], self.job["work_key"])
         first = self.apply(proof, dispatch_enabled=True)
         second = self.apply(proof, dispatch_enabled=True)
-        self.assertEqual(first["status"], "APPLIED_VERIFIED")
+        self.assertEqual(first["status"], "STORAGE_REPORT_VERIFIED_NATIVE_UNVERIFIED")
         self.assertEqual(first["result_sha256"], second["result_sha256"])
-        self.assertEqual(second["native_ack"]["state"], "acknowledged")
+        self.assertTrue(first["storage_readback_verified"])
+        self.assertFalse(first["native_hermes_ack_verified"])
+        self.assertFalse(first["native_application_verified"])
+        self.assertNotIn("native_ack", second)
+        state = handle(dict(schema=SCHEMA, operation="status",
+                            task_id=self.job["task_id"]), self.root)
+        self.assertEqual(state["state"], "reported")
+        self.assertEqual(state["outcome"], "completed")
+
+    def test_preexisting_transport_ack_is_not_native_hermes_proof(self):
+        proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+        first = self.apply(proof, dispatch_enabled=True)
+        # Simulated separate transport-layer ACK in isolated SQLite fixture.
+        transport_ack = handle(dict(schema=SCHEMA, operation="ack",
+                                    task_id=self.job["task_id"],
+                                    result_sha256=first["result_sha256"]), self.root)
+        self.assertEqual(transport_ack["state"], "acknowledged")
+        second = self.apply(proof, dispatch_enabled=True)
+        self.assertEqual(second["storage_state"], "acknowledged")
+        self.assertEqual(second["status"], "STORAGE_REPORT_VERIFIED_NATIVE_UNVERIFIED")
+        self.assertFalse(second["native_hermes_ack_verified"])
+        self.assertFalse(second["native_application_verified"])
 
     def test_conflicting_result_rejected(self):
         self.apply(receipt("ok", self.job["task_id"], self.job["work_key"]), dispatch_enabled=True)
