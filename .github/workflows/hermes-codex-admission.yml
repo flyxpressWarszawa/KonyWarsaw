@@ -1,0 +1,43 @@
+name: Hermes Codex admission and native apply tests
+on:
+  push:
+    branches:
+      - msw/hermes-chat-loop-20261114
+    paths:
+      - 'msw-autonomous-engine/integrations/hermes_codex_native_v1/**'
+      - '.github/workflows/hermes-codex-admission.yml'
+      - 'msw-autonomous-engine/msw_engine/hermes_chat_bridge.py'
+      - 'msw-autonomous-engine/tests/test_hermes_chat_bridge.py'
+      - 'msw-autonomous-engine/tests/test_sqlite_apply_adapter.py'
+      - 'msw-autonomous-engine/tests/test_standby_safe_entrypoint.py'
+      - 'msw-autonomous-engine/tests/test_guarded_codex_handoff.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile and run fail-closed regression tests
+        working-directory: msw-autonomous-engine/integrations/hermes_codex_native_v1
+        run: |
+          python -B -m py_compile canary_admission_guard.py native_apply_bridge.py codex_render_probe.py standby_safe_entrypoint.py runtime_pin_admission.py test_canary_admission_guard.py test_native_apply_bridge.py
+          python -B -m unittest -v test_canary_admission_guard.py test_native_apply_bridge.py
+          python -B codex_render_probe.py
+          python -B standby_safe_entrypoint.py > /tmp/msw-standby-probe.log 2>&1 && exit 1 || test $? -eq 78
+          grep -q 'standby_overlay_missing' /tmp/msw-standby-probe.log
+          printf '%s' '{"staging_overlay_launcher":{"public_head":"60bb7361f73f61c77bbd3d2909dbd0d64374ea08","tested_public_head":"a4dea48638e7721fa3e318de1eb4b2c2c4029908","public_head_matches_tested":false}}' | python -B runtime_pin_admission.py > /tmp/msw-pin-probe.log && exit 1 || test $? -eq 78
+          grep -q 'runtime_pin_mismatch' /tmp/msw-pin-probe.log
+      - name: Test native SQLite ACK integration and lease regression
+        working-directory: msw-autonomous-engine
+        run: |
+          python -B -m py_compile integrations/hermes_codex_native_v1/sqlite_apply_adapter.py tests/test_sqlite_apply_adapter.py tests/test_standby_safe_entrypoint.py tests/test_guarded_codex_handoff.py integrations/hermes_codex_native_v1/guarded_receipt_entry.py msw_engine/hermes_chat_bridge.py
+          python -B -m unittest discover -s tests -p 'test_sqlite_apply_adapter.py' -v
+          python -B -m unittest discover -s tests -p 'test_standby_safe_entrypoint.py' -v
+          python -B -m unittest discover -s tests -p 'test_guarded_codex_handoff.py' -v
+          python -B -m unittest discover -s tests -p 'test_hermes_chat_bridge.py' -v

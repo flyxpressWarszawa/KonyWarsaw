@@ -1,0 +1,54 @@
+name: MSW Hermes Chat Loop offline tests
+on:
+  pull_request:
+    branches:
+      - msw/worker-autostart-final-20261111
+    paths:
+      - 'msw-autonomous-engine/msw_engine/hermes_chat_bridge.py'
+      - 'msw-autonomous-engine/integrations/hermes_codex_native_v1/guarded_receipt_entry.py'
+      - 'msw-autonomous-engine/integrations/hermes_codex_native_v1/sqlite_apply_adapter.py'
+      - 'msw-autonomous-engine/tests/test_guarded_codex_handoff.py'
+      - 'msw-autonomous-engine/msw_engine/github_chat_queue.py'
+      - 'msw-autonomous-engine/msw_engine/github_chat_receipt_audit.py'
+      - 'msw-autonomous-engine/msw_engine/github_queue_staging.py'
+      - 'msw-autonomous-engine/msw_engine/github_python_hub_once.py'
+      - 'msw-autonomous-engine/msw_engine/python_task_pilot.py'
+      - 'msw-autonomous-engine/msw_engine/python_receipt_attestor.py'
+      - 'msw-autonomous-engine/msw_engine/tasks.py'
+      - 'msw-autonomous-engine/tests/test_hermes_chat_bridge.py'
+      - 'msw-autonomous-engine/tests/test_github_chat_queue.py'
+      - 'msw-autonomous-engine/tests/test_github_chat_receipt_audit.py'
+      - 'msw-autonomous-engine/tests/test_github_queue_staging.py'
+      - 'msw-autonomous-engine/tests/test_github_python_hub_once.py'
+      - 'msw-autonomous-engine/tests/test_python_task_pilot.py'
+      - 'msw-autonomous-engine/tests/test_python_receipt_attestor.py'
+      - 'msw-autonomous-engine/integrations/python-hub-health-live/class-mswdc-engines.php'
+      - 'msw-autonomous-engine/tests/hub_health_refresh_contract.php'
+      - '.github/workflows/msw-hermes-chat-loop-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mailbox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run only isolated mailbox tests, no network or paid API
+        working-directory: msw-autonomous-engine
+        env:
+          MSW_HERMES_CHAT_LOOP_ENABLED: '0'
+        run: |
+          python -m unittest discover -s tests -p 'test_*chat*.py' -v
+          python -m unittest discover -s tests -p 'test_github_queue_staging.py' -v
+          python -m unittest discover -s tests -p 'test_github_python_hub_once.py' -v
+          python -m unittest discover -s tests -p 'test_python_task_pilot.py' -v
+          python -m unittest discover -s tests -p 'test_python_receipt_attestor.py' -v
+          python -m unittest discover -s tests -p 'test_guarded_codex_handoff.py' -v
+          php -l integrations/python-hub-health-live/class-mswdc-engines.php
+          php tests/hub_health_refresh_contract.php
