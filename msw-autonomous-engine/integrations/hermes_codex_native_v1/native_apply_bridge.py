@@ -15,14 +15,22 @@ def _explicit_negative_native_outcome(record):
     """
     if not isinstance(record, dict):
         return False
-    if record.get('success') is False:
+    # Python considers 0 == False and 1 == True, but native success must
+    # be an actual Boolean True when that field is present. Unknown is HOLD.
+    if 'success' in record and record['success'] is not True:
         return True
     if record.get('error') not in (None, '', False):
         return True
-    rejected = {'failed', 'failure', 'blocked', 'denied', 'rejected', 'error',
-                'cancelled', 'canceled', 'unknown'}
-    return any(isinstance(record.get(k), str) and
-               record[k].strip().lower() in rejected for k in ('status', 'state', 'outcome'))
+    # An explicit "queued", "processing", "accepted" or unfamiliar state is
+    # not final native application. Do not infer success from matching hashes.
+    terminal = {'success', 'succeeded', 'completed', 'verified', 'applied',
+                'applied_verified', 'acknowledged', 'native_observed'}
+    for key in ('status', 'state', 'outcome'):
+        if key in record:
+            value = record[key]
+            if not isinstance(value, str) or value.strip().lower() not in terminal:
+                return True
+    return False
 
 def apply_verified(job, codex_receipt, apply_once, readback):
     """Require native Hermes ACK and independent persisted-effect readback.
