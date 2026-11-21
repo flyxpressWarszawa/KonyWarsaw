@@ -27,6 +27,21 @@ PUBLIC_MODULES = {
 }
 
 
+def _strict_pairs(pairs):
+    """A later duplicate JSON key must never overwrite earlier evidence."""
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate_verification_key")
+        result[key] = value
+    return result
+
+
+def _reject_json_constant(value):
+    """NaN/Infinity are not JSON; do not accept their Python extensions."""
+    raise ValueError("nonfinite_verification_value")
+
+
 def preflight() -> dict | None:
     """Ask the existing launcher to verify its source pins without touching the queue."""
     try:
@@ -36,7 +51,8 @@ def preflight() -> dict | None:
         )
         if checked.returncode or len(checked.stdout) > 16384:
             return None
-        payload = json.loads(checked.stdout)
+        payload = json.loads(checked.stdout, object_pairs_hook=_strict_pairs,
+                             parse_constant=_reject_json_constant)
         report = payload["staging_overlay_verification"]
         selected = report["selected_modules"]
         if (payload.get("verify_only") is not True
