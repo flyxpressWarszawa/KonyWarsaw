@@ -139,4 +139,41 @@ class NativeApplyTests(unittest.TestCase):
             apply_verified(job,receipt,broken,lambda j:None)
         self.assertEqual(len(calls),1)
 
+    def test_explicit_negative_ack_cannot_be_treated_as_native_success(self):
+        job, receipt = fixture()
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        readback_calls = []
+        def unexpected_readback(*_):
+            readback_calls.append(1)
+            raise AssertionError('negative native ACK must block readback')
+        for negative in ({'success': False}, {'status': 'FAILED'},
+                         {'outcome': 'blocked'}, {'error': 'native rejected'}):
+            def negative_apply(j, payload, negative=negative):
+                return dict(**{key:j[key] for key in fields},
+                            payload_sha256=hashlib.sha256(canonical(payload)).hexdigest(),
+                            **negative)
+            with self.subTest(negative=negative):
+                with self.assertRaisesRegex(Hold, 'NATIVE_ACK_NEGATIVE_OUTCOME'):
+                    apply_verified(job, receipt, negative_apply, unexpected_readback)
+        self.assertEqual(readback_calls, [])
+
+    def test_explicit_negative_effect_cannot_override_effect_verified(self):
+        job, receipt = fixture()
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        saved = {}
+        def apply_once(j, payload):
+            saved['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
+            saved['ack'] = dict(**{key:j[key] for key in fields},
+                                payload_sha256=saved['digest'])
+            return saved['ack']
+        for negative in ({'success': False}, {'status': 'rejected'},
+                         {'state': 'unknown'}, {'error': 'effect denied'}):
+            def negative_readback(j, negative=negative):
+                return dict(**{key:j[key] for key in fields},
+                            ack=saved['ack'], payload_sha256=saved['digest'],
+                            effect_verified=True, **negative)
+            with self.subTest(negative=negative):
+                with self.assertRaisesRegex(Hold, 'NATIVE_EFFECT_NEGATIVE_OUTCOME'):
+                    apply_verified(job, receipt, apply_once, negative_readback)
+
 if __name__=='__main__':unittest.main()
