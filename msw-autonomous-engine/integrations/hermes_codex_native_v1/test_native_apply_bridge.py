@@ -18,11 +18,14 @@ class NativeApplyTests(unittest.TestCase):
         saved={}
         def apply_once(job,payload):
             saved['digest']=hashlib.sha256(canonical(payload)).hexdigest()
-            saved['ack']=dict(task_id=job['task_id'],work_key=job['work_key'],
-                              payload_sha256=saved['digest'])
+            saved['ack']=dict(**{field:job[field] for field in
+                ('root_id','task_id','request_id','work_key','parent_id')},
+                payload_sha256=saved['digest'])
             return saved['ack']
         def readback(job):
-            return dict(ack=saved['ack'],payload_sha256=saved['digest'],effect_verified=True)
+            return dict(**{field:job[field] for field in
+                ('root_id','task_id','request_id','work_key','parent_id')},
+                ack=saved['ack'],payload_sha256=saved['digest'],effect_verified=True)
         self.assertEqual(apply_verified(job,receipt,apply_once,readback)['status'],'APPLIED_VERIFIED')
 
     def test_fail_closed_before_apply(self):
@@ -74,6 +77,52 @@ class NativeApplyTests(unittest.TestCase):
                 with self.assertRaisesRegex(Hold,'CODEX_RECEIPT_UNSAFE'):
                     apply_verified(job,mutated,must_not_call,must_not_call)
         self.assertEqual(calls,[])
+
+    def test_native_ack_requires_complete_original_identity(self):
+        job,receipt=fixture()
+        required=('root_id','task_id','request_id','work_key','parent_id')
+        readback_calls=[]
+        def never_readback(*args):
+            readback_calls.append(1)
+            raise AssertionError('bad native ack must fail before readback')
+        for field in required:
+            for missing in (False,True):
+                def mismatched_apply(j,p, field=field, missing=missing):
+                    ack={key:j[key] for key in required}
+                    if missing:
+                        ack.pop(field)
+                    else:
+                        ack[field]='foreign'
+                    ack['payload_sha256']=hashlib.sha256(canonical(p)).hexdigest()
+                    return ack
+                with self.subTest(field=field,missing=missing):
+                    with self.assertRaisesRegex(Hold,'NATIVE_ACK_MISMATCH'):
+                        apply_verified(job,receipt,mismatched_apply,never_readback)
+        self.assertEqual(readback_calls,[])
+
+    def test_native_effect_readback_requires_complete_original_identity(self):
+        job,receipt=fixture()
+        required=('root_id','task_id','request_id','work_key','parent_id')
+        def matching_apply(j,p):
+            return dict(**{key:j[key] for key in required},
+                        payload_sha256=hashlib.sha256(canonical(p)).hexdigest())
+        for field in required:
+            for missing in (False,True):
+                def mismatched_readback(j, field=field, missing=missing):
+                    ack=matching_apply(j,{'identity':{key:j[key] for key in required},
+                        'codex_receipt_sha256':receipt['receipt_sha256'],
+                        'result':receipt['text']})
+                    persisted=dict(**{key:j[key] for key in required},
+                                   ack=ack,payload_sha256=ack['payload_sha256'],
+                                   effect_verified=True)
+                    if missing:
+                        persisted.pop(field)
+                    else:
+                        persisted[field]='foreign'
+                    return persisted
+                with self.subTest(field=field,missing=missing):
+                    with self.assertRaisesRegex(Hold,'NATIVE_EFFECT_NOT_VERIFIED'):
+                        apply_verified(job,receipt,matching_apply,mismatched_readback)
 
     def test_ack_mismatch(self):
         job,receipt=fixture()
