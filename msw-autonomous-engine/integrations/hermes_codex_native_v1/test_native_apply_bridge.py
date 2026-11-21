@@ -157,6 +157,45 @@ class NativeApplyTests(unittest.TestCase):
                     apply_verified(job, receipt, negative_apply, unexpected_readback)
         self.assertEqual(readback_calls, [])
 
+    def test_nonterminal_native_ack_holds_even_with_matching_hashes(self):
+        job, receipt = fixture()
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        calls = []
+        def readback_never(*_):
+            calls.append('readback')
+            raise AssertionError('nonterminal ACK must not be accepted')
+        for signal in ({'status': 'processing'}, {'state': 'queued'},
+                       {'outcome': 'accepted'}, {'status': 'undocumented_state'},
+                       {'status': None}, {'success': 0}, {'success': 1}):
+            def apply_once(j, payload, signal=signal):
+                return dict(**{key:j[key] for key in fields},
+                            payload_sha256=hashlib.sha256(canonical(payload)).hexdigest(),
+                            **signal)
+            with self.subTest(signal=signal):
+                with self.assertRaisesRegex(Hold, 'NATIVE_ACK_NEGATIVE_OUTCOME'):
+                    apply_verified(job, receipt, apply_once, readback_never)
+        self.assertEqual(calls, [])
+
+    def test_nonterminal_persisted_effect_holds_even_with_effect_flag(self):
+        job, receipt = fixture()
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        saved = {}
+        def apply_once(j, payload):
+            saved['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
+            saved['ack'] = dict(**{key:j[key] for key in fields},
+                                payload_sha256=saved['digest'], status='verified')
+            return saved['ack']
+        for signal in ({'state': 'in_progress'}, {'outcome': 'reported'},
+                       {'status': 'accepted'}, {'status': 'undocumented_state'},
+                       {'success': None}):
+            def readback(j, signal=signal):
+                return dict(**{key:j[key] for key in fields},
+                            payload_sha256=saved['digest'], ack=saved['ack'],
+                            effect_verified=True, **signal)
+            with self.subTest(signal=signal):
+                with self.assertRaisesRegex(Hold, 'NATIVE_EFFECT_NEGATIVE_OUTCOME'):
+                    apply_verified(job, receipt, apply_once, readback)
+
     def test_explicit_negative_effect_cannot_override_effect_verified(self):
         job, receipt = fixture()
         fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
