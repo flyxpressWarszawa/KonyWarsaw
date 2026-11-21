@@ -87,19 +87,25 @@ def apply_once(directory, job, lease_token, codex_receipt):
                              result_sha256=digest, outcome="completed"), directory)
         if report.get("state") not in ("reported", "acknowledged") or report.get("result_sha256") != digest:
             raise ApplyHold("report_not_verified")
-    # The native ACK verifies the stored bytes and commits acknowledgement.
-    ack = handle(dict(schema=SCHEMA, operation="ack", task_id=job["task_id"],
-                      result_sha256=digest), directory)
-    if ack.get("state") != "acknowledged" or ack.get("hermes_ack_verified") is not True:
-        raise ApplyHold("ack_not_verified")
+    # This SQLite chat transport's generic "ack" operation only changes a
+    # local storage row. It does NOT prove that the actual Hermes process
+    # received, validated, or applied the result. Never issue that ACK for
+    # Hermes from the Codex adapter or promote transport storage to native apply.
+    # The authorized native owner must reconcile and ACK through its own
+    # authenticated contract, independently from this method.
     with closing(_connection(directory)) as db:
         stored = db.execute("SELECT id,work_key,parent_id,state,result,result_sha,outcome FROM jobs WHERE id=?",
                             (job["task_id"],)).fetchone()
         if (stored is None or stored["work_key"] != job["work_key"]
                 or stored["parent_id"] != job["parent_id"]
-                or stored["state"] != "acknowledged" or stored["result"] != result
-                or stored["result_sha"] != digest or stored["outcome"] != "completed"):
+                or stored["state"] not in ("reported", "acknowledged")
+                or stored["result"] != result or stored["result_sha"] != digest
+                or stored["outcome"] != "completed"):
             raise ApplyHold("readback_mismatch")
-    return {"status": "APPLIED_VERIFIED", "task_id":job["task_id"],
-            "work_key":job["work_key"], "result_sha256":digest,
-            "native_ack":ack, "readback_verified":True}
+        storage_state = stored["state"]
+    return {"status": "STORAGE_REPORT_VERIFIED_NATIVE_UNVERIFIED",
+            "task_id": job["task_id"], "work_key": job["work_key"],
+            "result_sha256": digest, "storage_state": storage_state,
+            "storage_readback_verified": True,
+            "native_hermes_ack_verified": False,
+            "native_application_verified": False}
