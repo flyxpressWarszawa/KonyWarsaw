@@ -22,7 +22,11 @@ def apply_verified(job, codex_receipt, apply_once, readback):
         raise Hold('NATIVE_APPLY_CONTRACT_UNVERIFIED')
     if not isinstance(codex_receipt,dict) or codex_receipt.get('status')!='VERIFIED' or codex_receipt.get('independent_readback') is not True:
         raise Hold('CODEX_RECEIPT_UNVERIFIED')
-    if codex_receipt.get('tools') != 0 or not isinstance(codex_receipt.get('text'),str):
+    # bool and float compare equal to integer zero in Python; neither is a
+    # valid no-tools attestation. Require the exact integer type.
+    if (type(codex_receipt.get('tools')) is not int
+            or codex_receipt['tools'] != 0
+            or not isinstance(codex_receipt.get('text'),str)):
         raise Hold('CODEX_RECEIPT_UNSAFE')
     body={k:v for k,v in codex_receipt.items() if k!='receipt_sha256'}
     if hashlib.sha256(canonical(body)).hexdigest()!=codex_receipt.get('receipt_sha256'):
