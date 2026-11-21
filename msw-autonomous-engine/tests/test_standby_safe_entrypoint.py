@@ -138,6 +138,26 @@ class StandbyEntrypointTests(TestCase):
                     self.assertEqual(entry.main(), 78)
                 execve.assert_not_called()
 
+    def test_ambiguous_json_attestation_fails_before_start(self):
+        # Python's permissive json.loads would overwrite an earlier duplicate
+        # verification key; NaN/Infinity are also nonstandard JSON constants.
+        original = verified_result().stdout
+        unsafe = (
+            original.replace('"version": 7', '"version": 6, "version": 7', 1),
+            original.replace('"selected_modules": {',
+                             '"selected_modules": {}, "selected_modules": {', 1),
+            original.replace('"version": 7', '"version": NaN, "version": 7', 1),
+            original.replace('"version": 7', '"version": Infinity, "version": 7', 1),
+        )
+        for malformed in unsafe:
+            self.assertNotEqual(malformed, original)
+            response = SimpleNamespace(returncode=0, stdout=malformed)
+            with mock.patch.object(entry.subprocess, "run", return_value=response):
+                self.assertIsNone(entry.preflight())
+        # No weaker regression: the normal unchanged verifier output is valid.
+        with mock.patch.object(entry.subprocess, "run", return_value=verified_result()):
+            self.assertIsNotNone(entry.preflight())
+
     def test_missing_or_changed_overlay_cannot_start(self):
         with TemporaryDirectory() as root, mock.patch.object(entry, "OVERLAY", Path(root) / "overlay_launcher.py"), \
                 mock.patch.object(entry.os, "execve") as execve:
