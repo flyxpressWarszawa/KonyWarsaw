@@ -22,7 +22,7 @@ def verified_result(**changes):
         selected["msw_engine." + name] = {"source": "public", "origin": "/opt/render/project/src/msw-autonomous-engine/msw_engine/" + name + ".py"}
     report = {"version": 7, "selected_modules": selected, "public_modules_verified": 10,
               "overlay_modules_verified": 5, "environment_modified": False,
-              "public_head_matches_tested": False}
+              "public_head_matches_tested": True}
     report.update(changes)
     return SimpleNamespace(returncode=0, stdout=json.dumps({
         "staging_overlay_verification": report, "verify_only": True,
@@ -88,6 +88,25 @@ class StandbyEntrypointTests(TestCase):
                 result.stdout = json.dumps(payload)
                 with mock.patch.object(entry.subprocess, "run", return_value=result):
                     self.assertIsNone(entry.preflight())
+
+    def test_public_head_mismatch_holds_without_exec(self):
+        # A valid 11-module overlay is not sufficient when the public source
+        # differs from the tested release. Non-booleans must also fail closed.
+        for drift in (False, None, 0, "true"):
+            with self.subTest(public_head_matches_tested=drift), TemporaryDirectory() as root, \
+                    mock.patch.object(entry, "OVERLAY", Path(root) / "overlay_launcher.py"), \
+                    mock.patch.object(entry.os, "execve") as execve:
+                entry.OVERLAY.write_text("# existing launcher")
+                result = verified_result(public_head_matches_tested=drift)
+                payload = json.loads(result.stdout)
+                for item in payload["staging_overlay_verification"]["selected_modules"].values():
+                    if item["source"] == "overlay":
+                        item["origin"] = item["origin"].replace(
+                            "/tmp/msw-aux-seo/hermes-chat-staging/overlay-v7-repinned-a4dea", root)
+                result.stdout = json.dumps(payload)
+                with mock.patch.object(entry.subprocess, "run", return_value=result):
+                    self.assertEqual(entry.main(), 78)
+                execve.assert_not_called()
 
     def test_missing_or_changed_overlay_cannot_start(self):
         with TemporaryDirectory() as root, mock.patch.object(entry, "OVERLAY", Path(root) / "overlay_launcher.py"), \
