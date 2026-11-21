@@ -112,6 +112,24 @@ class GuardedHandoff(unittest.TestCase):
                                     task_id=self.job["task_id"]), self.root)
                 self.assertEqual(state["state"], "leased")
 
+    def test_direct_adapter_rejects_noninteger_tools_before_write(self):
+        # No wrapper bypass: a recomputed hash cannot launder False or 0.0
+        # into the integer-zero attestation required for native apply.
+        for unsafe in (False, 0.0, -0.0, True, "0", None):
+            with self.subTest(tools=repr(unsafe)):
+                proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+                proof["tools"] = unsafe
+                proof["receipt_sha256"] = hashlib.sha256(
+                    adapter.canonical({k: v for k, v in proof.items()
+                                       if k != "receipt_sha256"}).encode()
+                ).hexdigest()
+                with self.assertRaisesRegex(adapter.ApplyHold, "receipt_unsafe"):
+                    adapter.apply_once(self.root, self.job, self.lease, proof)
+                state = handle(dict(schema=SCHEMA, operation="status",
+                                    task_id=self.job["task_id"]), self.root)
+                self.assertEqual(state["state"], "leased")
+                self.assertIsNone(state.get("result_sha256"))
+
     def test_corrupted_receipt_digest_prevents_ack(self):
         proof = receipt("ok", self.job["task_id"], self.job["work_key"])
         proof["receipt_sha256"] = "0" * 64
