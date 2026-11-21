@@ -45,6 +45,9 @@ def preflight() -> dict | None:
                 or report.get("version") != 7
                 or report.get("public_modules_verified") != 10
                 or report.get("overlay_modules_verified") != 5
+                # The tested public HEAD is a release pin, not an advisory label.
+                # A successful overlay count must not start a different public tree.
+                or report.get("public_head_matches_tested") is not True
                 or report.get("environment_modified") is not False
                 or not isinstance(selected, dict)
                 or set(selected) != OVERLAY_MODULES | PUBLIC_MODULES
