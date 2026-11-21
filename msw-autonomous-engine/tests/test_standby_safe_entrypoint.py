@@ -108,6 +108,36 @@ class StandbyEntrypointTests(TestCase):
                     self.assertEqual(entry.main(), 78)
                 execve.assert_not_called()
 
+    def test_noninteger_preflight_counters_hold_before_exec(self):
+        # Python equality treats False == 0 and float(7) == 7. A forged
+        # successful-looking report is not an exact offline attestation.
+        cases = (
+            ("network_false", "outer", "verification_network_calls", False),
+            ("network_float", "outer", "verification_network_calls", 0.0),
+            ("version_float", "report", "version", 7.0),
+            ("public_float", "report", "public_modules_verified", 10.0),
+            ("overlay_float", "report", "overlay_modules_verified", 5.0),
+            ("public_string", "report", "public_modules_verified", "10"),
+            ("overlay_null", "report", "overlay_modules_verified", None),
+        )
+        for label, target, field, forged in cases:
+            with self.subTest(label=label), TemporaryDirectory() as root, \
+                    mock.patch.object(entry, "OVERLAY", Path(root) / "overlay_launcher.py"), \
+                    mock.patch.object(entry.os, "execve") as execve:
+                entry.OVERLAY.write_text("# existing launcher")
+                result = verified_result()
+                payload = json.loads(result.stdout)
+                node = payload if target == "outer" else payload["staging_overlay_verification"]
+                node[field] = forged
+                for item in payload["staging_overlay_verification"]["selected_modules"].values():
+                    if item["source"] == "overlay":
+                        item["origin"] = item["origin"].replace(
+                            "/tmp/msw-aux-seo/hermes-chat-staging/overlay-v7-repinned-a4dea", root)
+                result.stdout = json.dumps(payload)
+                with mock.patch.object(entry.subprocess, "run", return_value=result):
+                    self.assertEqual(entry.main(), 78)
+                execve.assert_not_called()
+
     def test_missing_or_changed_overlay_cannot_start(self):
         with TemporaryDirectory() as root, mock.patch.object(entry, "OVERLAY", Path(root) / "overlay_launcher.py"), \
                 mock.patch.object(entry.os, "execve") as execve:
