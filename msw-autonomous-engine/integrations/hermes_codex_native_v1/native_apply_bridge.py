@@ -7,6 +7,23 @@ class Hold(RuntimeError): pass
 def canonical(obj):
     return json.dumps(obj,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()
 
+def _explicit_negative_native_outcome(record):
+    """Treat explicit native failure/denial as HOLD even when hashes match.
+
+    Absence of a status field is not success evidence: identity, payload and
+    independent effect readback remain mandatory below. Never retry on HOLD.
+    """
+    if not isinstance(record, dict):
+        return False
+    if record.get('success') is False:
+        return True
+    if record.get('error') not in (None, '', False):
+        return True
+    rejected = {'failed', 'failure', 'blocked', 'denied', 'rejected', 'error',
+                'cancelled', 'canceled', 'unknown'}
+    return any(isinstance(record.get(k), str) and
+               record[k].strip().lower() in rejected for k in ('status', 'state', 'outcome'))
+
 def apply_verified(job, codex_receipt, apply_once, readback):
     """Require native Hermes ACK and independent persisted-effect readback.
 
@@ -54,6 +71,8 @@ def apply_verified(job, codex_receipt, apply_once, readback):
             or any(ack.get(field) != job[field] for field in required)
             or ack.get('payload_sha256') != payload_digest):
         raise Hold('NATIVE_ACK_MISMATCH')
+    if _explicit_negative_native_outcome(ack):
+        raise Hold('NATIVE_ACK_NEGATIVE_OUTCOME')
     try:
         persisted=readback(job)
     except Exception as exc:
@@ -66,4 +85,6 @@ def apply_verified(job, codex_receipt, apply_once, readback):
             or persisted.get('payload_sha256') != payload_digest
             or persisted.get('effect_verified') is not True):
         raise Hold('NATIVE_EFFECT_NOT_VERIFIED')
+    if _explicit_negative_native_outcome(persisted):
+        raise Hold('NATIVE_EFFECT_NEGATIVE_OUTCOME')
     return {'status':'APPLIED_VERIFIED','task_id':job['task_id'],'work_key':job['work_key'],'native_ack':ack,'payload_sha256':payload_digest}
