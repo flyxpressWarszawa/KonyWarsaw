@@ -44,7 +44,10 @@ def apply_once(directory, job, lease_token, codex_receipt):
     for field in ("task_id", "work_key", "root_id", "request_id", "parent_id"):
         if codex_receipt.get(field) != job[field]:
             raise ApplyHold("receipt_" + field + "_mismatch")
-    if codex_receipt.get("independent_readback") is not True or codex_receipt.get("tools") != 0:
+    if (codex_receipt.get("independent_readback") is not True
+            or type(codex_receipt.get("tools")) is not int
+            or codex_receipt["tools"] != 0):
+        # bool(False) and float(0.0) compare equal to 0; neither proves no tools.
         raise ApplyHold("receipt_unsafe")
     result = codex_receipt.get("text")
     if not isinstance(result, str) or not result.strip() or len(result.encode("utf-8")) > 16384:
