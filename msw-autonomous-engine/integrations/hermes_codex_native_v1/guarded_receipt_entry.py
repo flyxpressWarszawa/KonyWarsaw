@@ -29,7 +29,10 @@ def apply_codex_result(directory, job, lease_token, receipt, *, dispatch_enabled
         raise ApplyHold("invalid_receipt")
     if receipt.get("status") != "VERIFIED" or receipt.get("independent_readback") is not True:
         raise ApplyHold("unverified_codex_result")
-    if receipt.get("tools") != 0:
+    # Equality with 0 also accepts False and 0.0: require integer attestation.
+    # Reject malformed no-tools receipts at this public entrypoint, before
+    # delegating to SQLite or any future native apply backend.
+    if type(receipt.get("tools")) is not int or receipt["tools"] != 0:
         raise ApplyHold("tool_execution_not_approved")
     if receipt.get("task_id") != job["task_id"]:
         raise ApplyHold("receipt_task_mismatch")
