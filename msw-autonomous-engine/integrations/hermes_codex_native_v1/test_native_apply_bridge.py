@@ -28,6 +28,36 @@ class NativeApplyTests(unittest.TestCase):
                 ack=saved['ack'],payload_sha256=saved['digest'],effect_verified=True)
         self.assertEqual(apply_verified(job,receipt,apply_once,readback)['status'],'APPLIED_VERIFIED')
 
+    def test_persisted_ack_readback_requires_exact_json_types(self):
+        job, receipt = fixture()
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        saved = {}
+        def apply_once(j, payload):
+            saved['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
+            saved['ack'] = dict(**{key:j[key] for key in fields},
+                                payload_sha256=saved['digest'],
+                                status='verified', success=True, attempts=1)
+            return saved['ack']
+        def readback(j, corrupted=None):
+            observed_ack = dict(saved['ack'])
+            if corrupted == 'bool_to_int':
+                observed_ack['success'] = 1  # True == 1 in Python
+            elif corrupted == 'int_to_bool':
+                observed_ack['attempts'] = True  # 1 == True in Python
+            return dict(**{key:j[key] for key in fields},
+                        payload_sha256=saved['digest'],
+                        ack=observed_ack, effect_verified=True)
+        # Exact native readback still succeeds.
+        self.assertEqual(apply_verified(job, receipt, apply_once,
+                                      lambda j:readback(j))['status'],
+                         'APPLIED_VERIFIED')
+        # Both mismatches previously passed with regular Python dict equality.
+        for changed in ('bool_to_int', 'int_to_bool'):
+            with self.subTest(changed=changed):
+                with self.assertRaisesRegex(Hold, 'NATIVE_EFFECT_NOT_VERIFIED'):
+                    apply_verified(job, receipt, apply_once,
+                                   lambda j, c=changed:readback(j,c))
+
     def test_fail_closed_before_apply(self):
         job,receipt=fixture()
         def must_not_call(*args):raise AssertionError('unexpected side effect')
