@@ -41,10 +41,14 @@ def preflight() -> dict | None:
         selected = report["selected_modules"]
         if (payload.get("verify_only") is not True
                 or payload.get("entrypoint_started") is not False
-                or payload.get("verification_network_calls") != 0
-                or report.get("version") != 7
-                or report.get("public_modules_verified") != 10
-                or report.get("overlay_modules_verified") != 5
+                or type(payload.get("verification_network_calls")) is not int
+                or payload["verification_network_calls"] != 0
+                or type(report.get("version")) is not int
+                or report["version"] != 7
+                or type(report.get("public_modules_verified")) is not int
+                or report["public_modules_verified"] != 10
+                or type(report.get("overlay_modules_verified")) is not int
+                or report["overlay_modules_verified"] != 5
                 # The tested public HEAD is a release pin, not an advisory label.
                 # A successful overlay count must not start a different public tree.
                 or report.get("public_head_matches_tested") is not True
