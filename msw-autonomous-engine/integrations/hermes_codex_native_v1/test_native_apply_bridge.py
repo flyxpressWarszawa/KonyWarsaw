@@ -226,6 +226,34 @@ class NativeApplyTests(unittest.TestCase):
                 with self.assertRaisesRegex(Hold, 'NATIVE_EFFECT_NEGATIVE_OUTCOME'):
                     apply_verified(job, receipt, apply_once, readback)
 
+
+    def test_transport_ack_and_generic_completion_are_not_native_effect(self):
+        # ACK may genuinely confirm transport; persisted effect cannot reuse
+        # "acknowledged", "completed" or "verified" as native-apply evidence.
+        job, receipt = fixture()
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        saved = {}
+        def apply_once(j, payload):
+            saved['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
+            saved['ack'] = dict(**{key:j[key] for key in fields},
+                                payload_sha256=saved['digest'],
+                                status='acknowledged')
+            return saved['ack']
+        def readback(j, state):
+            return dict(**{key:j[key] for key in fields},
+                        payload_sha256=saved['digest'],
+                        ack=saved['ack'], effect_verified=True, state=state)
+        for state in ('acknowledged', 'completed', 'verified',
+                      'succeeded', 'success', 'reported', 'processing'):
+            with self.subTest(persisted_state=state):
+                with self.assertRaisesRegex(Hold, 'NATIVE_EFFECT_NEGATIVE_OUTCOME'):
+                    apply_verified(job, receipt, apply_once,
+                                   lambda j, state=state: readback(j, state))
+        # An independently observed native effect is different from transport.
+        verified = apply_verified(job, receipt, apply_once,
+                                  lambda j: readback(j, 'native_observed'))
+        self.assertEqual(verified['status'], 'APPLIED_VERIFIED')
+
     def test_explicit_negative_effect_cannot_override_effect_verified(self):
         job, receipt = fixture()
         fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
