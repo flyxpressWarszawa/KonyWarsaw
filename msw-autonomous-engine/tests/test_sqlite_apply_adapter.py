@@ -1,4 +1,4 @@
-"""Offline tests for SQLite native Codex apply adapter."""
+"""Offline tests for Codex SQLite report transport; native Hermes ACK is separate."""
 from contextlib import closing
 import hashlib
 import os
@@ -58,11 +58,17 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                              "executor": "hermes", "conversation_key": "conv-00000001"},
                             self.directory)["lease_token"]
 
-    def test_full_native_ack_readback(self):
+    def test_storage_report_readback_does_not_pretend_native_ack(self):
         result = module.apply_once(self.directory, self.job, self.lease, receipt("ok", self.job))
-        self.assertEqual(result["status"], "APPLIED_VERIFIED")
-        self.assertTrue(result["readback_verified"])
-        self.assertEqual(result["native_ack"]["state"], "acknowledged")
+        self.assertEqual(result["status"], "STORAGE_REPORT_VERIFIED_NATIVE_UNVERIFIED")
+        self.assertTrue(result["storage_readback_verified"])
+        self.assertEqual(result["storage_state"], "reported")
+        self.assertFalse(result["native_hermes_ack_verified"])
+        self.assertFalse(result["native_application_verified"])
+        self.assertNotIn("native_ack", result)
+        state = handle({"schema": SCHEMA, "operation": "status",
+                        "task_id": self.job["task_id"]}, self.directory)
+        self.assertEqual(state["state"], "reported")
 
     def test_wrong_work_key_does_not_write(self):
         changed_job = dict(self.job, work_key="wrong-00000001")
@@ -86,9 +92,11 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
         first = module.apply_once(self.directory, self.job, self.lease, receipt("ok", self.job))
         second = module.apply_once(self.directory, self.job, self.lease, receipt("ok", self.job))
         self.assertEqual(first["result_sha256"], second["result_sha256"])
-        self.assertEqual(second["native_ack"]["state"], "acknowledged")
+        self.assertEqual(second["storage_state"], "reported")
+        self.assertFalse(second["native_hermes_ack_verified"])
+        self.assertNotIn("native_ack", second)
 
-    def test_uncertain_committed_report_is_read_back_then_acked(self):
+    def test_uncertain_committed_report_is_read_back_without_reack(self):
         answer = "ok after uncertain report"
         digest = hashlib.sha256(answer.encode()).hexdigest()
         handle({"schema": SCHEMA, "operation": "report", "task_id": self.job["task_id"],
@@ -106,8 +114,9 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
         with patch("msw_engine.hermes_chat_bridge.handle", side_effect=reject_second_report):
             applied = module.apply_once(self.directory, self.job, self.lease,
                                         receipt(answer, self.job))
-        self.assertEqual(applied["native_ack"]["state"], "acknowledged")
-        self.assertTrue(applied["readback_verified"])
+        self.assertEqual(applied["storage_state"], "reported")
+        self.assertTrue(applied["storage_readback_verified"])
+        self.assertFalse(applied["native_hermes_ack_verified"])
         self.assertEqual(applied["result_sha256"], digest)
 
     def test_uncertain_conflicting_report_stays_unacknowledged(self):
@@ -228,23 +237,24 @@ class BackendIsolationTests(unittest.TestCase):
                     self.apply()
                 connection.assert_not_called()
 
-    def test_explicit_sqlite_keeps_real_report_ack_and_idempotent_readback(self):
+    def test_explicit_sqlite_keeps_real_report_without_native_ack(self):
         self.seed_existing_lease()
         with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}):
             first, second = self.apply(), self.apply()
-        self.assertEqual(first["status"], "APPLIED_VERIFIED")
-        self.assertTrue(first["readback_verified"])
+        self.assertEqual(first["status"], "STORAGE_REPORT_VERIFIED_NATIVE_UNVERIFIED")
+        self.assertTrue(first["storage_readback_verified"])
+        self.assertFalse(first["native_hermes_ack_verified"])
         self.assertEqual(first["result_sha256"], second["result_sha256"])
         with closing(bridge._connection(self.root)) as db:
             rows = db.execute("SELECT state,result,result_sha FROM jobs WHERE work_key=?", (self.job["work_key"],)).fetchall()
         self.assertEqual(len(rows), 1)
-        self.assertEqual(tuple(rows[0]), ("acknowledged", self.proof["text"], self.proof["response_sha256"]))
+        self.assertEqual(tuple(rows[0]), ("reported", self.proof["text"], self.proof["response_sha256"]))
 
     def test_unset_backend_preserves_existing_sqlite_default(self):
         self.seed_existing_lease()
         with mock.patch.dict(os.environ):
             os.environ.pop("MSW_HERMES_CHAT_BACKEND", None)
-            self.assertEqual(self.apply()["status"], "APPLIED_VERIFIED")
+            self.assertEqual(self.apply()["status"], "STORAGE_REPORT_VERIFIED_NATIVE_UNVERIFIED")
 
 
 if __name__ == "__main__":
