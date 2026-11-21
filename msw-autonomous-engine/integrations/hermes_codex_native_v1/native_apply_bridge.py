@@ -32,6 +32,17 @@ def _explicit_negative_native_outcome(record):
                 return True
     return False
 
+def _same_canonical_json(left, right):
+    """Compare readback to original ACK without Python bool/int loose equality.
+
+    Native provenance is checked by the authorised receiver; this is only a
+    byte/type integrity guard. Unserializable evidence fails closed.
+    """
+    try:
+        return canonical(left) == canonical(right)
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError):
+        return False
+
 def apply_verified(job, codex_receipt, apply_once, readback):
     """Require native Hermes ACK and independent persisted-effect readback.
 
@@ -89,7 +100,7 @@ def apply_verified(job, codex_receipt, apply_once, readback):
     # Plain transport/storage readback without native identity is not enough.
     if (not isinstance(persisted,dict)
             or any(persisted.get(field) != job[field] for field in required)
-            or persisted.get('ack') != ack
+            or not _same_canonical_json(persisted.get('ack'), ack)
             or persisted.get('payload_sha256') != payload_digest
             or persisted.get('effect_verified') is not True):
         raise Hold('NATIVE_EFFECT_NOT_VERIFIED')
