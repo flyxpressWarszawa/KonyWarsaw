@@ -58,6 +58,23 @@ class NativeApplyTests(unittest.TestCase):
                         apply_verified(job,mutated,must_not_call,must_not_call)
         self.assertEqual(calls,[])
 
+    def test_tools_zero_must_be_exact_integer_before_native_effect(self):
+        job,receipt=fixture()
+        calls=[]
+        def must_not_call(*args):
+            calls.append(1)
+            raise AssertionError('invalid tools type must not reach native effect')
+        # In Python False == 0 and 0.0 == 0, but they are not a typed
+        # no-tools receipt. Rehash to rule out simple integrity rejection.
+        for tools in (False, 0.0, '0', None, [], {}):
+            mutated=dict(receipt,tools=tools)
+            mutated.pop('receipt_sha256')
+            mutated['receipt_sha256']=hashlib.sha256(canonical(mutated)).hexdigest()
+            with self.subTest(tools=repr(tools)):
+                with self.assertRaisesRegex(Hold,'CODEX_RECEIPT_UNSAFE'):
+                    apply_verified(job,mutated,must_not_call,must_not_call)
+        self.assertEqual(calls,[])
+
     def test_ack_mismatch(self):
         job,receipt=fixture()
         with self.assertRaisesRegex(Hold,'NATIVE_ACK_MISMATCH'):
