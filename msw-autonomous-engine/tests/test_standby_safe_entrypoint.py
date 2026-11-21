@@ -67,6 +67,28 @@ class StandbyEntrypointTests(TestCase):
                 self.assertEqual(entry.main(), 78)
             execve.assert_not_called()
 
+    def test_spoofed_module_origins_fail_closed_before_exec(self):
+        # Exact module names and correct counts are not enough if paths can be
+        # substituted with another admitted module or a traversal suffix.
+        for key, forged in (
+            ("msw_engine.tasks",
+             "/opt/render/project/src/msw-autonomous-engine/msw_engine/"
+             "wp_registry_staging.py"),
+            ("msw_engine.tasks",
+             "/opt/render/project/src/msw-autonomous-engine/msw_engine/"
+             "../outside.py"),
+            ("msw_engine.github_chat_queue",
+             str(entry.OVERLAY.parent / "overlay" / "msw_engine"
+                 / "github_queue_staging.py")),
+        ):
+            with self.subTest(module=key, forged=forged):
+                result = verified_result()
+                payload = json.loads(result.stdout)
+                payload["staging_overlay_verification"]["selected_modules"][key]["origin"] = forged
+                result.stdout = json.dumps(payload)
+                with mock.patch.object(entry.subprocess, "run", return_value=result):
+                    self.assertIsNone(entry.preflight())
+
     def test_missing_or_changed_overlay_cannot_start(self):
         with TemporaryDirectory() as root, mock.patch.object(entry, "OVERLAY", Path(root) / "overlay_launcher.py"), \
                 mock.patch.object(entry.os, "execve") as execve:
