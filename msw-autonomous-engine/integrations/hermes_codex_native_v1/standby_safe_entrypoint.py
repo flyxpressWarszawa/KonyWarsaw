@@ -53,12 +53,17 @@ def preflight() -> dict | None:
                     if item.get("source") == "overlay"} != OVERLAY_MODULES
                 or any(item.get("source") not in ("public", "overlay")
                        for item in selected.values())
+                # Prefix checking is not sufficient: a legitimate module name
+                # paired with another module's path (or a traversal suffix)
+                # must not be admitted as the pinned launcher source.
                 or any(not isinstance(item.get("origin"), str)
-                       or not item["origin"].startswith(
-                           str(OVERLAY.parent / "overlay" / "msw_engine") + "/"
+                       or item["origin"] != (
+                           str(OVERLAY.parent / "overlay" / "msw_engine"
+                               / (name.rsplit(".", 1)[-1] + ".py"))
                            if item["source"] == "overlay"
-                           else "/opt/render/project/src/msw-autonomous-engine/msw_engine/")
-                       for item in selected.values())):
+                           else "/opt/render/project/src/msw-autonomous-engine/msw_engine/"
+                                + name.rsplit(".", 1)[-1] + ".py")
+                       for name, item in selected.items())):
             return None
         return report
     except (OSError, ValueError, KeyError, TypeError, subprocess.TimeoutExpired):
