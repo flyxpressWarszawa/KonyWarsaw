@@ -50,6 +50,23 @@ class StandbyEntrypointTests(TestCase):
             self.assertEqual(execve.call_args.args[1][-1], str(entry.OVERLAY))
             self.assertEqual(execve.call_args.args[2]["MSW_CODEX_PRODUCTION_DISPATCH"], "0")
 
+    def test_public_module_substitution_fails_closed_before_exec(self):
+        with TemporaryDirectory() as root, mock.patch.object(entry, "OVERLAY", Path(root) / "overlay_launcher.py"), \
+                mock.patch.object(entry.os, "execve") as execve:
+            entry.OVERLAY.write_text("# existing launcher")
+            result = verified_result()
+            payload = json.loads(result.stdout)
+            selected = payload["staging_overlay_verification"]["selected_modules"]
+            selected["msw_engine.unrecognized"] = selected.pop("msw_engine.tasks")
+            for item in selected.values():
+                if item["source"] == "overlay":
+                    item["origin"] = item["origin"].replace(
+                        "/tmp/msw-aux-seo/hermes-chat-staging/overlay-v7-repinned-a4dea", root)
+            result.stdout = json.dumps(payload)
+            with mock.patch.object(entry.subprocess, "run", return_value=result):
+                self.assertEqual(entry.main(), 78)
+            execve.assert_not_called()
+
     def test_missing_or_changed_overlay_cannot_start(self):
         with TemporaryDirectory() as root, mock.patch.object(entry, "OVERLAY", Path(root) / "overlay_launcher.py"), \
                 mock.patch.object(entry.os, "execve") as execve:

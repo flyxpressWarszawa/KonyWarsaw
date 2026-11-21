@@ -18,6 +18,13 @@ OVERLAY_MODULES = {
     "msw_engine.github_queue_hermes_stage", "msw_engine.github_queue_staging",
     "msw_engine.wp_registry_cycle",
 }
+# The six public entries are part of the exact v7 eleven-module admission set.
+# A matching count must not admit a substituted or missing public module.
+PUBLIC_MODULES = {
+    "msw_engine.__init__", "msw_engine.github_python_hub_once",
+    "msw_engine.python_receipt_attestor", "msw_engine.python_task_pilot",
+    "msw_engine.tasks", "msw_engine.wp_registry_staging",
+}
 
 
 def preflight() -> dict | None:
@@ -39,7 +46,8 @@ def preflight() -> dict | None:
                 or report.get("public_modules_verified") != 10
                 or report.get("overlay_modules_verified") != 5
                 or report.get("environment_modified") is not False
-                or not isinstance(selected, dict) or len(selected) != 11
+                or not isinstance(selected, dict)
+                or set(selected) != OVERLAY_MODULES | PUBLIC_MODULES
                 or not all(isinstance(item, dict) for item in selected.values())
                 or {name for name, item in selected.items()
                     if item.get("source") == "overlay"} != OVERLAY_MODULES
