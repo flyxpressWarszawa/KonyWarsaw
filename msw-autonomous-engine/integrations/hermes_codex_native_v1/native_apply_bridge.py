@@ -46,12 +46,24 @@ def apply_verified(job, codex_receipt, apply_once, readback):
         ack=apply_once(job,payload)
     except Exception as exc:
         raise Hold('NATIVE_APPLY_UNKNOWN_OUTCOME') from exc
-    if not isinstance(ack,dict) or ack.get('task_id')!=job['task_id'] or ack.get('work_key')!=job['work_key'] or ack.get('payload_sha256')!=payload_digest:
+    # A matching task/work key and payload hash are insufficient: a native
+    # ACK must also bind the original root, request, and parent, not merely
+    # describe some persisted bytes. The authenticated receiver is responsible
+    # for issuing this complete record; this check is not a signature verifier.
+    if (not isinstance(ack,dict)
+            or any(ack.get(field) != job[field] for field in required)
+            or ack.get('payload_sha256') != payload_digest):
         raise Hold('NATIVE_ACK_MISMATCH')
     try:
         persisted=readback(job)
     except Exception as exc:
         raise Hold('NATIVE_READBACK_UNKNOWN') from exc
-    if not isinstance(persisted,dict) or persisted.get('ack')!=ack or persisted.get('payload_sha256')!=payload_digest or persisted.get('effect_verified') is not True:
+    # Require independent effect readback to bind the same complete identity.
+    # Plain transport/storage readback without native identity is not enough.
+    if (not isinstance(persisted,dict)
+            or any(persisted.get(field) != job[field] for field in required)
+            or persisted.get('ack') != ack
+            or persisted.get('payload_sha256') != payload_digest
+            or persisted.get('effect_verified') is not True):
         raise Hold('NATIVE_EFFECT_NOT_VERIFIED')
     return {'status':'APPLIED_VERIFIED','task_id':job['task_id'],'work_key':job['work_key'],'native_ack':ack,'payload_sha256':payload_digest}
