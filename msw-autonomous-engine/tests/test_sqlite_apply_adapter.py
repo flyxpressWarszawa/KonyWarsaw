@@ -132,6 +132,27 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                         "task_id": self.job["task_id"]}, self.directory)
         self.assertEqual(state["result_sha256"], hashlib.sha256(b"ok").hexdigest())
 
+    def test_noninteger_tools_rejected_before_storage(self):
+        # Direct adapter imports must enforce the same exact integer-zero guard
+        # as native_apply_bridge; a recomputed receipt digest is not sufficient.
+        for unsafe in (False, 0.0, -0.0, True, "0", None):
+            with self.subTest(tools=repr(unsafe)):
+                forged = receipt("ok", self.job)
+                forged["tools"] = unsafe
+                forged["receipt_sha256"] = hashlib.sha256(
+                    module.canonical({k: v for k, v in forged.items()
+                                      if k != "receipt_sha256"}).encode()
+                ).hexdigest()
+                with patch.object(module, "_connection",
+                                  side_effect=AssertionError("SQLite opened")) as connection:
+                    with self.assertRaisesRegex(module.ApplyHold, "receipt_unsafe"):
+                        module.apply_once(self.directory, self.job, self.lease, forged)
+                    connection.assert_not_called()
+        status = handle({"schema": SCHEMA, "operation": "status",
+                         "task_id": self.job["task_id"]}, self.directory)
+        self.assertEqual(status["state"], "leased")
+        self.assertIsNone(status.get("result_sha256"))
+
     def test_invalid_digest_does_not_write(self):
         bad = receipt("ok", self.job)
         bad["response_sha256"] = "0" * 64
