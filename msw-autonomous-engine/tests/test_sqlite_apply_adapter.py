@@ -49,11 +49,16 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                 "result_sha256": parent_digest, "outcome": "completed"}, self.directory)
         handle({"schema": SCHEMA, "operation": "ack", "task_id": self.job["root_id"],
                 "result_sha256": parent_digest}, self.directory)
-        handle({"schema": SCHEMA, "operation": "submit",
+        submitted = handle({"schema": SCHEMA, "operation": "submit",
                 "task_id": self.job["task_id"], "conversation_key": "conv-00000001",
                 "kind": "plan", "goal": "Offline test", "executor": "hermes",
                 "work_key": self.job["work_key"], "parent_id": self.job["parent_id"]},
                self.directory)
+        # Capture the actual persisted submit contract, not caller-invented
+        # equivalents of request SHA / executor / mailbox.
+        self.job.update(conversation_key=submitted["conversation_key"],
+                        executor=submitted["executor"],
+                        request_sha256=submitted["request_sha256"])
         self.lease = handle({"schema": SCHEMA, "operation": "claim",
                              "executor": "hermes", "conversation_key": "conv-00000001"},
                             self.directory)["lease_token"]
@@ -69,6 +74,31 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
         state = handle({"schema": SCHEMA, "operation": "status",
                         "task_id": self.job["task_id"]}, self.directory)
         self.assertEqual(state["state"], "reported")
+
+
+    def test_original_sqlite_submit_origin_must_match_before_report(self):
+        # Exactly the original persisted submit request, mailbox and executor
+        # may be reported. A forged but internally matching Codex receipt
+        # cannot substitute a second caller-supplied origin.
+        for key, bad in (("request_sha256", "0" * 64),
+                         ("conversation_key", "other-conv-0001"),
+                         ("executor", "chatgpt_scheduled")):
+            for route in ("altered", "missing"):
+                with self.subTest(key=key, route=route):
+                    changed = dict(self.job)
+                    if route == "missing":
+                        changed.pop(key)
+                        reason = "origin_binding_required"
+                    else:
+                        changed[key] = bad
+                        reason = "persisted_origin_mismatch"
+                    with self.assertRaisesRegex(module.ApplyHold, reason):
+                        module.apply_once(self.directory, changed, self.lease,
+                                          receipt("ok", changed))
+                    state = handle({"schema": SCHEMA, "operation": "status",
+                                    "task_id": self.job["task_id"]}, self.directory)
+                    self.assertEqual(state["state"], "leased")
+                    self.assertIsNone(state["result_sha256"])
 
     def test_wrong_work_key_does_not_write(self):
         changed_job = dict(self.job, work_key="wrong-00000001")
