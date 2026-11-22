@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 import re
+import time
 from contextlib import closing
 
 from msw_engine.hermes_chat_bridge import _connection, _sha, _id
@@ -88,7 +89,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # validates the lease, and enforces idempotency.
     with closing(_connection(directory)) as db:
         row = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,"
-                         "state,lease_sha,result,result_sha,outcome "
+                         "state,lease_sha,lease_until,result,result_sha,outcome "
                          "FROM jobs WHERE id=?",
                          (job["task_id"],)).fetchone()
         if (row is None or row["work_key"] != job["work_key"]
@@ -108,6 +109,15 @@ def apply_once(directory, job, lease_token, codex_receipt):
                 raise ApplyHold("conflicting_recorded_result")
             report_already_recorded = True
         elif row["state"] == "leased":
+            # The existing report handler enforces lease expiry inside its
+            # transaction. Detect an already-expired reservation here as well
+            # so the adapter never attempts a doomed report or turns that
+            # known denial into an ambiguous UNKNOWN outcome.
+            # A previously committed report is reconciled above regardless
+            # of the old lease deadline; never replay it.
+            if (type(row["lease_until"]) is not int
+                    or row["lease_until"] <= int(time.time())):
+                raise ApplyHold("lease_expired")
             report_already_recorded = False
         else:
             raise ApplyHold("work_not_leased")
