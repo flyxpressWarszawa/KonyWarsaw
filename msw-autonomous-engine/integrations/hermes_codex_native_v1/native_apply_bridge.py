@@ -6,6 +6,22 @@ from asyncio import CancelledError
 class Hold(RuntimeError): pass
 
 def canonical(obj):
+    # JSON object keys are strings, and arrays are lists. Python's encoder
+    # otherwise silently turns {1: 'x'} into {'1': 'x'} and tuples into
+    # arrays. The digest would then describe different native context than
+    # the originally admitted in-memory object. Refuse before native apply.
+    def require_json_shape(value):
+        if type(value) is dict:
+            if any(type(key) is not str for key in value):
+                raise TypeError('non_string_json_object_key')
+            for item in value.values():
+                require_json_shape(item)
+        elif type(value) is list:
+            for item in value:
+                require_json_shape(item)
+        elif value is not None and type(value) not in (str, int, float, bool):
+            raise TypeError('non_json_container_type')
+    require_json_shape(obj)
     return json.dumps(obj,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()
 
 def _explicit_negative_native_outcome(record, *, persisted_effect=False):
