@@ -25,7 +25,7 @@ class NativeApplyTests(unittest.TestCase):
         def readback(job):
             return dict(**{field:job[field] for field in
                 ('root_id','task_id','request_id','work_key','parent_id')},
-                ack=saved['ack'],payload_sha256=saved['digest'],effect_verified=True)
+                ack=saved['ack'],payload_sha256=saved['digest'],effect_verified=True, state='applied')
         self.assertEqual(apply_verified(job,receipt,apply_once,readback)['status'],'APPLIED_VERIFIED')
 
     def test_persisted_ack_readback_requires_exact_json_types(self):
@@ -46,7 +46,7 @@ class NativeApplyTests(unittest.TestCase):
                 observed_ack['attempts'] = True  # 1 == True in Python
             return dict(**{key:j[key] for key in fields},
                         payload_sha256=saved['digest'],
-                        ack=observed_ack, effect_verified=True)
+                        ack=observed_ack, effect_verified=True, state='native_observed')
         # Exact native readback still succeeds.
         self.assertEqual(apply_verified(job, receipt, apply_once,
                                       lambda j:readback(j))['status'],
@@ -169,6 +169,44 @@ class NativeApplyTests(unittest.TestCase):
                 with self.assertRaisesRegex(Hold, 'CODEX_RECEIPT_NONCANONICAL'):
                     apply_verified(job, malformed, must_not_apply, must_not_apply)
         self.assertEqual(calls, [])
+
+    def test_missing_native_effect_state_cannot_promote_storage_receipt(self):
+        job, receipt = fixture()
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        saved = {}
+        def apply_once(j, payload):
+            saved['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
+            saved['ack'] = dict(**{key:j[key] for key in fields},
+                                payload_sha256=saved['digest'], status='acknowledged')
+            return saved['ack']
+        for incomplete in (
+            {},
+            {'success': True},
+            {'effect_verified': True},
+        ):
+            def readback(j, incomplete=incomplete):
+                return dict(**{key:j[key] for key in fields},
+                            ack=saved['ack'], payload_sha256=saved['digest'],
+                            **incomplete)
+            with self.subTest(incomplete=incomplete):
+                with self.assertRaisesRegex(Hold, 'NATIVE_EFFECT_NOT_VERIFIED|NATIVE_EFFECT_NEGATIVE_OUTCOME'):
+                    apply_verified(job, receipt, apply_once, readback)
+
+    def test_explicit_native_effect_state_still_requires_effect_flag(self):
+        job, receipt = fixture()
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        saved = {}
+        def apply_once(j, payload):
+            saved['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
+            saved['ack'] = dict(**{key:j[key] for key in fields},
+                                payload_sha256=saved['digest'], status='acknowledged')
+            return saved['ack']
+        def readback(j):
+            return dict(**{key:j[key] for key in fields},
+                        ack=saved['ack'], payload_sha256=saved['digest'],
+                        state='applied', effect_verified=False)
+        with self.assertRaisesRegex(Hold, 'NATIVE_EFFECT_NOT_VERIFIED'):
+            apply_verified(job, receipt, apply_once, readback)
 
     def test_ack_mismatch(self):
         job,receipt=fixture()
