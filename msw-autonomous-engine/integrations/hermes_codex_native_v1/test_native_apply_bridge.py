@@ -154,6 +154,22 @@ class NativeApplyTests(unittest.TestCase):
                     with self.assertRaisesRegex(Hold,'NATIVE_EFFECT_NOT_VERIFIED'):
                         apply_verified(job,receipt,matching_apply,mismatched_readback)
 
+    def test_noncanonical_codex_receipt_holds_before_native_effect(self):
+        job, receipt = fixture()
+        calls = []
+        def must_not_apply(*args):
+            calls.append('unexpected_native_side_effect')
+            raise AssertionError('invalid receipt passed admission')
+        cases = (
+            dict(receipt, text='\ud800'),  # Lone UTF-16 surrogate, not UTF-8
+            dict(receipt, extra={1, 2}),  # Not JSON serializable
+        )
+        for malformed in cases:
+            with self.subTest(kind=type(malformed.get('extra')).__name__ if 'extra' in malformed else 'surrogate'):
+                with self.assertRaisesRegex(Hold, 'CODEX_RECEIPT_NONCANONICAL'):
+                    apply_verified(job, malformed, must_not_apply, must_not_apply)
+        self.assertEqual(calls, [])
+
     def test_ack_mismatch(self):
         job,receipt=fixture()
         with self.assertRaisesRegex(Hold,'NATIVE_ACK_MISMATCH'):
