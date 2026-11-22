@@ -11,6 +11,7 @@ import os
 import re
 import time
 from contextlib import closing
+from pathlib import Path
 
 from msw_engine.hermes_chat_bridge import _connection, _sha, _id
 
@@ -101,6 +102,15 @@ def apply_once(directory, job, lease_token, codex_receipt):
         raise ApplyHold("receipt_digest_mismatch")
     if digest != codex_receipt.get("response_sha256"):
         raise ApplyHold("result_digest_mismatch")
+    # _connection() creates/migrates storage as a side effect. This adapter
+    # reports an EXISTING leased task and must not bootstrap a fresh database
+    # when a caller points at the wrong directory. This is a preflight only:
+    # the subsequent transactional handler remains the authority for lease/CAS.
+    storage_root = Path(directory) / "hermes-chat-loop"
+    storage_file = storage_root / "exchange.sqlite3"
+    if (storage_root.is_symlink() or storage_file.is_symlink()
+            or not storage_file.is_file()):
+        raise ApplyHold("existing_sqlite_storage_required")
     from msw_engine.hermes_chat_bridge import SCHEMA, handle
     # The existing report operation owns the SQLite BEGIN IMMEDIATE transaction,
     # validates the lease, and enforces idempotency.
