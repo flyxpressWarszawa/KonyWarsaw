@@ -1,6 +1,7 @@
 """Offline tests for Codex SQLite report transport; native Hermes ACK is separate."""
 from contextlib import closing
 import hashlib
+import json
 import os
 import importlib.util
 from pathlib import Path
@@ -211,6 +212,33 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                          "task_id": self.job["task_id"]}, self.directory)
         self.assertEqual(status["state"], "leased")
         self.assertIsNone(status.get("result_sha256"))
+
+    def test_coercible_receipt_shapes_hold_before_sqlite(self):
+        # json.dumps used to silently normalize int keys and tuples; an
+        # attacker could recompute matching SHA over the changed wire form.
+        # Reject the original evidence instead of treating that SHA as proof.
+        for unsafe in ({"nested": {1: "item"}},
+                       {"nested": (1, 2)},
+                       {"nested": [{"value": ("a", "b")}]},
+                       {"nested": {False: "item"}}):
+            with self.subTest(unsafe=repr(unsafe)):
+                forged = receipt("ok", self.job)
+                forged["extra"] = unsafe
+                # Legacy Python JSON encoding accepts/coerces these inputs.
+                normalized = json.dumps(
+                    {k: v for k, v in forged.items() if k != "receipt_sha256"},
+                    sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+                    allow_nan=False)
+                forged["receipt_sha256"] = hashlib.sha256(normalized.encode()).hexdigest()
+                with patch.object(module, "_connection",
+                                  side_effect=AssertionError("SQLite accessed")) as connection:
+                    with self.assertRaisesRegex(module.ApplyHold, "receipt_noncanonical"):
+                        module.apply_once(self.directory, self.job, self.lease, forged)
+                    connection.assert_not_called()
+        state = handle({"schema": SCHEMA, "operation": "status",
+                        "task_id": self.job["task_id"]}, self.directory)
+        self.assertEqual(state["state"], "leased")
+        self.assertIsNone(state["result_sha256"])
 
     def test_invalid_digest_does_not_write(self):
         bad = receipt("ok", self.job)
