@@ -92,11 +92,17 @@ def apply_once(directory, job, lease_token, codex_receipt):
         else:
             raise ApplyHold("work_not_leased")
     if not report_already_recorded:
-        report = handle(dict(schema=SCHEMA, operation="report", task_id=job["task_id"],
-                             lease_token=lease_token, result=result,
-                             result_sha256=digest, outcome="completed"), directory)
+        # The remote reply can be lost AFTER the transaction commits. A failure
+        # here is UNKNOWN, never a reason to send another report or rerun Codex.
+        # A later independent call reconciles the original immutable DB row.
+        try:
+            report = handle(dict(schema=SCHEMA, operation="report", task_id=job["task_id"],
+                                 lease_token=lease_token, result=result,
+                                 result_sha256=digest, outcome="completed"), directory)
+        except Exception as exc:
+            raise ApplyHold("report_unknown_outcome") from exc
         if report.get("state") not in ("reported", "acknowledged") or report.get("result_sha256") != digest:
-            raise ApplyHold("report_not_verified")
+            raise ApplyHold("report_unknown_outcome")
     # This SQLite chat transport's generic "ack" operation only changes a
     # local storage row. It does NOT prove that the actual Hermes process
     # received, validated, or applied the result. Never issue that ACK for
