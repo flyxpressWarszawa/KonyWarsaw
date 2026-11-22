@@ -1,6 +1,7 @@
 """Fail-closed Hermes native apply bridge. No Codex dispatch or queue mutation built in."""
 import hashlib
 import json
+from asyncio import CancelledError
 
 class Hold(RuntimeError): pass
 
@@ -122,7 +123,7 @@ def apply_verified(job, codex_receipt, apply_once, readback):
     apply_job=json.loads(original_job_bytes)
     try:
         ack=apply_once(apply_job,payload)
-    except Exception as exc:
+    except (Exception, CancelledError) as exc:
         raise Hold('NATIVE_APPLY_UNKNOWN_OUTCOME') from exc
     try:
         if canonical(apply_job) != original_job_bytes or canonical(job) != original_job_bytes:
@@ -158,7 +159,7 @@ def apply_verified(job, codex_receipt, apply_once, readback):
     readback_job=json.loads(original_job_bytes)
     try:
         persisted=readback(readback_job)
-    except Exception as exc:
+    except (Exception, CancelledError) as exc:
         raise Hold('NATIVE_READBACK_UNKNOWN') from exc
     # Readback also receives a detached copy. A callback must not rebind or
     # rewrite the admitted grant/lease context after native application.
