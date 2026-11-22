@@ -209,7 +209,9 @@ class BackendIsolationTests(unittest.TestCase):
         self.root = Path(self.tmp.name) / "engine"
         self.job = dict(root_id="root-test-0001", task_id="task-test-0001",
                         request_id="request-test-0001", work_key="work-test-0001",
-                        parent_id="parent-test-0001")
+                        parent_id="parent-test-0001",
+                        conversation_key="conversation-test-0001", executor="hermes",
+                        request_sha256=bridge._sha("local test only"))
         self.token = "test-only-original-lease-token"
         self.proof = dict(status="VERIFIED", independent_readback=True, tools=0,
                           task_id=self.job["task_id"], work_key=self.job["work_key"],
