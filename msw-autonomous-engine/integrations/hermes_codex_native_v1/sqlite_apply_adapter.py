@@ -5,6 +5,7 @@ token. The adapter never creates a task, changes executor or reclaims expired wo
 """
 from __future__ import annotations
 
+from asyncio import CancelledError
 import hashlib
 import json
 import os
@@ -156,7 +157,9 @@ def apply_once(directory, job, lease_token, codex_receipt):
             report = handle(dict(schema=SCHEMA, operation="report", task_id=job["task_id"],
                                  lease_token=lease_token, result=result,
                                  result_sha256=digest, outcome="completed"), directory)
-        except Exception as exc:
+        except (Exception, CancelledError) as exc:
+            # Cancellation can arrive after SQLite has committed the report.
+            # Preserve UNKNOWN; do not permit an automatic report/Codex replay.
             raise ApplyHold("report_unknown_outcome") from exc
         # A transport may return None or a non-object AFTER the storage write
         # committed. Treat that as UNKNOWN, not an AttributeError that invites
