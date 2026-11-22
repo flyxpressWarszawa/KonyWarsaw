@@ -111,6 +111,14 @@ def apply_verified(job, codex_receipt, apply_once, readback):
         raise Hold('CODEX_RECEIPT_DIGEST_MISMATCH')
     if response_digest!=codex_receipt.get('response_sha256'):
         raise Hold('CODEX_TEXT_DIGEST_MISMATCH')
+    # Preserve the complete authenticated Codex receipt after admission.
+    # Callbacks may capture the caller's receipt by closure and rewrite it
+    # after digest verification. Even when the native payload is unchanged,
+    # that would erase the evidence identity behind a reported success.
+    try:
+        admitted_receipt_bytes=canonical(codex_receipt)
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('CODEX_RECEIPT_NONCANONICAL') from exc
     # A valid digest proves only receipt integrity, not ownership of this job.
     # Check the COMPLETE identity before invoking any potentially costly or
     # irreversible native apply; an old/cross-root receipt must fail closed.
@@ -141,6 +149,11 @@ def apply_verified(job, codex_receipt, apply_once, readback):
         ack=apply_once(apply_job,payload)
     except (Exception, CancelledError) as exc:
         raise Hold('NATIVE_APPLY_UNKNOWN_OUTCOME') from exc
+    try:
+        if canonical(codex_receipt) != admitted_receipt_bytes:
+            raise Hold('CODEX_RECEIPT_MUTATED_DURING_NATIVE_APPLY')
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('CODEX_RECEIPT_MUTATED_DURING_NATIVE_APPLY') from exc
     try:
         if canonical(apply_job) != original_job_bytes or canonical(job) != original_job_bytes:
             raise Hold('NATIVE_APPLY_JOB_CONTEXT_MUTATED')
@@ -177,6 +190,13 @@ def apply_verified(job, codex_receipt, apply_once, readback):
         persisted=readback(readback_job)
     except (Exception, CancelledError) as exc:
         raise Hold('NATIVE_READBACK_UNKNOWN') from exc
+    # A readback callback may also mutate the captured Codex receipt; never
+    # promote a changed source receipt to APPLIED_VERIFIED after native effect.
+    try:
+        if canonical(codex_receipt) != admitted_receipt_bytes:
+            raise Hold('CODEX_RECEIPT_MUTATED_DURING_NATIVE_READBACK')
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('CODEX_RECEIPT_MUTATED_DURING_NATIVE_READBACK') from exc
     # Readback also receives a detached copy. A callback must not rebind or
     # rewrite the admitted grant/lease context after native application.
     try:
