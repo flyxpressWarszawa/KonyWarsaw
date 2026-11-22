@@ -236,6 +236,34 @@ class NativeApplyTests(unittest.TestCase):
                     apply_verified(job, receipt, apply_once, readback)
                 self.assertEqual({key:job[key] for key in fields}, original)
 
+    def test_callback_payload_mutation_cannot_look_like_native_success(self):
+        # A callback may return matching *original* digests after it has
+        # changed the payload it was handed. Without a post-call byte check
+        # the bridge could report APPLIED_VERIFIED for a different effect.
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        for change in ('identity', 'result', 'noncanonical'):
+            job, receipt = fixture()
+            calls = []
+            def mutating_apply(callback_job, payload):
+                calls.append('apply')
+                original_digest = hashlib.sha256(canonical(payload)).hexdigest()
+                if change == 'identity':
+                    payload['identity']['root_id'] = 'foreign-root'
+                elif change == 'result':
+                    payload['result'] = 'different native instruction'
+                else:
+                    payload['identity']['extra'] = {1, 2}
+                return dict(**{k:callback_job[k] for k in fields},
+                            payload_sha256=original_digest, status='verified')
+            def readback_never(callback_job):
+                calls.append('readback')
+                raise AssertionError('mutated apply input was accepted')
+            with self.subTest(change=change):
+                with self.assertRaisesRegex(Hold, 'NATIVE_APPLY_INPUT_MUTATED'):
+                    apply_verified(job, receipt, mutating_apply, readback_never)
+                self.assertEqual(calls, ['apply'])
+                self.assertEqual(job['root_id'], 'r')
+
     def test_ack_mismatch(self):
         job,receipt=fixture()
         with self.assertRaisesRegex(Hold,'NATIVE_ACK_MISMATCH'):
