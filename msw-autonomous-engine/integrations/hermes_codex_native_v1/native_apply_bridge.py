@@ -101,7 +101,7 @@ def apply_verified(job, codex_receipt, apply_once, readback):
     # making a foreign ACK/readback appear to match the changed identity.
     identity={k:job[k] for k in required}
     admitted_job=dict(job)
-    payload={'identity':identity,'codex_receipt_sha256':codex_receipt['receipt_sha256'],'result':codex_receipt['text']}
+    payload={'identity':dict(identity),'codex_receipt_sha256':codex_receipt['receipt_sha256'],'result':codex_receipt['text']}
     payload_digest=hashlib.sha256(canonical(payload)).hexdigest()
     try:
         ack=apply_once(dict(admitted_job),payload)
