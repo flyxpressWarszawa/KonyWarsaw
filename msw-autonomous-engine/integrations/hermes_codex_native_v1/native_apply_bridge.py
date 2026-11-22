@@ -31,6 +31,11 @@ def _explicit_negative_native_outcome(record, *, persisted_effect=False):
         # exposes a state, only an explicit native-apply state can qualify.
         # The receiver must still authenticate provenance independently.
         terminal = {'applied', 'applied_verified', 'native_observed'}
+    # The persisted record must say that the NATIVE effect was applied.
+    # An absent state plus effect_verified=True would let a storage-only
+    # readback masquerade as native completion. Fail closed, do not retry.
+    if persisted_effect and not any(key in record for key in ('status', 'state', 'outcome')):
+        return True
     for key in ('status', 'state', 'outcome'):
         if key in record:
             value = record[key]
