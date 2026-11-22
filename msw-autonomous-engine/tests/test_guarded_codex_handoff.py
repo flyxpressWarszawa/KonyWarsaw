@@ -41,10 +41,13 @@ class GuardedHandoff(unittest.TestCase):
                     result_sha256=parent_digest, outcome="completed"), self.root)
         handle(dict(schema=SCHEMA, operation="ack", task_id=self.job["root_id"],
                     result_sha256=parent_digest), self.root)
-        handle(dict(schema=SCHEMA, operation="submit", task_id=self.job["task_id"],
+        submitted = handle(dict(schema=SCHEMA, operation="submit", task_id=self.job["task_id"],
                     conversation_key="conv-00000001", kind="plan", goal="Test",
                     executor="hermes", work_key=self.job["work_key"],
                     parent_id=self.job["parent_id"]), self.root)
+        self.job.update(conversation_key=submitted["conversation_key"],
+                        executor=submitted["executor"],
+                        request_sha256=submitted["request_sha256"])
         self.lease = handle(dict(schema=SCHEMA, operation="claim", executor="hermes",
                                  conversation_key="conv-00000001"), self.root)["lease_token"]
 
