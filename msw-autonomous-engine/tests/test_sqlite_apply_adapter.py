@@ -126,6 +126,26 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
         self.assertFalse(second["native_hermes_ack_verified"])
         self.assertNotIn("native_ack", second)
 
+    def test_expired_lease_holds_without_attempting_report(self):
+        # A known expired reservation is not an UNKNOWN report. The native
+        # report handler must not be called, and a former owner cannot write
+        # after the lease deadline. The already-committed-result branch has
+        # separate readback coverage and remains idempotent.
+        database = self.directory / "hermes-chat-loop" / "exchange.sqlite3"
+        with sqlite3.connect(database) as db:
+            db.execute("UPDATE jobs SET lease_until=0 WHERE id=?",
+                       (self.job["task_id"],))
+        with patch("msw_engine.hermes_chat_bridge.handle",
+                   side_effect=AssertionError("expired lease reached report")) as native_report:
+            with self.assertRaisesRegex(module.ApplyHold, "lease_expired"):
+                module.apply_once(self.directory, self.job, self.lease,
+                                  receipt("expired lease result", self.job))
+            native_report.assert_not_called()
+        state = handle({"schema": SCHEMA, "operation": "status",
+                        "task_id": self.job["task_id"]}, self.directory)
+        self.assertEqual(state["state"], "leased")
+        self.assertIsNone(state["result_sha256"])
+
     def test_uncertain_committed_report_is_read_back_without_reack(self):
         answer = "ok after uncertain report"
         digest = hashlib.sha256(answer.encode()).hexdigest()
