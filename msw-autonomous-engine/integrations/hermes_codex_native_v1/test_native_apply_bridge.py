@@ -264,6 +264,39 @@ class NativeApplyTests(unittest.TestCase):
                 self.assertEqual(calls, ['apply'])
                 self.assertEqual(job['root_id'], 'r')
 
+    def test_readback_cannot_rewrite_original_native_ack(self):
+        # The readback callback may retain a reference to apply_once's ACK.
+        # If it mutates that object and returns the same object as its own
+        # "persisted" ACK, dict equality alone previously accepted the pair.
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        for changed in ('status', 'nested', 'noncanonical'):
+            job, receipt = fixture()
+            saved = {}
+            calls = []
+            def apply_once(callback_job, payload):
+                calls.append('apply')
+                saved['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
+                saved['ack'] = dict(**{k:callback_job[k] for k in fields},
+                                    payload_sha256=saved['digest'],
+                                    status='verified', evidence={'serial': 'original'})
+                return saved['ack']
+            def readback(callback_job):
+                calls.append('readback')
+                if changed == 'status':
+                    saved['ack']['status'] = 'failed'
+                elif changed == 'nested':
+                    saved['ack']['evidence']['serial'] = 'rewritten'
+                else:
+                    saved['ack']['evidence'] = {1, 2}
+                return dict(**{k:callback_job[k] for k in fields},
+                            payload_sha256=saved['digest'], ack=saved['ack'],
+                            effect_verified=True, state='native_observed')
+            with self.subTest(changed=changed):
+                with self.assertRaisesRegex(Hold, 'NATIVE_ACK_MUTATED_DURING_READBACK'):
+                    apply_verified(job, receipt, apply_once, readback)
+                self.assertEqual(calls, ['apply', 'readback'])
+                self.assertEqual(job['root_id'], 'r')
+
     def test_ack_mismatch(self):
         job,receipt=fixture()
         with self.assertRaisesRegex(Hold,'NATIVE_ACK_MISMATCH'):
