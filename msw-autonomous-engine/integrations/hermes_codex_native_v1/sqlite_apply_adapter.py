@@ -20,6 +20,23 @@ class ApplyHold(RuntimeError):
 
 
 def canonical(value):
+    # The SQLite adapter is also a direct entrypoint. Do not let json.dumps
+    # silently coerce integer object keys to strings or tuples to arrays: the
+    # resulting receipt digest would attest different in-memory evidence.
+    # Validate recursively before opening or reporting to the local backend.
+    def require_json_shape(item):
+        if type(item) is dict:
+            if any(type(key) is not str for key in item):
+                raise TypeError("non_string_json_object_key")
+            for child in item.values():
+                require_json_shape(child)
+        elif type(item) is list:
+            for child in item:
+                require_json_shape(child)
+        elif item is not None and type(item) not in (str, int, float, bool):
+            raise TypeError("non_json_container_type")
+
+    require_json_shape(value)
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
                       allow_nan=False)
 
