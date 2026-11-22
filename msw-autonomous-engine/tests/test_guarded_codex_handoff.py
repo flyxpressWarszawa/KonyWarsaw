@@ -218,6 +218,38 @@ class GuardedHandoff(unittest.TestCase):
         self.assertEqual(state["state"], "reported")
         self.assertEqual(state["outcome"], "completed")
 
+    def test_lost_report_response_reconciles_without_replay(self):
+        # The write may commit before a connector loses its reply. Report the
+        # UNKNOWN outcome, then recover using the SAME original SQLite row.
+        # Neither recovery nor this adapter may fabricate native Hermes ACK.
+        from unittest.mock import patch
+        import msw_engine.hermes_chat_bridge as bridge
+
+        proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+        real_handle = bridge.handle
+
+        def commit_then_lose_reply(command, directory):
+            response = real_handle(command, directory)
+            if command.get("operation") == "report":
+                raise ConnectionError("response_lost_after_commit")
+            return response
+
+        with patch.object(bridge, "handle", side_effect=commit_then_lose_reply):
+            with self.assertRaisesRegex(adapter.ApplyHold, "report_unknown_outcome"):
+                self.apply(proof, dispatch_enabled=True)
+        after = real_handle(dict(schema=SCHEMA, operation="status",
+                                 task_id=self.job["task_id"]), self.root)
+        self.assertEqual(after["state"], "reported")
+        self.assertEqual(after["outcome"], "completed")
+
+        # This callback would fail the test if a second report is attempted.
+        with patch.object(bridge, "handle", side_effect=AssertionError("duplicate_report")):
+            recovered = self.apply(proof, dispatch_enabled=True)
+        self.assertEqual(recovered["status"], "STORAGE_REPORT_VERIFIED_NATIVE_UNVERIFIED")
+        self.assertEqual(recovered["storage_state"], "reported")
+        self.assertFalse(recovered["native_hermes_ack_verified"])
+        self.assertFalse(recovered["native_application_verified"])
+
     def test_preexisting_transport_ack_is_not_native_hermes_proof(self):
         proof = receipt("ok", self.job["task_id"], self.job["work_key"])
         first = self.apply(proof, dispatch_enabled=True)
