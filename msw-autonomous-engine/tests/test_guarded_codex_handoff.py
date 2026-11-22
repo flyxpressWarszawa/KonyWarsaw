@@ -250,6 +250,39 @@ class GuardedHandoff(unittest.TestCase):
         self.assertFalse(recovered["native_hermes_ack_verified"])
         self.assertFalse(recovered["native_application_verified"])
 
+    def test_nonmapping_report_reply_after_commit_holds_and_reconciles(self):
+        # The native SQLite bridge might commit successfully but return None
+        # instead of a response object. Never leak AttributeError or retry.
+        from unittest.mock import patch
+        import msw_engine.hermes_chat_bridge as bridge
+
+        proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+        real_handle = bridge.handle
+
+        def commit_then_return_none(command, directory):
+            saved = real_handle(command, directory)
+            if command.get("operation") == "report":
+                return None
+            return saved
+
+        with patch.object(bridge, "handle", side_effect=commit_then_return_none):
+            with self.assertRaisesRegex(adapter.ApplyHold, "report_unknown_outcome"):
+                self.apply(proof, dispatch_enabled=True)
+
+        observed = real_handle(dict(schema=SCHEMA, operation="status",
+                                    task_id=self.job["task_id"]), self.root)
+        self.assertEqual(observed["state"], "reported")
+        self.assertEqual(observed["outcome"], "completed")
+
+        # Reconciliation reads the existing original row. A new report fails.
+        with patch.object(bridge, "handle",
+                          side_effect=AssertionError("unexpected_duplicate_report")):
+            reconciled = self.apply(proof, dispatch_enabled=True)
+        self.assertEqual(reconciled["status"], "STORAGE_REPORT_VERIFIED_NATIVE_UNVERIFIED")
+        self.assertEqual(reconciled["storage_state"], "reported")
+        self.assertFalse(reconciled["native_hermes_ack_verified"])
+        self.assertFalse(reconciled["native_application_verified"])
+
     def test_preexisting_transport_ack_is_not_native_hermes_proof(self):
         proof = receipt("ok", self.job["task_id"], self.job["work_key"])
         first = self.apply(proof, dispatch_enabled=True)
