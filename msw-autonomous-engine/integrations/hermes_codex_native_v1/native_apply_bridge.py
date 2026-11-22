@@ -71,9 +71,17 @@ def apply_verified(job, codex_receipt, apply_once, readback):
             or not isinstance(codex_receipt.get('text'),str)):
         raise Hold('CODEX_RECEIPT_UNSAFE')
     body={k:v for k,v in codex_receipt.items() if k!='receipt_sha256'}
-    if hashlib.sha256(canonical(body)).hexdigest()!=codex_receipt.get('receipt_sha256'):
+    # External evidence may contain an invalid Unicode scalar or non-JSON
+    # object. Refuse it as HOLD rather than leaking an uncaught encoder error.
+    # All verification remains BEFORE apply_once (no native side effects).
+    try:
+        receipt_digest=hashlib.sha256(canonical(body)).hexdigest()
+        response_digest=hashlib.sha256(codex_receipt['text'].encode('utf-8', errors='strict')).hexdigest()
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('CODEX_RECEIPT_NONCANONICAL') from exc
+    if receipt_digest!=codex_receipt.get('receipt_sha256'):
         raise Hold('CODEX_RECEIPT_DIGEST_MISMATCH')
-    if hashlib.sha256(codex_receipt['text'].encode()).hexdigest()!=codex_receipt.get('response_sha256'):
+    if response_digest!=codex_receipt.get('response_sha256'):
         raise Hold('CODEX_TEXT_DIGEST_MISMATCH')
     # A valid digest proves only receipt integrity, not ownership of this job.
     # Check the COMPLETE identity before invoking any potentially costly or
