@@ -42,6 +42,14 @@ def _explicit_negative_native_outcome(record, *, persisted_effect=False):
         error = record['error']
         if error is not None and error is not False and error != '':
             return True
+    # An explicit negative verification flag contradicts any positive status.
+    # In particular storage-only receipts may expose native application=False
+    # while a wrapper incorrectly supplies state=applied. Do not let that
+    # contradictory record become APPLIED_VERIFIED after hash checks.
+    for flag in ('receipt_verified', 'native_hermes_ack_verified',
+                 'native_application_verified', 'effect_verified'):
+        if flag in record and record[flag] is not True:
+            return True
     # An explicit "queued", "processing", "accepted" or unfamiliar state is
     # not final native application. Do not infer success from matching hashes.
     terminal = {'success', 'succeeded', 'completed', 'verified', 'applied',
