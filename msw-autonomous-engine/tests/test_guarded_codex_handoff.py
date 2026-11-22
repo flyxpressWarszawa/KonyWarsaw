@@ -148,6 +148,29 @@ class GuardedHandoff(unittest.TestCase):
                 self.assertEqual(state["state"], "leased")
                 self.assertIsNone(state.get("result_sha256"))
 
+    def test_noncanonical_receipt_fails_closed_before_sqlite_report(self):
+        # The direct adapter must not leak an encoder error or accidentally
+        # write a result even if a caller bypasses the public entrypoint.
+        # The original lease and task identity are preserved throughout.
+        for malformed in (
+            {"text": "\\ud800"},
+            {"extra": {1, 2}},
+            {"extra": float("nan")},
+        ):
+            for route in ("direct", "public"):
+                with self.subTest(route=route, keys=tuple(malformed)):
+                    proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+                    proof.update(malformed)
+                    with self.assertRaisesRegex(adapter.ApplyHold, "receipt_noncanonical"):
+                        if route == "direct":
+                            adapter.apply_once(self.root, self.job, self.lease, proof)
+                        else:
+                            self.apply(proof, dispatch_enabled=True)
+                    state = handle(dict(schema=SCHEMA, operation="status",
+                                        task_id=self.job["task_id"]), self.root)
+                    self.assertEqual(state["state"], "leased")
+                    self.assertIsNone(state.get("result_sha256"))
+
     def test_corrupted_receipt_digest_prevents_ack(self):
         proof = receipt("ok", self.job["task_id"], self.job["work_key"])
         proof["receipt_sha256"] = "0" * 64
