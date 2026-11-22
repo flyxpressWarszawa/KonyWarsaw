@@ -101,7 +101,12 @@ def apply_once(directory, job, lease_token, codex_receipt):
                                  result_sha256=digest, outcome="completed"), directory)
         except Exception as exc:
             raise ApplyHold("report_unknown_outcome") from exc
-        if report.get("state") not in ("reported", "acknowledged") or report.get("result_sha256") != digest:
+        # A transport may return None or a non-object AFTER the storage write
+        # committed. Treat that as UNKNOWN, not an AttributeError that invites
+        # a caller to rerun the report or Codex. Reconcile original row later.
+        if (not isinstance(report, dict)
+                or report.get("state") not in ("reported", "acknowledged")
+                or report.get("result_sha256") != digest):
             raise ApplyHold("report_unknown_outcome")
     # This SQLite chat transport's generic "ack" operation only changes a
     # local storage row. It does NOT prove that the actual Hermes process
