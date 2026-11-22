@@ -19,8 +19,12 @@ def _explicit_negative_native_outcome(record, *, persisted_effect=False):
     # be an actual Boolean True when that field is present. Unknown is HOLD.
     if 'success' in record and record['success'] is not True:
         return True
-    if record.get('error') not in (None, '', False):
-        return True
+    # Equality would treat numeric 0 / 0.0 as False; these are not valid
+    # no-error sentinels from the authenticated native receiver. Fail closed.
+    if 'error' in record:
+        error = record['error']
+        if error is not None and error is not False and error != '':
+            return True
     # An explicit "queued", "processing", "accepted" or unfamiliar state is
     # not final native application. Do not infer success from matching hashes.
     terminal = {'success', 'succeeded', 'completed', 'verified', 'applied',
