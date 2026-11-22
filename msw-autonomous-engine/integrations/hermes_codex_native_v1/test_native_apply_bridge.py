@@ -332,6 +332,51 @@ class NativeApplyTests(unittest.TestCase):
                 self.assertEqual(calls, ['apply', 'readback'])
                 self.assertEqual(job['root_id'], 'r')
 
+    def test_native_callbacks_cannot_mutate_admitted_job_context(self):
+        # A lease flag, native grant or nested admission proof changed by a
+        # callback is not the original admitted work, even when all five IDs
+        # and the ACK digest still match. HOLD after effect, never retry.
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        for phase in ('apply', 'readback'):
+            for changed in ('state', 'nested_grant', 'noncanonical'):
+                job, receipt = fixture()
+                job['grant_context'] = {'fence_epoch': 7}
+                calls = []
+                saved = {}
+                def mutate(callback_job):
+                    if changed == 'state':
+                        callback_job['state'] = 'held'
+                    elif changed == 'nested_grant':
+                        callback_job['grant_context']['fence_epoch'] = 8
+                    else:
+                        callback_job['grant_context']['invalid'] = {1, 2}
+                def native_apply(callback_job, payload):
+                    calls.append('apply')
+                    saved['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
+                    saved['ack'] = dict(**{k: callback_job[k] for k in fields},
+                                        payload_sha256=saved['digest'],
+                                        status='verified')
+                    if phase == 'apply':
+                        mutate(callback_job)
+                    return saved['ack']
+                def native_readback(callback_job):
+                    calls.append('readback')
+                    if phase == 'readback':
+                        mutate(callback_job)
+                    return dict(**{k: callback_job[k] for k in fields},
+                                ack=saved['ack'], payload_sha256=saved['digest'],
+                                effect_verified=True, state='native_observed')
+                reason = ('NATIVE_APPLY_JOB_CONTEXT_MUTATED'
+                          if phase == 'apply'
+                          else 'NATIVE_READBACK_JOB_CONTEXT_MUTATED')
+                with self.subTest(phase=phase, changed=changed):
+                    with self.assertRaisesRegex(Hold, reason):
+                        apply_verified(job, receipt, native_apply, native_readback)
+                    self.assertEqual(calls, ['apply'] if phase == 'apply'
+                                     else ['apply', 'readback'])
+                    self.assertEqual(job['state'], 'leased')
+                    self.assertEqual(job['grant_context'], {'fence_epoch': 7})
+
     def test_ack_mismatch(self):
         job,receipt=fixture()
         with self.assertRaisesRegex(Hold,'NATIVE_ACK_MISMATCH'):
