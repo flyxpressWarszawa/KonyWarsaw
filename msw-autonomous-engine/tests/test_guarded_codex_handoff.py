@@ -153,7 +153,7 @@ class GuardedHandoff(unittest.TestCase):
         # write a result even if a caller bypasses the public entrypoint.
         # The original lease and task identity are preserved throughout.
         for malformed in (
-            {"text": "\\ud800"},
+            {"text": chr(0xD800)},  # Real unpaired surrogate at runtime
             {"extra": {1, 2}},
             {"extra": float("nan")},
         ):
