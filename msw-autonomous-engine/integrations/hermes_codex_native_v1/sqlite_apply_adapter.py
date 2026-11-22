@@ -37,6 +37,12 @@ def apply_once(directory, job, lease_token, codex_receipt):
         raise ApplyHold("invalid_identity")
     if not isinstance(lease_token, str) or not 20 <= len(lease_token) <= 256:
         raise ApplyHold("invalid_lease")
+    # Validate lease encoding before opening SQLite. A malformed Unicode token
+    # must produce a stable HOLD rather than an uncaught encoder exception.
+    try:
+        lease_token_digest = _sha(lease_token)
+    except UnicodeError as exc:
+        raise ApplyHold("invalid_lease") from exc
     if not isinstance(codex_receipt, dict) or codex_receipt.get("status") != "VERIFIED":
         raise ApplyHold("receipt_unverified")
     # The adapter is also importable directly; enforce the same request binding
@@ -78,7 +84,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
         if (row is None or row["work_key"] != job["work_key"]
                 or row["parent_id"] != job["parent_id"]):
             raise ApplyHold("work_identity_mismatch")
-        if row["lease_sha"] != _sha(lease_token):
+        if row["lease_sha"] != lease_token_digest:
             raise ApplyHold("lease_not_valid")
         if row["state"] in ("reported", "acknowledged"):
             # A previous report may have committed before its response was lost.
