@@ -13,6 +13,23 @@ def fixture():
     return job,receipt
 
 class NativeApplyTests(unittest.TestCase):
+    def test_python_only_context_cannot_change_type_after_json_roundtrip(self):
+        # The old canonical encoder converted numeric keys to text and tuples
+        # to arrays while reporting the same admitted hash as the converted
+        # native callback input. No callback may run after such conversion.
+        job, receipt = fixture()
+        calls = []
+        def forbidden(*_):
+            calls.append('native_called')
+            raise AssertionError('non-JSON job reached native callback')
+        for context in ({'grant': {1: 'active'}},
+                        {'grant': ('fence', 'lease')}):
+            with self.subTest(context=context):
+                with self.assertRaisesRegex(Hold, 'JOB_OR_PAYLOAD_NONCANONICAL'):
+                    apply_verified(dict(job, native_context=context),
+                                   receipt, forbidden, forbidden)
+        self.assertEqual(calls, [])
+
     def test_verified_apply_and_readback(self):
         job,receipt=fixture()
         saved={}
