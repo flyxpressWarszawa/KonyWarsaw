@@ -20,7 +20,7 @@ class NativeApplyTests(unittest.TestCase):
             saved['digest']=hashlib.sha256(canonical(payload)).hexdigest()
             saved['ack']=dict(**{field:job[field] for field in
                 ('root_id','task_id','request_id','work_key','parent_id')},
-                payload_sha256=saved['digest'])
+                payload_sha256=saved['digest'], status='verified')
             return saved['ack']
         def readback(job):
             return dict(**{field:job[field] for field in
@@ -135,7 +135,7 @@ class NativeApplyTests(unittest.TestCase):
         required=('root_id','task_id','request_id','work_key','parent_id')
         def matching_apply(j,p):
             return dict(**{key:j[key] for key in required},
-                        payload_sha256=hashlib.sha256(canonical(p)).hexdigest())
+                        payload_sha256=hashlib.sha256(canonical(p)).hexdigest(), status='verified')
         for field in required:
             for missing in (False,True):
                 def mismatched_readback(j, field=field, missing=missing):
@@ -241,6 +241,26 @@ class NativeApplyTests(unittest.TestCase):
                     apply_verified(job, receipt, negative_apply, unexpected_readback)
         self.assertEqual(readback_calls, [])
 
+    def test_statusless_native_ack_does_not_promote_hashes_to_native_apply(self):
+        # A matching identity and digest alone can be transport storage; only
+        # the native owner can issue a terminal status. No readback or retry
+        # should be attempted when the returned ACK lacks one.
+        job, receipt = fixture()
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        readback_calls = []
+        def unexpected_readback(*_):
+            readback_calls.append('readback')
+            raise AssertionError('missing native ACK state reached readback')
+        for extra in ({}, {'success': True}, {'error': None}):
+            def statusless_apply(j, payload, extra=extra):
+                return dict(**{key:j[key] for key in fields},
+                            payload_sha256=hashlib.sha256(canonical(payload)).hexdigest(),
+                            **extra)
+            with self.subTest(extra=extra):
+                with self.assertRaisesRegex(Hold, 'NATIVE_ACK_NEGATIVE_OUTCOME'):
+                    apply_verified(job, receipt, statusless_apply, unexpected_readback)
+        self.assertEqual(readback_calls, [])
+
     def test_nonterminal_native_ack_holds_even_with_matching_hashes(self):
         job, receipt = fixture()
         fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
@@ -315,7 +335,7 @@ class NativeApplyTests(unittest.TestCase):
         def apply_once(j, payload):
             saved['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
             saved['ack'] = dict(**{key:j[key] for key in fields},
-                                payload_sha256=saved['digest'])
+                                payload_sha256=saved['digest'], status='verified')
             return saved['ack']
         for negative in ({'success': False}, {'status': 'rejected'},
                          {'state': 'unknown'}, {'error': 'effect denied'}):
