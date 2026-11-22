@@ -148,6 +148,28 @@ class GuardedHandoff(unittest.TestCase):
                 self.assertEqual(state["state"], "leased")
                 self.assertIsNone(state.get("result_sha256"))
 
+    def test_nonunicode_lease_fails_closed_before_sqlite(self):
+        # A malformed lease token must be HOLD before opening SQLite, even
+        # when an otherwise valid Codex receipt is supplied. No report/ACK.
+        from unittest.mock import patch
+        proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+        malformed_lease = "a" * 20 + chr(0xD800)
+        for route in ("direct", "public"):
+            with self.subTest(route=route):
+                with patch.object(adapter, "_connection",
+                                  side_effect=AssertionError("sqlite_opened")):
+                    with self.assertRaisesRegex(adapter.ApplyHold, "invalid_lease"):
+                        if route == "direct":
+                            adapter.apply_once(self.root, self.job, malformed_lease, proof)
+                        else:
+                            entry.apply_codex_result(
+                                self.root, self.job, malformed_lease, proof,
+                                dispatch_enabled=True)
+                state = handle(dict(schema=SCHEMA, operation="status",
+                                    task_id=self.job["task_id"]), self.root)
+                self.assertEqual(state["state"], "leased")
+                self.assertIsNone(state.get("result_sha256"))
+
     def test_noncanonical_receipt_fails_closed_before_sqlite_report(self):
         # The direct adapter must not leak an encoder error or accidentally
         # write a result even if a caller bypasses the public entrypoint.
