@@ -232,7 +232,7 @@ class NativeApplyTests(unittest.TestCase):
                             effect_verified=True, state='native_observed')
             with self.subTest(phase=phase):
                 with self.assertRaisesRegex(
-                        Hold, 'NATIVE_ACK_MISMATCH|NATIVE_EFFECT_NOT_VERIFIED'):
+                        Hold, 'NATIVE_APPLY_JOB_CONTEXT_MUTATED|NATIVE_READBACK_JOB_CONTEXT_MUTATED'):
                     apply_verified(job, receipt, apply_once, readback)
                 self.assertEqual({key:job[key] for key in fields}, original)
 
