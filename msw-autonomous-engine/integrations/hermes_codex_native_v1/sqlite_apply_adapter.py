@@ -8,6 +8,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 from contextlib import closing
 
 from msw_engine.hermes_chat_bridge import _connection, _sha, _id
@@ -35,6 +36,14 @@ def apply_once(directory, job, lease_token, codex_receipt):
     fields = ("root_id", "task_id", "request_id", "work_key", "parent_id")
     if not isinstance(job, dict) or any(not isinstance(job.get(k), str) or not job[k] for k in fields):
         raise ApplyHold("invalid_identity")
+    # The SQLite jobs table does not store root_id or request_id. In addition
+    # to the five receipt IDs above, compare these immutable submit/claim
+    # fields against the PERSISTED original row (not another caller echo).
+    # This narrows cross-request confusion; it is NOT native root attestation.
+    origin = ("conversation_key", "executor", "request_sha256")
+    if (any(not isinstance(job.get(k), str) or not job[k] for k in origin)
+            or re.fullmatch(r"[0-9a-f]{64}", job["request_sha256"]) is None):
+        raise ApplyHold("origin_binding_required")
     if not isinstance(lease_token, str) or not 20 <= len(lease_token) <= 256:
         raise ApplyHold("invalid_lease")
     # Validate lease encoding before opening SQLite. A malformed Unicode token
@@ -78,12 +87,17 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # The existing report operation owns the SQLite BEGIN IMMEDIATE transaction,
     # validates the lease, and enforces idempotency.
     with closing(_connection(directory)) as db:
-        row = db.execute("SELECT id,work_key,parent_id,state,lease_sha,result,result_sha,outcome "
+        row = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,"
+                         "state,lease_sha,result,result_sha,outcome "
                          "FROM jobs WHERE id=?",
                          (job["task_id"],)).fetchone()
         if (row is None or row["work_key"] != job["work_key"]
                 or row["parent_id"] != job["parent_id"]):
             raise ApplyHold("work_identity_mismatch")
+        if (row["conversation"] != job["conversation_key"]
+                or row["executor"] != job["executor"]
+                or row["request_sha"] != job["request_sha256"]):
+            raise ApplyHold("persisted_origin_mismatch")
         if row["lease_sha"] != lease_token_digest:
             raise ApplyHold("lease_not_valid")
         if row["state"] in ("reported", "acknowledged"):
@@ -121,9 +135,13 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # The authorized native owner must reconcile and ACK through its own
     # authenticated contract, independently from this method.
     with closing(_connection(directory)) as db:
-        stored = db.execute("SELECT id,work_key,parent_id,state,result,result_sha,outcome FROM jobs WHERE id=?",
+        stored = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,"
+                            "state,result,result_sha,outcome FROM jobs WHERE id=?",
                             (job["task_id"],)).fetchone()
-        if (stored is None or stored["work_key"] != job["work_key"]
+        if (stored is None or stored["conversation"] != job["conversation_key"]
+                or stored["executor"] != job["executor"]
+                or stored["request_sha"] != job["request_sha256"]
+                or stored["work_key"] != job["work_key"]
                 or stored["parent_id"] != job["parent_id"]
                 or stored["state"] not in ("reported", "acknowledged")
                 or stored["result"] != result or stored["result_sha"] != digest
