@@ -392,6 +392,36 @@ class NativeApplyTests(unittest.TestCase):
             apply_verified(job,receipt,broken,lambda j:None)
         self.assertEqual(len(calls),1)
 
+    def test_native_callback_cancellation_is_unknown_and_not_replayed(self):
+        # Python asyncio.CancelledError derives from BaseException, not
+        # Exception. A callback can be cancelled after the native write; its
+        # outcome must be UNKNOWN, never a signal to retry the same effect.
+        from asyncio import CancelledError
+        job, receipt = fixture()
+        calls = []
+        def cancelled_apply(j, payload):
+            calls.append('apply')
+            raise CancelledError()
+        def never_readback(j):
+            calls.append('readback')
+            raise AssertionError('unexpected readback')
+        with self.assertRaisesRegex(Hold, 'NATIVE_APPLY_UNKNOWN_OUTCOME'):
+            apply_verified(job, receipt, cancelled_apply, never_readback)
+        self.assertEqual(calls, ['apply'])
+        saved = {}
+        def accepted_apply(j, payload):
+            calls.append('apply')
+            saved['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
+            return dict(**{key:j[key] for key in
+                ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')},
+                payload_sha256=saved['digest'], status='verified')
+        def cancelled_readback(j):
+            calls.append('readback')
+            raise CancelledError()
+        with self.assertRaisesRegex(Hold, 'NATIVE_READBACK_UNKNOWN'):
+            apply_verified(job, receipt, accepted_apply, cancelled_readback)
+        self.assertEqual(calls, ['apply', 'apply', 'readback'])
+
     def test_numeric_error_does_not_masquerade_as_false_native_error(self):
         # A real native ACK/effect may report error=0 or 0.0. Python considers
         # both equal to False, but neither is an authenticated no-error flag.
