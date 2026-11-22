@@ -170,6 +170,44 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
         self.assertFalse(applied["native_hermes_ack_verified"])
         self.assertEqual(applied["result_sha256"], digest)
 
+    def test_cancelled_after_sqlite_report_commit_holds_without_replay(self):
+        # asyncio.CancelledError is not an Exception in supported Python.
+        # Simulate cancellation AFTER the genuine isolated SQLite transaction
+        # committed but BEFORE the report handler returned its response.
+        from asyncio import CancelledError
+        answer = "persisted despite cancelled transport"
+        proof = receipt(answer, self.job)
+        calls = []
+
+        def commit_then_cancel(payload, directory):
+            self.assertEqual(payload["operation"], "report")
+            calls.append(payload["task_id"])
+            handle(payload, directory)
+            raise CancelledError()
+
+        with patch("msw_engine.hermes_chat_bridge.handle",
+                   side_effect=commit_then_cancel) as routed:
+            with self.assertRaisesRegex(module.ApplyHold, "report_unknown_outcome"):
+                module.apply_once(self.directory, self.job, self.lease, proof)
+            routed.assert_called_once()
+        self.assertEqual(calls, [self.job["task_id"]])
+
+        stored = handle({"schema": SCHEMA, "operation": "status",
+                         "task_id": self.job["task_id"]}, self.directory)
+        self.assertEqual(stored["state"], "reported")
+        self.assertEqual(stored["result_sha256"], proof["response_sha256"])
+
+        # A later invocation reconciles exactly this committed row.
+        # No second report, native ACK, or Codex dispatch is permitted.
+        with patch("msw_engine.hermes_chat_bridge.handle",
+                   side_effect=AssertionError("uncertain report replayed")) as routed:
+            recovered = module.apply_once(self.directory, self.job, self.lease, proof)
+            routed.assert_not_called()
+        self.assertEqual(recovered["storage_state"], "reported")
+        self.assertTrue(recovered["storage_readback_verified"])
+        self.assertFalse(recovered["native_hermes_ack_verified"])
+        self.assertFalse(recovered["native_application_verified"])
+
     def test_uncertain_conflicting_report_stays_unacknowledged(self):
         original = "first result"
         digest = hashlib.sha256(original.encode()).hexdigest()
