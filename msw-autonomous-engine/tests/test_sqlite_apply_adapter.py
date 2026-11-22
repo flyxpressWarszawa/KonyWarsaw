@@ -284,6 +284,39 @@ class BackendIsolationTests(unittest.TestCase):
                  "leased", bridge._sha(self.token), now + 900, now, now,
                  "hermes", self.job["work_key"]))
 
+    def test_sqlite_backend_missing_storage_never_creates_database(self):
+        # A typo/wrong working directory must not cause the reporting adapter
+        # to initialize a second empty SQLite mailbox.
+        for backend in ("sqlite", None):
+            with self.subTest(backend=backend):
+                with mock.patch.dict(os.environ):
+                    if backend is None:
+                        os.environ.pop("MSW_HERMES_CHAT_BACKEND", None)
+                    else:
+                        os.environ["MSW_HERMES_CHAT_BACKEND"] = backend
+                    with mock.patch.object(module, "_connection",
+                                           side_effect=AssertionError("SQLite opened")) as connection:
+                        with self.assertRaisesRegex(module.ApplyHold, "existing_sqlite_storage_required"):
+                            self.apply()
+                        connection.assert_not_called()
+                    self.assertFalse(self.root.exists(), "adapter bootstrapped a new queue")
+
+    def test_sqlite_backend_refuses_symlinked_storage_before_connection(self):
+        # Even a populated-looking symlink is not an admitted local backend.
+        alternate = Path(self.tmp.name) / "other"
+        alternate.mkdir()
+        storage = alternate / "exchange.sqlite3"
+        storage.write_bytes(b"not a SQLite database")
+        self.root.mkdir()
+        (self.root / "hermes-chat-loop").symlink_to(alternate, target_is_directory=True)
+        with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}), \\
+                mock.patch.object(module, "_connection",
+                                  side_effect=AssertionError("SQLite opened")) as connection:
+            with self.assertRaisesRegex(module.ApplyHold, "existing_sqlite_storage_required"):
+                self.apply()
+            connection.assert_not_called()
+        self.assertEqual(storage.read_bytes(), b"not a SQLite database")
+
     def test_github_backend_rejected_without_creating_sqlite(self):
         with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "github"}):
             try:
