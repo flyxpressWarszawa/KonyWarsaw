@@ -106,11 +106,21 @@ def apply_verified(job, codex_receipt, apply_once, readback):
     identity={k:job[k] for k in required}
     admitted_job=dict(job)
     payload={'identity':dict(identity),'codex_receipt_sha256':codex_receipt['receipt_sha256'],'result':codex_receipt['text']}
-    payload_digest=hashlib.sha256(canonical(payload)).hexdigest()
+    # Retain the EXACT admitted bytes. A native callback may mutate the dict
+    # passed into apply_once; its matching ACK digest is not evidence that
+    # the native effect used the original request. After any such call the
+    # effect is uncertain, so HOLD without another apply or Codex dispatch.
+    original_payload_bytes=canonical(payload)
+    payload_digest=hashlib.sha256(original_payload_bytes).hexdigest()
     try:
         ack=apply_once(dict(admitted_job),payload)
     except Exception as exc:
         raise Hold('NATIVE_APPLY_UNKNOWN_OUTCOME') from exc
+    try:
+        if canonical(payload) != original_payload_bytes:
+            raise Hold('NATIVE_APPLY_INPUT_MUTATED')
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('NATIVE_APPLY_INPUT_MUTATED') from exc
     # A matching task/work key and payload hash are insufficient: a native
     # ACK must also bind the original root, request, and parent, not merely
     # describe some persisted bytes. The authenticated receiver is responsible
