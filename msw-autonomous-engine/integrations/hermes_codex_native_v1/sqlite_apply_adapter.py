@@ -50,12 +50,22 @@ def apply_once(directory, job, lease_token, codex_receipt):
         # bool(False) and float(0.0) compare equal to 0; neither proves no tools.
         raise ApplyHold("receipt_unsafe")
     result = codex_receipt.get("text")
-    if not isinstance(result, str) or not result.strip() or len(result.encode("utf-8")) > 16384:
+    if not isinstance(result, str) or not result.strip():
         raise ApplyHold("result_invalid")
-    receipt_body = {k: v for k, v in codex_receipt.items() if k != "receipt_sha256"}
-    if _sha(canonical(receipt_body)) != codex_receipt.get("receipt_sha256"):
+    # This direct adapter is callable without the public guarded entrypoint.
+    # An unpaired Unicode surrogate, NaN/Infinity, non-JSON object, or cyclic
+    # receipt must be a stable HOLD BEFORE opening the SQLite connection.
+    # It must never appear as an uncaught runtime error that could invite retry.
+    try:
+        if len(result.encode("utf-8", errors="strict")) > 16384:
+            raise ApplyHold("result_invalid")
+        receipt_body = {k: v for k, v in codex_receipt.items() if k != "receipt_sha256"}
+        receipt_digest = _sha(canonical(receipt_body))
+        digest = _sha(result)
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise ApplyHold("receipt_noncanonical") from exc
+    if receipt_digest != codex_receipt.get("receipt_sha256"):
         raise ApplyHold("receipt_digest_mismatch")
-    digest = _sha(result)
     if digest != codex_receipt.get("response_sha256"):
         raise ApplyHold("result_digest_mismatch")
     from msw_engine.hermes_chat_bridge import SCHEMA, handle
