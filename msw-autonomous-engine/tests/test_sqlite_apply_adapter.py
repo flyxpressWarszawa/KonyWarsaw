@@ -309,9 +309,9 @@ class BackendIsolationTests(unittest.TestCase):
         storage.write_bytes(b"not a SQLite database")
         self.root.mkdir()
         (self.root / "hermes-chat-loop").symlink_to(alternate, target_is_directory=True)
-        with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}), \\
-                mock.patch.object(module, "_connection",
-                                  side_effect=AssertionError("SQLite opened")) as connection:
+        with (mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              mock.patch.object(module, "_connection",
+                                side_effect=AssertionError("SQLite opened")) as connection):
             with self.assertRaisesRegex(module.ApplyHold, "existing_sqlite_storage_required"):
                 self.apply()
             connection.assert_not_called()
