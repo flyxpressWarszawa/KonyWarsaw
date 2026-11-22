@@ -208,6 +208,34 @@ class NativeApplyTests(unittest.TestCase):
         with self.assertRaisesRegex(Hold, 'NATIVE_EFFECT_NOT_VERIFIED'):
             apply_verified(job, receipt, apply_once, readback)
 
+    def test_native_callbacks_cannot_rebind_original_identity(self):
+        # Native callbacks must not mutate the original admitted job so a
+        # foreign ACK/effect can be checked against a rewritten root_id.
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        for phase in ('apply', 'readback'):
+            job, receipt = fixture()
+            original = {key: job[key] for key in fields}
+            saved = {}
+            def apply_once(callback_job, payload):
+                saved['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
+                if phase == 'apply':
+                    callback_job['root_id'] = 'foreign-root'
+                saved['ack'] = dict(**{key: callback_job[key] for key in fields},
+                                    payload_sha256=saved['digest'],
+                                    status='verified')
+                return saved['ack']
+            def readback(callback_job):
+                if phase == 'readback':
+                    callback_job['root_id'] = 'foreign-root'
+                return dict(**{key: callback_job[key] for key in fields},
+                            ack=saved['ack'], payload_sha256=saved['digest'],
+                            effect_verified=True, state='native_observed')
+            with self.subTest(phase=phase):
+                with self.assertRaisesRegex(
+                        Hold, 'NATIVE_ACK_MISMATCH|NATIVE_EFFECT_NOT_VERIFIED'):
+                    apply_verified(job, receipt, apply_once, readback)
+                self.assertEqual({key:job[key] for key in fields}, original)
+
     def test_ack_mismatch(self):
         job,receipt=fixture()
         with self.assertRaisesRegex(Hold,'NATIVE_ACK_MISMATCH'):
