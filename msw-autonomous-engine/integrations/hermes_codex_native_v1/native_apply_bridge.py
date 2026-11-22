@@ -110,12 +110,25 @@ def apply_verified(job, codex_receipt, apply_once, readback):
     # passed into apply_once; its matching ACK digest is not evidence that
     # the native effect used the original request. After any such call the
     # effect is uncertain, so HOLD without another apply or Codex dispatch.
-    original_payload_bytes=canonical(payload)
-    payload_digest=hashlib.sha256(original_payload_bytes).hexdigest()
+    # Freeze the complete admitted lease/context, not only the five ID fields.
+    # Native callbacks receive detached JSON copies; a changed grant/state or
+    # nested evidence is not the same admitted work even with matching IDs.
     try:
-        ack=apply_once(dict(admitted_job),payload)
+        original_job_bytes=canonical(admitted_job)
+        original_payload_bytes=canonical(payload)
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('JOB_OR_PAYLOAD_NONCANONICAL') from exc
+    payload_digest=hashlib.sha256(original_payload_bytes).hexdigest()
+    apply_job=json.loads(original_job_bytes)
+    try:
+        ack=apply_once(apply_job,payload)
     except Exception as exc:
         raise Hold('NATIVE_APPLY_UNKNOWN_OUTCOME') from exc
+    try:
+        if canonical(apply_job) != original_job_bytes or canonical(job) != original_job_bytes:
+            raise Hold('NATIVE_APPLY_JOB_CONTEXT_MUTATED')
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('NATIVE_APPLY_JOB_CONTEXT_MUTATED') from exc
     try:
         if canonical(payload) != original_payload_bytes:
             raise Hold('NATIVE_APPLY_INPUT_MUTATED')
@@ -142,10 +155,20 @@ def apply_verified(job, codex_receipt, apply_once, readback):
         admitted_ack = json.loads(original_ack_bytes)
     except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
         raise Hold('NATIVE_ACK_NONCANONICAL') from exc
+    readback_job=json.loads(original_job_bytes)
     try:
-        persisted=readback(dict(admitted_job))
+        persisted=readback(readback_job)
     except Exception as exc:
         raise Hold('NATIVE_READBACK_UNKNOWN') from exc
+    # Readback also receives a detached copy. A callback must not rebind or
+    # rewrite the admitted grant/lease context after native application.
+    try:
+        if (canonical(readback_job) != original_job_bytes
+                or canonical(apply_job) != original_job_bytes
+                or canonical(job) != original_job_bytes):
+            raise Hold('NATIVE_READBACK_JOB_CONTEXT_MUTATED')
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('NATIVE_READBACK_JOB_CONTEXT_MUTATED') from exc
     # An altered ACK means UNKNOWN after native apply, not a fresh attempt.
     try:
         if canonical(ack) != original_ack_bytes:
