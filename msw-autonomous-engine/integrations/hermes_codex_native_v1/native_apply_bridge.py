@@ -133,20 +133,35 @@ def apply_verified(job, codex_receipt, apply_once, readback):
         raise Hold('NATIVE_ACK_MISMATCH')
     if _explicit_negative_native_outcome(ack):
         raise Hold('NATIVE_ACK_NEGATIVE_OUTCOME')
+    # Pin the EXACT ACK bytes before crossing into the readback callback.
+    # The callback may hold a reference to the ACK returned by apply_once;
+    # comparing persisted['ack'] to that mutable object after readback could
+    # falsely validate two jointly modified objects as native evidence.
+    try:
+        original_ack_bytes = canonical(ack)
+        admitted_ack = json.loads(original_ack_bytes)
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('NATIVE_ACK_NONCANONICAL') from exc
     try:
         persisted=readback(dict(admitted_job))
     except Exception as exc:
         raise Hold('NATIVE_READBACK_UNKNOWN') from exc
+    # An altered ACK means UNKNOWN after native apply, not a fresh attempt.
+    try:
+        if canonical(ack) != original_ack_bytes:
+            raise Hold('NATIVE_ACK_MUTATED_DURING_READBACK')
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('NATIVE_ACK_MUTATED_DURING_READBACK') from exc
     # Require independent effect readback to bind the same complete identity.
     # Plain transport/storage readback without native identity is not enough.
     if any(job.get(field) != value for field,value in identity.items()):
         raise Hold('JOB_IDENTITY_MUTATED')
     if (not isinstance(persisted,dict)
             or any(persisted.get(field) != identity[field] for field in required)
-            or not _same_canonical_json(persisted.get('ack'), ack)
+            or not _same_canonical_json(persisted.get('ack'), admitted_ack)
             or persisted.get('payload_sha256') != payload_digest
             or persisted.get('effect_verified') is not True):
         raise Hold('NATIVE_EFFECT_NOT_VERIFIED')
     if _explicit_negative_native_outcome(persisted, persisted_effect=True):
         raise Hold('NATIVE_EFFECT_NEGATIVE_OUTCOME')
-    return {'status':'APPLIED_VERIFIED','task_id':job['task_id'],'work_key':job['work_key'],'native_ack':ack,'payload_sha256':payload_digest}
+    return {'status':'APPLIED_VERIFIED','task_id':job['task_id'],'work_key':job['work_key'],'native_ack':admitted_ack,'payload_sha256':payload_digest}
