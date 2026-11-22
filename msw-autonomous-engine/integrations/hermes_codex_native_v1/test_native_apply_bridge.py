@@ -349,6 +349,51 @@ class NativeApplyTests(unittest.TestCase):
                 self.assertEqual(calls, ['apply', 'readback'])
                 self.assertEqual(job['root_id'], 'r')
 
+    def test_admitted_codex_receipt_cannot_change_after_native_callback(self):
+        # A native callback may retain the original caller receipt through a
+        # closure. Without a post-call check, the bridge can return VERIFIED
+        # for a receipt whose admitted content was altered after hashing.
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        for phase, change in (('apply', 'nested'), ('readback', 'text'),
+                              ('readback', 'noncanonical')):
+            job, receipt = fixture()
+            receipt['evidence'] = {'source': 'admitted'}
+            body = {k:v for k,v in receipt.items() if k != 'receipt_sha256'}
+            receipt['receipt_sha256'] = hashlib.sha256(canonical(body)).hexdigest()
+            calls = []
+            saved = {}
+            def mutate_source_receipt():
+                if change == 'nested':
+                    receipt['evidence']['source'] = 'rewritten'
+                elif change == 'text':
+                    receipt['text'] = 'different native result'
+                else:
+                    receipt['evidence']['source'] = {1, 2}
+            def native_apply(j, payload):
+                calls.append('apply')
+                saved['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
+                saved['ack'] = dict(**{k:j[k] for k in fields},
+                                    payload_sha256=saved['digest'],
+                                    status='verified')
+                if phase == 'apply':
+                    mutate_source_receipt()
+                return saved['ack']
+            def native_readback(j):
+                calls.append('readback')
+                if phase == 'readback':
+                    mutate_source_receipt()
+                return dict(**{k:j[k] for k in fields},
+                            payload_sha256=saved['digest'], ack=saved['ack'],
+                            effect_verified=True, state='native_observed')
+            reason = ('CODEX_RECEIPT_MUTATED_DURING_NATIVE_APPLY'
+                      if phase == 'apply'
+                      else 'CODEX_RECEIPT_MUTATED_DURING_NATIVE_READBACK')
+            with self.subTest(phase=phase, change=change):
+                with self.assertRaisesRegex(Hold, reason):
+                    apply_verified(job, receipt, native_apply, native_readback)
+                self.assertEqual(calls, ['apply'] if phase == 'apply'
+                                 else ['apply', 'readback'])
+
     def test_native_callbacks_cannot_mutate_admitted_job_context(self):
         # A lease flag, native grant or nested admission proof changed by a
         # callback is not the original admitted work, even when all five IDs
