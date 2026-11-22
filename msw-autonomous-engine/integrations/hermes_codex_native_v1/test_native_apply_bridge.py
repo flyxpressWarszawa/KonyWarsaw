@@ -297,6 +297,41 @@ class NativeApplyTests(unittest.TestCase):
                 self.assertEqual(calls, ['apply', 'readback'])
                 self.assertEqual(job['root_id'], 'r')
 
+    def test_readback_cannot_mutate_admitted_apply_payload(self):
+        # A native apply callback can retain a reference to its input payload.
+        # A later readback must not mutate that shared object after the
+        # bridge's initial post-apply integrity check and still report success.
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        for change in ('result', 'nested_identity', 'noncanonical'):
+            job, receipt = fixture()
+            saved = {}
+            calls = []
+            def apply_once(j, payload):
+                calls.append('apply')
+                saved['payload'] = payload
+                digest = hashlib.sha256(canonical(payload)).hexdigest()
+                saved['digest'] = digest
+                saved['ack'] = dict(**{k:j[k] for k in fields},
+                                    payload_sha256=digest, status='verified')
+                return saved['ack']
+            def readback(j):
+                calls.append('readback')
+                if change == 'result':
+                    saved['payload']['result'] = 'changed after apply'
+                elif change == 'nested_identity':
+                    saved['payload']['identity']['root_id'] = 'foreign'
+                else:
+                    saved['payload']['identity']['extra'] = {1, 2}
+                return dict(**{k:j[k] for k in fields}, ack=saved['ack'],
+                            payload_sha256=saved['digest'],
+                            effect_verified=True, state='native_observed')
+            with self.subTest(change=change):
+                with self.assertRaisesRegex(
+                        Hold, 'NATIVE_APPLY_INPUT_MUTATED_DURING_READBACK'):
+                    apply_verified(job, receipt, apply_once, readback)
+                self.assertEqual(calls, ['apply', 'readback'])
+                self.assertEqual(job['root_id'], 'r')
+
     def test_ack_mismatch(self):
         job,receipt=fixture()
         with self.assertRaisesRegex(Hold,'NATIVE_ACK_MISMATCH'):
