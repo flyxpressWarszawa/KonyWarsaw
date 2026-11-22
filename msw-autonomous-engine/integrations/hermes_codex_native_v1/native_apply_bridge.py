@@ -96,31 +96,39 @@ def apply_verified(job, codex_receipt, apply_once, readback):
     for field in required:
         if codex_receipt.get(field) != job[field]:
             raise Hold('CODEX_RECEIPT_'+field.upper()+'_MISMATCH')
+    # Freeze the admitted identity before calling native callbacks. Passing a
+    # separate dict prevents an adapter from mutating the caller's job and
+    # making a foreign ACK/readback appear to match the changed identity.
     identity={k:job[k] for k in required}
+    admitted_job=dict(job)
     payload={'identity':identity,'codex_receipt_sha256':codex_receipt['receipt_sha256'],'result':codex_receipt['text']}
     payload_digest=hashlib.sha256(canonical(payload)).hexdigest()
     try:
-        ack=apply_once(job,payload)
+        ack=apply_once(dict(admitted_job),payload)
     except Exception as exc:
         raise Hold('NATIVE_APPLY_UNKNOWN_OUTCOME') from exc
     # A matching task/work key and payload hash are insufficient: a native
     # ACK must also bind the original root, request, and parent, not merely
     # describe some persisted bytes. The authenticated receiver is responsible
     # for issuing this complete record; this check is not a signature verifier.
+    if any(job.get(field) != value for field,value in identity.items()):
+        raise Hold('JOB_IDENTITY_MUTATED')
     if (not isinstance(ack,dict)
-            or any(ack.get(field) != job[field] for field in required)
+            or any(ack.get(field) != identity[field] for field in required)
             or ack.get('payload_sha256') != payload_digest):
         raise Hold('NATIVE_ACK_MISMATCH')
     if _explicit_negative_native_outcome(ack):
         raise Hold('NATIVE_ACK_NEGATIVE_OUTCOME')
     try:
-        persisted=readback(job)
+        persisted=readback(dict(admitted_job))
     except Exception as exc:
         raise Hold('NATIVE_READBACK_UNKNOWN') from exc
     # Require independent effect readback to bind the same complete identity.
     # Plain transport/storage readback without native identity is not enough.
+    if any(job.get(field) != value for field,value in identity.items()):
+        raise Hold('JOB_IDENTITY_MUTATED')
     if (not isinstance(persisted,dict)
-            or any(persisted.get(field) != job[field] for field in required)
+            or any(persisted.get(field) != identity[field] for field in required)
             or not _same_canonical_json(persisted.get('ack'), ack)
             or persisted.get('payload_sha256') != payload_digest
             or persisted.get('effect_verified') is not True):
