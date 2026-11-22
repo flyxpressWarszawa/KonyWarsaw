@@ -152,6 +152,15 @@ def apply_verified(job, codex_receipt, apply_once, readback):
             raise Hold('NATIVE_ACK_MUTATED_DURING_READBACK')
     except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
         raise Hold('NATIVE_ACK_MUTATED_DURING_READBACK') from exc
+    # readback may retain a reference to the original apply payload and change
+    # it after the first post-apply check. Such an alias can make the observed
+    # object diverge from the bytes admitted to native apply. Never convert
+    # this uncertain post-effect state into success or retry it.
+    try:
+        if canonical(payload) != original_payload_bytes:
+            raise Hold('NATIVE_APPLY_INPUT_MUTATED_DURING_READBACK')
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('NATIVE_APPLY_INPUT_MUTATED_DURING_READBACK') from exc
     # Require independent effect readback to bind the same complete identity.
     # Plain transport/storage readback without native identity is not enough.
     if any(job.get(field) != value for field,value in identity.items()):
