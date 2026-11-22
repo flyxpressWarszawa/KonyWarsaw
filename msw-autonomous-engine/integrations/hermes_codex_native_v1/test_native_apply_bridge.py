@@ -518,6 +518,51 @@ class NativeApplyTests(unittest.TestCase):
                 with self.assertRaisesRegex(Hold, 'NATIVE_EFFECT_NEGATIVE_OUTCOME'):
                     apply_verified(job, receipt, accepted, bad_readback)
 
+    def test_explicit_verification_flag_contradictions_fail_closed(self):
+        # A native record cannot say applied in its status and simultaneously
+        # say receipt/native application/effect was NOT verified. This is a
+        # contradiction after the native call: HOLD, never a second apply.
+        job, receipt = fixture()
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        flags = ('receipt_verified', 'native_hermes_ack_verified',
+                 'native_application_verified', 'effect_verified')
+        for flag in flags:
+            for invalid in (False, 0, None):
+                calls = []
+                def negative_ack(j, payload):
+                    calls.append('apply')
+                    return dict(**{k:j[k] for k in fields},
+                                payload_sha256=hashlib.sha256(canonical(payload)).hexdigest(),
+                                status='verified', **{flag:invalid})
+                def forbidden_readback(j):
+                    calls.append('readback')
+                    raise AssertionError('contradictory native ACK was accepted')
+                with self.subTest(stage='ack', flag=flag, invalid=invalid):
+                    with self.assertRaisesRegex(Hold, 'NATIVE_ACK_NEGATIVE_OUTCOME'):
+                        apply_verified(job, receipt, negative_ack, forbidden_readback)
+                    self.assertEqual(calls, ['apply'])
+        for flag in flags:
+            if flag == 'effect_verified':
+                continue  # The persisted-effect gate already requires True.
+            for invalid in (False, 0, None):
+                saved = {}
+                calls = []
+                def accepted_ack(j, payload):
+                    calls.append('apply')
+                    saved['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
+                    saved['ack'] = dict(**{k:j[k] for k in fields},
+                                        payload_sha256=saved['digest'], status='verified')
+                    return saved['ack']
+                def contradicting_readback(j):
+                    calls.append('readback')
+                    return dict(**{k:j[k] for k in fields}, ack=saved['ack'],
+                                payload_sha256=saved['digest'], state='applied',
+                                effect_verified=True, **{flag:invalid})
+                with self.subTest(stage='effect', flag=flag, invalid=invalid):
+                    with self.assertRaisesRegex(Hold, 'NATIVE_EFFECT_NEGATIVE_OUTCOME'):
+                        apply_verified(job, receipt, accepted_ack, contradicting_readback)
+                    self.assertEqual(calls, ['apply', 'readback'])
+
     def test_explicit_negative_ack_cannot_be_treated_as_native_success(self):
         job, receipt = fixture()
         fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
