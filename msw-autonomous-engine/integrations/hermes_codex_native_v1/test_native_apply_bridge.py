@@ -251,6 +251,40 @@ class NativeApplyTests(unittest.TestCase):
             apply_verified(job,receipt,broken,lambda j:None)
         self.assertEqual(len(calls),1)
 
+    def test_numeric_error_does_not_masquerade_as_false_native_error(self):
+        # A real native ACK/effect may report error=0 or 0.0. Python considers
+        # both equal to False, but neither is an authenticated no-error flag.
+        job, receipt = fixture()
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        for bad_error in (0, 0.0):
+            with self.subTest(stage='ack', error=bad_error):
+                calls = []
+                def apply_once(j, payload):
+                    calls.append('apply')
+                    return dict(**{k:j[k] for k in fields},
+                                payload_sha256=hashlib.sha256(canonical(payload)).hexdigest(),
+                                status='verified', error=bad_error)
+                def no_readback(j):
+                    calls.append('readback')
+                    raise AssertionError('negative ACK entered readback')
+                with self.assertRaisesRegex(Hold, 'NATIVE_ACK_NEGATIVE_OUTCOME'):
+                    apply_verified(job, receipt, apply_once, no_readback)
+                self.assertEqual(calls, ['apply'])
+            with self.subTest(stage='effect', error=bad_error):
+                state = {}
+                def accepted(j, payload):
+                    state['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
+                    state['ack'] = dict(**{k:j[k] for k in fields},
+                                        payload_sha256=state['digest'], status='verified')
+                    return state['ack']
+                def bad_readback(j):
+                    return dict(**{k:j[k] for k in fields},
+                                ack=state['ack'], payload_sha256=state['digest'],
+                                effect_verified=True, state='native_observed',
+                                error=bad_error)
+                with self.assertRaisesRegex(Hold, 'NATIVE_EFFECT_NEGATIVE_OUTCOME'):
+                    apply_verified(job, receipt, accepted, bad_readback)
+
     def test_explicit_negative_ack_cannot_be_treated_as_native_success(self):
         job, receipt = fixture()
         fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
