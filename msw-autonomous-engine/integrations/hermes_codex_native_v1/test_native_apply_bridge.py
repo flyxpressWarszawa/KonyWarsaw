@@ -50,6 +50,43 @@ class NativeApplyTests(unittest.TestCase):
                     apply_verified(job, changed, forbidden, forbidden)
         self.assertEqual(calls, [])
 
+    def test_native_result_utf8_byte_limit_before_effect(self):
+        # The native entrypoint must honor the same 16 KiB limit as the
+        # direct SQLite report adapter, even for digest-valid receipts.
+        # A multibyte character must count by encoded UTF-8 byte length.
+        job, receipt = fixture()
+        calls = []
+        def forbidden(*_):
+            calls.append('native')
+            raise AssertionError('oversized result reached native callback')
+        def with_text(text):
+            changed = dict(receipt, text=text,
+                           response_sha256=hashlib.sha256(text.encode('utf-8')).hexdigest())
+            changed.pop('receipt_sha256', None)
+            changed['receipt_sha256'] = hashlib.sha256(canonical(changed)).hexdigest()
+            return changed
+        for oversized in ('A' * 16385, '\u017c' * 8193):
+            with self.subTest(utf8_bytes=len(oversized.encode('utf-8'))):
+                with self.assertRaisesRegex(Hold, 'CODEX_RESULT_TOO_LARGE'):
+                    apply_verified(job, with_text(oversized), forbidden, forbidden)
+        self.assertEqual(calls, [])
+        # At exactly 16,384 bytes, this guard must not reject otherwise
+        # admissible work. Native ACK and actual effect readback remain required.
+        exact = with_text('\u017c' * 8192)
+        observed = {}
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        def apply_once(j, payload):
+            observed['digest'] = hashlib.sha256(canonical(payload)).hexdigest()
+            observed['ack'] = dict(**{k: j[k] for k in fields},
+                                   payload_sha256=observed['digest'], status='verified')
+            return observed['ack']
+        def readback(j):
+            return dict(**{k: j[k] for k in fields}, ack=observed['ack'],
+                        payload_sha256=observed['digest'],
+                        effect_verified=True, state='native_observed')
+        self.assertEqual(apply_verified(job, exact, apply_once, readback)['status'],
+                         'APPLIED_VERIFIED')
+
     def test_verified_apply_and_readback(self):
         job,receipt=fixture()
         saved={}
