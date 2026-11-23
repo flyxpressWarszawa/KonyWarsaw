@@ -230,6 +230,26 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                         "task_id": self.job["task_id"]}, self.directory)
         self.assertEqual(state["result_sha256"], hashlib.sha256(b"ok").hexdigest())
 
+    def test_invisible_only_result_rejected_before_sqlite_access(self):
+        # A direct SQLite caller bypasses native_apply_bridge. A valid SHA for
+        # non-actionable Unicode must not consume the original leased task.
+        for raw in ("\u200b", "\ufeff", "\u2060", "\u200e\u200f",
+                    "\u200d\u0000", "\t \r\n"):
+            with self.subTest(text=repr(raw)):
+                proof = receipt(raw, self.job)
+                with patch.object(module, "_connection",
+                                  side_effect=AssertionError("SQLite accessed")) as connect:
+                    with patch("msw_engine.hermes_chat_bridge.handle",
+                               side_effect=AssertionError("report submitted")) as send:
+                        with self.assertRaisesRegex(module.ApplyHold, "result_invalid"):
+                            module.apply_once(self.directory, self.job, self.lease, proof)
+                        connect.assert_not_called()
+                        send.assert_not_called()
+                state = handle({"schema": SCHEMA, "operation": "status",
+                                "task_id": self.job["task_id"]}, self.directory)
+                self.assertEqual(state["state"], "leased")
+                self.assertIsNone(state["result_sha256"])
+
     def test_noninteger_tools_rejected_before_storage(self):
         # Direct adapter imports must enforce the same exact integer-zero guard
         # as native_apply_bridge; a recomputed receipt digest is not sufficient.
