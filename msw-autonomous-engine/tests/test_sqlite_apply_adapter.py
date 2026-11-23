@@ -546,7 +546,7 @@ class BackendIsolationTests(unittest.TestCase):
         original_bytes = database.read_bytes()
         parked = Path(self.tmp.name) / "original-mailbox"
         replacement = Path(self.tmp.name) / "replacement-mailbox"
-        replacement_bytes = b"SQLite format 3\\x00" + b"foreign-private-mailbox"
+        replacement_bytes = b"SQLite format 3\x00" + b"foreign-private-mailbox"
         replacement.write_bytes(replacement_bytes)
         replacement.chmod(0o600)
         actual_read = os.read
