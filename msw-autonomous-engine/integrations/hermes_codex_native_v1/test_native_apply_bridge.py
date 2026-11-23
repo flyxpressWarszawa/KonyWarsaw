@@ -38,8 +38,8 @@ class NativeApplyTests(unittest.TestCase):
         def forbidden(*_):
             calls.append('unexpected_native_call')
             raise AssertionError('invisible-only Codex result reached native apply')
-        for text in ('\\u200b', '\\ufeff', '\\u200e\\u200f',
-                     '\\u2060', '\\u200d\\u200b\\t'):
+        for text in ('\u200b', '\ufeff', '\u200e\u200f',
+                     '\u2060', '\u200d\u200b\t'):
             with self.subTest(text_repr=repr(text)):
                 changed = dict(receipt, text=text,
                                response_sha256=hashlib.sha256(text.encode('utf-8')).hexdigest())
