@@ -77,6 +77,45 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
         self.assertEqual(state["state"], "reported")
 
 
+    def test_pathlike_storage_pin_prevents_cross_mailbox_report(self):
+        # The preflight normalizes a caller PathLike just once. A hostile or
+        # buggy __fspath__ may otherwise return a different existing mailbox
+        # on the later SQLite read, report and readback calls. Both mailboxes
+        # have an identical leased task: only the admitted original may change.
+        original_db = self.directory / "hermes-chat-loop" / "exchange.sqlite3"
+        other_root = self.directory / "shadow-mailbox"
+        other_dir = other_root / "hermes-chat-loop"
+        other_dir.mkdir(parents=True, mode=0o700)
+        other_db = other_dir / "exchange.sqlite3"
+        with closing(sqlite3.connect(original_db)) as source, closing(sqlite3.connect(other_db)) as target:
+            source.backup(target)
+        other_db.chmod(0o600)
+
+        class SwitchingPath:
+            def __init__(self, first, later):
+                self.first, self.later, self.calls = first, later, 0
+
+            def __fspath__(self):
+                self.calls += 1
+                return os.fspath(self.first if self.calls == 1 else self.later)
+
+        supplied = SwitchingPath(self.directory, other_root)
+        answer = "pinned original mailbox"
+        with patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}):
+            outcome = module.apply_once(supplied, self.job, self.lease,
+                                        receipt(answer, self.job))
+        self.assertEqual(supplied.calls, 1, "untrusted PathLike resolved again after preflight")
+        self.assertEqual(outcome["status"], "STORAGE_REPORT_VERIFIED_NATIVE_UNVERIFIED")
+        self.assertFalse(outcome["native_hermes_ack_verified"])
+        with closing(sqlite3.connect(original_db)) as db:
+            original = db.execute("SELECT state,result FROM jobs WHERE id=?",
+                                  (self.job["task_id"],)).fetchone()
+        with closing(sqlite3.connect(other_db)) as db:
+            shadow = db.execute("SELECT state,result FROM jobs WHERE id=?",
+                                (self.job["task_id"],)).fetchone()
+        self.assertEqual(original, ("reported", answer))
+        self.assertEqual(shadow, ("leased", None))
+
     def test_sqlite_initial_read_failure_is_stable_hold_without_report(self):
         # A plausible SQLite header does not prove all pages can be read.
         # A raw DatabaseError before report must not invite another execution.
