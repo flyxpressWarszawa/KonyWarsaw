@@ -435,6 +435,33 @@ class BackendIsolationTests(unittest.TestCase):
                     routed.assert_not_called()
                 self.assertEqual(database.read_bytes(), original_bytes)
 
+    def test_malformed_filesystem_path_holds_without_open_or_report(self):
+        # An embedded NUL or an unencodable Unicode scalar can raise from
+        # pathlib.lstat(). These are stable admission denials, never a reason
+        # for the caller to retry or select a different storage backend.
+        self.seed_existing_lease()
+        original_db = self.root / "hermes-chat-loop" / "exchange.sqlite3"
+        original_bytes = original_db.read_bytes()
+        for malformed in (str(self.root) + "\\x00-other",
+                          str(self.root) + "\\ud800"):
+            malformed = malformed.replace("\\x00", "\x00").replace("\\ud800", "\ud800")
+            with self.subTest(kind=repr(malformed[-8:])):
+                with (mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+                      mock.patch.object(module, "_connection",
+                                        side_effect=AssertionError("SQLite opened")) as connection,
+                      mock.patch.object(bridge, "handle",
+                                        side_effect=AssertionError("report attempted")) as routed):
+                    with self.assertRaisesRegex(module.ApplyHold,
+                                                "existing_sqlite_storage_required"):
+                        module.apply_once(malformed, self.job, self.token, self.proof)
+                    connection.assert_not_called()
+                    routed.assert_not_called()
+                self.assertEqual(original_db.read_bytes(), original_bytes)
+        with closing(bridge._connection(self.root)) as db:
+            row = db.execute("SELECT state,result,result_sha FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), ("leased", None, None))
+
     def test_sqlite_backend_missing_storage_never_creates_database(self):
         # A typo/wrong working directory must not cause the reporting adapter
         # to initialize a second empty SQLite mailbox.
