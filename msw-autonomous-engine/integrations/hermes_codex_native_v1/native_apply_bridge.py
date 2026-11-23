@@ -106,7 +106,7 @@ def apply_verified(job, codex_receipt, apply_once, readback):
             or codex_receipt['tools'] != 0
             or not isinstance(codex_receipt.get('text'),str)):
         raise Hold('CODEX_RECEIPT_UNSAFE')
-    body={k:v for k,v in codex_receipt.items() if k!='receipt_sha256'}
+    # A digest-valid but blank Codex result is not an actionable native effect.\n    # Reject it before apply_once; do not consume a lease or persist an empty effect.\n    if not codex_receipt['text'].strip():\n        raise Hold('CODEX_RESULT_EMPTY')\n    body={k:v for k,v in codex_receipt.items() if k!='receipt_sha256'}
     # External evidence may contain an invalid Unicode scalar or non-JSON
     # object. Refuse it as HOLD rather than leaking an uncaught encoder error.
     # All verification remains BEFORE apply_once (no native side effects).
