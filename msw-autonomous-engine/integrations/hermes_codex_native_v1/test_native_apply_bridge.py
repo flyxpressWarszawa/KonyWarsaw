@@ -30,6 +30,26 @@ class NativeApplyTests(unittest.TestCase):
                                    receipt, forbidden, forbidden)
         self.assertEqual(calls, [])
 
+    def test_invisible_only_codex_result_never_reaches_native_apply(self):
+        # A freshly hash-valid result made of Unicode format controls is not
+        # actionable text. str.strip() alone previously admitted these bytes.
+        job, receipt = fixture()
+        calls = []
+        def forbidden(*_):
+            calls.append('unexpected_native_call')
+            raise AssertionError('invisible-only Codex result reached native apply')
+        for text in ('\\u200b', '\\ufeff', '\\u200e\\u200f',
+                     '\\u2060', '\\u200d\\u200b\\t'):
+            with self.subTest(text_repr=repr(text)):
+                changed = dict(receipt, text=text,
+                               response_sha256=hashlib.sha256(text.encode('utf-8')).hexdigest())
+                changed['receipt_sha256'] = hashlib.sha256(canonical(
+                    {k: v for k, v in changed.items()
+                     if k != 'receipt_sha256'})).hexdigest()
+                with self.assertRaisesRegex(Hold, 'CODEX_RESULT_EMPTY'):
+                    apply_verified(job, changed, forbidden, forbidden)
+        self.assertEqual(calls, [])
+
     def test_verified_apply_and_readback(self):
         job,receipt=fixture()
         saved={}
