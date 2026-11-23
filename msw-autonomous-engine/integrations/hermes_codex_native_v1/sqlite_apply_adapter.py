@@ -115,7 +115,16 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # reports an EXISTING leased task and must not bootstrap a fresh database
     # when a caller points at the wrong directory. This is a preflight only:
     # the subsequent transactional handler remains the authority for lease/CAS.
-    storage_base = Path(directory)
+    # The native SQLite mailbox is an exact filesystem target. Relative
+    # paths depend on the caller's working directory; a '..' component can
+    # retarget a different existing mailbox before _connection() opens it.
+    # Refuse either alias before reading or changing any database state.
+    try:
+        storage_base = Path(directory)
+    except (TypeError, ValueError) as exc:
+        raise ApplyHold("existing_sqlite_storage_required") from exc
+    if not storage_base.is_absolute() or ".." in storage_base.parts:
+        raise ApplyHold("existing_sqlite_storage_required")
     storage_root = storage_base / "hermes-chat-loop"
     storage_file = storage_root / "exchange.sqlite3"
     # Checking only the last two path components misses a symlink in
