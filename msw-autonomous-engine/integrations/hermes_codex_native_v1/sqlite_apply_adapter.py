@@ -192,11 +192,22 @@ def apply_once(directory, job, lease_token, codex_receipt):
         try:
             opened = os.fstat(fd)
             header = os.read(fd, 16)
+            # A path-safe open is not sufficient if the same inode changes
+            # permissions, length, or contents DURING the bounded read.
+            # Compare the open descriptor twice; never trust an old fstat.
+            after_header = os.fstat(fd)
         finally:
             os.close(fd)
     except OSError as exc:
         raise ApplyHold("existing_sqlite_storage_required") from exc
-    if (opened.st_dev != file_meta.st_dev
+    # Detect in-place edits/permission changes between fstat and header read.
+    # This is an intra-open integrity check only; the subsequent SQLite
+    # _connection()/report still require the native owner's inode/lease fence.
+    observed_fields = ("st_dev", "st_ino", "st_uid", "st_mode", "st_nlink",
+                       "st_size", "st_mtime_ns", "st_ctime_ns")
+    if (any(getattr(opened, key) != getattr(after_header, key)
+            for key in observed_fields)
+            or opened.st_dev != file_meta.st_dev
             or opened.st_ino != file_meta.st_ino
             or not stat.S_ISREG(opened.st_mode)
             or opened.st_uid != os.geteuid()
