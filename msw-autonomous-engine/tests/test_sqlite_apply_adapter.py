@@ -485,7 +485,7 @@ class BackendIsolationTests(unittest.TestCase):
         database = self.root / "hermes-chat-loop" / "exchange.sqlite3"
         original = database.read_bytes()
         alternate = Path(self.tmp.name) / "another-private-mailbox"
-        alternate.write_bytes(b"SQLite format 3\\x00" + b"unrelated")
+        alternate.write_bytes(b"SQLite format 3\x00" + b"unrelated")
         alternate.chmod(0o600)
         actual_open = os.open
 
@@ -506,7 +506,7 @@ class BackendIsolationTests(unittest.TestCase):
             connection.assert_not_called()
             routed.assert_not_called()
         self.assertEqual(database.read_bytes(), original)
-        self.assertEqual(alternate.read_bytes(), b"SQLite format 3\\x00" + b"unrelated")
+        self.assertEqual(alternate.read_bytes(), b"SQLite format 3\x00" + b"unrelated")
 
     def test_writable_mailbox_base_holds_before_sqlite_open(self):
         # A private database is not safe inside a caller-selected directory
