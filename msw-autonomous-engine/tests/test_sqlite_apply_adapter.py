@@ -107,6 +107,47 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                              (self.job["task_id"],)).fetchone()
         self.assertEqual(tuple(row), ("leased", None, None))
 
+    def test_backend_drift_during_path_conversion_holds_before_report(self):
+        # A PathLike callback can change the routing setting after the first
+        # admission. The adapter must not report to the other backend.
+        class SwitchingBackend:
+            def __fspath__(inner):
+                os.environ["MSW_HERMES_CHAT_BACKEND"] = "github"
+                return os.fspath(self.directory)
+
+        verified = receipt("original backend", self.job)
+        with (patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              patch.object(module, "_connection", side_effect=AssertionError("SQLite opened")) as opened,
+              patch.object(bridge, "handle", side_effect=AssertionError("report attempted")) as routed):
+            with self.assertRaisesRegex(module.ApplyHold, "sqlite_backend_required"):
+                module.apply_once(SwitchingBackend(), self.job, self.lease, verified)
+            opened.assert_not_called()
+            routed.assert_not_called()
+        with closing(bridge._connection(self.directory)) as db:
+            row = db.execute("SELECT state,result,result_sha FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), ("leased", None, None))
+
+    def test_backend_drift_after_sqlite_read_holds_before_report(self):
+        verified = receipt("original backend", self.job)
+        real_connection = module._connection
+
+        def changing_connection(directory):
+            db = real_connection(directory)
+            os.environ["MSW_HERMES_CHAT_BACKEND"] = "github"
+            return db
+
+        with (patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              patch.object(module, "_connection", side_effect=changing_connection),
+              patch.object(bridge, "handle", side_effect=AssertionError("report attempted")) as routed):
+            with self.assertRaisesRegex(module.ApplyHold, "sqlite_backend_required"):
+                module.apply_once(self.directory, self.job, self.lease, verified)
+            routed.assert_not_called()
+        with closing(bridge._connection(self.directory)) as db:
+            row = db.execute("SELECT state,result,result_sha FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), ("leased", None, None))
+
     def test_job_identity_frozen_before_pathlike_callback(self):
         # Caller mapping is not a durable admission record. A path callback
         # can mutate it after the receipt is verified, before the SQLite read.
