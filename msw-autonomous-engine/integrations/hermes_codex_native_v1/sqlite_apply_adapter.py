@@ -78,14 +78,21 @@ def apply_once(directory, job, lease_token, codex_receipt):
     if os.environ.get("MSW_HERMES_CHAT_BACKEND", "sqlite") != "sqlite":
         raise ApplyHold("sqlite_backend_required")
     fields = ("root_id", "task_id", "request_id", "work_key", "parent_id")
-    if not isinstance(job, dict) or any(not isinstance(job.get(k), str) or not job[k] for k in fields):
+    # Freeze the caller-owned identity before any path conversion or I/O.
+    # A PathLike callback or another thread can mutate the original mapping
+    # after receipt validation. All row admission, report and readback must
+    # refer to the same verified identity, not later values from that mapping.
+    if type(job) is not dict:
+        raise ApplyHold("invalid_identity")
+    job = job.copy()
+    if any(type(job.get(k)) is not str or not job[k] for k in fields):
         raise ApplyHold("invalid_identity")
     # The SQLite jobs table does not store root_id or request_id. In addition
     # to the five receipt IDs above, compare these immutable submit/claim
     # fields against the PERSISTED original row (not another caller echo).
     # This narrows cross-request confusion; it is NOT native root attestation.
     origin = ("conversation_key", "executor", "request_sha256")
-    if (any(not isinstance(job.get(k), str) or not job[k] for k in origin)
+    if (any(type(job.get(k)) is not str or not job[k] for k in origin)
             or re.fullmatch(r"[0-9a-f]{64}", job["request_sha256"]) is None):
         raise ApplyHold("origin_binding_required")
     if not isinstance(lease_token, str) or not 20 <= len(lease_token) <= 256:
