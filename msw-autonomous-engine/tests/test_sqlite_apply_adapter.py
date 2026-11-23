@@ -491,6 +491,8 @@ class BackendIsolationTests(unittest.TestCase):
 
         def open_other_inode(path, flags, *args, **kwargs):
             if os.fspath(path) == os.fspath(database):
+                self.assertTrue(flags & os.O_NONBLOCK, "raced FIFO could block open")
+                self.assertTrue(flags & os.O_NOFOLLOW, "raced symlink could redirect")
                 return actual_open(alternate, flags, *args, **kwargs)
             return actual_open(path, flags, *args, **kwargs)
 
