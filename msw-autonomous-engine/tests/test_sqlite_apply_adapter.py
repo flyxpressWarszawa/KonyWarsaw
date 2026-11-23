@@ -402,6 +402,29 @@ class BackendIsolationTests(unittest.TestCase):
                 routed.assert_not_called()
         self.assertEqual(database.read_bytes(), b"sentinel-not-a-real-database")
 
+    def test_sqlite_backend_refuses_hardlinked_storage_before_connection(self):
+        # A second hard link aliases the same inode without any symlink.
+        # The preflight must refuse it before opening or reporting to SQLite.
+        other = Path(self.tmp.name) / "original-exchange.sqlite3"
+        other.write_bytes(b"hardlink-sentinel-database-bytes")
+        storage_root = self.root / "hermes-chat-loop"
+        storage_root.mkdir(parents=True)
+        database = storage_root / "exchange.sqlite3"
+        os.link(other, database)
+        self.assertEqual(database.stat().st_nlink, 2)
+        with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}), \
+                mock.patch.object(module, "_connection",
+                                  side_effect=AssertionError("SQLite opened")) as connection, \
+                mock.patch.object(bridge, "handle",
+                                  side_effect=AssertionError("report attempted")) as routed:
+            with self.assertRaisesRegex(module.ApplyHold,
+                                        "existing_sqlite_storage_required"):
+                self.apply()
+            connection.assert_not_called()
+            routed.assert_not_called()
+        self.assertEqual(other.read_bytes(), b"hardlink-sentinel-database-bytes")
+        self.assertEqual(database.read_bytes(), other.read_bytes())
+
     def test_github_backend_rejected_without_creating_sqlite(self):
         with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "github"}):
             try:
