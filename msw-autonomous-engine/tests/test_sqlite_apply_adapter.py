@@ -425,6 +425,35 @@ class BackendIsolationTests(unittest.TestCase):
         self.assertEqual(other.read_bytes(), b"hardlink-sentinel-database-bytes")
         self.assertEqual(database.read_bytes(), other.read_bytes())
 
+    def test_sqlite_backend_requires_private_owned_storage_before_connection(self):
+        # The bridge's _connection chmods and may migrate the selected file.
+        # A different actor's world-readable/writable mailbox, or its parent,
+        # must never be opened or silently "fixed" by that routine.
+        storage_root = self.root / "hermes-chat-loop"
+        storage_root.mkdir(parents=True)
+        database = storage_root / "exchange.sqlite3"
+        database.write_bytes(b"private-storage-sentinel")
+        for target, mode in ((database, 0o644), (database, 0o666),
+                             (storage_root, 0o755)):
+            with self.subTest(target=target.name, mode=oct(mode)):
+                storage_root.chmod(0o700)
+                database.chmod(0o600)
+                target.chmod(mode)
+                with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}), \\
+                        mock.patch.object(module, "_connection",
+                                          side_effect=AssertionError("SQLite opened")) as connection, \\
+                        mock.patch.object(bridge, "handle",
+                                          side_effect=AssertionError("report attempted")) as routed:
+                    with self.assertRaisesRegex(module.ApplyHold,
+                                                "existing_sqlite_storage_required"):
+                        self.apply()
+                    connection.assert_not_called()
+                    routed.assert_not_called()
+                self.assertEqual(database.read_bytes(), b"private-storage-sentinel")
+                self.assertEqual(target.stat().st_mode & 0o777, mode)
+        storage_root.chmod(0o700)
+        database.chmod(0o600)
+
     def test_github_backend_rejected_without_creating_sqlite(self):
         with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "github"}):
             try:
