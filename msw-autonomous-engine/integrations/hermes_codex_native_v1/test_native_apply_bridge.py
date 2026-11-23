@@ -94,7 +94,7 @@ class NativeApplyTests(unittest.TestCase):
         def unexpected(*args):
             calls.append(1)
             raise AssertionError('blank result reached native callback')
-        for blank in ('', ' ', '\\t\\n'):
+        for blank in ('', ' ', '\t\n'):
             modified = dict(receipt, text=blank,
                             response_sha256=hashlib.sha256(blank.encode('utf-8')).hexdigest())
             modified.pop('receipt_sha256')
