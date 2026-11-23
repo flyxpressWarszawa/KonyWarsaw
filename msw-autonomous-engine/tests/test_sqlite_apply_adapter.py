@@ -121,6 +121,31 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
         self.assertEqual(state["result_sha256"], digest)
         # No native ACK or second SQLite report was issued by this adapter.
 
+    def test_rejected_origin_readonly_preflight_does_not_migrate_native_schema(self):
+        # The native bridge's _connection() can CREATE missing indexes even
+        # when the subsequent origin check rejects this task. Admission and
+        # independent readback must be read-only until an authorized report.
+        mailbox = self.directory / "hermes-chat-loop" / "exchange.sqlite3"
+        with closing(bridge._connection(self.directory)) as db:
+            db.execute("DROP INDEX ix_jobs_state")
+        changed = dict(self.job, conversation_key="foreign-conversation-0001")
+        with patch.object(bridge, "handle", side_effect=AssertionError("report attempted")) as routed:
+            with self.assertRaisesRegex(module.ApplyHold, "persisted_origin_mismatch"):
+                module.apply_once(self.directory, changed, self.lease,
+                                  receipt("read-only inspection", changed))
+            routed.assert_not_called()
+        # Inspect without bridge._connection(), which would recreate the index.
+        with sqlite3.connect(mailbox) as db:
+            index = db.execute(
+                "SELECT name FROM sqlite_master WHERE type='index' AND name='ix_jobs_state'"
+            ).fetchone()
+            row = db.execute(
+                "SELECT state,result,result_sha FROM jobs WHERE id=?",
+                (self.job["task_id"],)
+            ).fetchone()
+        self.assertIsNone(index, "read-only admission silently recreated an index")
+        self.assertEqual(row, ("leased", None, None))
+
     def test_original_sqlite_submit_origin_must_match_before_report(self):
         # Exactly the original persisted submit request, mailbox and executor
         # may be reported. A forged but internally matching Codex receipt
