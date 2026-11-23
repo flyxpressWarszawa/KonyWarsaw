@@ -454,6 +454,60 @@ class BackendIsolationTests(unittest.TestCase):
         storage_root.chmod(0o700)
         database.chmod(0o600)
 
+    def test_empty_or_malformed_private_mailbox_holds_before_sqlite_open(self):
+        # An existing private pathname is not evidence of the original DB.
+        # Refuse zero-length and non-SQLite bytes without opening or migrating.
+        self.root.mkdir()
+        storage = self.root / "hermes-chat-loop"
+        storage.mkdir(mode=0o700)
+        database = storage / "exchange.sqlite3"
+        for bad_bytes in (b"", b"not-sqlite-original-mailbox"):
+            with self.subTest(contents=bad_bytes):
+                database.write_bytes(bad_bytes)
+                database.chmod(0o600)
+                with (mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+                      mock.patch.object(module, "_connection",
+                                        side_effect=AssertionError("SQLite opened")) as connection,
+                      mock.patch.object(bridge, "handle",
+                                        side_effect=AssertionError("report attempted")) as routed):
+                    with self.assertRaisesRegex(module.ApplyHold,
+                                                "existing_sqlite_storage_required"):
+                        self.apply()
+                    connection.assert_not_called()
+                    routed.assert_not_called()
+                self.assertEqual(database.read_bytes(), bad_bytes)
+
+    def test_private_mailbox_inode_substitution_during_open_holds(self):
+        # If the path changes between lstat and the guarded header open,
+        # fstat must reject the wrong inode. This does not claim a full
+        # race-free SQLite/open transaction or native fencing.
+        self.seed_existing_lease()
+        database = self.root / "hermes-chat-loop" / "exchange.sqlite3"
+        original = database.read_bytes()
+        alternate = Path(self.tmp.name) / "another-private-mailbox"
+        alternate.write_bytes(b"SQLite format 3\\x00" + b"unrelated")
+        alternate.chmod(0o600)
+        actual_open = os.open
+
+        def open_other_inode(path, flags, *args, **kwargs):
+            if os.fspath(path) == os.fspath(database):
+                return actual_open(alternate, flags, *args, **kwargs)
+            return actual_open(path, flags, *args, **kwargs)
+
+        with (mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              mock.patch.object(module.os, "open", side_effect=open_other_inode),
+              mock.patch.object(module, "_connection",
+                                side_effect=AssertionError("SQLite opened")) as connection,
+              mock.patch.object(bridge, "handle",
+                                side_effect=AssertionError("report attempted")) as routed):
+            with self.assertRaisesRegex(module.ApplyHold,
+                                        "existing_sqlite_storage_required"):
+                self.apply()
+            connection.assert_not_called()
+            routed.assert_not_called()
+        self.assertEqual(database.read_bytes(), original)
+        self.assertEqual(alternate.read_bytes(), b"SQLite format 3\\x00" + b"unrelated")
+
     def test_writable_mailbox_base_holds_before_sqlite_open(self):
         # A private database is not safe inside a caller-selected directory
         # writable by another UID. Opening it can follow a swapped pathname.
