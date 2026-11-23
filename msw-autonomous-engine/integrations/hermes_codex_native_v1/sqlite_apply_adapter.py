@@ -13,6 +13,7 @@ import re
 import time
 from contextlib import closing
 from pathlib import Path
+from unicodedata import category
 
 from msw_engine.hermes_chat_bridge import _connection, _sha, _id
 
@@ -85,7 +86,13 @@ def apply_once(directory, job, lease_token, codex_receipt):
         # bool(False) and float(0.0) compare equal to 0; neither proves no tools.
         raise ApplyHold("receipt_unsafe")
     result = codex_receipt.get("text")
-    if not isinstance(result, str) or not result.strip():
+    # Direct SQLite entrypoint must enforce the same actionable-result gate as
+    # native_apply_bridge: strip() alone accepts Unicode Cf controls (BOM,
+    # zero-width space, bidi marks) as a hash-valid but content-free result.
+    # Refuse before touching the SQLite database or the existing report path.
+    if not isinstance(result, str) or not any(
+        not (ch.isspace() or category(ch) in ("Cf", "Cc")) for ch in result
+    ):
         raise ApplyHold("result_invalid")
     # This direct adapter is callable without the public guarded entrypoint.
     # An unpaired Unicode surrogate, NaN/Infinity, non-JSON object, or cyclic
