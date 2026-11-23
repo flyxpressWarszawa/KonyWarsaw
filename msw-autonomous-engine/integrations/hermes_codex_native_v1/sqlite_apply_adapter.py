@@ -178,6 +178,30 @@ def apply_once(directory, job, lease_token, codex_receipt):
             or storage_root.is_symlink() or storage_file.is_symlink()
             or not private_storage):
         raise ApplyHold("existing_sqlite_storage_required")
+    # An existing private filename alone is not an existing SQLite mailbox.
+    # _connection() can initialize/migrate a zero-byte or non-SQLite file;
+    # refuse damaged/wrong storage without mutating it or submitting report.
+    # O_NOFOLLOW plus fstat also rejects an inode swapped after lstat but
+    # before the header read. This still is NOT a native atomic inode fence
+    # across the later SQLite open: the existing owner must enforce that.
+    try:
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+        fd = os.open(storage_file, flags)
+        try:
+            opened = os.fstat(fd)
+            header = os.read(fd, 16)
+        finally:
+            os.close(fd)
+    except OSError as exc:
+        raise ApplyHold("existing_sqlite_storage_required") from exc
+    if (opened.st_dev != file_meta.st_dev
+            or opened.st_ino != file_meta.st_ino
+            or not stat.S_ISREG(opened.st_mode)
+            or opened.st_uid != os.geteuid()
+            or opened.st_nlink != 1
+            or opened.st_mode & 0o077
+            or header != b"SQLite format 3\x00"):
+        raise ApplyHold("existing_sqlite_storage_required")
     from msw_engine.hermes_chat_bridge import SCHEMA, handle
     # The existing report operation owns the SQLite BEGIN IMMEDIATE transaction,
     # validates the lease, and enforces idempotency.
