@@ -510,6 +510,43 @@ class BackendIsolationTests(unittest.TestCase):
         self.assertEqual(database.read_bytes(), original)
         self.assertEqual(alternate.read_bytes(), b"SQLite format 3\x00" + b"unrelated")
 
+    def test_private_mailbox_mode_change_during_header_read_holds(self):
+        # The same inode may become unsafe after the first fstat but before
+        # the header read returns. An old descriptor snapshot must not admit
+        # a subsequently world-readable SQLite mailbox for reporting.
+        self.seed_existing_lease()
+        database = self.root / "hermes-chat-loop" / "exchange.sqlite3"
+        original_header = database.read_bytes()[:16]
+        actual_read = os.read
+        calls = []
+
+        def read_then_relax_mode(fd, size):
+            header = actual_read(fd, size)
+            if size == 16:
+                os.fchmod(fd, 0o644)
+                calls.append("permissions_changed")
+            return header
+
+        with (mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              mock.patch.object(module.os, "read", side_effect=read_then_relax_mode),
+              mock.patch.object(module, "_connection",
+                                side_effect=AssertionError("SQLite opened")) as connection,
+              mock.patch.object(bridge, "handle",
+                                side_effect=AssertionError("report attempted")) as routed):
+            with self.assertRaisesRegex(module.ApplyHold,
+                                        "existing_sqlite_storage_required"):
+                self.apply()
+            connection.assert_not_called()
+            routed.assert_not_called()
+        self.assertEqual(calls, ["permissions_changed"])
+        self.assertEqual(database.read_bytes()[:16], original_header)
+        self.assertEqual(database.stat().st_mode & 0o777, 0o644)
+        database.chmod(0o600)
+        with closing(bridge._connection(self.root)) as db:
+            row = db.execute("SELECT state,result,result_sha FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), ("leased", None, None))
+
     def test_writable_mailbox_base_holds_before_sqlite_open(self):
         # A private database is not safe inside a caller-selected directory
         # writable by another UID. Opening it can follow a swapped pathname.
