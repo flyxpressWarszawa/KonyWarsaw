@@ -609,6 +609,34 @@ class BackendIsolationTests(unittest.TestCase):
         self.assertEqual(other.read_bytes(), b"hardlink-sentinel-database-bytes")
         self.assertEqual(database.read_bytes(), other.read_bytes())
 
+    def test_untrusted_writable_ancestor_refused_before_report(self):
+        # The selected mailbox itself is private, but an untrusted ancestor
+        # without sticky protection could be renamed between checks and open.
+        unsafe_parent = Path(self.tmp.name) / "untrusted-parent"
+        unsafe_parent.mkdir(mode=0o700)
+        self.root = unsafe_parent / "engine"
+        self.seed_existing_lease()
+        mailbox = self.root / "hermes-chat-loop" / "exchange.sqlite3"
+        self.root.chmod(0o700)
+        mailbox.parent.chmod(0o700)
+        mailbox.chmod(0o600)
+        original_bytes = mailbox.read_bytes()
+        for mode in (0o770, 0o777):
+            with self.subTest(ancestor_mode=oct(mode)):
+                unsafe_parent.chmod(mode)
+                with (mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+                      mock.patch.object(module, "_connection",
+                                        side_effect=AssertionError("SQLite opened")) as connection,
+                      mock.patch.object(bridge, "handle",
+                                        side_effect=AssertionError("report attempted")) as routed):
+                    with self.assertRaisesRegex(module.ApplyHold,
+                                                "existing_sqlite_storage_required"):
+                        self.apply()
+                    connection.assert_not_called()
+                    routed.assert_not_called()
+                self.assertEqual(mailbox.read_bytes(), original_bytes)
+        unsafe_parent.chmod(0o700)
+
     def test_sqlite_backend_requires_private_owned_storage_before_connection(self):
         # The bridge's _connection chmods and may migrate the selected file.
         # A different actor's world-readable/writable mailbox, or its parent,
