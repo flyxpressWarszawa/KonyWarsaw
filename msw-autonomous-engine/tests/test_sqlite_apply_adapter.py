@@ -77,6 +77,50 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
         self.assertEqual(state["state"], "reported")
 
 
+    def test_sqlite_initial_read_failure_is_stable_hold_without_report(self):
+        # A plausible SQLite header does not prove all pages can be read.
+        # A raw DatabaseError before report must not invite another execution.
+        with patch.object(module, "_connection", side_effect=sqlite3.DatabaseError("damaged page")):
+            with patch.object(bridge, "handle", side_effect=AssertionError("report attempted")) as routed:
+                with self.assertRaisesRegex(module.ApplyHold, "sqlite_row_read_unknown"):
+                    module.apply_once(self.directory, self.job, self.lease,
+                                      receipt("unchanged answer", self.job))
+                routed.assert_not_called()
+        state = handle({"schema": SCHEMA, "operation": "status",
+                        "task_id": self.job["task_id"]}, self.directory)
+        self.assertEqual(state["state"], "leased")
+        self.assertIsNone(state["result_sha256"])
+
+    def test_sqlite_post_report_readback_failure_preserves_unknown_result(self):
+        # The real report commits, then the adapter loses SQLite readback.
+        # This is an UNKNOWN outcome, not a reason to report or execute again.
+        original_connection = module._connection
+        calls = 0
+
+        def fail_second_open(directory):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise sqlite3.DatabaseError("readback unavailable")
+            return original_connection(directory)
+
+        answer = "committed before readback fault"
+        digest = hashlib.sha256(answer.encode()).hexdigest()
+        with patch.object(module, "_connection", side_effect=fail_second_open):
+            with patch.object(bridge, "handle", wraps=handle) as routed:
+                with self.assertRaisesRegex(module.ApplyHold, "readback_unknown_outcome"):
+                    module.apply_once(self.directory, self.job, self.lease,
+                                      receipt(answer, self.job))
+                reports = [call for call in routed.call_args_list
+                           if call.args[0]["operation"] == "report"]
+                self.assertEqual(len(reports), 1)
+        self.assertEqual(calls, 2)
+        state = handle({"schema": SCHEMA, "operation": "status",
+                        "task_id": self.job["task_id"]}, self.directory)
+        self.assertEqual(state["state"], "reported")
+        self.assertEqual(state["result_sha256"], digest)
+        # No native ACK or second SQLite report was issued by this adapter.
+
     def test_original_sqlite_submit_origin_must_match_before_report(self):
         # Exactly the original persisted submit request, mailbox and executor
         # may be reported. A forged but internally matching Codex receipt
