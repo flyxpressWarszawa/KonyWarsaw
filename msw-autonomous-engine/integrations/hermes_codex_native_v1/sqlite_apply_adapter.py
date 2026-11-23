@@ -10,13 +10,14 @@ import hashlib
 import json
 import os
 import re
+import sqlite3
 import stat
 import time
 from contextlib import closing
 from pathlib import Path
 from unicodedata import category
 
-from msw_engine.hermes_chat_bridge import _connection, _sha, _id
+from msw_engine.hermes_chat_bridge import _sha, _id
 
 
 class ApplyHold(RuntimeError):
@@ -43,6 +44,27 @@ def canonical(value):
     require_json_shape(value)
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
                       allow_nan=False)
+
+
+def _connection(directory):
+    """Inspect the existing SQLite mailbox without entering the writer's opener.
+
+    The native bridge _connection() chmods the file, creates indexes and may
+    migrate schema. Neither a rejected admission nor an independent readback
+    may silently change those original records. Actual reporting still goes
+    through the existing native handle() transaction with lease/CAS.
+    """
+    path = Path(directory) / "hermes-chat-loop" / "exchange.sqlite3"
+    # URI mode=ro refuses a missing mailbox instead of creating one.
+    db = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True,
+                         timeout=10, isolation_level=None)
+    db.row_factory = sqlite3.Row
+    try:
+        db.execute("PRAGMA query_only=ON")
+    except BaseException:
+        db.close()
+        raise
+    return db
 
 
 def apply_once(directory, job, lease_token, codex_receipt):
