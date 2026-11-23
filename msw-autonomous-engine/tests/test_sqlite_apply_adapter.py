@@ -107,6 +107,56 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                              (self.job["task_id"],)).fetchone()
         self.assertEqual(tuple(row), ("leased", None, None))
 
+    def test_mailbox_swap_after_row_read_holds_without_report(self):
+        self._check_mailbox_swap_at_close(1)
+
+    def test_mailbox_swap_after_final_read_holds_unknown_without_replay(self):
+        self._check_mailbox_swap_at_close(2)
+
+    def _check_mailbox_swap_at_close(self, swap_at):
+        database = self.directory / "hermes-chat-loop" / "exchange.sqlite3"
+        replacement = self.directory / "replacement.sqlite3"
+        parked = self.directory / "original.sqlite3"
+        with closing(sqlite3.connect(database)) as source, closing(sqlite3.connect(replacement)) as target:
+            source.backup(target)
+        replacement.chmod(0o600)
+        real_connection = module._connection
+        calls = []
+
+        def connection(directory):
+            db = real_connection(directory)
+            class CloseThenSwap:
+                def execute(inner, *args, **kwargs):
+                    return db.execute(*args, **kwargs)
+                def close(inner):
+                    db.close()
+                    calls.append(True)
+                    if len(calls) == swap_at:
+                        os.replace(database, parked)
+                        os.replace(replacement, database)
+            return CloseThenSwap()
+
+        answer = "admitted result"
+        expected = ("existing_sqlite_storage_required" if swap_at == 1
+                    else "readback_unknown_outcome")
+        with (patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              patch.object(module, "_connection", side_effect=connection),
+              patch.object(bridge, "handle", wraps=bridge.handle) as routed):
+            with self.assertRaisesRegex(module.ApplyHold, expected):
+                module.apply_once(self.directory, self.job, self.lease,
+                                  receipt(answer, self.job))
+            self.assertEqual(routed.call_count, swap_at - 1)
+        self.assertEqual(len(calls), swap_at)
+        with closing(sqlite3.connect(parked)) as db:
+            original = db.execute("SELECT state,result FROM jobs WHERE id=?",
+                                  (self.job["task_id"],)).fetchone()
+        with closing(sqlite3.connect(database)) as db:
+            shadow = db.execute("SELECT state,result FROM jobs WHERE id=?",
+                                (self.job["task_id"],)).fetchone()
+        self.assertEqual(original, ("leased", None) if swap_at == 1
+                         else ("reported", answer))
+        self.assertEqual(shadow, ("leased", None))
+
     def test_backend_drift_during_path_conversion_holds_before_report(self):
         # A PathLike callback can change the routing setting after the first
         # admission. The adapter must not report to the other backend.
