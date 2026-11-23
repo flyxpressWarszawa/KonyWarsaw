@@ -185,7 +185,9 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # before the header read. This still is NOT a native atomic inode fence
     # across the later SQLite open: the existing owner must enforce that.
     try:
-        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+        # A raced-in FIFO/device must not block the worker at open().
+        flags = (os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+                 | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_CLOEXEC", 0))
         fd = os.open(storage_file, flags)
         try:
             opened = os.fstat(fd)
