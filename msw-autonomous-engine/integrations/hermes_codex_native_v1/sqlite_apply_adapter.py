@@ -114,9 +114,16 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # reports an EXISTING leased task and must not bootstrap a fresh database
     # when a caller points at the wrong directory. This is a preflight only:
     # the subsequent transactional handler remains the authority for lease/CAS.
-    storage_root = Path(directory) / "hermes-chat-loop"
+    storage_base = Path(directory)
+    storage_root = storage_base / "hermes-chat-loop"
     storage_file = storage_root / "exchange.sqlite3"
-    if (storage_root.is_symlink() or storage_file.is_symlink()
+    # Checking only the last two path components misses a symlink in
+    # directory or one of its ancestors. That aliases a different existing
+    # SQLite mailbox even though the immediate storage path is not a symlink.
+    # Refuse such paths before opening/migrating any database; the active
+    # native owner must supply an exact, unaliased storage directory.
+    if (any(part.is_symlink() for part in (storage_base, *storage_base.parents))
+            or storage_root.is_symlink() or storage_file.is_symlink()
             or not storage_file.is_file()):
         raise ApplyHold("existing_sqlite_storage_required")
     from msw_engine.hermes_chat_bridge import SCHEMA, handle
