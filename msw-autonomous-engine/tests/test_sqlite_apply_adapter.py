@@ -222,6 +222,28 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
         self.assertEqual(status["state"], "reported")
         self.assertEqual(status["result_sha256"], digest)
 
+    def test_reported_blocked_is_never_promoted_or_replayed(self):
+        # A genuine reported/blocked result is terminal for this task, even
+        # if a later caller supplies a digest-valid Codex 'completed' receipt.
+        # The original blocked ledger must stay intact; no second report or
+        # transport/native ACK may be synthesized from a new receipt.
+        blocked = "browser policy blocked the required native test"
+        blocked_digest = hashlib.sha256(blocked.encode()).hexdigest()
+        handle({"schema": SCHEMA, "operation": "report", "task_id": self.job["task_id"],
+                "lease_token": self.lease, "result": blocked,
+                "result_sha256": blocked_digest, "outcome": "blocked"}, self.directory)
+        with patch("msw_engine.hermes_chat_bridge.handle",
+                   side_effect=AssertionError("blocked task report replayed")) as routed:
+            with self.assertRaisesRegex(module.ApplyHold, "conflicting_recorded_result"):
+                module.apply_once(self.directory, self.job, self.lease,
+                                  receipt("fabricated completion", self.job))
+            routed.assert_not_called()
+        with closing(bridge._connection(self.directory)) as db:
+            row = db.execute(
+                "SELECT state,outcome,result_sha,result FROM jobs WHERE id=?",
+                (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), ("reported", "blocked", blocked_digest, blocked))
+
     def test_conflicting_second_result_is_rejected(self):
         module.apply_once(self.directory, self.job, self.lease, receipt("ok", self.job))
         with self.assertRaises(Exception):
