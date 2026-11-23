@@ -209,6 +209,14 @@ def apply_once(directory, job, lease_token, codex_receipt):
             os.close(fd)
     except OSError as exc:
         raise ApplyHold("existing_sqlite_storage_required") from exc
+    # The pathname may be swapped AFTER the guarded open; fstat(fd) would
+    # still describe the old inode, but sqlite3.connect() would open the new
+    # inode. Re-read the named inode before that boundary. This only narrows
+    # the preflight race; it is NOT atomic open-to-report fencing.
+    try:
+        named_after_read = storage_file.lstat()
+    except OSError as exc:
+        raise ApplyHold("existing_sqlite_storage_required") from exc
     # Detect in-place edits/permission changes between fstat and header read.
     # This is an intra-open integrity check only; the subsequent SQLite
     # _connection()/report still require the native owner's inode/lease fence.
@@ -218,6 +226,12 @@ def apply_once(directory, job, lease_token, codex_receipt):
             for key in observed_fields)
             or opened.st_dev != file_meta.st_dev
             or opened.st_ino != file_meta.st_ino
+            or named_after_read.st_dev != opened.st_dev
+            or named_after_read.st_ino != opened.st_ino
+            or not stat.S_ISREG(named_after_read.st_mode)
+            or named_after_read.st_uid != os.geteuid()
+            or named_after_read.st_nlink != 1
+            or named_after_read.st_mode & 0o077
             or not stat.S_ISREG(opened.st_mode)
             or opened.st_uid != os.geteuid()
             or opened.st_nlink != 1
