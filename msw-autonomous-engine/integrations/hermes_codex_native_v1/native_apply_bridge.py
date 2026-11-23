@@ -115,13 +115,23 @@ def apply_verified(job, codex_receipt, apply_once, readback):
     if not any(not (ch.isspace() or category(ch) in ('Cf', 'Cc'))
                for ch in codex_receipt['text']):
         raise Hold('CODEX_RESULT_EMPTY')
+    # Match the existing SQLite transport's 16 KiB UTF-8 result bound. A
+    # digest-valid oversized receipt must not reach a native irreversible
+    # callback or exhaust resources while entering the effect ledger.
+    # Count encoded bytes, not Python Unicode code points.
+    try:
+        response_bytes=codex_receipt['text'].encode('utf-8', errors='strict')
+    except UnicodeError as exc:
+        raise Hold('CODEX_RECEIPT_NONCANONICAL') from exc
+    if len(response_bytes)>16384:
+        raise Hold('CODEX_RESULT_TOO_LARGE')
     body={k:v for k,v in codex_receipt.items() if k!='receipt_sha256'}
     # External evidence may contain an invalid Unicode scalar or non-JSON
     # object. Refuse it as HOLD rather than leaking an uncaught encoder error.
     # All verification remains BEFORE apply_once (no native side effects).
     try:
         receipt_digest=hashlib.sha256(canonical(body)).hexdigest()
-        response_digest=hashlib.sha256(codex_receipt['text'].encode('utf-8', errors='strict')).hexdigest()
+        response_digest=hashlib.sha256(response_bytes).hexdigest()
     except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
         raise Hold('CODEX_RECEIPT_NONCANONICAL') from exc
     if receipt_digest!=codex_receipt.get('receipt_sha256'):
