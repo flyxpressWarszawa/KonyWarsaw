@@ -156,6 +156,11 @@ def apply_once(directory, job, lease_token, codex_receipt):
         storage_base = Path(directory)
     except (TypeError, ValueError) as exc:
         raise ApplyHold("existing_sqlite_storage_required") from exc
+    # Path conversion can execute caller code. Do not enter a different
+    # configured backend after initial admission; the native handler routes
+    # by this same setting. This check is not a concurrent runtime fence.
+    if os.environ.get("MSW_HERMES_CHAT_BACKEND", "sqlite") != "sqlite":
+        raise ApplyHold("sqlite_backend_required")
     if not storage_base.is_absolute() or ".." in storage_base.parts:
         raise ApplyHold("existing_sqlite_storage_required")
     storage_root = storage_base / "hermes-chat-loop"
@@ -337,6 +342,8 @@ def apply_once(directory, job, lease_token, codex_receipt):
     else:
         raise ApplyHold("work_not_leased")
     if not report_already_recorded:
+        if os.environ.get("MSW_HERMES_CHAT_BACKEND", "sqlite") != "sqlite":
+            raise ApplyHold("sqlite_backend_required")
         # The remote reply can be lost AFTER the transaction commits. A failure
         # here is UNKNOWN, never a reason to send another report or rerun Codex.
         # A later independent call reconciles the original immutable DB row.
