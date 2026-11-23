@@ -299,6 +299,20 @@ def apply_once(directory, job, lease_token, codex_receipt):
             or opened.st_mode & 0o077
             or header != b"SQLite format 3\x00"):
         raise ApplyHold("existing_sqlite_storage_required")
+    def require_named_mailbox(error):
+        # Recheck the admitted inode at the SQLite read/report boundaries.
+        # A successful row read can outlive a rename of its pathname.
+        # This narrows the race only; native atomic fencing is still required.
+        try:
+            current = storage_file.lstat()
+        except OSError as exc:
+            raise ApplyHold(error) from exc
+        if (current.st_dev != opened.st_dev or current.st_ino != opened.st_ino
+                or not stat.S_ISREG(current.st_mode)
+                or current.st_uid != os.geteuid() or current.st_nlink != 1
+                or current.st_mode & 0o077):
+            raise ApplyHold(error)
+
     from msw_engine.hermes_chat_bridge import SCHEMA, handle
     # This is a read-only row admission, but opening the database can still
     # raise if the preflight header is intact while SQLite pages are damaged
@@ -312,6 +326,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
                              (job["task_id"],)).fetchone()
     except (Exception, CancelledError) as exc:
         raise ApplyHold("sqlite_row_read_unknown") from exc
+    require_named_mailbox("existing_sqlite_storage_required")
     if (row is None or row["work_key"] != job["work_key"]
             or row["parent_id"] != job["parent_id"]):
         raise ApplyHold("work_identity_mismatch")
@@ -342,6 +357,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
     else:
         raise ApplyHold("work_not_leased")
     if not report_already_recorded:
+        require_named_mailbox("existing_sqlite_storage_required")
         if os.environ.get("MSW_HERMES_CHAT_BACKEND", "sqlite") != "sqlite":
             raise ApplyHold("sqlite_backend_required")
         # The remote reply can be lost AFTER the transaction commits. A failure
@@ -371,6 +387,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # The report may already have committed. Any SQLite/open/readback error
     # here is UNKNOWN, not permission to submit a second report. The original
     # persisted row must be reconciled by its existing identity.
+    require_named_mailbox("readback_unknown_outcome")
     try:
         with closing(_connection(storage_base)) as db:
             stored = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,"
@@ -378,6 +395,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
                                 (job["task_id"],)).fetchone()
     except (Exception, CancelledError) as exc:
         raise ApplyHold("readback_unknown_outcome") from exc
+    require_named_mailbox("readback_unknown_outcome")
     if (stored is None or stored["conversation"] != job["conversation_key"]
             or stored["executor"] != job["executor"]
             or stored["request_sha"] != job["request_sha256"]
