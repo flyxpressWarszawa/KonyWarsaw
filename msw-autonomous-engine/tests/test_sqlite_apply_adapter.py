@@ -77,6 +77,36 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
         self.assertEqual(state["state"], "reported")
 
 
+    def test_foreign_owned_nonwritable_ancestor_holds_before_report(self):
+        # A foreign owner can change a 0755 directory's permissions and
+        # replace its children. Current nonwritability is not an owner fence.
+        from types import SimpleNamespace
+        import stat
+        database = self.directory / "hermes-chat-loop" / "exchange.sqlite3"
+        original = database.read_bytes()
+        ancestor = self.directory.parent
+        real_lstat = Path.lstat
+        foreign_uid = max(1, os.geteuid() + 1)
+
+        def foreign_ancestor(path, *args, **kwargs):
+            if path == ancestor:
+                return SimpleNamespace(st_mode=stat.S_IFDIR | 0o755, st_uid=foreign_uid)
+            return real_lstat(path, *args, **kwargs)
+
+        with (patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              patch.object(Path, "lstat", foreign_ancestor),
+              patch.object(module, "_connection", side_effect=AssertionError("SQLite opened")) as opened,
+              patch.object(bridge, "handle", side_effect=AssertionError("report attempted")) as routed):
+            with self.assertRaisesRegex(module.ApplyHold, "existing_sqlite_storage_required"):
+                module.apply_once(self.directory, self.job, self.lease, receipt("ok", self.job))
+            opened.assert_not_called()
+            routed.assert_not_called()
+        self.assertEqual(database.read_bytes(), original)
+        with closing(bridge._connection(self.directory)) as db:
+            row = db.execute("SELECT state,result,result_sha FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), ("leased", None, None))
+
     def test_pathlike_storage_pin_prevents_cross_mailbox_report(self):
         # The preflight normalizes a caller PathLike just once. A hostile or
         # buggy __fspath__ may otherwise return a different existing mailbox
