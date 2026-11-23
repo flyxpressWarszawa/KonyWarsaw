@@ -86,6 +86,24 @@ class NativeApplyTests(unittest.TestCase):
             with self.subTest(change=change),self.assertRaises(Hold):
                 apply_verified(job,dict(receipt,**change),must_not_call,must_not_call)
 
+    def test_blank_verified_codex_result_never_reaches_native_apply(self):
+        # A matching receipt and response digest do not make an empty/whitespace
+        # response into an actionable result. No native callback may run.
+        job, receipt = fixture()
+        calls = []
+        def unexpected(*args):
+            calls.append(1)
+            raise AssertionError('blank result reached native callback')
+        for blank in ('', ' ', '\\t\\n'):
+            modified = dict(receipt, text=blank,
+                            response_sha256=hashlib.sha256(blank.encode('utf-8')).hexdigest())
+            modified.pop('receipt_sha256')
+            modified['receipt_sha256'] = hashlib.sha256(canonical(modified)).hexdigest()
+            with self.subTest(blank=repr(blank)):
+                with self.assertRaisesRegex(Hold, 'CODEX_RESULT_EMPTY'):
+                    apply_verified(job, modified, unexpected, unexpected)
+        self.assertEqual(calls, [])
+
     def test_cross_root_and_cross_request_receipts_fail_before_apply(self):
         job,receipt=fixture()
         calls=[]
