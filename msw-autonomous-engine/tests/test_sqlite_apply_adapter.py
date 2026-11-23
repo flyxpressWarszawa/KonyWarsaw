@@ -454,6 +454,34 @@ class BackendIsolationTests(unittest.TestCase):
         storage_root.chmod(0o700)
         database.chmod(0o600)
 
+    def test_writable_mailbox_base_holds_before_sqlite_open(self):
+        # A private database is not safe inside a caller-selected directory
+        # writable by another UID. Opening it can follow a swapped pathname.
+        # This tests one admission gate; it is not inode-level race proof.
+        self.root.mkdir()
+        storage_root = self.root / "hermes-chat-loop"
+        storage_root.mkdir(mode=0o700)
+        database = storage_root / "exchange.sqlite3"
+        original = b"unaltered-private-mailbox"
+        database.write_bytes(original)
+        database.chmod(0o600)
+        for mode in (0o770, 0o707):
+            with self.subTest(mode=oct(mode)):
+                self.root.chmod(mode)
+                with (mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+                      mock.patch.object(module, "_connection",
+                                        side_effect=AssertionError("SQLite opened")) as connection,
+                      mock.patch.object(bridge, "handle",
+                                        side_effect=AssertionError("report called")) as routed):
+                    with self.assertRaisesRegex(module.ApplyHold,
+                                                "existing_sqlite_storage_required"):
+                        self.apply()
+                    connection.assert_not_called()
+                    routed.assert_not_called()
+                self.assertEqual(database.read_bytes(), original)
+                self.assertEqual(self.root.stat().st_mode & 0o777, mode)
+        self.root.chmod(0o700)
+
     def test_sqlite_sidecar_alias_or_unsafe_permissions_never_open_storage(self):
         # SQLite opens WAL/SHM/journal sidecars itself. Check them even when
         # the primary DB path is private and unaliased.
