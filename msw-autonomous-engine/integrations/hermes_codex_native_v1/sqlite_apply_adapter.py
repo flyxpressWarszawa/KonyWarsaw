@@ -251,35 +251,35 @@ def apply_once(directory, job, lease_token, codex_receipt):
                              (job["task_id"],)).fetchone()
     except (Exception, CancelledError) as exc:
         raise ApplyHold("sqlite_row_read_unknown") from exc
-        if (row is None or row["work_key"] != job["work_key"]
-                or row["parent_id"] != job["parent_id"]):
-            raise ApplyHold("work_identity_mismatch")
-        if (row["conversation"] != job["conversation_key"]
-                or row["executor"] != job["executor"]
-                or row["request_sha"] != job["request_sha256"]):
-            raise ApplyHold("persisted_origin_mismatch")
-        if row["lease_sha"] != lease_token_digest:
-            raise ApplyHold("lease_not_valid")
-        if row["state"] in ("reported", "acknowledged"):
-            # A previous report may have committed before its response was lost.
-            # Read the stored effect; never submit the uncertain report again.
-            if (row["result"] != result or row["result_sha"] != digest
-                    or row["outcome"] != "completed"):
-                raise ApplyHold("conflicting_recorded_result")
-            report_already_recorded = True
-        elif row["state"] == "leased":
-            # The existing report handler enforces lease expiry inside its
-            # transaction. Detect an already-expired reservation here as well
-            # so the adapter never attempts a doomed report or turns that
-            # known denial into an ambiguous UNKNOWN outcome.
-            # A previously committed report is reconciled above regardless
-            # of the old lease deadline; never replay it.
-            if (type(row["lease_until"]) is not int
-                    or row["lease_until"] <= int(time.time())):
-                raise ApplyHold("lease_expired")
-            report_already_recorded = False
-        else:
-            raise ApplyHold("work_not_leased")
+    if (row is None or row["work_key"] != job["work_key"]
+            or row["parent_id"] != job["parent_id"]):
+        raise ApplyHold("work_identity_mismatch")
+    if (row["conversation"] != job["conversation_key"]
+            or row["executor"] != job["executor"]
+            or row["request_sha"] != job["request_sha256"]):
+        raise ApplyHold("persisted_origin_mismatch")
+    if row["lease_sha"] != lease_token_digest:
+        raise ApplyHold("lease_not_valid")
+    if row["state"] in ("reported", "acknowledged"):
+        # A previous report may have committed before its response was lost.
+        # Read the stored effect; never submit the uncertain report again.
+        if (row["result"] != result or row["result_sha"] != digest
+                or row["outcome"] != "completed"):
+            raise ApplyHold("conflicting_recorded_result")
+        report_already_recorded = True
+    elif row["state"] == "leased":
+        # The existing report handler enforces lease expiry inside its
+        # transaction. Detect an already-expired reservation here as well
+        # so the adapter never attempts a doomed report or turns that
+        # known denial into an ambiguous UNKNOWN outcome.
+        # A previously committed report is reconciled above regardless
+        # of the old lease deadline; never replay it.
+        if (type(row["lease_until"]) is not int
+                or row["lease_until"] <= int(time.time())):
+            raise ApplyHold("lease_expired")
+        report_already_recorded = False
+    else:
+        raise ApplyHold("work_not_leased")
     if not report_already_recorded:
         # The remote reply can be lost AFTER the transaction commits. A failure
         # here is UNKNOWN, never a reason to send another report or rerun Codex.
