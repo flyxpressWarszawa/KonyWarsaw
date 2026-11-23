@@ -145,6 +145,27 @@ def apply_once(directory, job, lease_token, codex_receipt):
         )
     except OSError:
         private_storage = False
+    # WAL/SHM/journal sidecars are opened by SQLite before row validation.
+    # Refuse existing aliases and unsafe files before opening any mailbox.
+    # This remains a preflight, not descriptor-level inode or lease fencing.
+    if private_storage:
+        for suffix in ("-wal", "-shm", "-journal"):
+            sidecar = Path(str(storage_file) + suffix)
+            try:
+                side_meta = sidecar.lstat()
+            except FileNotFoundError:
+                continue
+            except OSError:
+                private_storage = False
+                break
+            if not (
+                stat.S_ISREG(side_meta.st_mode)
+                and side_meta.st_uid == os.geteuid()
+                and side_meta.st_nlink == 1
+                and side_meta.st_mode & 0o077 == 0
+            ):
+                private_storage = False
+                break
     if (any(part.is_symlink() for part in (storage_base, *storage_base.parents))
             or storage_root.is_symlink() or storage_file.is_symlink()
             or not private_storage):
