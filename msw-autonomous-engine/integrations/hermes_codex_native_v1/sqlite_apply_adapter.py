@@ -239,13 +239,18 @@ def apply_once(directory, job, lease_token, codex_receipt):
             or header != b"SQLite format 3\x00"):
         raise ApplyHold("existing_sqlite_storage_required")
     from msw_engine.hermes_chat_bridge import SCHEMA, handle
-    # The existing report operation owns the SQLite BEGIN IMMEDIATE transaction,
-    # validates the lease, and enforces idempotency.
-    with closing(_connection(directory)) as db:
-        row = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,"
-                         "state,lease_sha,lease_until,result,result_sha,outcome "
-                         "FROM jobs WHERE id=?",
-                         (job["task_id"],)).fetchone()
+    # This is a read-only row admission, but opening the database can still
+    # raise if the preflight header is intact while SQLite pages are damaged
+    # or inaccessible. Treat that as a stable HOLD before any report call;
+    # never invite a blind retry by leaking a raw SQLite exception.
+    try:
+        with closing(_connection(directory)) as db:
+            row = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,"
+                             "state,lease_sha,lease_until,result,result_sha,outcome "
+                             "FROM jobs WHERE id=?",
+                             (job["task_id"],)).fetchone()
+    except (Exception, CancelledError) as exc:
+        raise ApplyHold("sqlite_row_read_unknown") from exc
         if (row is None or row["work_key"] != job["work_key"]
                 or row["parent_id"] != job["parent_id"]):
             raise ApplyHold("work_identity_mismatch")
@@ -300,20 +305,26 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # Hermes from the Codex adapter or promote transport storage to native apply.
     # The authorized native owner must reconcile and ACK through its own
     # authenticated contract, independently from this method.
-    with closing(_connection(directory)) as db:
-        stored = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,"
-                            "state,result,result_sha,outcome FROM jobs WHERE id=?",
-                            (job["task_id"],)).fetchone()
-        if (stored is None or stored["conversation"] != job["conversation_key"]
-                or stored["executor"] != job["executor"]
-                or stored["request_sha"] != job["request_sha256"]
-                or stored["work_key"] != job["work_key"]
-                or stored["parent_id"] != job["parent_id"]
-                or stored["state"] not in ("reported", "acknowledged")
-                or stored["result"] != result or stored["result_sha"] != digest
-                or stored["outcome"] != "completed"):
-            raise ApplyHold("readback_mismatch")
-        storage_state = stored["state"]
+    # The report may already have committed. Any SQLite/open/readback error
+    # here is UNKNOWN, not permission to submit a second report. The original
+    # persisted row must be reconciled by its existing identity.
+    try:
+        with closing(_connection(directory)) as db:
+            stored = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,"
+                                "state,result,result_sha,outcome FROM jobs WHERE id=?",
+                                (job["task_id"],)).fetchone()
+    except (Exception, CancelledError) as exc:
+        raise ApplyHold("readback_unknown_outcome") from exc
+    if (stored is None or stored["conversation"] != job["conversation_key"]
+            or stored["executor"] != job["executor"]
+            or stored["request_sha"] != job["request_sha256"]
+            or stored["work_key"] != job["work_key"]
+            or stored["parent_id"] != job["parent_id"]
+            or stored["state"] not in ("reported", "acknowledged")
+            or stored["result"] != result or stored["result_sha"] != digest
+            or stored["outcome"] != "completed"):
+        raise ApplyHold("readback_mismatch")
+    storage_state = stored["state"]
     return {"status": "STORAGE_REPORT_VERIFIED_NATIVE_UNVERIFIED",
             "task_id": job["task_id"], "work_key": job["work_key"],
             "result_sha256": digest, "storage_state": storage_state,
