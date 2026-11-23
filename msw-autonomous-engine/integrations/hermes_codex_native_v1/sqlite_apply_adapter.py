@@ -198,7 +198,10 @@ def apply_once(directory, job, lease_token, codex_receipt):
         try:
             for ancestor in storage_base.parents:
                 parent_meta = ancestor.lstat()
+                # The directory owner can chmod/rename its children even
+                # if the current mode is 0755. Trust only root or this UID.
                 if (not stat.S_ISDIR(parent_meta.st_mode)
+                        or parent_meta.st_uid not in (0, os.geteuid())
                         or (parent_meta.st_mode & 0o022
                             and not (parent_meta.st_mode & stat.S_ISVTX
                                      and parent_meta.st_uid in (0, os.geteuid())))):
