@@ -439,9 +439,9 @@ class BackendIsolationTests(unittest.TestCase):
                 storage_root.chmod(0o700)
                 database.chmod(0o600)
                 target.chmod(mode)
-                with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}), \\
+                with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}), \
                         mock.patch.object(module, "_connection",
-                                          side_effect=AssertionError("SQLite opened")) as connection, \\
+                                          side_effect=AssertionError("SQLite opened")) as connection, \
                         mock.patch.object(bridge, "handle",
                                           side_effect=AssertionError("report attempted")) as routed:
                     with self.assertRaisesRegex(module.ApplyHold,
