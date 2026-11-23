@@ -2,6 +2,7 @@
 import hashlib
 import json
 from asyncio import CancelledError
+from unicodedata import category
 
 class Hold(RuntimeError): pass
 
@@ -108,7 +109,11 @@ def apply_verified(job, codex_receipt, apply_once, readback):
         raise Hold('CODEX_RECEIPT_UNSAFE')
     # A digest-valid but blank Codex result is not an actionable native effect.
     # Reject it before apply_once; do not consume a lease or persist an empty effect.
-    if not codex_receipt['text'].strip():
+    # strip() misses invisible Unicode format controls such as ZERO WIDTH SPACE,
+    # BOM and bidi marks. A result made entirely of these characters is still
+    # empty for native-action purposes; meaningful text containing them passes.
+    if not any(not (ch.isspace() or category(ch) in ('Cf', 'Cc'))
+               for ch in codex_receipt['text']):
         raise Hold('CODEX_RESULT_EMPTY')
     body={k:v for k,v in codex_receipt.items() if k!='receipt_sha256'}
     # External evidence may contain an invalid Unicode scalar or non-JSON
