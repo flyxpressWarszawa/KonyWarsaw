@@ -122,9 +122,16 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # SQLite mailbox even though the immediate storage path is not a symlink.
     # Refuse such paths before opening/migrating any database; the active
     # native owner must supply an exact, unaliased storage directory.
+    # A second hard link to the SQLite inode is another alias, even when no
+    # pathname is a symlink. Its independent caller can mutate the same mailbox
+    # outside this adapter's path checks. Admit only a single-link existing file.
+    try:
+        single_link_file = storage_file.is_file() and storage_file.stat().st_nlink == 1
+    except OSError:
+        single_link_file = False
     if (any(part.is_symlink() for part in (storage_base, *storage_base.parents))
             or storage_root.is_symlink() or storage_file.is_symlink()
-            or not storage_file.is_file()):
+            or not single_link_file):
         raise ApplyHold("existing_sqlite_storage_required")
     from msw_engine.hermes_chat_bridge import SCHEMA, handle
     # The existing report operation owns the SQLite BEGIN IMMEDIATE transaction,
