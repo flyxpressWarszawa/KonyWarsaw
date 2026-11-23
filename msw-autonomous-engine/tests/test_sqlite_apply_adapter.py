@@ -454,6 +454,45 @@ class BackendIsolationTests(unittest.TestCase):
         storage_root.chmod(0o700)
         database.chmod(0o600)
 
+    def test_sqlite_sidecar_alias_or_unsafe_permissions_never_open_storage(self):
+        # SQLite opens WAL/SHM/journal sidecars itself. Check them even when
+        # the primary DB path is private and unaliased.
+        self.root.mkdir()
+        storage_root = self.root / "hermes-chat-loop"
+        storage_root.mkdir(mode=0o700)
+        database = storage_root / "exchange.sqlite3"
+        database.write_bytes(b"unchanged-main-database")
+        database.chmod(0o600)
+        victim = Path(self.tmp.name) / "unrelated-file"
+        victim.write_bytes(b"unrelated-private-bytes")
+        victim.chmod(0o600)
+        for suffix in ("-wal", "-shm", "-journal"):
+            for variant in ("symlink", "hardlink", "public"):
+                with self.subTest(suffix=suffix, variant=variant):
+                    sidecar = Path(str(database) + suffix)
+                    if variant == "symlink":
+                        sidecar.symlink_to(victim)
+                    elif variant == "hardlink":
+                        os.link(victim, sidecar)
+                    else:
+                        sidecar.write_bytes(b"private-sidecar-before-mode-change")
+                        sidecar.chmod(0o644)
+                    try:
+                        with (mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+                              mock.patch.object(module, "_connection",
+                                                side_effect=AssertionError("SQLite opened")) as connection,
+                              mock.patch.object(bridge, "handle",
+                                                side_effect=AssertionError("report attempted")) as routed):
+                            with self.assertRaisesRegex(module.ApplyHold,
+                                                        "existing_sqlite_storage_required"):
+                                self.apply()
+                            connection.assert_not_called()
+                            routed.assert_not_called()
+                        self.assertEqual(database.read_bytes(), b"unchanged-main-database")
+                        self.assertEqual(victim.read_bytes(), b"unrelated-private-bytes")
+                    finally:
+                        sidecar.unlink()
+
     def test_github_backend_rejected_without_creating_sqlite(self):
         with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "github"}):
             try:
