@@ -190,6 +190,22 @@ def apply_once(directory, job, lease_token, codex_receipt):
         # Embedded NUL / invalid filesystem encoding must be a stable HOLD,
         # not an exception that could trigger a duplicate report retry.
         private_storage = False
+    # A private mailbox base is not enough if an ancestor directory can be
+    # renamed by another account. A world/group-writable ancestor is allowed
+    # only when it is sticky and owned by root or this process (e.g. /tmp).
+    # Reject untrusted ancestry before the read-only SQLite opener or report.
+    if private_storage:
+        try:
+            for ancestor in storage_base.parents:
+                parent_meta = ancestor.lstat()
+                if (not stat.S_ISDIR(parent_meta.st_mode)
+                        or (parent_meta.st_mode & 0o022
+                            and not (parent_meta.st_mode & stat.S_ISVTX
+                                     and parent_meta.st_uid in (0, os.geteuid())))):
+                    private_storage = False
+                    break
+        except (OSError, ValueError, UnicodeError):
+            private_storage = False
     # WAL/SHM/journal sidecars are opened by SQLite before row validation.
     # Refuse existing aliases and unsafe files before opening any mailbox.
     # This remains a preflight, not descriptor-level inode or lease fencing.
