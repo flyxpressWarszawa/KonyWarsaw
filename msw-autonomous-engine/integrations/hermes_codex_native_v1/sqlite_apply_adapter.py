@@ -132,10 +132,18 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # pathname can target another actor's storage and mutate it on open.
     # This remains a preflight, not a substitute for a native inode/lease fence.
     try:
+        # The parent of the private mailbox must not be replaceable by
+        # another local account. A 0700 mailbox inside a group/world-writable
+        # base can be renamed between preflight and SQLite's open(). This is
+        # an additional admission check, not atomic inode/lease fencing.
+        base_meta = storage_base.lstat()
         root_meta = storage_root.lstat()
         file_meta = storage_file.lstat()
         private_storage = (
-            stat.S_ISDIR(root_meta.st_mode)
+            stat.S_ISDIR(base_meta.st_mode)
+            and base_meta.st_uid == os.geteuid()
+            and base_meta.st_mode & 0o022 == 0
+            and stat.S_ISDIR(root_meta.st_mode)
             and root_meta.st_uid == os.geteuid()
             and root_meta.st_mode & 0o077 == 0
             and stat.S_ISREG(file_meta.st_mode)
