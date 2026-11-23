@@ -160,7 +160,9 @@ def apply_once(directory, job, lease_token, codex_receipt):
             and file_meta.st_nlink == 1
             and file_meta.st_mode & 0o077 == 0
         )
-    except OSError:
+    except (OSError, ValueError, UnicodeError):
+        # Embedded NUL / invalid filesystem encoding must be a stable HOLD,
+        # not an exception that could trigger a duplicate report retry.
         private_storage = False
     # WAL/SHM/journal sidecars are opened by SQLite before row validation.
     # Refuse existing aliases and unsafe files before opening any mailbox.
@@ -183,9 +185,11 @@ def apply_once(directory, job, lease_token, codex_receipt):
             ):
                 private_storage = False
                 break
-    if (any(part.is_symlink() for part in (storage_base, *storage_base.parents))
-            or storage_root.is_symlink() or storage_file.is_symlink()
-            or not private_storage):
+    # Check the rejected path before any further filesystem calls: pathlib
+    # symlink probes on malformed names can raise after lstat failed closed.
+    if (not private_storage
+            or any(part.is_symlink() for part in (storage_base, *storage_base.parents))
+            or storage_root.is_symlink() or storage_file.is_symlink()):
         raise ApplyHold("existing_sqlite_storage_required")
     # An existing private filename alone is not an existing SQLite mailbox.
     # _connection() can initialize/migrate a zero-byte or non-SQLite file;
