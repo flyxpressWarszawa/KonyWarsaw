@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 import re
+import stat
 import time
 from contextlib import closing
 from pathlib import Path
@@ -125,13 +126,28 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # A second hard link to the SQLite inode is another alias, even when no
     # pathname is a symlink. Its independent caller can mutate the same mailbox
     # outside this adapter's path checks. Admit only a single-link existing file.
+    # _connection() chmods the selected file and may alter its schema. The
+    # exact pre-existing mailbox must therefore be an owned, private regular
+    # file inside an owned, private directory. Otherwise even an unaliased
+    # pathname can target another actor's storage and mutate it on open.
+    # This remains a preflight, not a substitute for a native inode/lease fence.
     try:
-        single_link_file = storage_file.is_file() and storage_file.stat().st_nlink == 1
+        root_meta = storage_root.lstat()
+        file_meta = storage_file.lstat()
+        private_storage = (
+            stat.S_ISDIR(root_meta.st_mode)
+            and root_meta.st_uid == os.geteuid()
+            and root_meta.st_mode & 0o077 == 0
+            and stat.S_ISREG(file_meta.st_mode)
+            and file_meta.st_uid == os.geteuid()
+            and file_meta.st_nlink == 1
+            and file_meta.st_mode & 0o077 == 0
+        )
     except OSError:
-        single_link_file = False
+        private_storage = False
     if (any(part.is_symlink() for part in (storage_base, *storage_base.parents))
             or storage_root.is_symlink() or storage_file.is_symlink()
-            or not single_link_file):
+            or not private_storage):
         raise ApplyHold("existing_sqlite_storage_required")
     from msw_engine.hermes_chat_bridge import SCHEMA, handle
     # The existing report operation owns the SQLite BEGIN IMMEDIATE transaction,
