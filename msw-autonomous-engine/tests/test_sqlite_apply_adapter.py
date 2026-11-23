@@ -107,6 +107,37 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                              (self.job["task_id"],)).fetchone()
         self.assertEqual(tuple(row), ("leased", None, None))
 
+    def test_job_identity_frozen_before_pathlike_callback(self):
+        # Caller mapping is not a durable admission record. A path callback
+        # can mutate it after the receipt is verified, before the SQLite read.
+        original_id = self.job["task_id"]
+        original_work_key = self.job["work_key"]
+        caller_job = self.job
+
+        class MutatingPath:
+            def __fspath__(inner):
+                caller_job["task_id"] = "task-foreign-00002"
+                caller_job["work_key"] = "work-foreign-00002"
+                caller_job["request_sha256"] = "a" * 64
+                return os.fspath(self.directory)
+
+        answer = "original admitted identity"
+        verified_receipt = receipt(answer, self.job)
+        with patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}):
+            outcome = module.apply_once(MutatingPath(), caller_job, self.lease,
+                                        verified_receipt)
+        self.assertEqual(outcome["task_id"], original_id)
+        self.assertEqual(outcome["work_key"], original_work_key)
+        self.assertFalse(outcome["native_hermes_ack_verified"])
+        self.assertNotEqual(caller_job["task_id"], original_id)
+        with closing(bridge._connection(self.directory)) as db:
+            original = db.execute("SELECT state,result FROM jobs WHERE id=?",
+                                  (original_id,)).fetchone()
+            foreign = db.execute("SELECT state FROM jobs WHERE id=?",
+                                 (caller_job["task_id"],)).fetchone()
+        self.assertEqual(tuple(original), ("reported", answer))
+        self.assertIsNone(foreign)
+
     def test_pathlike_storage_pin_prevents_cross_mailbox_report(self):
         # The preflight normalizes a caller PathLike just once. A hostile or
         # buggy __fspath__ may otherwise return a different existing mailbox
