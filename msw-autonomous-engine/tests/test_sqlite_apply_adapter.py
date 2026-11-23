@@ -375,6 +375,33 @@ class BackendIsolationTests(unittest.TestCase):
             connection.assert_not_called()
         self.assertEqual(storage.read_bytes(), b"not a SQLite database")
 
+    def test_sqlite_backend_refuses_symlinked_storage_ancestor_before_connection(self):
+        # An alias for the directory (or one of its parents) must not bypass
+        # the existing-storage check and open a different mailbox. The file
+        # deliberately exists to prove that a basic is_file() check is unsafe.
+        self.root.mkdir()
+        storage_root = self.root / "hermes-chat-loop"
+        storage_root.mkdir()
+        database = storage_root / "exchange.sqlite3"
+        database.write_bytes(b"sentinel-not-a-real-database")
+        root_alias = Path(self.tmp.name) / "engine-alias"
+        root_alias.symlink_to(self.root, target_is_directory=True)
+        parent_alias = Path(self.tmp.name) / "parent-alias"
+        parent_alias.symlink_to(Path(self.tmp.name), target_is_directory=True)
+        for alternate in (root_alias, parent_alias / "engine"):
+            with self.subTest(alias=str(alternate)), \
+                    mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}), \
+                    mock.patch.object(module, "_connection",
+                                      side_effect=AssertionError("SQLite opened")) as connection, \
+                    mock.patch.object(bridge, "handle",
+                                      side_effect=AssertionError("report submitted")) as routed:
+                with self.assertRaisesRegex(module.ApplyHold,
+                                            "existing_sqlite_storage_required"):
+                    module.apply_once(alternate, self.job, self.token, self.proof)
+                connection.assert_not_called()
+                routed.assert_not_called()
+        self.assertEqual(database.read_bytes(), b"sentinel-not-a-real-database")
+
     def test_github_backend_rejected_without_creating_sqlite(self):
         with mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "github"}):
             try:
