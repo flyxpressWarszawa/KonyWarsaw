@@ -142,6 +142,10 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # retarget a different existing mailbox before _connection() opens it.
     # Refuse either alias before reading or changing any database state.
     try:
+        # Freeze the caller-supplied path at the first verified admission.
+        # An os.PathLike object may return a DIFFERENT location at each
+        # __fspath__ call; later read/report must use this exact Path, not
+        # resolve the caller again after all the filesystem safety checks.
         storage_base = Path(directory)
     except (TypeError, ValueError) as exc:
         raise ApplyHold("existing_sqlite_storage_required") from exc
@@ -270,7 +274,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # or inaccessible. Treat that as a stable HOLD before any report call;
     # never invite a blind retry by leaking a raw SQLite exception.
     try:
-        with closing(_connection(directory)) as db:
+        with closing(_connection(storage_base)) as db:
             row = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,"
                              "state,lease_sha,lease_until,result,result_sha,outcome "
                              "FROM jobs WHERE id=?",
@@ -313,7 +317,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
         try:
             report = handle(dict(schema=SCHEMA, operation="report", task_id=job["task_id"],
                                  lease_token=lease_token, result=result,
-                                 result_sha256=digest, outcome="completed"), directory)
+                                 result_sha256=digest, outcome="completed"), storage_base)
         except (Exception, CancelledError) as exc:
             # Cancellation can arrive after SQLite has committed the report.
             # Preserve UNKNOWN; do not permit an automatic report/Codex replay.
@@ -335,7 +339,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # here is UNKNOWN, not permission to submit a second report. The original
     # persisted row must be reconciled by its existing identity.
     try:
-        with closing(_connection(directory)) as db:
+        with closing(_connection(storage_base)) as db:
             stored = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,"
                                 "state,result,result_sha,outcome FROM jobs WHERE id=?",
                                 (job["task_id"],)).fetchone()
