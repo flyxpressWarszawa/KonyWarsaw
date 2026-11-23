@@ -342,6 +342,33 @@ class BackendIsolationTests(unittest.TestCase):
                  "leased", bridge._sha(self.token), now + 900, now, now,
                  "hermes", self.job["work_key"]))
 
+    def test_sqlite_existing_mailbox_rejects_relative_and_parent_traversal(self):
+        # Both spellings resolve to an existing leased mailbox today, but can
+        # later resolve elsewhere if cwd or an ancestor is changed. The native
+        # adapter must never report through such an alias.
+        self.seed_existing_lease()
+        database = self.root / "hermes-chat-loop" / "exchange.sqlite3"
+        original_bytes = database.read_bytes()
+        (self.root.parent / "alias-parent").mkdir()
+        aliases = [
+            Path(os.path.relpath(self.root, start=Path.cwd())),
+            self.root.parent / "alias-parent" / ".." / self.root.name,
+        ]
+        for alias in aliases:
+            with self.subTest(alias=str(alias)):
+                self.assertTrue((alias / "hermes-chat-loop" / "exchange.sqlite3").exists())
+                with (mock.patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+                      mock.patch.object(module, "_connection",
+                                        side_effect=AssertionError("SQLite opened")) as connection,
+                      mock.patch.object(bridge, "handle",
+                                        side_effect=AssertionError("report attempted")) as routed):
+                    with self.assertRaisesRegex(module.ApplyHold,
+                                                "existing_sqlite_storage_required"):
+                        module.apply_once(alias, self.job, self.token, self.proof)
+                    connection.assert_not_called()
+                    routed.assert_not_called()
+                self.assertEqual(database.read_bytes(), original_bytes)
+
     def test_sqlite_backend_missing_storage_never_creates_database(self):
         # A typo/wrong working directory must not cause the reporting adapter
         # to initialize a second empty SQLite mailbox.
