@@ -64,6 +64,33 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                              "executor": "hermes", "conversation_key": "conv-00000001"},
                             self.directory)["lease_token"]
 
+    def test_post_report_lease_drift_rejects_storage_readback(self):
+        # Fault injection in the isolated TemporaryDirectory only. The native
+        # report commits once; an altered reservation cannot attest that effect.
+        proof = receipt("original result", self.job)
+        original_handle = bridge.handle
+        foreign_digest = "f" * 64
+
+        def report_then_drift(payload, directory):
+            report = original_handle(payload, directory)
+            with closing(bridge._connection(directory)) as db:
+                db.execute("UPDATE jobs SET lease_sha=? WHERE id=?",
+                           (foreign_digest, self.job["task_id"]))
+            return report
+
+        with (patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              patch.object(bridge, "handle", side_effect=report_then_drift) as routed):
+            with self.assertRaisesRegex(module.ApplyHold, "readback_mismatch"):
+                module.apply_once(self.directory, self.job, self.lease, proof)
+            with self.assertRaisesRegex(module.ApplyHold, "lease_not_valid"):
+                module.apply_once(self.directory, self.job, self.lease, proof)
+            routed.assert_called_once()
+        with closing(bridge._connection(self.directory)) as db:
+            row = db.execute("SELECT state,lease_sha,result,result_sha FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), ("reported", foreign_digest, proof["text"],
+                                     proof["response_sha256"]))
+
     def test_receipt_dict_subclass_cannot_attest_different_status(self):
         # A caller object can expose VERIFIED via get() while its actual
         # hashed JSON says REJECTED. The direct adapter must not open SQLite.
