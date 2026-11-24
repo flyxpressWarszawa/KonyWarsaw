@@ -396,11 +396,24 @@ def apply_once(directory, job, lease_token, codex_receipt):
         # a caller to rerun the report or Codex. Reconcile original row later.
         # A foreign mapping or string subclass must not run accessors after
         # the effect. Invalid transport evidence remains UNKNOWN, not retry.
+        # Native _receipt() binds more than a result digest. Equal result text
+        # can occur in a different task; a foreign transport receipt must not
+        # be accepted even when our subsequent local row happens to match.
+        # Only plain JSON scalar identity fields are compared.
+        expected_report = {
+            "schema": SCHEMA, "task_id": job["task_id"],
+            "conversation_key": job["conversation_key"],
+            "parent_id": job["parent_id"], "work_key": job["work_key"],
+            "executor": job["executor"], "request_sha256": job["request_sha256"],
+            "result_sha256": digest, "outcome": "completed",
+        }
         if (type(report) is not dict
+                or any(type(key) is not str for key in report)
+                or any(type(report.get(k)) is not str or report[k] != v
+                       for k, v in expected_report.items())
+                or report.get("readback_verified") is not True
                 or type(report.get("state")) is not str
-                or type(report.get("result_sha256")) is not str
-                or report["state"] not in ("reported", "acknowledged")
-                or report["result_sha256"] != digest):
+                or report["state"] not in ("reported", "acknowledged")):
             raise ApplyHold("report_unknown_outcome")
     # This SQLite chat transport's generic "ack" operation only changes a
     # local storage row. It does NOT prove that the actual Hermes process
