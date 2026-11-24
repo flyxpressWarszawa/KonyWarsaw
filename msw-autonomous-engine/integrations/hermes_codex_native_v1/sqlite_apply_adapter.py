@@ -244,7 +244,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # WAL/SHM/journal sidecars are opened by SQLite before row validation.
     # Refuse existing aliases and unsafe files before opening any mailbox.
     # This remains a preflight, not descriptor-level inode or lease fencing.
-    if private_storage:
+    def private_sidecars():
         for suffix in ("-wal", "-shm", "-journal"):
             sidecar = Path(str(storage_file) + suffix)
             try:
@@ -252,16 +252,18 @@ def apply_once(directory, job, lease_token, codex_receipt):
             except FileNotFoundError:
                 continue
             except OSError:
-                private_storage = False
-                break
+                return False
             if not (
                 stat.S_ISREG(side_meta.st_mode)
                 and side_meta.st_uid == os.geteuid()
                 and side_meta.st_nlink == 1
                 and side_meta.st_mode & 0o077 == 0
             ):
-                private_storage = False
-                break
+                return False
+        return True
+
+    if private_storage:
+        private_storage = private_sidecars()
     # Check the rejected path before any further filesystem calls: pathlib
     # symlink probes on malformed names can raise after lstat failed closed.
     if (not private_storage
@@ -330,9 +332,14 @@ def apply_once(directory, job, lease_token, codex_receipt):
         if (current.st_dev != opened.st_dev or current.st_ino != opened.st_ino
                 or not stat.S_ISREG(current.st_mode)
                 or current.st_uid != os.geteuid() or current.st_nlink != 1
-                or current.st_mode & 0o077):
+                or current.st_mode & 0o077
+                or not private_sidecars()):
             raise ApplyHold(error)
 
+    # The native SQLite opener also consults its sidecars. Repeat the
+    # metadata gate at each existing read/report boundary, not only at
+    # initial admission. This narrows a race; it is not an atomic fence.
+    require_named_mailbox("existing_sqlite_storage_required")
     from msw_engine.hermes_chat_bridge import SCHEMA, handle
     # This is a read-only row admission, but opening the database can still
     # raise if the preflight header is intact while SQLite pages are damaged
