@@ -30,6 +30,37 @@ class NativeApplyTests(unittest.TestCase):
                                    receipt, forbidden, forbidden)
         self.assertEqual(calls, [])
 
+    def test_job_mapping_cannot_disguise_unverified_lease(self):
+        job, receipt = fixture()
+        calls = []
+        class MisleadingJob(dict):
+            def get(self, key, default=None):
+                if key == 'lease_verified':
+                    return True
+                return super().get(key, default)
+        def forbidden(*args):
+            calls.append('native')
+            raise AssertionError('non-plain job reached native callback')
+        changed = MisleadingJob(job, lease_verified=False)
+        with self.assertRaisesRegex(Hold, 'JOB_OR_PAYLOAD_NONCANONICAL'):
+            apply_verified(changed, receipt, forbidden, forbidden)
+        self.assertEqual(calls, [])
+        self.assertIs(changed['lease_verified'], False)
+
+    def test_job_state_subclass_never_reaches_native_callback(self):
+        job, receipt = fixture()
+        calls = []
+        class MisleadingState(str):
+            def __ne__(self, other):
+                return False
+        def forbidden(*args):
+            calls.append('native')
+            raise AssertionError('non-plain state reached native callback')
+        with self.assertRaisesRegex(Hold, 'JOB_OR_PAYLOAD_NONCANONICAL'):
+            apply_verified(dict(job, state=MisleadingState('held')),
+                           receipt, forbidden, forbidden)
+        self.assertEqual(calls, [])
+
     def test_invisible_only_codex_result_never_reaches_native_apply(self):
         # A freshly hash-valid result made of Unicode format controls is not
         # actionable text. str.strip() alone previously admitted these bytes.
