@@ -41,10 +41,13 @@ class GuardedHandoff(unittest.TestCase):
                     result_sha256=parent_digest, outcome="completed"), self.root)
         handle(dict(schema=SCHEMA, operation="ack", task_id=self.job["root_id"],
                     result_sha256=parent_digest), self.root)
-        handle(dict(schema=SCHEMA, operation="submit", task_id=self.job["task_id"],
+        submitted = handle(dict(schema=SCHEMA, operation="submit", task_id=self.job["task_id"],
                     conversation_key="conv-00000001", kind="plan", goal="Test",
                     executor="hermes", work_key=self.job["work_key"],
                     parent_id=self.job["parent_id"]), self.root)
+        self.job.update(conversation_key=submitted["conversation_key"],
+                        executor=submitted["executor"],
+                        request_sha256=submitted["request_sha256"])
         self.lease = handle(dict(schema=SCHEMA, operation="claim", executor="hermes",
                                  conversation_key="conv-00000001"), self.root)["lease_token"]
 
@@ -148,6 +151,51 @@ class GuardedHandoff(unittest.TestCase):
                 self.assertEqual(state["state"], "leased")
                 self.assertIsNone(state.get("result_sha256"))
 
+    def test_nonunicode_lease_fails_closed_before_sqlite(self):
+        # A malformed lease token must be HOLD before opening SQLite, even
+        # when an otherwise valid Codex receipt is supplied. No report/ACK.
+        from unittest.mock import patch
+        proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+        malformed_lease = "a" * 20 + chr(0xD800)
+        for route in ("direct", "public"):
+            with self.subTest(route=route):
+                with patch.object(adapter, "_connection",
+                                  side_effect=AssertionError("sqlite_opened")):
+                    with self.assertRaisesRegex(adapter.ApplyHold, "invalid_lease"):
+                        if route == "direct":
+                            adapter.apply_once(self.root, self.job, malformed_lease, proof)
+                        else:
+                            entry.apply_codex_result(
+                                self.root, self.job, malformed_lease, proof,
+                                dispatch_enabled=True)
+                state = handle(dict(schema=SCHEMA, operation="status",
+                                    task_id=self.job["task_id"]), self.root)
+                self.assertEqual(state["state"], "leased")
+                self.assertIsNone(state.get("result_sha256"))
+
+    def test_noncanonical_receipt_fails_closed_before_sqlite_report(self):
+        # The direct adapter must not leak an encoder error or accidentally
+        # write a result even if a caller bypasses the public entrypoint.
+        # The original lease and task identity are preserved throughout.
+        for malformed in (
+            {"text": chr(0xD800)},  # Real unpaired surrogate at runtime
+            {"extra": {1, 2}},
+            {"extra": float("nan")},
+        ):
+            for route in ("direct", "public"):
+                with self.subTest(route=route, keys=tuple(malformed)):
+                    proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+                    proof.update(malformed)
+                    with self.assertRaisesRegex(adapter.ApplyHold, "receipt_noncanonical"):
+                        if route == "direct":
+                            adapter.apply_once(self.root, self.job, self.lease, proof)
+                        else:
+                            self.apply(proof, dispatch_enabled=True)
+                    state = handle(dict(schema=SCHEMA, operation="status",
+                                        task_id=self.job["task_id"]), self.root)
+                    self.assertEqual(state["state"], "leased")
+                    self.assertIsNone(state.get("result_sha256"))
+
     def test_corrupted_receipt_digest_prevents_ack(self):
         proof = receipt("ok", self.job["task_id"], self.job["work_key"])
         proof["receipt_sha256"] = "0" * 64
@@ -194,6 +242,71 @@ class GuardedHandoff(unittest.TestCase):
                             task_id=self.job["task_id"]), self.root)
         self.assertEqual(state["state"], "reported")
         self.assertEqual(state["outcome"], "completed")
+
+    def test_lost_report_response_reconciles_without_replay(self):
+        # The write may commit before a connector loses its reply. Report the
+        # UNKNOWN outcome, then recover using the SAME original SQLite row.
+        # Neither recovery nor this adapter may fabricate native Hermes ACK.
+        from unittest.mock import patch
+        import msw_engine.hermes_chat_bridge as bridge
+
+        proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+        real_handle = bridge.handle
+
+        def commit_then_lose_reply(command, directory):
+            response = real_handle(command, directory)
+            if command.get("operation") == "report":
+                raise ConnectionError("response_lost_after_commit")
+            return response
+
+        with patch.object(bridge, "handle", side_effect=commit_then_lose_reply):
+            with self.assertRaisesRegex(adapter.ApplyHold, "report_unknown_outcome"):
+                self.apply(proof, dispatch_enabled=True)
+        after = real_handle(dict(schema=SCHEMA, operation="status",
+                                 task_id=self.job["task_id"]), self.root)
+        self.assertEqual(after["state"], "reported")
+        self.assertEqual(after["outcome"], "completed")
+
+        # This callback would fail the test if a second report is attempted.
+        with patch.object(bridge, "handle", side_effect=AssertionError("duplicate_report")):
+            recovered = self.apply(proof, dispatch_enabled=True)
+        self.assertEqual(recovered["status"], "STORAGE_REPORT_VERIFIED_NATIVE_UNVERIFIED")
+        self.assertEqual(recovered["storage_state"], "reported")
+        self.assertFalse(recovered["native_hermes_ack_verified"])
+        self.assertFalse(recovered["native_application_verified"])
+
+    def test_nonmapping_report_reply_after_commit_holds_and_reconciles(self):
+        # The native SQLite bridge might commit successfully but return None
+        # instead of a response object. Never leak AttributeError or retry.
+        from unittest.mock import patch
+        import msw_engine.hermes_chat_bridge as bridge
+
+        proof = receipt("ok", self.job["task_id"], self.job["work_key"])
+        real_handle = bridge.handle
+
+        def commit_then_return_none(command, directory):
+            saved = real_handle(command, directory)
+            if command.get("operation") == "report":
+                return None
+            return saved
+
+        with patch.object(bridge, "handle", side_effect=commit_then_return_none):
+            with self.assertRaisesRegex(adapter.ApplyHold, "report_unknown_outcome"):
+                self.apply(proof, dispatch_enabled=True)
+
+        observed = real_handle(dict(schema=SCHEMA, operation="status",
+                                    task_id=self.job["task_id"]), self.root)
+        self.assertEqual(observed["state"], "reported")
+        self.assertEqual(observed["outcome"], "completed")
+
+        # Reconciliation reads the existing original row. A new report fails.
+        with patch.object(bridge, "handle",
+                          side_effect=AssertionError("unexpected_duplicate_report")):
+            reconciled = self.apply(proof, dispatch_enabled=True)
+        self.assertEqual(reconciled["status"], "STORAGE_REPORT_VERIFIED_NATIVE_UNVERIFIED")
+        self.assertEqual(reconciled["storage_state"], "reported")
+        self.assertFalse(reconciled["native_hermes_ack_verified"])
+        self.assertFalse(reconciled["native_application_verified"])
 
     def test_preexisting_transport_ack_is_not_native_hermes_proof(self):
         proof = receipt("ok", self.job["task_id"], self.job["work_key"])

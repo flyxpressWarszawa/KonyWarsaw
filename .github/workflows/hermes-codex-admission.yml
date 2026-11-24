@@ -11,6 +11,17 @@ on:
       - 'msw-autonomous-engine/tests/test_sqlite_apply_adapter.py'
       - 'msw-autonomous-engine/tests/test_standby_safe_entrypoint.py'
       - 'msw-autonomous-engine/tests/test_guarded_codex_handoff.py'
+  pull_request:
+    branches:
+      - msw/hermes-chat-loop-20261114
+    paths:
+      - 'msw-autonomous-engine/integrations/hermes_codex_native_v1/**'
+      - '.github/workflows/hermes-codex-admission.yml'
+      - 'msw-autonomous-engine/msw_engine/hermes_chat_bridge.py'
+      - 'msw-autonomous-engine/tests/test_hermes_chat_bridge.py'
+      - 'msw-autonomous-engine/tests/test_sqlite_apply_adapter.py'
+      - 'msw-autonomous-engine/tests/test_standby_safe_entrypoint.py'
+      - 'msw-autonomous-engine/tests/test_guarded_codex_handoff.py'
   workflow_dispatch:
 permissions:
   contents: read
