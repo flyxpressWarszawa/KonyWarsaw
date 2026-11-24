@@ -429,6 +429,52 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                          else ("reported", answer))
         self.assertEqual(shadow, ("leased", None))
 
+    def test_backend_drift_during_existing_result_reconciliation_holds(self):
+        proof = receipt("original result", self.job)
+        with patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}):
+            module.apply_once(self.directory, self.job, self.lease, proof)
+            self._check_backend_drift_at_close(proof, 1, "sqlite_backend_required", 0)
+
+    def test_backend_drift_after_final_read_holds_without_replay(self):
+        proof = receipt("original result", self.job)
+        self._check_backend_drift_at_close(proof, 2, "readback_unknown_outcome", 1)
+
+    def _check_backend_drift_at_close(self, proof, insert_at, error, reports):
+        real_connection = module._connection
+        calls = []
+
+        def connection(directory):
+            db = real_connection(directory)
+
+            class CloseThenDrift:
+                def execute(inner, *args, **kwargs):
+                    return db.execute(*args, **kwargs)
+
+                def close(inner):
+                    db.close()
+                    calls.append(True)
+                    if len(calls) == insert_at:
+                        os.environ["MSW_HERMES_CHAT_BACKEND"] = "github"
+
+            return CloseThenDrift()
+
+        with (patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              patch.object(bridge, "handle", wraps=bridge.handle) as routed):
+            with patch.object(module, "_connection", side_effect=connection):
+                with self.assertRaisesRegex(module.ApplyHold, error):
+                    module.apply_once(self.directory, self.job, self.lease, proof)
+            self.assertEqual(len(calls), insert_at)
+            self.assertEqual(routed.call_count, reports)
+            os.environ["MSW_HERMES_CHAT_BACKEND"] = "sqlite"
+            recovered = module.apply_once(self.directory, self.job, self.lease, proof)
+            self.assertEqual(routed.call_count, reports)
+            self.assertFalse(recovered["native_hermes_ack_verified"])
+            self.assertFalse(recovered["native_application_verified"])
+        with closing(sqlite3.connect(self.directory / "hermes-chat-loop" / "exchange.sqlite3")) as db:
+            row = db.execute("SELECT state,result FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(row, ("reported", proof["text"]))
+
     def test_mailbox_permission_drift_after_admission_holds_before_report(self):
         self._check_mailbox_permission_drift(1)
 

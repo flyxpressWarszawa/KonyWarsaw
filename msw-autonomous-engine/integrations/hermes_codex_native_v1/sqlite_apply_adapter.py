@@ -354,6 +354,8 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # metadata gate at each existing read/report boundary, not only at
     # initial admission. This narrows a race; it is not an atomic fence.
     require_named_mailbox("existing_sqlite_storage_required")
+    if os.environ.get("MSW_HERMES_CHAT_BACKEND", "sqlite") != "sqlite":
+        raise ApplyHold("sqlite_backend_required")
     from msw_engine.hermes_chat_bridge import SCHEMA, handle
     # This is a read-only row admission, but opening the database can still
     # raise if the preflight header is intact while SQLite pages are damaged
@@ -368,6 +370,10 @@ def apply_once(directory, job, lease_token, codex_receipt):
     except (Exception, CancelledError) as exc:
         raise ApplyHold("sqlite_row_read_unknown") from exc
     require_named_mailbox("existing_sqlite_storage_required")
+    # Reconciliation of an already reported row must also retain the active
+    # backend binding; it skips the writer path and its backend check.
+    if os.environ.get("MSW_HERMES_CHAT_BACKEND", "sqlite") != "sqlite":
+        raise ApplyHold("sqlite_backend_required")
     if (row is None or row["work_key"] != job["work_key"]
             or row["parent_id"] != job["parent_id"]):
         raise ApplyHold("work_identity_mismatch")
@@ -455,6 +461,8 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # here is UNKNOWN, not permission to submit a second report. The original
     # persisted row must be reconciled by its existing identity.
     require_named_mailbox("readback_unknown_outcome")
+    if os.environ.get("MSW_HERMES_CHAT_BACKEND", "sqlite") != "sqlite":
+        raise ApplyHold("readback_unknown_outcome")
     try:
         with closing(_connection(storage_base)) as db:
             stored = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,depth,"
@@ -463,6 +471,10 @@ def apply_once(directory, job, lease_token, codex_receipt):
     except (Exception, CancelledError) as exc:
         raise ApplyHold("readback_unknown_outcome") from exc
     require_named_mailbox("readback_unknown_outcome")
+    # A backend change after commit/readback invalidates the current proof;
+    # never replay the report or infer native ACK from the old local row.
+    if os.environ.get("MSW_HERMES_CHAT_BACKEND", "sqlite") != "sqlite":
+        raise ApplyHold("readback_unknown_outcome")
     if (stored is None or stored["conversation"] != job["conversation_key"]
             or stored["executor"] != job["executor"]
             or stored["request_sha"] != job["request_sha256"]
