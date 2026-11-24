@@ -415,7 +415,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
     try:
         with closing(_connection(storage_base)) as db:
             stored = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,"
-                                "state,result,result_sha,outcome FROM jobs WHERE id=?",
+                                "state,lease_sha,result,result_sha,outcome FROM jobs WHERE id=?",
                                 (job["task_id"],)).fetchone()
     except (Exception, CancelledError) as exc:
         raise ApplyHold("readback_unknown_outcome") from exc
@@ -425,6 +425,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
             or stored["request_sha"] != job["request_sha256"]
             or stored["work_key"] != job["work_key"]
             or stored["parent_id"] != job["parent_id"]
+            or stored["lease_sha"] != lease_token_digest
             or stored["state"] not in ("reported", "acknowledged")
             or stored["result"] != result or stored["result_sha"] != digest
             or stored["outcome"] != "completed"):
