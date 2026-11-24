@@ -64,6 +64,31 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                              "executor": "hermes", "conversation_key": "conv-00000001"},
                             self.directory)["lease_token"]
 
+    def test_foreign_report_receipt_after_commit_holds_without_replay(self):
+        proof = receipt("original result", self.job)
+        original_handle = bridge.handle
+
+        def commit_then_foreign_receipt(payload, directory):
+            report = original_handle(payload, directory)
+            # The result digest alone does not identify the original task.
+            return dict(report, task_id="task-foreign0001")
+
+        with (patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              patch.object(bridge, "handle",
+                           side_effect=commit_then_foreign_receipt) as routed):
+            with self.assertRaisesRegex(module.ApplyHold, "report_unknown_outcome"):
+                module.apply_once(self.directory, self.job, self.lease, proof)
+            recovered = module.apply_once(self.directory, self.job, self.lease, proof)
+            routed.assert_called_once()
+        self.assertTrue(recovered["storage_readback_verified"])
+        self.assertFalse(recovered["native_hermes_ack_verified"])
+        self.assertFalse(recovered["native_application_verified"])
+        with closing(bridge._connection(self.directory)) as db:
+            row = db.execute("SELECT state,result,result_sha,outcome FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), ("reported", proof["text"],
+                                     proof["response_sha256"], "completed"))
+
     def test_post_report_lease_drift_rejects_storage_readback(self):
         # Fault injection in the isolated TemporaryDirectory only. The native
         # report commits once; an altered reservation cannot attest that effect.
