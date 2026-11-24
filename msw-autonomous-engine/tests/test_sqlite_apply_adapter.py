@@ -95,6 +95,49 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                              (self.job["task_id"],)).fetchone()
         self.assertEqual(tuple(row), ("leased", None, None))
 
+    def test_receipt_digest_subclass_cannot_override_comparison(self):
+        class ForgedDigest(str):
+            def __eq__(self, other):
+                return True
+            def __ne__(self, other):
+                return False
+
+        proof = receipt("original result", self.job)
+        proof["receipt_sha256"] = ForgedDigest("0" * 64)
+        with (patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              patch.object(module, "_connection",
+                           side_effect=AssertionError("SQLite opened")) as opened,
+              patch.object(bridge, "handle",
+                           side_effect=AssertionError("report attempted")) as routed):
+            with self.assertRaisesRegex(module.ApplyHold, "receipt_digest_mismatch"):
+                module.apply_once(self.directory, self.job, self.lease, proof)
+            opened.assert_not_called()
+            routed.assert_not_called()
+        with closing(bridge._connection(self.directory)) as db:
+            row = db.execute("SELECT state,result,result_sha FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), ("leased", None, None))
+
+    def test_lease_subclass_cannot_override_encoded_identity(self):
+        class AmbiguousLease(str):
+            def encode(inner, *args, **kwargs):
+                return self.lease.encode(*args, **kwargs)
+
+        with (patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              patch.object(module, "_connection",
+                           side_effect=AssertionError("SQLite opened")) as opened,
+              patch.object(bridge, "handle",
+                           side_effect=AssertionError("report attempted")) as routed):
+            with self.assertRaisesRegex(module.ApplyHold, "invalid_lease"):
+                module.apply_once(self.directory, self.job, AmbiguousLease("x" * 32),
+                                  receipt("original result", self.job))
+            opened.assert_not_called()
+            routed.assert_not_called()
+        with closing(bridge._connection(self.directory)) as db:
+            row = db.execute("SELECT state,result,result_sha FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), ("leased", None, None))
+
     def test_storage_report_readback_does_not_pretend_native_ack(self):
         result = module.apply_once(self.directory, self.job, self.lease, receipt("ok", self.job))
         self.assertEqual(result["status"], "STORAGE_REPORT_VERIFIED_NATIVE_UNVERIFIED")
