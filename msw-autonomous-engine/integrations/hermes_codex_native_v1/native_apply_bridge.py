@@ -93,6 +93,15 @@ def apply_verified(job, codex_receipt, apply_once, readback):
     when native apply outcome is unknown. Caller must own and revalidate lease.
     """
     required=('root_id','task_id','request_id','work_key','parent_id')
+    # Reject non-JSON job context before interpreting lease or identity.
+    # A custom mapping may disguise an unverified lease, then dict(job)
+    # would normalize its underlying values only after admission.
+    try:
+        if type(job) is not dict:
+            raise TypeError('non_plain_job')
+        canonical(job)
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('JOB_OR_PAYLOAD_NONCANONICAL') from exc
     if not isinstance(job,dict) or any(not isinstance(job.get(k),str) or not job[k] for k in required):
         raise Hold('INVALID_JOB_IDENTITY')
     if job.get('lease_verified') is not True or job.get('state') != 'leased':
