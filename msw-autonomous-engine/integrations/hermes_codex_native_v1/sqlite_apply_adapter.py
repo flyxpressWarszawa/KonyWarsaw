@@ -95,7 +95,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
     if (any(type(job.get(k)) is not str or not job[k] for k in origin)
             or re.fullmatch(r"[0-9a-f]{64}", job["request_sha256"]) is None):
         raise ApplyHold("origin_binding_required")
-    if not isinstance(lease_token, str) or not 20 <= len(lease_token) <= 256:
+    if type(lease_token) is not str or not 20 <= len(lease_token) <= 256:
         raise ApplyHold("invalid_lease")
     # Validate lease encoding before opening SQLite. A malformed Unicode token
     # must produce a stable HOLD rather than an uncaught encoder exception.
@@ -142,7 +142,12 @@ def apply_once(directory, job, lease_token, codex_receipt):
         digest = _sha(result)
     except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
         raise ApplyHold("receipt_noncanonical") from exc
-    if receipt_digest != codex_receipt.get("receipt_sha256"):
+    # The digest field is excluded from the hashed body, so recursive JSON
+    # validation above cannot reject a custom equality implementation here.
+    claimed_digest = codex_receipt.get("receipt_sha256")
+    if (type(claimed_digest) is not str
+            or re.fullmatch(r"[0-9a-f]{64}", claimed_digest) is None
+            or receipt_digest != claimed_digest):
         raise ApplyHold("receipt_digest_mismatch")
     if digest != codex_receipt.get("response_sha256"):
         raise ApplyHold("result_digest_mismatch")
