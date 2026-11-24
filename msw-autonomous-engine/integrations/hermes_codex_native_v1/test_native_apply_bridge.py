@@ -762,4 +762,56 @@ class NativeApplyTests(unittest.TestCase):
                 with self.assertRaisesRegex(Hold, 'NATIVE_EFFECT_NEGATIVE_OUTCOME'):
                     apply_verified(job, receipt, apply_once, negative_readback)
 
+    def test_effect_mapping_cannot_hide_negative_persisted_record(self):
+        job, receipt = fixture()
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        saved, calls = {}, []
+        class ContradictoryReadback(dict):
+            def get(self, key, default=None):
+                if key == 'effect_verified':
+                    return True
+                return super().get(key, default)
+            def __getitem__(self, key):
+                if key == 'state':
+                    return 'applied'
+                return super().__getitem__(key)
+        def apply_once(j, payload):
+            calls.append('apply')
+            saved['ack'] = dict(**{k:j[k] for k in fields},
+                                payload_sha256=hashlib.sha256(canonical(payload)).hexdigest(),
+                                status='verified')
+            return saved['ack']
+        def readback(j):
+            calls.append('readback')
+            return ContradictoryReadback(**{k:j[k] for k in fields},
+                                         ack=saved['ack'],
+                                         payload_sha256=saved['ack']['payload_sha256'],
+                                         effect_verified=False, state='rejected')
+        with self.assertRaisesRegex(Hold, 'NATIVE_EFFECT_NOT_VERIFIED'):
+            apply_verified(job, receipt, apply_once, readback)
+        self.assertEqual(calls, ['apply', 'readback'])
+
+    def test_effect_status_subclass_cannot_disguise_rejected_state(self):
+        job, receipt = fixture()
+        fields = ('root_id', 'task_id', 'request_id', 'work_key', 'parent_id')
+        saved, calls = {}, []
+        class MisleadingState(str):
+            def strip(self, *args, **kwargs):
+                return 'applied'
+        def apply_once(j, payload):
+            calls.append('apply')
+            saved['ack'] = dict(**{k:j[k] for k in fields},
+                                payload_sha256=hashlib.sha256(canonical(payload)).hexdigest(),
+                                status='verified')
+            return saved['ack']
+        def readback(j):
+            calls.append('readback')
+            return dict(**{k:j[k] for k in fields},
+                        ack=saved['ack'],
+                        payload_sha256=saved['ack']['payload_sha256'],
+                        effect_verified=True, state=MisleadingState('rejected'))
+        with self.assertRaisesRegex(Hold, 'NATIVE_EFFECT_NOT_VERIFIED'):
+            apply_verified(job, receipt, apply_once, readback)
+        self.assertEqual(calls, ['apply', 'readback'])
+
 if __name__=='__main__':unittest.main()

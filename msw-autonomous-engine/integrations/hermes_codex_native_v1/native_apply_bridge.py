@@ -248,6 +248,17 @@ def apply_verified(job, codex_receipt, apply_once, readback):
             raise Hold('NATIVE_APPLY_INPUT_MUTATED_DURING_READBACK')
     except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
         raise Hold('NATIVE_APPLY_INPUT_MUTATED_DURING_READBACK') from exc
+    # The whole persisted readback must be plain, canonical JSON before
+    # checking fields. A dict subclass can override get() or membership;
+    # a nested str subclass can override equality or strip() and disguise a
+    # foreign/negative effect. Only the detached exact JSON snapshot is
+    # evidence. An already invoked apply remains UNKNOWN on rejection.
+    try:
+        if type(persisted) is not dict:
+            raise TypeError('non_plain_effect_record')
+        persisted = json.loads(canonical(persisted))
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('NATIVE_EFFECT_NOT_VERIFIED') from exc
     # Require independent effect readback to bind the same complete identity.
     # Plain transport/storage readback without native identity is not enough.
     if any(job.get(field) != value for field,value in identity.items()):
