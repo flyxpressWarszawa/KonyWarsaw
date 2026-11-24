@@ -64,6 +64,37 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                              "executor": "hermes", "conversation_key": "conv-00000001"},
                             self.directory)["lease_token"]
 
+    def test_receipt_dict_subclass_cannot_attest_different_status(self):
+        # A caller object can expose VERIFIED via get() while its actual
+        # hashed JSON says REJECTED. The direct adapter must not open SQLite.
+        class ConflictingReceipt(dict):
+            def get(self, key, default=None):
+                if key == "status":
+                    return "VERIFIED"
+                return super().get(key, default)
+
+        payload = receipt("original result", self.job)
+        payload["status"] = "REJECTED"
+        payload.pop("receipt_sha256")
+        payload["receipt_sha256"] = hashlib.sha256(
+            module.canonical(payload).encode()).hexdigest()
+        conflicting = ConflictingReceipt(payload)
+        self.assertEqual(conflicting.get("status"), "VERIFIED")
+        self.assertEqual(conflicting["status"], "REJECTED")
+        with (patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              patch.object(module, "_connection",
+                           side_effect=AssertionError("SQLite opened")) as opened,
+              patch.object(bridge, "handle",
+                           side_effect=AssertionError("report attempted")) as routed):
+            with self.assertRaisesRegex(module.ApplyHold, "receipt_unverified"):
+                module.apply_once(self.directory, self.job, self.lease, conflicting)
+            opened.assert_not_called()
+            routed.assert_not_called()
+        with closing(bridge._connection(self.directory)) as db:
+            row = db.execute("SELECT state,result,result_sha FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), ("leased", None, None))
+
     def test_storage_report_readback_does_not_pretend_native_ack(self):
         result = module.apply_once(self.directory, self.job, self.lease, receipt("ok", self.job))
         self.assertEqual(result["status"], "STORAGE_REPORT_VERIFIED_NATIVE_UNVERIFIED")
