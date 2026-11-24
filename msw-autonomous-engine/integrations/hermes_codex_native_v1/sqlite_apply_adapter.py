@@ -226,6 +226,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # renamed by another account. A world/group-writable ancestor is allowed
     # only when it is sticky and owned by root or this process (e.g. /tmp).
     # Reject untrusted ancestry before the read-only SQLite opener or report.
+    ancestor_snapshot = {}
     if private_storage:
         try:
             for ancestor in storage_base.parents:
@@ -239,6 +240,8 @@ def apply_once(directory, job, lease_token, codex_receipt):
                                      and parent_meta.st_uid in (0, os.geteuid())))):
                     private_storage = False
                     break
+                ancestor_snapshot[ancestor] = (parent_meta.st_dev, parent_meta.st_ino,
+                                               parent_meta.st_uid, parent_meta.st_mode)
         except (OSError, ValueError, UnicodeError):
             private_storage = False
     # WAL/SHM/journal sidecars are opened by SQLite before row validation.
@@ -329,7 +332,13 @@ def apply_once(directory, job, lease_token, codex_receipt):
             current_base = storage_base.lstat()
             current_root = storage_root.lstat()
             current = storage_file.lstat()
-        except OSError as exc:
+            # Revalidate admitted ancestry as well as the mailbox itself.
+            # This is a bounded check, not atomic inode/lease fencing.
+            for ancestor, admitted in ancestor_snapshot.items():
+                meta = ancestor.lstat()
+                if (meta.st_dev, meta.st_ino, meta.st_uid, meta.st_mode) != admitted:
+                    raise ApplyHold(error)
+        except (OSError, ValueError, UnicodeError) as exc:
             raise ApplyHold(error) from exc
         # The same file inode can remain reachable after directory aliasing
         # or a permissions change. Recheck both admitted directory identities
