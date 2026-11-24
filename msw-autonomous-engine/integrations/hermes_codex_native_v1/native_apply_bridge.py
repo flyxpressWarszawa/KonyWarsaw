@@ -108,7 +108,16 @@ def apply_verified(job, codex_receipt, apply_once, readback):
         raise Hold('LEASE_NOT_VERIFIED')
     if job.get('native_apply_contract_verified') is not True:
         raise Hold('NATIVE_APPLY_CONTRACT_UNVERIFIED')
-    if not isinstance(codex_receipt,dict) or codex_receipt.get('status')!='VERIFIED' or codex_receipt.get('independent_readback') is not True:
+    # Validate the entire receipt before invoking any caller-defined field
+    # accessor, string comparison or encoding. Reject non-plain JSON before
+    # it can execute methods during admission, including the digest field.
+    try:
+        if type(codex_receipt) is not dict:
+            raise TypeError('non_plain_codex_receipt')
+        admitted_receipt_bytes=canonical(codex_receipt)
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('CODEX_RECEIPT_NONCANONICAL') from exc
+    if codex_receipt.get('status')!='VERIFIED' or codex_receipt.get('independent_readback') is not True:
         raise Hold('CODEX_RECEIPT_UNVERIFIED')
     # bool and float compare equal to integer zero in Python; neither is a
     # valid no-tools attestation. Require the exact integer type.
@@ -152,7 +161,8 @@ def apply_verified(job, codex_receipt, apply_once, readback):
     # after digest verification. Even when the native payload is unchanged,
     # that would erase the evidence identity behind a reported success.
     try:
-        admitted_receipt_bytes=canonical(codex_receipt)
+        if canonical(codex_receipt) != admitted_receipt_bytes:
+            raise Hold('CODEX_RECEIPT_MUTATED_DURING_ADMISSION')
     except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
         raise Hold('CODEX_RECEIPT_NONCANONICAL') from exc
     # A valid digest proves only receipt integrity, not ownership of this job.
@@ -206,19 +216,27 @@ def apply_verified(job, codex_receipt, apply_once, readback):
     # for issuing this complete record; this check is not a signature verifier.
     if any(job.get(field) != value for field,value in identity.items()):
         raise Hold('JOB_IDENTITY_MUTATED')
-    if (not isinstance(ack,dict)
-            or any(ack.get(field) != identity[field] for field in required)
-            or ack.get('payload_sha256') != payload_digest):
+    # An apply has already been invoked. Reject non-plain ACK evidence before
+    # invoking any overridden accessor; preserve UNKNOWN without retry.
+    if type(ack) is not dict:
+        raise Hold('NATIVE_ACK_NONCANONICAL')
+    try:
+        original_ack_bytes = canonical(ack)
+        admitted_ack = json.loads(original_ack_bytes)
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise Hold('NATIVE_ACK_NONCANONICAL') from exc
+    if (any(admitted_ack.get(field) != identity[field] for field in required)
+            or admitted_ack.get('payload_sha256') != payload_digest):
         raise Hold('NATIVE_ACK_MISMATCH')
-    if _explicit_negative_native_outcome(ack):
+    if _explicit_negative_native_outcome(admitted_ack):
         raise Hold('NATIVE_ACK_NEGATIVE_OUTCOME')
     # Pin the EXACT ACK bytes before crossing into the readback callback.
     # The callback may hold a reference to the ACK returned by apply_once;
     # comparing persisted['ack'] to that mutable object after readback could
     # falsely validate two jointly modified objects as native evidence.
     try:
-        original_ack_bytes = canonical(ack)
-        admitted_ack = json.loads(original_ack_bytes)
+        if canonical(ack) != original_ack_bytes:
+            raise Hold('NATIVE_ACK_MUTATED_BEFORE_READBACK')
     except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
         raise Hold('NATIVE_ACK_NONCANONICAL') from exc
     readback_job=json.loads(original_job_bytes)
