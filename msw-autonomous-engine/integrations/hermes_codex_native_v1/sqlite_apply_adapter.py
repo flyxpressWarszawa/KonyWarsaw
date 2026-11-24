@@ -108,7 +108,16 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # Accept only an ordinary JSON object and pin its top-level fields.
     if type(codex_receipt) is not dict:
         raise ApplyHold("receipt_unverified")
-    codex_receipt = codex_receipt.copy()
+    # Check the digest type separately to preserve the existing error contract.
+    if type(codex_receipt.get("receipt_sha256")) is not str:
+        raise ApplyHold("receipt_digest_mismatch")
+    # Validate plain JSON before comparing any field or encoding result text.
+    # A nested str subclass could execute arbitrary accessors during admission.
+    # Detach the validated data so subsequent checks see one JSON snapshot.
+    try:
+        codex_receipt = json.loads(canonical(codex_receipt))
+    except (TypeError, ValueError, UnicodeError, OverflowError, RecursionError) as exc:
+        raise ApplyHold("receipt_noncanonical") from exc
     if codex_receipt.get("status") != "VERIFIED":
         raise ApplyHold("receipt_unverified")
     # The adapter is also importable directly; enforce the same request binding
@@ -385,9 +394,13 @@ def apply_once(directory, job, lease_token, codex_receipt):
         # A transport may return None or a non-object AFTER the storage write
         # committed. Treat that as UNKNOWN, not an AttributeError that invites
         # a caller to rerun the report or Codex. Reconcile original row later.
-        if (not isinstance(report, dict)
-                or report.get("state") not in ("reported", "acknowledged")
-                or report.get("result_sha256") != digest):
+        # A foreign mapping or string subclass must not run accessors after
+        # the effect. Invalid transport evidence remains UNKNOWN, not retry.
+        if (type(report) is not dict
+                or type(report.get("state")) is not str
+                or type(report.get("result_sha256")) is not str
+                or report["state"] not in ("reported", "acknowledged")
+                or report["result_sha256"] != digest):
             raise ApplyHold("report_unknown_outcome")
     # This SQLite chat transport's generic "ack" operation only changes a
     # local storage row. It does NOT prove that the actual Hermes process
