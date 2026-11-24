@@ -103,7 +103,13 @@ def apply_once(directory, job, lease_token, codex_receipt):
         lease_token_digest = _sha(lease_token)
     except UnicodeError as exc:
         raise ApplyHold("invalid_lease") from exc
-    if not isinstance(codex_receipt, dict) or codex_receipt.get("status") != "VERIFIED":
+    # A dict subclass can return different values from get() and items(),
+    # allowing admission to inspect a status not covered by its digest.
+    # Accept only an ordinary JSON object and pin its top-level fields.
+    if type(codex_receipt) is not dict:
+        raise ApplyHold("receipt_unverified")
+    codex_receipt = codex_receipt.copy()
+    if codex_receipt.get("status") != "VERIFIED":
         raise ApplyHold("receipt_unverified")
     # The adapter is also importable directly; enforce the same request binding
     # as its entrypoint so bypassing the wrapper cannot weaken admission.
