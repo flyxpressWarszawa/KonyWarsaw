@@ -340,7 +340,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
     # never invite a blind retry by leaking a raw SQLite exception.
     try:
         with closing(_connection(storage_base)) as db:
-            row = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,"
+            row = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,depth,"
                              "state,lease_sha,lease_until,result,result_sha,outcome "
                              "FROM jobs WHERE id=?",
                              (job["task_id"],)).fetchone()
@@ -354,6 +354,9 @@ def apply_once(directory, job, lease_token, codex_receipt):
             or row["executor"] != job["executor"]
             or row["request_sha"] != job["request_sha256"]):
         raise ApplyHold("persisted_origin_mismatch")
+    # The persisted lineage depth is part of the native receipt, not a caller echo.
+    if type(row["depth"]) is not int or row["depth"] < 1:
+        raise ApplyHold("persisted_depth_invalid")
     if row["lease_sha"] != lease_token_digest:
         raise ApplyHold("lease_not_valid")
     if row["state"] in ("reported", "acknowledged"):
@@ -411,6 +414,8 @@ def apply_once(directory, job, lease_token, codex_receipt):
                 or any(type(key) is not str for key in report)
                 or any(type(report.get(k)) is not str or report[k] != v
                        for k, v in expected_report.items())
+                or type(report.get("depth")) is not int
+                or report["depth"] != row["depth"]
                 or report.get("readback_verified") is not True
                 or type(report.get("state")) is not str
                 or report["state"] not in ("reported", "acknowledged")):
@@ -427,7 +432,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
     require_named_mailbox("readback_unknown_outcome")
     try:
         with closing(_connection(storage_base)) as db:
-            stored = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,"
+            stored = db.execute("SELECT id,conversation,executor,request_sha,work_key,parent_id,depth,"
                                 "state,lease_sha,result,result_sha,outcome FROM jobs WHERE id=?",
                                 (job["task_id"],)).fetchone()
     except (Exception, CancelledError) as exc:
@@ -438,6 +443,8 @@ def apply_once(directory, job, lease_token, codex_receipt):
             or stored["request_sha"] != job["request_sha256"]
             or stored["work_key"] != job["work_key"]
             or stored["parent_id"] != job["parent_id"]
+            or type(stored["depth"]) is not int
+            or stored["depth"] != row["depth"]
             or stored["lease_sha"] != lease_token_digest
             or stored["state"] not in ("reported", "acknowledged")
             or stored["result"] != result or stored["result_sha"] != digest
