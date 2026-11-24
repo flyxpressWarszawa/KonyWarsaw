@@ -326,9 +326,23 @@ def apply_once(directory, job, lease_token, codex_receipt):
         # A successful row read can outlive a rename of its pathname.
         # This narrows the race only; native atomic fencing is still required.
         try:
+            current_base = storage_base.lstat()
+            current_root = storage_root.lstat()
             current = storage_file.lstat()
         except OSError as exc:
             raise ApplyHold(error) from exc
+        # The same file inode can remain reachable after directory aliasing
+        # or a permissions change. Recheck both admitted directory identities
+        # and their permissions at the same bounded read/report checkpoints.
+        if (not stat.S_ISDIR(current_base.st_mode)
+                or current_base.st_uid != os.geteuid()
+                or current_base.st_mode & 0o022
+                or (current_base.st_dev, current_base.st_ino) != (base_meta.st_dev, base_meta.st_ino)
+                or not stat.S_ISDIR(current_root.st_mode)
+                or current_root.st_uid != os.geteuid()
+                or current_root.st_mode & 0o077
+                or (current_root.st_dev, current_root.st_ino) != (root_meta.st_dev, root_meta.st_ino)):
+            raise ApplyHold(error)
         if (current.st_dev != opened.st_dev or current.st_ino != opened.st_ino
                 or not stat.S_ISREG(current.st_mode)
                 or current.st_uid != os.geteuid() or current.st_nlink != 1

@@ -429,6 +429,57 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                          else ("reported", answer))
         self.assertEqual(shadow, ("leased", None))
 
+    def test_mailbox_permission_drift_after_admission_holds_before_report(self):
+        self._check_mailbox_permission_drift(1)
+
+    def test_mailbox_permission_drift_after_final_read_holds_without_replay(self):
+        self._check_mailbox_permission_drift(2)
+
+    def _check_mailbox_permission_drift(self, insert_at):
+        root = self.directory / "hermes-chat-loop"
+        database = root / "exchange.sqlite3"
+        mode = root.stat().st_mode & 0o777
+        real_connection = module._connection
+        calls = []
+        proof = receipt("admitted result", self.job)
+
+        def connection(directory):
+            db = real_connection(directory)
+
+            class CloseThenDrift:
+                def execute(inner, *args, **kwargs):
+                    return db.execute(*args, **kwargs)
+
+                def close(inner):
+                    db.close()
+                    calls.append(True)
+                    if len(calls) == insert_at:
+                        root.chmod(0o755)
+
+            return CloseThenDrift()
+
+        error = ("existing_sqlite_storage_required" if insert_at == 1
+                 else "readback_unknown_outcome")
+        with (patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              patch.object(bridge, "handle", wraps=bridge.handle) as routed):
+            try:
+                with patch.object(module, "_connection", side_effect=connection):
+                    with self.assertRaisesRegex(module.ApplyHold, error):
+                        module.apply_once(self.directory, self.job, self.lease, proof)
+                self.assertEqual(routed.call_count, insert_at - 1)
+            finally:
+                root.chmod(mode)
+            if insert_at == 2:
+                recovered = module.apply_once(self.directory, self.job, self.lease, proof)
+                self.assertFalse(recovered["native_hermes_ack_verified"])
+                routed.assert_called_once()
+        self.assertEqual(len(calls), insert_at)
+        with closing(sqlite3.connect(database)) as db:
+            row = db.execute("SELECT state,result FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(row, ("leased", None) if insert_at == 1
+                         else ("reported", proof["text"]))
+
     def test_sidecar_alias_after_admission_read_holds_before_report(self):
         self._check_sidecar_alias_at_close(1)
 
