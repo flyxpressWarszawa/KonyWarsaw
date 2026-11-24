@@ -64,6 +64,52 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                              "executor": "hermes", "conversation_key": "conv-00000001"},
                             self.directory)["lease_token"]
 
+    def test_wrong_report_depth_after_commit_holds_without_replay(self):
+        proof = receipt("original result", self.job)
+        original_handle = bridge.handle
+
+        def commit_then_wrong_depth(payload, directory):
+            report = original_handle(payload, directory)
+            return dict(report, depth=report["depth"] + 1)
+
+        with (patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              patch.object(bridge, "handle",
+                           side_effect=commit_then_wrong_depth) as routed):
+            with self.assertRaisesRegex(module.ApplyHold, "report_unknown_outcome"):
+                module.apply_once(self.directory, self.job, self.lease, proof)
+            recovered = module.apply_once(self.directory, self.job, self.lease, proof)
+            routed.assert_called_once()
+        self.assertTrue(recovered["storage_readback_verified"])
+        self.assertFalse(recovered["native_hermes_ack_verified"])
+        with closing(bridge._connection(self.directory)) as db:
+            row = db.execute("SELECT depth,state,result FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), (2, "reported", proof["text"]))
+
+    def test_post_report_depth_drift_rejects_readback(self):
+        proof = receipt("original result", self.job)
+        original_handle = bridge.handle
+
+        def report_then_drift(payload, directory):
+            report = original_handle(payload, directory)
+            # Simulated concurrent corruption in this isolated test database.
+            with closing(bridge._connection(directory)) as db:
+                db.execute("UPDATE jobs SET depth=depth+1 WHERE id=?",
+                           (self.job["task_id"],))
+            return report
+
+        with (patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              patch.object(bridge, "handle",
+                           side_effect=report_then_drift) as routed):
+            with self.assertRaisesRegex(module.ApplyHold, "readback_mismatch"):
+                module.apply_once(self.directory, self.job, self.lease, proof)
+            routed.assert_called_once()
+        with closing(bridge._connection(self.directory)) as db:
+            row = db.execute("SELECT depth,state,result,result_sha FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), (3, "reported", proof["text"],
+                                     proof["response_sha256"]))
+
     def test_foreign_report_receipt_after_commit_holds_without_replay(self):
         proof = receipt("original result", self.job)
         original_handle = bridge.handle
