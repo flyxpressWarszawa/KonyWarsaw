@@ -61,6 +61,47 @@ class NativeApplyTests(unittest.TestCase):
                            receipt, forbidden, forbidden)
         self.assertEqual(calls, [])
 
+
+    def test_receipt_subclass_accessors_never_run_during_admission(self):
+        job, receipt = fixture()
+        calls = []
+        class UntrustedReceipt(dict):
+            def get(self, *args):
+                calls.append('receipt_accessor')
+                return super().get(*args)
+        class UntrustedStatus(str):
+            def __ne__(self, other):
+                calls.append('status_comparison')
+                return False
+        def forbidden(*args):
+            calls.append('native')
+            raise AssertionError('invalid evidence reached native apply')
+        for changed in (UntrustedReceipt(receipt),
+                        dict(receipt, status=UntrustedStatus('REJECTED'))):
+            with self.assertRaisesRegex(Hold, 'CODEX_RECEIPT_NONCANONICAL'):
+                apply_verified(job, changed, forbidden, forbidden)
+        self.assertEqual(calls, [])
+
+    def test_ack_subclass_accessors_never_run_after_apply(self):
+        job, receipt = fixture()
+        calls = []
+        class UntrustedAck(dict):
+            def get(self, *args):
+                calls.append('ack_accessor')
+                return super().get(*args)
+        def apply_once(j, payload):
+            calls.append('apply')
+            return UntrustedAck(
+                **{k:j[k] for k in ('root_id','task_id','request_id','work_key','parent_id')},
+                payload_sha256=hashlib.sha256(canonical(payload)).hexdigest(),
+                status='rejected')
+        def forbidden(*args):
+            calls.append('readback')
+            raise AssertionError('invalid ACK reached readback')
+        with self.assertRaisesRegex(Hold, 'NATIVE_ACK_NONCANONICAL'):
+            apply_verified(job, receipt, apply_once, forbidden)
+        self.assertEqual(calls, ['apply'])
+
     def test_invisible_only_codex_result_never_reaches_native_apply(self):
         # A freshly hash-valid result made of Unicode format controls is not
         # actionable text. str.strip() alone previously admitted these bytes.
