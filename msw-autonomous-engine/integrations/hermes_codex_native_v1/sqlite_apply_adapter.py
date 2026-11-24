@@ -379,6 +379,9 @@ def apply_once(directory, job, lease_token, codex_receipt):
         report_already_recorded = False
     else:
         raise ApplyHold("work_not_leased")
+    # A stored ACK is monotonic; a transport receipt may advance reported ->
+    # acknowledged, but a later readback must not regress either observation.
+    observed_acknowledged = row["state"] == "acknowledged"
     if not report_already_recorded:
         require_named_mailbox("existing_sqlite_storage_required")
         if os.environ.get("MSW_HERMES_CHAT_BACKEND", "sqlite") != "sqlite":
@@ -420,6 +423,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
                 or type(report.get("state")) is not str
                 or report["state"] not in ("reported", "acknowledged")):
             raise ApplyHold("report_unknown_outcome")
+        observed_acknowledged = report["state"] == "acknowledged"
     # This SQLite chat transport's generic "ack" operation only changes a
     # local storage row. It does NOT prove that the actual Hermes process
     # received, validated, or applied the result. Never issue that ACK for
@@ -447,6 +451,7 @@ def apply_once(directory, job, lease_token, codex_receipt):
             or stored["depth"] != row["depth"]
             or stored["lease_sha"] != lease_token_digest
             or stored["state"] not in ("reported", "acknowledged")
+            or (observed_acknowledged and stored["state"] != "acknowledged")
             or stored["result"] != result or stored["result_sha"] != digest
             or stored["outcome"] != "completed"):
         raise ApplyHold("readback_mismatch")

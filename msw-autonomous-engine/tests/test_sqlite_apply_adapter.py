@@ -64,6 +64,53 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                              "executor": "hermes", "conversation_key": "conv-00000001"},
                             self.directory)["lease_token"]
 
+    def test_acknowledged_transport_cannot_regress_to_reported(self):
+        proof = receipt("original result", self.job)
+        original_handle = bridge.handle
+
+        def commit_then_claim_ack(payload, directory):
+            report = original_handle(payload, directory)
+            return dict(report, state="acknowledged")
+
+        with (patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}),
+              patch.object(bridge, "handle",
+                           side_effect=commit_then_claim_ack) as routed):
+            with self.assertRaisesRegex(module.ApplyHold, "readback_mismatch"):
+                module.apply_once(self.directory, self.job, self.lease, proof)
+            recovered = module.apply_once(self.directory, self.job, self.lease, proof)
+            routed.assert_called_once()
+        self.assertFalse(recovered["native_hermes_ack_verified"])
+        with closing(bridge._connection(self.directory)) as db:
+            row = db.execute("SELECT state,result FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), ("reported", proof["text"]))
+
+    def test_acknowledged_row_cannot_regress_during_reconciliation(self):
+        proof = receipt("original result", self.job)
+        with patch.dict(os.environ, {"MSW_HERMES_CHAT_BACKEND": "sqlite"}):
+            module.apply_once(self.directory, self.job, self.lease, proof)
+            handle({"schema": SCHEMA, "operation": "ack",
+                    "task_id": self.job["task_id"],
+                    "result_sha256": proof["response_sha256"]}, self.directory)
+            real_connection = module._connection
+            calls = []
+
+            def connection_then_regress(directory):
+                calls.append(1)
+                if len(calls) == 2:
+                    # Fault injection in isolated test storage only.
+                    with closing(bridge._connection(directory)) as db:
+                        db.execute("UPDATE jobs SET state='reported' WHERE id=?",
+                                   (self.job["task_id"],))
+                return real_connection(directory)
+
+            with (patch.object(module, "_connection", side_effect=connection_then_regress),
+                  patch.object(bridge, "handle", side_effect=AssertionError("replayed")) as routed):
+                with self.assertRaisesRegex(module.ApplyHold, "readback_mismatch"):
+                    module.apply_once(self.directory, self.job, self.lease, proof)
+                routed.assert_not_called()
+        self.assertEqual(len(calls), 2)
+
     def test_wrong_report_depth_after_commit_holds_without_replay(self):
         proof = receipt("original result", self.job)
         original_handle = bridge.handle
