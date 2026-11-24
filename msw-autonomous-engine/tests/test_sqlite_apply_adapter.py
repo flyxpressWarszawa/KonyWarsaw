@@ -118,6 +118,59 @@ class SQLiteApplyAdapterTests(unittest.TestCase):
                              (self.job["task_id"],)).fetchone()
         self.assertEqual(tuple(row), ("leased", None, None))
 
+    def test_receipt_nested_status_accessor_never_runs_before_sqlite(self):
+        calls = []
+
+        class UntrustedStatus(str):
+            def __ne__(self, other):
+                calls.append("status comparison")
+                return False
+
+        proof = receipt("original result", self.job)
+        proof["status"] = UntrustedStatus("REJECTED")
+        with (patch.object(module, "_connection",
+                           side_effect=AssertionError("SQLite opened")) as opened,
+              patch.object(bridge, "handle",
+                           side_effect=AssertionError("report attempted")) as routed):
+            with self.assertRaisesRegex(module.ApplyHold, "receipt_noncanonical"):
+                module.apply_once(self.directory, self.job, self.lease, proof)
+            opened.assert_not_called()
+            routed.assert_not_called()
+        self.assertEqual(calls, [])
+        with closing(bridge._connection(self.directory)) as db:
+            row = db.execute("SELECT state,result,result_sha FROM jobs WHERE id=?",
+                             (self.job["task_id"],)).fetchone()
+        self.assertEqual(tuple(row), ("leased", None, None))
+
+    def test_report_mapping_accessor_never_runs_after_real_commit(self):
+        calls = []
+        answer = "persisted before invalid transport response"
+        proof = receipt(answer, self.job)
+
+        class UntrustedReport(dict):
+            def get(self, *args):
+                calls.append("report accessor")
+                raise AssertionError("untrusted report accessor invoked")
+
+        def commit_then_return_mapping(payload, directory):
+            self.assertEqual(payload["operation"], "report")
+            calls.append("report committed")
+            return UntrustedReport(handle(payload, directory))
+
+        with patch.object(bridge, "handle", side_effect=commit_then_return_mapping) as routed:
+            with self.assertRaisesRegex(module.ApplyHold, "report_unknown_outcome"):
+                module.apply_once(self.directory, self.job, self.lease, proof)
+            routed.assert_called_once()
+        self.assertEqual(calls, ["report committed"])
+        with patch.object(bridge, "handle",
+                          side_effect=AssertionError("committed report replayed")) as routed:
+            recovered = module.apply_once(self.directory, self.job, self.lease, proof)
+            routed.assert_not_called()
+        self.assertEqual(recovered["storage_state"], "reported")
+        self.assertEqual(recovered["result_sha256"], proof["response_sha256"])
+        self.assertFalse(recovered["native_hermes_ack_verified"])
+        self.assertFalse(recovered["native_application_verified"])
+
     def test_lease_subclass_cannot_override_encoded_identity(self):
         class AmbiguousLease(str):
             def encode(inner, *args, **kwargs):
